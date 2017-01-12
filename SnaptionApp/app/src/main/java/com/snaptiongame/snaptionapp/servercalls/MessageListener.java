@@ -18,15 +18,18 @@ public class MessageListener {
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     String message;
+    boolean hasUpdated = false;
 
-    public MessageListener(String path) {
-        DatabaseReference myRef = database.getReference().child("Tests");
+    public MessageListener(String path, String toSet) {
+        DatabaseReference myRef = database.getReference(path);
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                System.out.println("Getting tha data");
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 message = dataSnapshot.getValue(String.class);
+                hasUpdated = true;
             }
 
             @Override
@@ -37,7 +40,12 @@ public class MessageListener {
         });
     }
 
+    //Freezes
     public String getMessage() {
+        //while(!hasUpdated) {
+            ; //Wait until updated is true
+        //}
+        hasUpdated = false;
         return message;
     }
 }

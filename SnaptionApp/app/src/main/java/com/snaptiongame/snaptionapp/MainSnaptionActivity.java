@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.servercalls.MessageListener;
 
 public class MainSnaptionActivity extends AppCompatActivity {
 
@@ -34,6 +36,11 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //Just for testing purposes. Remove this later
         // Below works and sets value when running the app. Doesn't work when is run via testing
         // for some reason. Further investigation required.
+
+        FirebaseUpload.uploadString("Test", "Heyo");
+        String whatever = "";
+        new MessageListener("Test", whatever);
+        System.out.println("Message is:" + whatever);
 //        System.out.println("Something");
 //        FirebaseDatabase database = FirebaseDatabase.getInstance();
 //        DatabaseReference myRef = database.getReference();
