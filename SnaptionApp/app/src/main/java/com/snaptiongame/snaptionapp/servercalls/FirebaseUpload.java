@@ -9,10 +9,11 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class FirebaseUpload {
 
-    public static void uploadString(String firebasePath, String content) {
+    public static boolean uploadString(String firebasePath, String content) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(firebasePath);
         myRef.setValue(content);
         System.out.println("Did something");
+        return true;
     }
 }

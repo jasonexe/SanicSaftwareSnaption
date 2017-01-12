@@ -1,17 +1,16 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
-import com.snaptiongame.snaptionapp.servercalls.MessageListener;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -40,8 +39,19 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    public void testDownload() {
-        MessageListener notExist = new MessageListener("games");
-        assertEquals("Nothun", notExist.getMessage());
+    public void testDownload() throws InterruptedException {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("testing/path");
+        myRef.setValue("another test");
+//        assertEquals(FirebaseUpload.uploadString("Test/hkhj", "Heyo"), true);
+        MessageUpdater updater = new MessageUpdater() {
+            @Override
+            public void onUpdate(Object test) {
+                assertEquals("Heyo", test.toString());
+            }
+        };
+        //Need this to upload
+        Thread.sleep(1000);
+        FirebaseListener testListener = new FirebaseListener("Test", updater);
     }
 }

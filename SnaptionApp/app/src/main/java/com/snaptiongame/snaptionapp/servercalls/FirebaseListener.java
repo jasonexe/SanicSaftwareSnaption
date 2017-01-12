@@ -7,6 +7,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.snaptiongame.snaptionapp.MessageUpdater;
 
 import static com.google.android.gms.internal.zzs.TAG;
 
@@ -14,13 +15,13 @@ import static com.google.android.gms.internal.zzs.TAG;
  * Returned by download - will give you whatever the current message is
  */
 
-public class MessageListener {
+public class FirebaseListener {
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     String message;
     boolean hasUpdated = false;
 
-    public MessageListener(String path, String toSet) {
+    public FirebaseListener(String path, final MessageUpdater callOnUpdate) {
         DatabaseReference myRef = database.getReference(path);
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -29,7 +30,7 @@ public class MessageListener {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 message = dataSnapshot.getValue(String.class);
-                hasUpdated = true;
+                callOnUpdate.onUpdate(message);
             }
 
             @Override
@@ -38,14 +39,5 @@ public class MessageListener {
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
-    }
-
-    //Freezes
-    public String getMessage() {
-        //while(!hasUpdated) {
-            ; //Wait until updated is true
-        //}
-        hasUpdated = false;
-        return message;
     }
 }
