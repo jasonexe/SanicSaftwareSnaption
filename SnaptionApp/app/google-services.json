@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "917089676170",
+    "firebase_url": "https://vertical-prototype-81b3e.firebaseio.com",
+    "project_id": "vertical-prototype-81b3e",
+    "storage_bucket": "vertical-prototype-81b3e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917089676170:android:c32db780c43899a8",
+        "android_client_info": {
+          "package_name": "com.snaptiongame.snaptionapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917089676170-lrs7fmid3ihuqsi194qpikca135hlmns.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.snaptiongame.snaptionapp",
+            "certificate_hash": "10249B926E9A6BDE8D178D61DF6825DBE58F5C4C"
+          }
+        },
+        {
+          "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDW-0BOx3SPWYXu4MIfMq6_2-Es4Jttsj4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917089676170-cvl9abbrfmm607pp1e2o0h5uqdh1ga9a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "edu.calpoly.csc.2168.snapsquad.verticalprototype"
+              }
+            },
+            {
+              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

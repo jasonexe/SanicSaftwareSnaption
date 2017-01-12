@@ -1,4 +1,4 @@
-package com.snaptiongame.myapplication;
+package com.snaptiongame.snaptionapp;
 
 import org.junit.Test;
 

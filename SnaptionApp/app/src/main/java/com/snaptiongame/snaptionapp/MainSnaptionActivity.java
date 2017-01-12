@@ -1,4 +1,4 @@
-package com.snaptiongame.myapplication;
+package com.snaptiongame.snaptionapp;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -8,6 +8,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.snaptiongame.snaptionapp.R;
 
 public class MainSnaptionActivity extends AppCompatActivity {
 
@@ -26,6 +30,15 @@ public class MainSnaptionActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        //Just for testing purposes. Remove this later
+        // Below works and sets value when running the app. Doesn't work when is run via testing
+        // for some reason. Further investigation required.
+//        System.out.println("Something");
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        DatabaseReference myRef = database.getReference();
+//        myRef.child("Tests").setValue("WTFFF");
+//        System.out.println("Done");
     }
 
     @Override
