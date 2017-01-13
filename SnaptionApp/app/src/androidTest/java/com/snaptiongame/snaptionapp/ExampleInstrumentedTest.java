@@ -12,6 +12,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.R.id.message;
 import static org.junit.Assert.*;
 
 /**
@@ -32,25 +33,26 @@ public class ExampleInstrumentedTest {
         assertEquals("com.snaptiongame.snaptionapp", appContext.getPackageName());
     }
 
-    @Test
-    public void testUploading() {
-        FirebaseUpload testUpload = new FirebaseUpload();
-        testUpload.uploadString("TestUpload", "Testing");
-    }
-
+    //This asserts both uploads and download work. Kind of.
     @Test
     public void testDownload() throws InterruptedException {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("testing/path");
-        myRef.setValue("another test");
         MessageUpdater updater = new MessageUpdater() {
             @Override
             public void onUpdate(Object test) {
                 assertEquals("Heyo", test.toString());
+                FirebaseUpload.deleteValue("testing/message");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                assertNull(test);
             }
+
         };
+        FirebaseUpload.uploadString("testing/message", "Heyo");
         //Need this to upload
-        Thread.sleep(1000);
-        FirebaseListener testListener = new FirebaseListener("Test", updater);
+        Thread.sleep(500);
+        FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }
 }
