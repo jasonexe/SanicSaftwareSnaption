@@ -43,7 +43,6 @@ public class ExampleInstrumentedTest {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("testing/path");
         myRef.setValue("another test");
-//        assertEquals(FirebaseUpload.uploadString("Test/hkhj", "Heyo"), true);
         MessageUpdater updater = new MessageUpdater() {
             @Override
             public void onUpdate(Object test) {
