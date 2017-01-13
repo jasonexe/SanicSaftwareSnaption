@@ -9,11 +9,15 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class FirebaseUpload {
 
-    public static boolean uploadString(String firebasePath, String content) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public static FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    public static void uploadString(String firebasePath, String content) {
         DatabaseReference myRef = database.getReference(firebasePath);
         myRef.setValue(content);
-        System.out.println("Did something");
-        return true;
+    }
+
+    public static void deleteValue(String firebasePath) {
+        DatabaseReference myRef = database.getReference(firebasePath);
+        myRef.removeValue();
     }
 }
