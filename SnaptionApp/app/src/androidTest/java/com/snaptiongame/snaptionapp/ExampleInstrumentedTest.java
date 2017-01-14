@@ -1,18 +1,18 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
-import com.snaptiongame.snaptionapp.servercalls.MessageListener;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.concurrent.TimeUnit;
-
+import static android.R.id.message;
 import static org.junit.Assert.*;
 
 /**
@@ -33,15 +33,26 @@ public class ExampleInstrumentedTest {
         assertEquals("com.snaptiongame.snaptionapp", appContext.getPackageName());
     }
 
+    //This asserts both uploads and download work. Kind of.
     @Test
-    public void testUploading() {
-        FirebaseUpload testUpload = new FirebaseUpload();
-        testUpload.uploadString("TestUpload", "Testing");
-    }
+    public void testDownload() throws InterruptedException {
+        MessageUpdater updater = new MessageUpdater() {
+            @Override
+            public void onUpdate(Object test) {
+                assertEquals("Heyo", test.toString());
+                FirebaseUpload.deleteValue("testing/message");
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                assertNull(test);
+            }
 
-    @Test
-    public void testDownload() {
-        MessageListener notExist = new MessageListener("games");
-        assertEquals("Nothun", notExist.getMessage());
+        };
+        FirebaseUpload.uploadString("testing/message", "Heyo");
+        //Need this to upload
+        Thread.sleep(500);
+        FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }
 }

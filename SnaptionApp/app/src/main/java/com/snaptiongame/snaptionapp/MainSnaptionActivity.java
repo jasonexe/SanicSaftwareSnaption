@@ -9,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+
 public class MainSnaptionActivity extends AppCompatActivity {
 
     @Override
@@ -32,11 +34,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //Just for testing purposes. Remove this later
         // Below works and sets value when running the app. Doesn't work when is run via testing
         // for some reason. Further investigation required.
-//        System.out.println("Something");
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        DatabaseReference myRef = database.getReference();
-//        myRef.child("Tests").setValue("WTFFF");
-//        System.out.println("Done");
+
+        FirebaseUpload.uploadString("test/test2", "whateva");
     }
 
     @Override
