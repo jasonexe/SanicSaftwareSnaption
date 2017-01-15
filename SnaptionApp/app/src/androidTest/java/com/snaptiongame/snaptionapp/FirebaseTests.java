@@ -6,11 +6,15 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
 
 import static android.R.id.message;
 import static org.junit.Assert.*;
@@ -21,7 +25,7 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest {
+public class FirebaseTests {
 
     Context appContext;
     @Test
@@ -51,8 +55,20 @@ public class ExampleInstrumentedTest {
 
         };
         FirebaseUpload.uploadString("testing/message", "Heyo");
-        //Need this to upload
-        Thread.sleep(500);
+        Thread.sleep(500); //Need this to upload
         FirebaseListener testListener = new FirebaseListener("testing/message", updater);
+    }
+
+    @Test
+    public void cantCaptionWhenNotLoggedInTest() throws Exception {
+        ArrayList<String> inputArr = new ArrayList<String>();
+        inputArr.add("Yay");
+        inputArr.add("Cards work");
+        try {
+            Caption testCaption = new Caption(new Card("Whatevs"), inputArr);
+            assertTrue("User was allowed to submit a caption when not logged in", false);
+        } catch (IllegalStateException e){
+            assertTrue(true);
+        }
     }
 }
