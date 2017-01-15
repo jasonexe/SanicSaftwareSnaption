@@ -16,8 +16,8 @@ import java.util.List;
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
-    protected List<WallFragment.TempGame> items;
-    public WallViewAdapter(List<WallFragment.TempGame> items) {
+    protected List<TempGame> items;
+    public WallViewAdapter(List<TempGame> items) {
         this.items = items;
     }
     @Override
