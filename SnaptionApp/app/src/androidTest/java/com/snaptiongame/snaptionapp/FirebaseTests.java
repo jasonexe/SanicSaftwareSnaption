@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-
 import static android.R.id.message;
 import static org.junit.Assert.*;
 
@@ -70,5 +69,8 @@ public class FirebaseTests {
         } catch (IllegalStateException e){
             assertTrue(true);
         }
+        //Need this to upload
+        Thread.sleep(500);
+        FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }
 }

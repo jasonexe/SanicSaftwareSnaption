@@ -5,11 +5,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 
 public class MainSnaptionActivity extends AppCompatActivity {
@@ -20,6 +19,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_snaption);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
+                new WallFragment(), WallFragment.class.getSimpleName()).commit();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
