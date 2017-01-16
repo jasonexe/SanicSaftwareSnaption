@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.TempGame;
 
 import java.util.List;
 

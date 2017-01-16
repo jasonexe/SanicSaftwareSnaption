@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
