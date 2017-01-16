@@ -69,8 +69,5 @@ public class FirebaseTests {
         } catch (IllegalStateException e){
             assertTrue(true);
         }
-        //Need this to upload
-        Thread.sleep(500);
-        FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }
 }
