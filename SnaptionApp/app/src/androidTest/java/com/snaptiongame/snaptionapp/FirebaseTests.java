@@ -39,6 +39,7 @@ public class FirebaseTests {
     //This asserts both uploads and download work. Kind of.
     @Test
     public void testDownload() throws InterruptedException {
+        //TODO this should login first. Right now won't work if db is only changeable with auth.
         MessageUpdater updater = new MessageUpdater() {
             @Override
             public void onUpdate(Object test) {
@@ -82,5 +83,10 @@ public class FirebaseTests {
         Card testCard = new Card(cardText);
         Caption testCaption = new Caption(testCard, inputArr, "Test user");
         assertEquals("Yay! Cards work! I like ice cream", testCaption.getCaptionText().toString());
+    }
+
+    @Test
+    public void addStuffToFirebase() throws Exception {
+
     }
 }
