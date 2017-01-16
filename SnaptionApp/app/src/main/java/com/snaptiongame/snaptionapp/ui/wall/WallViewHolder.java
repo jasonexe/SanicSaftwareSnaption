@@ -1,9 +1,11 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.snaptiongame.snaptionapp.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

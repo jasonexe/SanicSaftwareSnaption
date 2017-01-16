@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 public class MainSnaptionActivity extends AppCompatActivity {
 

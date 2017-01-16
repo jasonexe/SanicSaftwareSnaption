@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,8 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.TempGame;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
