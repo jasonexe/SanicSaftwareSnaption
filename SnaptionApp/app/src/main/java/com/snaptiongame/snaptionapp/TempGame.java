@@ -1,7 +1,11 @@
 package com.snaptiongame.snaptionapp;
 
+import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.testobjects.TestCaption;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by brittanyberlanga on 1/15/17.
@@ -9,16 +13,26 @@ import java.util.List;
 
 public class TempGame {
     public String gamePhoto;
-    public String caption;
+    public Caption caption;
     public String captionerPhoto;
-    public TempGame(String gamePhoto, String caption, String captionerPhoto) {
+    public TempGame(String gamePhoto, Caption caption, String captionerPhoto) {
         this.gamePhoto = gamePhoto;
         this.caption = caption;
         this.captionerPhoto = captionerPhoto;
     }
 
+    // Used to get game photos since I'm lazy
+    public TempGame(String gamePhoto, String caption, String captionerPhoto) {
+        this.gamePhoto = gamePhoto;
+        this.captionerPhoto = captionerPhoto;
+    }
+
     public static List<TempGame> getMockData() {
+        List<String> gamePhotos = new ArrayList<String>();
+
+
         List<TempGame> items = new ArrayList<>();
+        List<TempGame> newerTempGame = new ArrayList<>(); // Uses Captions instead of Strings
         items.add(new TempGame("http://images.mentalfloss.com/sites/default/files/styles/insert_m" +
                 "ain_wide_image/public/istock_000078603065_small.jpg", "Hello, I am a cation of t" +
                 "his photo that needs a caption", "Brittany Berlanga"));
@@ -79,6 +93,19 @@ public class TempGame {
                 "his photo that needs a caption", "Brittany Berlanga"));
         items.add(new TempGame("https://lh6.ggpht.com/VPIhV2_K37sFk6bSQrlz-ndaUiZBXGPqUzAZvJ7VVAZ_nywvf-HP5kOoQ9PT9HzEng=h900", "Hello, I am a cation of t" +
                 "his photo that needs a caption", "Brittany Berlanga"));
-        return items;
+
+        for (TempGame oldFormat: items) {
+            Random rand = new Random();
+            TempGame newGame;
+            if(rand.nextInt(2) == 1) {
+                newGame = new TempGame(oldFormat.gamePhoto, TestCaption.getSingleInputCaption(), oldFormat.captionerPhoto);
+            } else {
+                newGame = new TempGame(oldFormat.gamePhoto, TestCaption.getDoubleInputCaption(), oldFormat.captionerPhoto);
+            }
+
+            newerTempGame.add(newGame);
+        }
+
+        return newerTempGame;
     }
 }

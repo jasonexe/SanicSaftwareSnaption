@@ -72,18 +72,24 @@ public class Caption {
     public SpannableStringBuilder getCaptionText() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         String finalString = card.getCardText();
+        int firstModifier = 0;
+        int lastModifier = 0;
         for(String userText : userInput) {
-            int firstModifier = finalString.indexOf("%s");
-            builder.append(finalString.substring(0, firstModifier));
-            //See where start of user text will be
+            firstModifier = finalString.indexOf("%s");
+            builder.append(finalString.substring(lastModifier, firstModifier));
+            // See where start of user text will be
             int startUnderline = builder.length();
             builder.append(userText);
+            // This is where you set the styling for the user input.
             builder.setSpan(new UnderlineSpan(), startUnderline, builder.length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            finalString = finalString.substring(0, firstModifier) + userText +
+            // Get rid of the %s is the reference string so the next indexOf will work
+            finalString = finalString.substring(0, firstModifier) +
                     finalString.substring(firstModifier + 2);
+            lastModifier = firstModifier;
         }
-
+        builder.append(finalString.substring(firstModifier));
+        System.out.println("Builder text: " + builder.toString());
         return builder;
     }
 }

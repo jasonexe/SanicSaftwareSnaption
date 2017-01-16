@@ -30,7 +30,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     @Override
     public void onBindViewHolder(WallViewHolder holder, int position) {
-        holder.captionText.setText(items.get(position).caption);
+        holder.captionText.setText(items.get(position).caption.getCaptionText());
         holder.captionerText.setText(items.get(position).captionerPhoto);
         Glide.with(holder.photo.getContext()).load(items.get(position).gamePhoto).into(holder.photo);
         Glide.with(holder.captionPhoto.getContext()).load("http://i75.servimg.com/u/f75/11/25/80/77/210.jpg").into(holder.captionPhoto);

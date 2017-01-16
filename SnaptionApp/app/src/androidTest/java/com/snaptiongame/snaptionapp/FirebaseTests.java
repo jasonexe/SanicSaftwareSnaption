@@ -70,4 +70,17 @@ public class FirebaseTests {
             assertTrue(true);
         }
     }
+
+    // Need to run this one as an instrumented test since Caption uses SpannableStringBuilder,
+    // which is an Android resource
+    @Test
+    public void captionTest() throws  Exception {
+        ArrayList<String> inputArr = new ArrayList<String>();
+        inputArr.add("Yay");
+        inputArr.add("Cards work");
+        String cardText = "%s! %s! I like ice cream";
+        Card testCard = new Card(cardText);
+        Caption testCaption = new Caption(testCard, inputArr, "Test user");
+        assertEquals("Yay! Cards work! I like ice cream", testCaption.getCaptionText().toString());
+    }
 }

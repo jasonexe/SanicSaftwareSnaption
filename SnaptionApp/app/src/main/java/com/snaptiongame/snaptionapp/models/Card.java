@@ -23,17 +23,4 @@ public class Card {
     public String getCardText() {
         return cardText;
     }
-
-    // Replaces the %s indicators with user input from the given list
-    public String getCardWithUserInput(List<String> userInputs) {
-        String finalString = cardText;
-        // There may be a cleaner way to do this, but I couldn't figure out what to google.
-        // Plus, it works.
-        for(String userText : userInputs) {
-            int firstModifier = finalString.indexOf("%s");
-            finalString = finalString.substring(0, firstModifier) + userText +
-                    finalString.substring(firstModifier + 2);
-        }
-        return finalString;
-    }
 }

@@ -16,15 +16,7 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ModelTests {
-    @Test
-    public void cardTest() throws  Exception {
-        ArrayList<String> inputArr = new ArrayList<String>();
-        inputArr.add("Yay");
-        inputArr.add("Cards work");
-        String cardText = "%s! %s! I like ice cream";
-        Card testCard = new Card(cardText);
-        assertEquals("Yay! Cards work! I like ice cream", testCard.getCardWithUserInput(inputArr));
-    }
+
 
 
 }
