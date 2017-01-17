@@ -9,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.facebook.FacebookSdk;
+import com.facebook.login.widget.LoginButton;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
@@ -17,11 +19,14 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_main_snaption);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        WallFragment frag = new WallFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
-                new WallFragment(), WallFragment.class.getSimpleName()).commit();
+                frag, WallFragment.class.getSimpleName()).commit();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +61,11 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        else if (id == R.id.action_login) {
+            //create pop up for login Facebook or Google+
+            LoginDialog logDialog = new LoginDialog(this);
+            logDialog.show();
         }
 
         return super.onOptionsItemSelected(item);
