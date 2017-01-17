@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * Class to keep track of game info.
+ *
  * @author Cameron Geehr
  */
 
