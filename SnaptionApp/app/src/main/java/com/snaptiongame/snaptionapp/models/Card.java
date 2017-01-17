@@ -16,6 +16,15 @@ public class Card {
         this.cardText = cardText;
     }
 
+    public Card (Card oldCard) {
+        this.cardText = oldCard.getCardText();
+    }
+
+    // Call this after firebase generates the key that the card will have.
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }
