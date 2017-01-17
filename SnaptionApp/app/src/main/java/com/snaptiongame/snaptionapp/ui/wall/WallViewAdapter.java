@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
+import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,13 +31,23 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     @Override
     public void onBindViewHolder(WallViewHolder holder, int position) {
-        holder.captionText.setText(items.get(position).caption.getCaptionText());
-        holder.captionerText.setText(items.get(position).captionerPhoto);
-        Glide.with(holder.photo.getContext()).load(items.get(position).gamePhoto).into(holder.photo);
+        TempGame game = items.get(position);
+        holder.captionText.setText(game.caption.getCaptionText());
+        holder.captionerText.setText(game.captionerPhoto);
+        Glide.with(holder.photo.getContext()).load(game.gamePhoto).into(holder.photo);
         Glide.with(holder.captionPhoto.getContext()).load("http://i75.servimg.com/u/f75/11/25/80/77/210.jpg").into(holder.captionPhoto);
         if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
+        }
+
+        // distinguish between complete and incomplete games
+        if (game.complete) {
+            holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.BOLD);
+        }
+        else {
+            holder.captionText.setTypeface(Typeface.create(holder.captionText.getTypeface(),
+                    Typeface.NORMAL), Typeface.NORMAL);
         }
     }
 
