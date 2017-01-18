@@ -53,7 +53,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         // Below works and sets value when running the app. Doesn't work when is run via testing
         // for some reason. Further investigation required.
 
-        FirebaseUpload.uploadString("test/test2", "whateva");
+        FirebaseUpload.uploadObject("test/test2", "whateva");
     }
 
     @Override
