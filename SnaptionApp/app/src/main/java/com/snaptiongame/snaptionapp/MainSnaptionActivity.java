@@ -2,7 +2,9 @@ package com.snaptiongame.snaptionapp;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,8 +26,26 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected Toolbar mToolbar;
     @BindView(R.id.drawer_layout)
     protected DrawerLayout mDrawerLayout;
+    @BindView(R.id.navigation_view)
+    protected NavigationView mNavigationView;
 
-    protected ActionBarDrawerToggle mDrawerToggle;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private NavigationView.OnNavigationItemSelectedListener mNavListener =
+            new NavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            boolean handled = false;
+            switch (item.getItemId()) {
+                case R.id.wall_item:
+                    handled = true;
+                    break;
+                case R.id.profile_item:
+                    handled = true;
+                    break;
+            }
+            return handled;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +60,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
         mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mNavigationView.setNavigationItemSelectedListener(mNavListener);
 
         // wall fragment instantiation
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
