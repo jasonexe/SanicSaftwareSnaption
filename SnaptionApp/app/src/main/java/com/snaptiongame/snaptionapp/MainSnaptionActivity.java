@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -9,15 +10,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
+import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
+
 public class MainSnaptionActivity extends AppCompatActivity {
+    private CallbackManager mCallbackManager;
+    private LoginManager loginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
 
@@ -36,6 +45,15 @@ public class MainSnaptionActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        mCallbackManager = CallbackManager.Factory.create();
+        loginManager = new LoginManager(this);
+
+        //Just for testing purposes. Remove this later
+        // Below works and sets value when running the app. Doesn't work when is run via testing
+        // for some reason. Further investigation required.
+
+        FirebaseUpload.uploadObject("test/test2", "whateva");
     }
 
     @Override
@@ -58,10 +76,20 @@ public class MainSnaptionActivity extends AppCompatActivity {
         }
         else if (id == R.id.action_login) {
             //create pop up for login Facebook or Google+
-            LoginDialog logDialog = new LoginDialog(this);
+            LoginDialog logDialog = new LoginDialog(this, loginManager);
             logDialog.show();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        loginManager.handleOnActivityResult(requestCode, resultCode, data);
+        if (requestCode == GOOGLE_LOGIN_RC) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            loginManager.handleGoogleLoginResult(result);
+        }
     }
 }

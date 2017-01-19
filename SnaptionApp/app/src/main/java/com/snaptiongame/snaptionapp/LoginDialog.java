@@ -45,10 +45,10 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
     private LoginManager.AuthCallback loginAuthCallback;
     private LoginManager.AuthCallback logoutAuthCallback;
 
-    public LoginDialog(FragmentActivity activity) {
+    public LoginDialog(FragmentActivity activity, LoginManager manager) {
         super(activity);
         this.activity = activity;
-        manager = new LoginManager(activity);
+        this.manager = manager;
     }
 
     @Override
