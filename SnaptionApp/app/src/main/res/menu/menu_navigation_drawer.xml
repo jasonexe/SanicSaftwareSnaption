@@ -2,8 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/wall_item"
-        android:title="@string/snaption_wall"/>
+        android:title="@string/snaption_wall"
+        android:icon="@android:drawable/ic_menu_gallery"/>
     <item
         android:id="@+id/profile_item"
-        android:title="@string/profile"/>
+        android:title="@string/profile"
+        android:icon="@android:drawable/ic_menu_my_calendar"/>
 </menu>
