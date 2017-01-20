@@ -29,21 +29,30 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @BindView(R.id.navigation_view)
     protected NavigationView mNavigationView;
 
+    private int currentFragmentMenuItemId;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
         @Override
+        // onNavigationItemSelected gets called when an item in the navigation drawer is selected
+        // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            boolean handled = false;
-            switch (item.getItemId()) {
-                case R.id.wall_item:
-                    handled = true;
-                    break;
-                case R.id.profile_item:
-                    handled = true;
-                    break;
+            int selectedItemId = item.getItemId();
+            // if the selected item is different than the currently selected item, replace the fragment
+            if (selectedItemId != currentFragmentMenuItemId) {
+                switch (selectedItemId) {
+                    case R.id.wall_item:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new WallFragment()).commit();
+                        break;
+                    case R.id.profile_item:
+                        //TODO swap out current fragment with the profile fragment
+                        break;
+                }
+                currentFragmentMenuItemId = selectedItemId;
             }
-            return handled;
+            mDrawerLayout.closeDrawers();
+            return true;
         }
     };
 
@@ -63,8 +72,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
         mNavigationView.setNavigationItemSelectedListener(mNavListener);
 
         // wall fragment instantiation
+        currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
-                new WallFragment(), WallFragment.class.getSimpleName()).commit();
+                new WallFragment()).commit();
     }
 
     @OnClick(R.id.fab)
