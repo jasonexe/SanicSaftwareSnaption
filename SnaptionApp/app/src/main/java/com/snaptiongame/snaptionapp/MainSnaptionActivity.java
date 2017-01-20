@@ -1,6 +1,8 @@
 package com.snaptiongame.snaptionapp;
 
+import android.content.Intent;
 import android.content.res.Configuration;
+
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +16,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.facebook.CallbackManager;
+import com.facebook.FacebookSdk;
+import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
+
+import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import butterknife.BindView;
@@ -21,6 +32,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class MainSnaptionActivity extends AppCompatActivity {
+    private CallbackManager mCallbackManager;
+    private LoginManager loginManager;
 
     @BindView(R.id.toolbar)
     protected Toolbar mToolbar;
@@ -58,8 +71,12 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
+
         setContentView(R.layout.activity_main_snaption);
+        
         ButterKnife.bind(this);
 
         // toolbar and navigation drawer setup
@@ -75,6 +92,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
+        loginManager = new LoginManager(this);
     }
 
     @OnClick(R.id.fab)
@@ -111,7 +129,29 @@ public class MainSnaptionActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        else if (id == R.id.action_login) {
+            //create pop up for login Facebook or Google+
+            LoginDialog logDialog = new LoginDialog(this, loginManager);
+            logDialog.show();
+        }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * This is called after returning from a login intent from either Facebook or Google
+     * This initiates the connection with firebase after contacting Facebook or Google
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        loginManager.handleOnActivityResult(requestCode, resultCode, data);
+        if (requestCode == GOOGLE_LOGIN_RC) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            loginManager.handleGoogleLoginResult(result);
+        }
     }
 }
