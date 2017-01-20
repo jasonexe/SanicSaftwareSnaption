@@ -4,4 +4,6 @@
     <string name="facebook_app_id">1810118319274207</string>
     <string name="fb_login_protocol_scheme">fb1810118319274207</string>
     <string name="login_dialog_header">Log in with Google+ or Facebook</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_out">Sign Out</string>
 </resources>

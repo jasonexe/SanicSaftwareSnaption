@@ -49,11 +49,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         mCallbackManager = CallbackManager.Factory.create();
         loginManager = new LoginManager(this);
 
-        //Just for testing purposes. Remove this later
-        // Below works and sets value when running the app. Doesn't work when is run via testing
-        // for some reason. Further investigation required.
-
-        FirebaseUpload.uploadObject("test/test2", "whateva");
     }
 
     @Override
@@ -83,11 +78,18 @@ public class MainSnaptionActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This is called after returning from a login intent from either Facebook or Google
+     * This initiates the connection with firebase after contacting Facebook or Google
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         loginManager.handleOnActivityResult(requestCode, resultCode, data);
-        if (requestCode == GOOGLE_LOGIN_RC) {
+        if (requestCode == LoginManager.GOOGLE_LOGIN_RC) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             loginManager.handleGoogleLoginResult(result);
         }

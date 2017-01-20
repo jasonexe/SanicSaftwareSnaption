@@ -113,24 +113,7 @@ public class LoginManager {
         }
     }
 
-    private void loginToFirebase(GoogleSignInAccount acct) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                        if (task.isSuccessful()) {
-                            mGoogleAuthCallback.onSuccess();
-                        }
-                        else {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            mGoogleAuthCallback.onError();
-                        }
-                        mGoogleAuthCallback = null;
-                    }
-                });
-    }
+
 
     public void setupFacebookLoginButton(LoginButton loginButton, AuthCallback loginCallback, AuthCallback logoutCallback) {
         this.mFacebookAuthCallback = loginCallback;
@@ -166,6 +149,57 @@ public class LoginManager {
         };
     }
 
+
+    public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    //TODO this should be pulled from firebase not the auth object
+    public String getUserName() {
+        String username = null;
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            username = user.getDisplayName();
+        }
+        return username;
+    }
+
+    public String getProvider() {
+        String provider = null;
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            provider = user.getProviders().get(0);
+        }
+        return provider;
+    }
+
+    /**
+     * Login with Google+
+     * @param acct
+     */
+    private void loginToFirebase(GoogleSignInAccount acct) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                        if (task.isSuccessful()) {
+                            mGoogleAuthCallback.onSuccess();
+                        }
+                        else {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            mGoogleAuthCallback.onError();
+                        }
+                        mGoogleAuthCallback = null;
+                    }
+                });
+    }
+
+    /**
+     * Login with Facebook
+     * @param token
+     */
     private void loginToFirebase(AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -183,27 +217,5 @@ public class LoginManager {
                         }
                     }
                 });
-    }
-
-    public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public String getUserName() {
-        String username = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            username = user.getDisplayName();
-        }
-        return username;
-    }
-
-    public String getProvider() {
-        String provider = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            provider = user.getProviders().get(0);
-        }
-        return provider;
     }
 }
