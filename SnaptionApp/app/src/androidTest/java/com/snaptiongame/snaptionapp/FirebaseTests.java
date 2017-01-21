@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
@@ -15,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import static android.R.id.message;
+
 import static org.junit.Assert.*;
 
 /**
@@ -54,7 +52,7 @@ public class FirebaseTests {
             }
 
         };
-        FirebaseUpload.uploadString("testing/message", "Heyo");
+        FirebaseUpload.uploadObject("testing/message", "Heyo");
         Thread.sleep(500); //Need this to upload
         FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }

@@ -11,7 +11,7 @@ public class FirebaseUpload {
 
     public static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-    public static void uploadString(String firebasePath, String content) {
+    public static void uploadObject(String firebasePath, Object content) {
         DatabaseReference myRef = database.getReference(firebasePath);
         myRef.setValue(content);
     }

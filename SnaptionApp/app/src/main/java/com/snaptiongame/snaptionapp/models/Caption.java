@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.InvalidClassException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,15 +30,15 @@ public class Caption {
 
     // Used for dependency injection if you want a custom userId
     public Caption(Card card, List<String> userInput, String userId) {
-        this.card = card;
-        this.userInput = userInput;
+        this.card = new Card(card);
+        this.userInput = new ArrayList<>(userInput);
         this.userId = userId;
         votes = 0;
     }
 
     public Caption(Card card, List<String> userInput) throws IllegalStateException{
-        this.card = card;
-        this.userInput = userInput;
+        this.card = new Card(card);
+        this.userInput = new ArrayList<>(userInput);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user != null) {
@@ -89,7 +90,6 @@ public class Caption {
             lastModifier = firstModifier;
         }
         builder.append(finalString.substring(firstModifier));
-        System.out.println("Builder text: " + builder.toString());
         return builder;
     }
 }

@@ -24,7 +24,7 @@
     <Button android:id="@+id/buttonUpload"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/upload_photo"
+        android:text="@string/create_game"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="16dp"/>
 
