@@ -1,6 +1,5 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,10 +8,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.ActionBar;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -35,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * The fragment where users can upload photos to start a game.
@@ -42,7 +41,7 @@ import butterknife.BindView;
  * @author Cameron Geehr
  */
 
-public class UploadPhotoFragment extends Fragment {
+public class CreateGameFragment extends Fragment {
 
     public static final String IMAGE_FOLDER = "images/";
     public static final String GAMES_PATH_REF = "games";
@@ -69,6 +68,9 @@ public class UploadPhotoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        View view = inflater.inflate(R.layout.fragment_create_game, container, false);
+        ButterKnife.bind(this, view);
 
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,14 +118,14 @@ public class UploadPhotoFragment extends Fragment {
                             }
                         });
                     } catch (Exception ex) {
-                        Log.e(UploadPhotoFragment.class.getSimpleName(), "Problem uploading photo");
+                        Log.e(CreateGameFragment.class.getSimpleName(), "Problem uploading photo");
                     }
                 }
             }
         });
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_upload_photo, container, true);
+        return view;
     }
 
     /*@Override
@@ -138,6 +140,7 @@ public class UploadPhotoFragment extends Fragment {
         return true;
     }
 */
+    // Sets the image in the imageview
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
