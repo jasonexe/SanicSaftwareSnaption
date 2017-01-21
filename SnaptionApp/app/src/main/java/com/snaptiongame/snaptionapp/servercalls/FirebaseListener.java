@@ -9,6 +9,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.snaptiongame.snaptionapp.MessageUpdater;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.android.gms.internal.zzs.TAG;
 
 /**
@@ -18,7 +21,6 @@ import static com.google.android.gms.internal.zzs.TAG;
 public class FirebaseListener {
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
-    String message;
     boolean hasUpdated = false;
 
     public FirebaseListener(String path, final MessageUpdater callOnUpdate) {
@@ -27,10 +29,21 @@ public class FirebaseListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 System.out.println("Getting tha data");
+                Object data;
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                if (snapshots.iterator().hasNext()) {
+                    data = new ArrayList<>();
+                    for (DataSnapshot snapshot : snapshots) {
+                        ((List) data).add(snapshot.getValue(callOnUpdate.getDataType()));
+                    }
+                }
+                else {
+                    data = dataSnapshot.getValue(callOnUpdate.getDataType());
+                }
+
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
-                message = dataSnapshot.getValue(String.class);
-                callOnUpdate.onUpdate(message);
+                callOnUpdate.onUpdate(data);
             }
 
             @Override
