@@ -1,6 +1,8 @@
 package com.snaptiongame.snaptionapp;
 
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.User;
 
 /**
  * Created by austinrobarts on 1/21/17.
@@ -25,10 +27,9 @@ public interface Uploader {
      *  adds caption to the game in firebase
      *  adds caption to the user captions list
      *
-     * @param gameId
-     * @param userId
+     * @param caption
      */
-    public void addCaptions(String gameId, String userId);
+    public void addCaptions(Caption caption);
 
     /**
      * Responsible for:
@@ -36,14 +37,15 @@ public interface Uploader {
      *
      * @param userId
      */
-    public void addUser(String userId);
+    public void addUser(User user, String userId);
 
     /**
      * Responsbile for:
      *  adds to a map in users table, increment upvote in the caption in game and user table
      * @param captionId
-     * @param userId
+     * @param upvoterId
+     * @param captionerId
      * @param gameId
      */
-    public void addUpvote(String captionId, String userId, String gameId);
+    public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId);
 }

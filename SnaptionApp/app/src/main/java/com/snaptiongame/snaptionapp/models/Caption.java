@@ -22,21 +22,28 @@ import java.util.List;
  */
 
 public class Caption {
-    public String id;
+    public String id;       // The id of the caption
     public String userId;   // The person who created the caption
+    public String gameId;   // The game the caption was made on
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
     public int votes;
 
+    //Needed for firebase compatibility
+    public Caption() {}
+
     // Used for dependency injection if you want a custom userId
-    public Caption(Card card, List<String> userInput, String userId) {
+    public Caption(String id, Card card, List<String> userInput, String userId, String gameId) {
+        this.id = id;
         this.card = new Card(card);
         this.userInput = new ArrayList<>(userInput);
         this.userId = userId;
+        this.gameId = gameId;
         votes = 0;
     }
 
-    public Caption(Card card, List<String> userInput) throws IllegalStateException{
+    public Caption(String id, Card card, List<String> userInput) throws IllegalStateException{
+        this.id = id;
         this.card = new Card(card);
         this.userInput = new ArrayList<>(userInput);
 
