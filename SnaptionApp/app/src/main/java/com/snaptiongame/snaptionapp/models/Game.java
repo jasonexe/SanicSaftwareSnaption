@@ -16,16 +16,21 @@ public class Game {
     private String picker; //The ID of the picker
     private String imagePath; //The path of the image on Firebase
     private Map<String, Caption> captionsList; //The list of captions
-    private List<String> playerList; //The list of players
+    private List<String> playersList; //The list of players
     private List<String> categories; //The list of categories
     private boolean isPublic; //Whether the game is open to the public
     private boolean isOpen; //Whether the game is still open
-    private int endDate; //When the game ends
-    private int creationDate; //When the game was created
+    private long endDate; //When the game ends
+    private long creationDate; //When the game was created
     private int judgerRating; //The rating that judgers have given the game
-    private String maturityRating;
-    private String winner;
-    private String peoplesChoice;
+    private String maturityRating; //The maturity rating of the game
+    private String winner; //The id of the winning caption
+    private String peoplesChoice; //The id of the caption selected by the players
+
+    /**
+     * Default constructor.
+     */
+    public Game() {}
 
     /**
      * Constructs a game.
@@ -41,19 +46,19 @@ public class Game {
      * @param maturityRating The maturity rating of the card
      */
     public Game(String id, String picker, String imagePath, List<String> playerList,
-                List<String> categories, boolean isPublic, int endDate, int creationDate,
+                List<String> categories, boolean isPublic, long endDate, long creationDate,
                 String maturityRating) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.playerList = new ArrayList<String>(playerList);
-        this.categories = new ArrayList<String>(categories);
+        this.playersList = new ArrayList<>(playerList);
+        this.categories = new ArrayList<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
         this.maturityRating = maturityRating;
 
-        captionsList = new HashMap<String, Caption>();
+        captionsList = new HashMap<>();
         isOpen = true;
         judgerRating = 0;
     }
@@ -74,7 +79,7 @@ public class Game {
      * @param playerId The ID of the player being added
      */
     public void addPlayer(String playerId) {
-        playerList.add(playerId);
+        playersList.add(playerId);
     }
 
     /**
@@ -152,8 +157,8 @@ public class Game {
      *
      * @return The list of players
      */
-    public List getPlayerList() {
-        return new ArrayList(playerList);
+    public List getPlayersList() {
+        return new ArrayList(playersList);
     }
 
     /**
@@ -188,7 +193,7 @@ public class Game {
      *
      * @return The time when the game ends
      */
-    public int getEndDate() {
+    public long getEndDate() {
         return endDate;
     }
 
@@ -197,7 +202,7 @@ public class Game {
      *
      * @return The time when the game was started
      */
-    public int getCreationDate() {
+    public long getCreationDate() {
         return creationDate;
     }
 

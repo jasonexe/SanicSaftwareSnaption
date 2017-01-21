@@ -34,6 +34,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * The fragment where users can upload photos to start a game.
@@ -63,14 +64,14 @@ public class CreateGameFragment extends Fragment {
     protected ImageView imageView;
 
     private Uri imageUri;
-
+    private Unbinder unbinder;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_create_game, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,4 +157,9 @@ public class CreateGameFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
 }
