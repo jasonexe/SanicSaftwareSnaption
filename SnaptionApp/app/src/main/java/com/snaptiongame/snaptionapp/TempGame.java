@@ -15,6 +15,7 @@ public class TempGame {
     public String gamePhoto;
     public Caption caption;
     public String captionerPhoto;
+    public boolean complete;
     public TempGame(String gamePhoto, Caption caption, String captionerPhoto) {
         this.gamePhoto = gamePhoto;
         this.caption = caption;
@@ -102,9 +103,12 @@ public class TempGame {
             } else {
                 newGame = new TempGame(oldFormat.gamePhoto, TestCaption.getDoubleInputCaption(), oldFormat.captionerPhoto);
             }
-
             newerTempGame.add(newGame);
         }
+
+        // create completed games to demonstrate the distinction between complete and incomplete games
+        newerTempGame.get(3).complete = true;
+        newerTempGame.get(5).complete = true;
 
         return newerTempGame;
     }
