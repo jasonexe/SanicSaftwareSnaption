@@ -31,7 +31,7 @@ public class TestCaption {
         List<String> captionInput = possibleInputs.get(rand.nextInt(possibleInputs.size()));
         Card card = TestCard.getTestCardSingleInput();
 
-        return new Caption(card, captionInput, "TestUserId");
+        return new Caption("TestId", "TestGameId", "TestUserId", card, captionInput);
     }
 
     public static Caption getDoubleInputCaption() {
@@ -56,6 +56,6 @@ public class TestCaption {
         List<String> captionInput = possibleInputs.get(rand.nextInt(possibleInputs.size()));
         Card card = TestCard.getTestCardDoubleInput();
 
-        return new Caption(card, captionInput, "TestUserId");
+        return new Caption("TestId", "TestGameId", "TestUserId", card, captionInput);
     }
 }
