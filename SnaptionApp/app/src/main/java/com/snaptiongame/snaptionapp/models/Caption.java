@@ -33,7 +33,7 @@ public class Caption {
     public Caption() {}
 
     // Used for dependency injection if you want a custom userId
-    public Caption(String id, Card card, List<String> userInput, String userId, String gameId) {
+    public Caption(String id, String gameId, String userId, Card card, List<String> userInput) {
         this.id = id;
         this.card = new Card(card);
         this.userInput = new ArrayList<>(userInput);
@@ -42,8 +42,10 @@ public class Caption {
         votes = 0;
     }
 
-    public Caption(String id, Card card, List<String> userInput) throws IllegalStateException{
+    public Caption(String id, String gameId, Card card, List<String> userInput) throws IllegalStateException{
         this.id = id;
+        this.gameId = gameId;
+
         this.card = new Card(card);
         this.userInput = new ArrayList<>(userInput);
 
@@ -72,6 +74,8 @@ public class Caption {
     public String getId() {
         return id;
     }
+
+    public String getGameId() { return gameId; }
 
     public String getUserId() {
         return userId;

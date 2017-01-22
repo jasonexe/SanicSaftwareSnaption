@@ -63,7 +63,7 @@ public class FirebaseTests {
         inputArr.add("Yay");
         inputArr.add("Cards work");
         try {
-            Caption testCaption = new Caption(new Card("Whatevs"), inputArr);
+            Caption testCaption = new Caption("TestId", "TestGameId", "TestUserId", new Card("Whatevs"), inputArr);
             assertTrue("User was allowed to submit a caption when not logged in", false);
         } catch (IllegalStateException e){
             assertTrue(true);
@@ -79,7 +79,7 @@ public class FirebaseTests {
         inputArr.add("Cards work");
         String cardText = "%s! %s! I like ice cream";
         Card testCard = new Card(cardText);
-        Caption testCaption = new Caption(testCard, inputArr, "Test user");
+        Caption testCaption = new Caption("TestId", "TestGameId", "Test user", testCard, inputArr);
         assertEquals("Yay! Cards work! I like ice cream", testCaption.getCaptionText().toString());
     }
 
