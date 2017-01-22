@@ -35,9 +35,10 @@ public interface Uploader {
      * Responsible for:
      *  upload profile picture
      *
-     * @param userId
+     * @param user
+     * @param photo
      */
-    public void addUser(User user, String userId);
+    public void addUser(User user, byte[] photo);
 
     /**
      * Responsbile for:
