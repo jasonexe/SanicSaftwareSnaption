@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Snaption App</string>
     <string name="action_settings">Settings</string>
+    <string name="select_image">Select an Image</string>
+    <string name="create_game">Create Game</string>
     <string name="facebook_app_id">1810118319274207</string>
     <string name="fb_login_protocol_scheme">fb1810118319274207</string>
     <string name="login_dialog_header">Log in with Google+ or Facebook</string>
