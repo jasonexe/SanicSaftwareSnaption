@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
@@ -67,6 +68,7 @@ public class FirebaseTests {
         ArrayList<String> inputArr = new ArrayList<String>();
         inputArr.add("Yay");
         inputArr.add("Cards work");
+        FirebaseAuth.getInstance().signOut();
         try {
             Caption testCaption = new Caption(new Card("Whatevs"), inputArr);
             assertTrue("User was allowed to submit a caption when not logged in", false);
