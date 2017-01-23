@@ -8,8 +8,4 @@
         android:id="@+id/profile_item"
         android:title="@string/profile"
         android:icon="@android:drawable/ic_menu_my_calendar"/>
-    <item
-        android:id="@+id/upload_photo"
-        android:title="Upload photo"
-        android:icon="@android:drawable/ic_menu_my_calendar"/>
 </menu>

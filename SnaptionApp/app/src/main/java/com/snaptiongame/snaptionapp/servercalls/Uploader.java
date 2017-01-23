@@ -5,6 +5,8 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.User;
 
 /**
+ * This is a generic interface to provide structure for our backend solution
+ * The client is only allowed to upload information to our backend with these provided methods
  * Created by austinrobarts on 1/21/17.
  */
 
@@ -22,6 +24,12 @@ public interface Uploader {
     public void addGame(Game game, byte[] photo);
 
     /**
+     * Create a new key from backend to use as a Game's identity
+     * @return a string representing a key so that it can be found later
+     */
+    public String getNewGameKey();
+
+    /**
      * Responsible for:
      *  notifications still mystery
      *  adds caption to the game in firebase
@@ -32,8 +40,13 @@ public interface Uploader {
     public void addCaptions(Caption caption);
 
     /**
+     * Create a new key from backend to use as a Caption's identity
+     * @return a string representing a key so that it can be found later
+     */
+    public String getNewCaptionKey();
+    /**
      * Responsible for:
-     *  upload profile picture
+     *  uploading profile picture
      *
      * @param user
      * @param photo
@@ -49,4 +62,10 @@ public interface Uploader {
      * @param gameId
      */
     public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId);
+
+    /**
+     * Create a new key from backend to use as an Upvote's identity
+     * @return a string representing a key so that it can be found later
+     */
+    public String getNewUpvoteKey();
 }

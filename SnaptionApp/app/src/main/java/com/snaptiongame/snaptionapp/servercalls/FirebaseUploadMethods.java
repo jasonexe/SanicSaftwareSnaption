@@ -62,6 +62,23 @@ public class FirebaseUploadMethods implements Uploader{
         gamesRef.setValue(game);
     }
 
+    @Override
+    public String getNewGameKey() {
+        DatabaseReference gamesFolderRef = FirebaseDatabase.getInstance().getReference(gamesPath);
+        String key = gamesFolderRef.push().getKey();
+        return key;
+    }
+
+    @Override
+    public String getNewCaptionKey() {
+        return null;
+    }
+
+    @Override
+    public String getNewUpvoteKey() {
+        return null;
+    }
+
     private void addGameToUserTable(Game game) {
         final String gameId = game.getId();
         String userId = game.getPicker();
