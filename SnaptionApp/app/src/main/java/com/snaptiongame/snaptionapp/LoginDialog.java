@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.SignInButton;
 
 /**
  * Created by austinrobarts on 1/16/17.
@@ -18,7 +19,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
     protected TextView mStatusTextView;
     private Activity activity;
     private LoginManager manager;
-    private Button googleLogButton;
+    private SignInButton googleLogButton;
     private LoginButton facebookLogButton;
     private LoginManager.AuthCallback loginAuthCallback;
     private LoginManager.AuthCallback logoutAuthCallback;
@@ -35,29 +36,25 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
         setContentView(R.layout.login_dialog);
 
         //create google sign in button
-        googleLogButton = (Button)findViewById(R.id.goog_sign_in_button);
+        googleLogButton = (SignInButton)findViewById(R.id.google_login_button);
+        googleLogButton.setSize(SignInButton.SIZE_WIDE);
         //create listener for google sign in
         googleLogButton.setOnClickListener(this);
         //create facebook sign in button
-        facebookLogButton = (LoginButton) findViewById(R.id.login_button);
+        facebookLogButton = (LoginButton) findViewById(R.id.facebook_login_button);
 
         mStatusTextView = (TextView)findViewById(R.id.login_status_text);
 
         setUpLoginCallbacks();
         updateStatus();
-        updateGoogleSignInButton();
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.goog_sign_in_button:
-                if (googleLogButton.getText().equals("Sign out")) {
-                    manager.logoutOfGoogle(logoutAuthCallback);
-                }
-                else {
-                    manager.loginToGoogle(loginAuthCallback);
-                }
+            case R.id.google_login_button:
+                //takes a authCallback but is it needed with google button?
+                manager.loginToGoogle(null);
                 break;
         }
     }
@@ -67,26 +64,22 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
             @Override
             public void onSuccess() {
                 updateStatus();
-                updateGoogleSignInButton();
             }
 
             @Override
             public void onError() {
                 mStatusTextView.setText("Something went wrong");
-                updateGoogleSignInButton();
             }
         };
         logoutAuthCallback = new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 mStatusTextView.setText("Successfully logged out");
-                updateGoogleSignInButton();
             }
 
             @Override
             public void onError() {
                 mStatusTextView.setText("Unable to logout");
-                updateGoogleSignInButton();
             }
         };
         manager.setupFacebookLoginButton(facebookLogButton, loginAuthCallback, logoutAuthCallback);
@@ -98,14 +91,5 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
             status += "You're logged into " + manager.getProvider() + " as " + manager.getUserName();
         }
         mStatusTextView.setText(status);
-    }
-
-    private void updateGoogleSignInButton() {
-        if (!TextUtils.isEmpty(manager.getUserName()) && manager.getProvider().equals("google.com")) {
-            googleLogButton.setText( activity.getString(R.string.sign_out));
-        }
-        else {
-            googleLogButton.setText(activity.getString(R.string.sign_in));
-        }
     }
 }

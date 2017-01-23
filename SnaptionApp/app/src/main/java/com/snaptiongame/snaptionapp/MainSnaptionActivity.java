@@ -151,7 +151,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
         loginManager.handleOnActivityResult(requestCode, resultCode, data);
         if (requestCode == GOOGLE_LOGIN_RC) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            loginManager.handleGoogleLoginResult(result);
+            if (result.isSuccess()) {
+                loginManager.handleGoogleLoginResult(result);
+            }
         }
     }
 }

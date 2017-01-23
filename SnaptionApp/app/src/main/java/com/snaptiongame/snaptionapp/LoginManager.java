@@ -185,7 +185,8 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            mGoogleAuthCallback.onSuccess();
+                            //mGoogleAuthCallback.onSuccess();
+                            System.out.println("LOGGED IN TO FIREBASE BOIIII");
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
