@@ -7,8 +7,8 @@ import android.support.test.runner.AndroidJUnit4;
 import com.google.firebase.auth.FirebaseAuth;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +43,7 @@ public class FirebaseTests {
             @Override
             public void onUpdate(Object test) {
                 assertEquals("Heyo", test.toString());
-                FirebaseUpload.deleteValue("testing/message");
+                FirebaseUploader.deleteValue("testing/message");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -53,7 +53,7 @@ public class FirebaseTests {
             }
 
         };
-        FirebaseUpload.uploadObject("testing/message", "Heyo");
+        FirebaseUploader.uploadObject("testing/message", "Heyo");
         Thread.sleep(500); //Need this to upload
         FirebaseListener testListener = new FirebaseListener("testing/message", updater);
     }

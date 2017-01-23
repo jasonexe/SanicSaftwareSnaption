@@ -18,16 +18,13 @@ import android.view.View;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaptionapp.models.Game;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUploadMethods;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
-import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +99,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
-        FirebaseUploadMethods uploadGame = new FirebaseUploadMethods(this, view);
+        //TODO replace this with a link to the createGame fragment once that's made
+        FirebaseUploader uploadGame = new FirebaseUploader(this, view);
         byte[] test = new byte[1000000];
         List<String> playerList = new ArrayList<String>();
         Game testGame = new Game("testGame", "Jason", "testGame", playerList, playerList,

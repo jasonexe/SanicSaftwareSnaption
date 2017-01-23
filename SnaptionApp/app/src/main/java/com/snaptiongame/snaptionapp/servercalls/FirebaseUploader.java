@@ -33,16 +33,30 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
  * Created by jason_000 on 1/21/2017.
  */
 
-public class FirebaseUploadMethods implements Uploader{
+public class FirebaseUploader implements Uploader{
+    //TODO pull this from a file instead
     public static final String storageBucket = "gs://vertical-prototype-81b3e.appspot.com";
     private static final String usersPath = "usersSnaption";
+    private static final String captionPath = "captions";
     private static final String gamesPath = "games";
     private static final int progressDivisor = 1000;
     public static final String imagePath = "images";
     private Context context;
     private View view;
 
-    public FirebaseUploadMethods(Context context, View view) {
+    private static FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+    public static void uploadObject(String firebasePath, Object content) {
+        DatabaseReference myRef = database.getReference(firebasePath);
+        myRef.setValue(content);
+    }
+
+    public static void deleteValue(String firebasePath) {
+        DatabaseReference myRef = database.getReference(firebasePath);
+        myRef.removeValue();
+    }
+
+    public FirebaseUploader(Context context, View view) {
         this.context = context;
         this.view = view;
     }
@@ -57,33 +71,35 @@ public class FirebaseUploadMethods implements Uploader{
 
         // Add game object to games table
         String gameId = game.getId();
-        DatabaseReference gamesRef = FirebaseDatabase.getInstance().getReference(gamesPath
+        DatabaseReference gamesRef = database.getReference(gamesPath
                 + "/" + gameId);
         gamesRef.setValue(game);
     }
 
     @Override
     public String getNewGameKey() {
-        DatabaseReference gamesFolderRef = FirebaseDatabase.getInstance().getReference(gamesPath);
+        DatabaseReference gamesFolderRef = database.getReference(gamesPath);
         String key = gamesFolderRef.push().getKey();
         return key;
     }
 
     @Override
-    public String getNewCaptionKey() {
-        return null;
+    public String getNewCaptionKey(String gameId) {
+        DatabaseReference captionFolderRef = database.getReference(gamesPath + "/" + gameId + "/" +
+                captionPath);
+        return captionFolderRef.push().getKey();
     }
 
     @Override
     public String getNewUpvoteKey() {
+        //TODO implement this
         return null;
     }
 
     private void addGameToUserTable(Game game) {
         final String gameId = game.getId();
         String userId = game.getPicker();
-        DatabaseReference userRef = FirebaseDatabase.getInstance()
-                .getReference(usersPath + "/" + userId);
+        DatabaseReference userRef = database.getReference(usersPath + "/" + userId);
         //TODO if games stays as a List instead of map, is PITA (can't do .push()). See below
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
 //        userRef.child("games").push().setValue(gameId);
