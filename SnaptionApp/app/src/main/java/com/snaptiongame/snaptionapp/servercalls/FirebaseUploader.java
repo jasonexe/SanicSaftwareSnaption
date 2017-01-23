@@ -105,7 +105,7 @@ public class FirebaseUploader implements Uploader{
 //        userRef.child("games").push().setValue(gameId);
         //Assuming we'll leave it as a list
         final DatabaseReference userGameListRef = userRef.child("games");
-        userGameListRef.addValueEventListener(new ValueEventListener() {
+        userGameListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
@@ -129,7 +129,7 @@ public class FirebaseUploader implements Uploader{
         // Upload photo to storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReferenceFromUrl(storageBucket)
-                .child("TestImages/" + game.getId() + ".jpg");
+                .child(imagePath + "/" + game.getId() + ".jpg");
         UploadTask uploadTask = imageLoc.putBytes(photo);
         //Creating the progress dialog
         final ProgressDialog loadingDialog = new ProgressDialog(context);
