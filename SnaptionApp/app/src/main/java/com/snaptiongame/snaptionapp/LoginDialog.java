@@ -53,8 +53,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.google_login_button:
-                //takes a authCallback but is it needed with google button?
-                manager.loginToGoogle(null);
+                manager.signInWithGoogle();
                 break;
         }
     }

@@ -49,6 +49,18 @@ public class LoginManager {
         this.activity = activity;
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
+
+    }
+
+    public interface AuthCallback {
+        void onSuccess();
+        void onError();
+    }
+
+    public void signInWithGoogle() {
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -67,18 +79,11 @@ public class LoginManager {
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-    }
-
-    public interface AuthCallback {
-        void onSuccess();
-        void onError();
-    }
-
-    public void loginToGoogle(final AuthCallback authCallback) {
-        this.mGoogleAuthCallback = authCallback;
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         //This means that the result function will be triggered, override
         activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+
+
     }
 
     public void handleGoogleLoginResult(GoogleSignInResult result) {
@@ -150,7 +155,7 @@ public class LoginManager {
     }
 
 
-    public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
