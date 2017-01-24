@@ -10,7 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.R;
-import com.snaptiongame.snaptionapp.TempGame;
+import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,6 +29,23 @@ import butterknife.Unbinder;
 public class WallFragment extends Fragment {
     private static final int NUM_COLUMNS = 2;
     private Unbinder unbinder;
+    private WallViewAdapter wallAdapter;
+    private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
+        @Override
+        public void onData(List<Game> games) {
+            wallAdapter.addItems(games);
+        }
+
+        @Override
+        public Class getDataType() {
+            return Game.class;
+        }
+    };
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(8, listener);
+
+    public void retrieveMoreGames() {
+        resourceManager.retrieveGamesByCreationDate();
+    }
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -37,7 +60,10 @@ public class WallFragment extends Fragment {
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
-        wallListView.setAdapter(new WallViewAdapter(TempGame.getMockData()));
+        wallAdapter = new WallViewAdapter(new ArrayList<Game>());
+        wallListView.setAdapter(wallAdapter);
+
+        retrieveMoreGames();
         return view;
     }
 
