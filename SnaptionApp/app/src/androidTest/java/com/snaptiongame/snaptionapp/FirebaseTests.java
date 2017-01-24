@@ -8,7 +8,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 
 import org.junit.Test;
@@ -16,9 +15,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.Assert.*;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -46,7 +43,7 @@ public class FirebaseTests {
             @Override
             public void onUpdate(String test) {
                 assertEquals("Heyo", test);
-                FirebaseUpload.deleteValue("testing/message");
+                FirebaseUploader.deleteValue("testing/message");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
