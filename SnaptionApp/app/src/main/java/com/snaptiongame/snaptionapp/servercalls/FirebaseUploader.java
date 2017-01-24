@@ -31,11 +31,13 @@ import java.util.List;
  * Created by jason_000 on 1/21/2017.
  */
 
-public class FirebaseUploader implements Uploader{
+public class FirebaseUploader implements Uploader {
+
     private static final String usersPath = "usersSnaption";
     private static final String captionPath = "captions";
     private static final String gamesPath = "games";
     public static final String imagePath = "images";
+
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -48,6 +50,7 @@ public class FirebaseUploader implements Uploader{
         DatabaseReference myRef = database.getReference(firebasePath);
         myRef.removeValue();
     }
+
 
     public FirebaseUploader() {
 
@@ -126,8 +129,6 @@ public class FirebaseUploader implements Uploader{
         });
     }
 
-
-
     private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
         // Upload photo to storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -136,7 +137,6 @@ public class FirebaseUploader implements Uploader{
         UploadTask uploadTask = imageLoc.putBytes(photo);
         //Creating the progress dialog
         uploadCallback.onStartUpload(photo.length);
-
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -155,7 +155,6 @@ public class FirebaseUploader implements Uploader{
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                 uploadCallback.onUploadProgress(taskSnapshot.getBytesTransferred());
                 //Display progress as it updates
-
             }
         });
     }

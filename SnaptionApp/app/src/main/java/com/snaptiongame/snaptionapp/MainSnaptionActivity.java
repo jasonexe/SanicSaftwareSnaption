@@ -26,7 +26,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
-import static com.snaptiongame.snaptionapp.R.id.photo;
 
 import java.util.ArrayList;
 import java.util.List;
