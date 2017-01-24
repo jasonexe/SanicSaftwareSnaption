@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,8 +16,8 @@ public class Game {
     private String id; //The ID of the game
     private String picker; //The ID of the picker
     private String imagePath; //The path of the image on Firebase
-    private Map<String, Caption> captionsList; //The list of captions
-    private List<String> playersList; //The list of players
+    private Map<String, Caption> captions; //The list of captions
+    private List<String> players; //The list of players
     private List<String> categories; //The list of categories
     private boolean isPublic; //Whether the game is open to the public
     private boolean isOpen; //Whether the game is still open
@@ -51,16 +52,45 @@ public class Game {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.playersList = new ArrayList<>(playerList);
+        this.players = new ArrayList<>(playerList);
         this.categories = new ArrayList<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
         this.maturityRating = maturityRating;
 
-        captionsList = new HashMap<>();
+        captions = new HashMap<>();
         isOpen = true;
         judgerRating = 0;
+    }
+
+    /**
+     * Constructs a game.
+     *
+     * @param id The unique ID of the game
+     * @param picker The player ID of the picker
+     * @param imagePath The path of the image on Firebase
+     * @param playerList The list of players in the game
+     * @param categories The list of categories that the game belongs to
+     * @param isPublic Whether the game is available to the public
+     * @param endDate The time when the game ends
+     * @param maturityRating The maturity rating of the card
+     */
+    public Game(String id, String picker, String imagePath, List<String> playerList,
+                List<String> categories, boolean isPublic, long endDate, String maturityRating) {
+        this.id = id;
+        this.picker = picker;
+        this.imagePath = imagePath;
+        this.players = new ArrayList<>(playerList);
+        this.categories = new ArrayList<>(categories);
+        this.isPublic = isPublic;
+        this.endDate = endDate;
+        this.maturityRating = maturityRating;
+
+        captions = new HashMap<>();
+        isOpen = true;
+        judgerRating = 0;
+        creationDate = new Date().getTime();
     }
 
     /**
@@ -70,7 +100,7 @@ public class Game {
      * @param caption The caption being added to the game
      */
     public void addCaption(String key, Caption caption) {
-        captionsList.put(key, caption);
+        captions.put(key, caption);
     }
 
     /**
@@ -79,7 +109,7 @@ public class Game {
      * @param playerId The ID of the player being added
      */
     public void addPlayer(String playerId) {
-        playersList.add(playerId);
+        players.add(playerId);
     }
 
     /**
@@ -148,8 +178,8 @@ public class Game {
      *
      * @return The list of captions in the game
      */
-    public Map getCaptionsList() {
-        return new HashMap(captionsList);
+    public Map getCaptions() {
+        return new HashMap(captions);
     }
 
     /**
@@ -157,8 +187,8 @@ public class Game {
      *
      * @return The list of players
      */
-    public List getPlayersList() {
-        return new ArrayList(playersList);
+    public List getPlayers() {
+        return new ArrayList(players);
     }
 
     /**
