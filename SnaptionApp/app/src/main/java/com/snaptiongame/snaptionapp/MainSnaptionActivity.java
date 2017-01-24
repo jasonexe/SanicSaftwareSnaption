@@ -107,6 +107,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         List<String> playerList = new ArrayList<String>();
         Game testGame = new Game("testGame", "Jason", "testGame", playerList, playerList,
                 true, 100, 100, "PG");
+        // UploadDialogInterface creates the dialog progress bar. Declared in FirebaseUploader
         uploadGame.addGame(testGame, test, new FirebaseUploader.UploadDialogInterface() {
             int progressDivisor = 1000; // This converts from bytes to whatever units you want.
                                         // IE 1000 = display with kilobytes
@@ -117,7 +118,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 loadingDialog.setIndeterminate(false);
                 loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 loadingDialog.setProgress(0);
-                loadingDialog.setProgressNumberFormat("%1fMB/%2fMB");
+                loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
                 loadingDialog.setMessage("Uploading photo");
                 loadingDialog.setMax((int) maxBytes/progressDivisor);
                 //Display progress dialog
