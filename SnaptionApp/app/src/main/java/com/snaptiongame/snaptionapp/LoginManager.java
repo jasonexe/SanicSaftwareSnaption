@@ -49,6 +49,9 @@ public class LoginManager extends Observable {
     public LoginManager(FragmentActivity activity) {
         this.activity = activity;
         mAuth = FirebaseAuth.getInstance();
+        //TODO: remove this sign out when sign out is implemented
+        //this is just for testing purposes to show snackbar when already logged in
+        mAuth.signOut();
         mCallbackManager = CallbackManager.Factory.create();
         isLoggedIn = mAuth.getCurrentUser() != null;
         System.out.println("IS LOGGED IN: " + isLoggedIn);
