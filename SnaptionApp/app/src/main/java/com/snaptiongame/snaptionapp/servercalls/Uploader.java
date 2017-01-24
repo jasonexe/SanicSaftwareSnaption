@@ -41,9 +41,10 @@ public interface Uploader {
 
     /**
      * Create a new key from backend to use as a Caption's identity
+     * @param gameId The Id of the game that the caption will be in.
      * @return a string representing a key so that it can be found later
      */
-    public String getNewCaptionKey();
+    public String getNewCaptionKey(String gameId);
     /**
      * Responsible for:
      *  uploading profile picture
