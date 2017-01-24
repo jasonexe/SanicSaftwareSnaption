@@ -1,6 +1,9 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -29,7 +32,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Observable;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * Created by brittanyberlanga on 12/2/16.
@@ -45,6 +57,7 @@ public class LoginManager extends Observable {
     private AuthCallback mGoogleAuthCallback;
     private FragmentActivity activity;
     private boolean isLoggedIn;
+    private byte[] profilePhoto;
 
     public LoginManager(FragmentActivity activity) {
         this.activity = activity;
@@ -54,7 +67,7 @@ public class LoginManager extends Observable {
         mAuth.signOut();
         mCallbackManager = CallbackManager.Factory.create();
         isLoggedIn = mAuth.getCurrentUser() != null;
-        System.out.println("IS LOGGED IN: " + isLoggedIn);
+        profilePhoto = null;
     }
 
     public interface AuthCallback {
@@ -195,11 +208,63 @@ public class LoginManager extends Observable {
         notifyObservers();
     }
 
+    private void uploadUser(final String facebookID) {
+
+        FirebaseUser fbUser = mAuth.getCurrentUser();
+        final String id = fbUser.getUid();
+        String email = fbUser.getEmail();
+        String displayName = fbUser.getDisplayName();
+        //TODO: fill these fields once we reach notifications and friends
+        String notificationId = null;
+        String facebookId = facebookID;
+        User user = new User(id, email, displayName, notificationId, facebookId);
+        FirebaseUpload.uploadObject("users/" + id , user);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //getting profile pictures
+                if (facebookID != null) {
+                    getFacebookPhoto(facebookID);
+                }
+                else {
+                    getGooglePhoto();
+                }
+                //uploading profile picture to firebase
+                if (profilePhoto != null) {
+                    StorageReference ref = FirebaseStorage.getInstance().getReference().child("ProfilePictures/" + id);
+                    ref.putBytes(profilePhoto);
+                }
+            }
+        });
+        thread.start();
+
+    }
+
+    private void getFacebookPhoto(String id) {
+        String imageUrl = "https://graph.facebook.com/"+id+"/picture?type=large";
+
+        try {
+            InputStream inputStream = (InputStream)new URL(imageUrl).getContent();
+            profilePhoto = IOUtils.toByteArray(inputStream);
+        }
+        catch (Exception err) {
+            Log.d("TAG", "Loading Picture FAILED");
+            err.printStackTrace();
+        }
+    }
+
+    private void getGooglePhoto() {
+
+    }
+
     /**
      * Login with Google+
      * @param acct
      */
     private void loginToFirebase(GoogleSignInAccount acct) {
+        Uri photo = acct.getPhotoUrl();
+
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
@@ -208,6 +273,7 @@ public class LoginManager extends Observable {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
                             setLoggedIn(true);
+                            uploadUser(null);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
@@ -222,7 +288,7 @@ public class LoginManager extends Observable {
      * Login with Facebook
      * @param token
      */
-    private void loginToFirebase(AccessToken token) {
+    private void loginToFirebase(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -232,6 +298,7 @@ public class LoginManager extends Observable {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
                             setLoggedIn(true);
+                            uploadUser(token.getUserId());
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
