@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -10,24 +11,23 @@ import android.widget.TextView;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by austinrobarts on 1/16/17.
  */
 
-public class LoginDialog extends Dialog implements View.OnClickListener {
+public class LoginDialog extends Dialog implements View.OnClickListener, Observer {
 
-    protected TextView mStatusTextView;
-    private Activity activity;
     private LoginManager manager;
     private SignInButton googleLogButton;
     private LoginButton facebookLogButton;
-    private LoginManager.AuthCallback loginAuthCallback;
-    private LoginManager.AuthCallback logoutAuthCallback;
 
     public LoginDialog(Activity activity, LoginManager manager) {
         super(activity);
-        this.activity = activity;
         this.manager = manager;
+        manager.addObserver(this);
     }
 
     @Override
@@ -42,11 +42,18 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
         googleLogButton.setOnClickListener(this);
         //create facebook sign in button
         facebookLogButton = (LoginButton) findViewById(R.id.facebook_login_button);
+        manager.setupFacebookLoginButton(facebookLogButton);
+    }
 
-        mStatusTextView = (TextView)findViewById(R.id.login_status_text);
-
-        setUpLoginCallbacks();
-        updateStatus();
+    /**
+     * Update when login status changes
+     * @param observable
+     * @param o
+     */
+    @Override
+    public void update(Observable observable, Object o) {
+        //dismisses the dialog to go back to main screen
+        dismiss();
     }
 
     @Override
@@ -56,39 +63,5 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
                 manager.signInWithGoogle();
                 break;
         }
-    }
-
-    private void setUpLoginCallbacks() {
-        loginAuthCallback = new LoginManager.AuthCallback() {
-            @Override
-            public void onSuccess() {
-                updateStatus();
-            }
-
-            @Override
-            public void onError() {
-                mStatusTextView.setText("Something went wrong");
-            }
-        };
-        logoutAuthCallback = new LoginManager.AuthCallback() {
-            @Override
-            public void onSuccess() {
-                mStatusTextView.setText("Successfully logged out");
-            }
-
-            @Override
-            public void onError() {
-                mStatusTextView.setText("Unable to logout");
-            }
-        };
-        manager.setupFacebookLoginButton(facebookLogButton, loginAuthCallback, logoutAuthCallback);
-    }
-
-    private void updateStatus() {
-        String status = "";
-        if (!TextUtils.isEmpty(manager.getUserName())) {
-            status += "You're logged into " + manager.getProvider() + " as " + manager.getUserName();
-        }
-        mStatusTextView.setText(status);
     }
 }

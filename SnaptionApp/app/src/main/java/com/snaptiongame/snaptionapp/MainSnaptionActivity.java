@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 
@@ -31,7 +32,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainSnaptionActivity extends AppCompatActivity {
+public class MainSnaptionActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
     private CallbackManager mCallbackManager;
     private LoginManager loginManager;
 
@@ -122,6 +123,12 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onDismiss(DialogInterface dialogInterface) {
+        Snackbar.make(findViewById(R.id.drawer_layout), loginManager.getStatus(),Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
@@ -130,9 +137,15 @@ public class MainSnaptionActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_login) {
-            //create pop up for login Facebook or Google+
-            LoginDialog logDialog = new LoginDialog(this, loginManager);
-            logDialog.show();
+            if (!loginManager.isLoggedIn()) {
+                //create pop up for login Facebook or Google+
+                LoginDialog logDialog = new LoginDialog(this, loginManager);
+                logDialog.setOnDismissListener(this);
+                logDialog.show();
+            }
+            else {
+                onDismiss(null);
+            }
         }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);

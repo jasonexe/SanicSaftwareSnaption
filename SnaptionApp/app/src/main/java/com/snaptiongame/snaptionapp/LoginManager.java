@@ -29,27 +29,29 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.Observable;
+
 /**
  * Created by brittanyberlanga on 12/2/16.
+ * Edited by Austin Robarts
  */
+public class LoginManager extends Observable {
 
-public class LoginManager {
-    public static final int GOOGLE_LOGIN_RC = 13;
+    public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
     private AuthCallback mGoogleAuthCallback;
-    private AuthCallback mFacebookAuthCallback;
-    private AuthCallback mFacebookLogoutAuthCallback;
     private FragmentActivity activity;
-    private AccessTokenTracker accessTokenTracker;
+    private boolean isLoggedIn;
 
     public LoginManager(FragmentActivity activity) {
         this.activity = activity;
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
-
+        isLoggedIn = mAuth.getCurrentUser() != null;
+        System.out.println("IS LOGGED IN: " + isLoggedIn);
     }
 
     public interface AuthCallback {
@@ -87,6 +89,7 @@ public class LoginManager {
     }
 
     public void handleGoogleLoginResult(GoogleSignInResult result) {
+        isLoggedIn = true;
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -120,9 +123,7 @@ public class LoginManager {
 
 
 
-    public void setupFacebookLoginButton(LoginButton loginButton, AuthCallback loginCallback, AuthCallback logoutCallback) {
-        this.mFacebookAuthCallback = loginCallback;
-        this.mFacebookLogoutAuthCallback = logoutCallback;
+    public void setupFacebookLoginButton(LoginButton loginButton) {
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -134,24 +135,13 @@ public class LoginManager {
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
-                mFacebookAuthCallback.onError();
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "facebook:onError", error);
-                mFacebookAuthCallback.onError();
             }
         });
-        accessTokenTracker = new AccessTokenTracker() {
-            @Override
-            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken) {
-                // the newAccessToken becomes null when the user signs out
-                if (newAccessToken == null) {
-                    mFacebookLogoutAuthCallback.onSuccess();
-                }
-            }
-        };
     }
 
 
@@ -159,8 +149,22 @@ public class LoginManager {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    public String getStatus() {
+        String status = "";
+        String provider = getProvider();
+        String userName = getUserName();
+        if (provider != null && userName != null) {
+            status += "You're logged into " + getProvider() + " as " + getUserName();
+        }
+        else {
+            status += "Logout unsuccessful";
+        }
+
+        return status;
+    }
+
     //TODO this should be pulled from firebase not the auth object
-    public String getUserName() {
+    private String getUserName() {
         String username = null;
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -169,13 +173,23 @@ public class LoginManager {
         return username;
     }
 
-    public String getProvider() {
+    private String getProvider() {
         String provider = null;
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             provider = user.getProviders().get(0);
         }
         return provider;
+    }
+
+    public boolean isLoggedIn() {
+        return isLoggedIn;
+    }
+
+    private void setLoggedIn(boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+        setChanged();
+        notifyObservers();
     }
 
     /**
@@ -190,8 +204,7 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            //mGoogleAuthCallback.onSuccess();
-                            System.out.println("LOGGED IN TO FIREBASE BOIIII");
+                            setLoggedIn(true);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
@@ -215,11 +228,10 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            mFacebookAuthCallback.onSuccess();
+                            setLoggedIn(true);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            mFacebookAuthCallback.onError();
                         }
                     }
                 });
