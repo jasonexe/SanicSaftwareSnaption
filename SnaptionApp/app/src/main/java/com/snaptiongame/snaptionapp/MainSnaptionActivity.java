@@ -22,6 +22,7 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
@@ -59,7 +60,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
                                 new WallFragment()).commit();
                         break;
                     case R.id.profile_item:
-                        //TODO swap out current fragment with the profile fragment
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new ProfileFragment()).commit();
                         break;
                 }
                 currentFragmentMenuItemId = selectedItemId;
