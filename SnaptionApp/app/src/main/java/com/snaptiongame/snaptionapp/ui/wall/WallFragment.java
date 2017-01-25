@@ -30,10 +30,12 @@ public class WallFragment extends Fragment {
     private static final int NUM_COLUMNS = 2;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
+    private boolean isLoading = false;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
             wallAdapter.addItems(games);
+            isLoading = false;
         }
 
         @Override
@@ -41,11 +43,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(8, listener);
-
-    public void retrieveMoreGames() {
-        resourceManager.retrieveGamesByCreationDate();
-    }
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, listener);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -56,15 +54,35 @@ public class WallFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
-        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL);
+        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL);
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
         wallAdapter = new WallViewAdapter(new ArrayList<Game>());
         wallListView.setAdapter(wallAdapter);
 
-        retrieveMoreGames();
+        wallListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int totalChildren = manager.getItemCount();
+                int totalChildrenVisible = manager.getChildCount();
+                int[] firstVisibleChildren = null;
+                firstVisibleChildren = manager.findFirstVisibleItemPositions(firstVisibleChildren);
+                if (!isLoading && firstVisibleChildren != null && firstVisibleChildren.length > 0 &&
+                        firstVisibleChildren[0] + totalChildrenVisible > totalChildren) {
+                    loadMoreGames();
+                }
+            }
+        });
+
+        loadMoreGames();
         return view;
+    }
+
+    private void loadMoreGames() {
+        isLoading = true;
+        resourceManager.retrieveGamesByCreationDate();
     }
 
     @Override
