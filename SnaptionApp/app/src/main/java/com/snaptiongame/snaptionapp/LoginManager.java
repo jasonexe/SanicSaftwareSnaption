@@ -106,9 +106,9 @@ public class LoginManager extends Observable {
     }
 
     public void handleGoogleLoginResult(GoogleSignInResult result) {
-        isLoggedIn = true;
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
+            isLoggedIn = true;
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
@@ -250,6 +250,14 @@ public class LoginManager extends Observable {
             }
         });
         thread.start();
+        //wait for thread to finish before going back to main execution
+        //this is so we get the photo before we upload it
+        try {
+            thread.join();
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+        }
     }
 
     /**
