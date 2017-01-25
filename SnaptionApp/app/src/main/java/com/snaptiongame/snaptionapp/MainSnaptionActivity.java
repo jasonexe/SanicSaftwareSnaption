@@ -162,17 +162,15 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //if returning from google login attempt
         if (requestCode == GOOGLE_LOGIN_RC) {
-            System.out.println("GOOGLE RESULT: " + resultCode);
-            System.out.println("GOOGLE REQUEST: " + requestCode);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 loginManager.handleGoogleLoginResult(result);
             }
         }
+        //if returning from facebook login attempt
         else {
-            System.out.println("FACEBOOK RESULT: " + resultCode);
-            System.out.println("FACEBOOK REQUEST: " + requestCode);
             loginManager.handleFacebookLoginResult(requestCode, resultCode, data);
         }
     }

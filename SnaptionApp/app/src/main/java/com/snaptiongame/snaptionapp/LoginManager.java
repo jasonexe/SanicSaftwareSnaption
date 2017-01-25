@@ -1,16 +1,12 @@
 package com.snaptiongame.snaptionapp;
 
-import android.content.ContentProvider;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -49,9 +45,15 @@ import org.apache.commons.io.IOUtils;
  * Edited by Austin Robarts
  */
 public class LoginManager extends Observable {
-
+//TODO: refactor to remove Firebase objects from this class when we establish Uploader class
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
+
+    private final String usersFolder = "users/";
+    private final String photosFolder = "ProfilePictures/";
+    private final String photoExtension = ".jpg";
+    private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
+
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
@@ -101,8 +103,6 @@ public class LoginManager extends Observable {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         //This means that the result function will be triggered, override
         activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
-
-
     }
 
     public void handleGoogleLoginResult(GoogleSignInResult result) {
@@ -138,8 +138,6 @@ public class LoginManager extends Observable {
         }
     }
 
-
-
     public void setupFacebookLoginButton(LoginButton loginButton) {
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -161,7 +159,6 @@ public class LoginManager extends Observable {
         });
     }
 
-
     public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
@@ -176,7 +173,6 @@ public class LoginManager extends Observable {
         else {
             status += "Logout unsuccessful";
         }
-
         return status;
     }
 
@@ -209,30 +205,37 @@ public class LoginManager extends Observable {
         notifyObservers();
     }
 
-    private void uploadUser(final String facebookID) {
+    private void uploadUser(final String facebookId) {
         FirebaseUser fbUser = mAuth.getCurrentUser();
-        final String id = fbUser.getUid();
-        String email = fbUser.getEmail();
-        String displayName = fbUser.getDisplayName();
-        //TODO: fill these fields once we reach notifications and friends
-        String notificationId = null;
-        String facebookId = facebookID;
-        User user = new User(id, email, displayName, notificationId, facebookId);
-        FirebaseUpload.uploadObject("users/" + id , user);
+        //make sure user is signed in before sending
+        if (fbUser != null) {
+            //establish fields needed for constructor
+            final String id = fbUser.getUid();
+            String imagePath = photosFolder + id + photoExtension;
+            String email = fbUser.getEmail();
+            String displayName = fbUser.getDisplayName();
+            //TODO: fill this fields once we reach notifications and friends
+            String notificationId = null;
 
-        if (facebookID != null) {
-            getFacebookPhoto(facebookID);
-        }
+            //create and upload User to Firebase
+            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
+            FirebaseUpload.uploadObject(usersFolder + id , user);
 
-        //uploading profile picture to firebase
-        if (profilePhoto != null) {
-            StorageReference ref = FirebaseStorage.getInstance().getReference().child("ProfilePictures/" + id);
-            ref.putBytes(profilePhoto);
+            //getting facebook photo
+            if (facebookId != null) {
+                downloadPhoto(String.format(facebookImageUrl, facebookId));
+            }
+            //uploading profile picture to firebase
+            if (profilePhoto != null) {
+                StorageReference ref = FirebaseStorage.getInstance().getReference().child(imagePath);
+                ref.putBytes(profilePhoto);
+            }
         }
 
     }
 
     private void downloadPhoto(final String imageUrl) {
+        //have to use thread so it is not running on android's main thread
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -247,16 +250,6 @@ public class LoginManager extends Observable {
             }
         });
         thread.start();
-
-    }
-
-    private void getFacebookPhoto(String id) {
-        String imageUrl = "https://graph.facebook.com/"+id+"/picture?type=large";
-        downloadPhoto(imageUrl);
-    }
-
-    private void getGooglePhoto(Uri photo) {
-        downloadPhoto(photo.toString());
     }
 
     /**
@@ -265,7 +258,8 @@ public class LoginManager extends Observable {
      */
     private void loginToFirebase(GoogleSignInAccount acct) {
         Uri photo = acct.getPhotoUrl();
-        getGooglePhoto(photo);
+        //downloading google profile picture
+        downloadPhoto(photo.toString());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)

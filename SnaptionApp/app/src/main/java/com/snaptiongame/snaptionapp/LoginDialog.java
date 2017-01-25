@@ -59,6 +59,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Observe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            //cases will be added here to deal with logout
             case R.id.google_login_button:
                 manager.signInWithGoogle();
                 break;
