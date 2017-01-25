@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp;
 
+import android.content.ContentProvider;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -209,7 +210,6 @@ public class LoginManager extends Observable {
     }
 
     private void uploadUser(final String facebookID) {
-
         FirebaseUser fbUser = mAuth.getCurrentUser();
         final String id = fbUser.getUid();
         String email = fbUser.getEmail();
@@ -220,20 +220,29 @@ public class LoginManager extends Observable {
         User user = new User(id, email, displayName, notificationId, facebookId);
         FirebaseUpload.uploadObject("users/" + id , user);
 
+        if (facebookID != null) {
+            getFacebookPhoto(facebookID);
+        }
+
+        //uploading profile picture to firebase
+        if (profilePhoto != null) {
+            StorageReference ref = FirebaseStorage.getInstance().getReference().child("ProfilePictures/" + id);
+            ref.putBytes(profilePhoto);
+        }
+
+    }
+
+    private void downloadPhoto(final String imageUrl) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                //getting profile pictures
-                if (facebookID != null) {
-                    getFacebookPhoto(facebookID);
+                try {
+                    InputStream inputStream = (InputStream)new URL(imageUrl).getContent();
+                    profilePhoto = IOUtils.toByteArray(inputStream);
                 }
-                else {
-                    getGooglePhoto();
-                }
-                //uploading profile picture to firebase
-                if (profilePhoto != null) {
-                    StorageReference ref = FirebaseStorage.getInstance().getReference().child("ProfilePictures/" + id);
-                    ref.putBytes(profilePhoto);
+                catch (Exception err) {
+                    Log.d("TAG", "Loading Picture FAILED");
+                    err.printStackTrace();
                 }
             }
         });
@@ -243,19 +252,11 @@ public class LoginManager extends Observable {
 
     private void getFacebookPhoto(String id) {
         String imageUrl = "https://graph.facebook.com/"+id+"/picture?type=large";
-
-        try {
-            InputStream inputStream = (InputStream)new URL(imageUrl).getContent();
-            profilePhoto = IOUtils.toByteArray(inputStream);
-        }
-        catch (Exception err) {
-            Log.d("TAG", "Loading Picture FAILED");
-            err.printStackTrace();
-        }
+        downloadPhoto(imageUrl);
     }
 
-    private void getGooglePhoto() {
-
+    private void getGooglePhoto(Uri photo) {
+        downloadPhoto(photo.toString());
     }
 
     /**
@@ -264,6 +265,7 @@ public class LoginManager extends Observable {
      */
     private void loginToFirebase(GoogleSignInAccount acct) {
         Uri photo = acct.getPhotoUrl();
+        getGooglePhoto(photo);
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
