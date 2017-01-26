@@ -28,25 +28,33 @@ public class FirebaseResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
 
-    public static void retrieveAllWithUpdates(String path, final ResourceListener listener) {
-        DatabaseReference myRef = database.getReference(path);
-        myRef.addValueEventListener(new ValueEventListener() {
+    private ValueEventListener valueEventListener;
+    private DatabaseReference databaseReference;
+
+    public FirebaseResourceManager() {}
+
+    /**
+     * Notifies the given ResourceListener of when elements in the table of the given path is changed
+     *
+     * @param path The table path name
+     * @param listener A ResourceListener for a List of the resource class type associated with the
+     *                 table elements
+     */
+    public void retrieveAllWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Object data;
+                List data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
-                if (snapshots.iterator().hasNext()) {
-                    data = new ArrayList<>();
-                    for (DataSnapshot snapshot : snapshots) {
-                        ((List) data).add(snapshot.getValue(listener.getDataType()));
-                    }
+                for (DataSnapshot snapshot : snapshots) {
+                    data.add(snapshot.getValue(listener.getDataType()));
                 }
-                else {
-                    data = dataSnapshot.getValue(listener.getDataType());
-                }
-
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
+                // Notify the ResourceListener that data was received
                 listener.onData(data);
             }
 
@@ -55,7 +63,51 @@ public class FirebaseResourceManager {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
-        });
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+
+    /**
+     * Notifies the given ResourceListener of when a single element of the given path is changed
+     *
+     * @param path The single element path name
+     * @param listener A ResourceListener for the resource class type associated with the single
+     *                 element
+     */
+    public void retrieveSingleWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Object data = dataSnapshot.getValue(listener.getDataType());
+                // Notify the ResourceListener that data was received
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+
+    /**
+     * Stops db notifications to a previously set ResourceListener
+     */
+    public void removeListener() {
+        if (databaseReference != null && valueEventListener != null) {
+            databaseReference.removeEventListener(valueEventListener);
+            databaseReference = null;
+            valueEventListener = null;
+        }
     }
 
     /**

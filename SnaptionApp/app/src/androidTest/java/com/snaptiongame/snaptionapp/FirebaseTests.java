@@ -61,7 +61,7 @@ public class FirebaseTests {
         };
         FirebaseUploader.uploadObject("testing/message", "Heyo");
         Thread.sleep(500); //Need this to upload
-        FirebaseResourceManager.retrieveAllWithUpdates("testing/message", updater);
+        new FirebaseResourceManager().retrieveSingleWithUpdates("testing/message", updater);
     }
 
     @Test
