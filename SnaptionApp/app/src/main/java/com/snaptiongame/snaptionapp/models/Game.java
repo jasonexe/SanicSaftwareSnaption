@@ -272,4 +272,15 @@ public class Game {
         return peoplesChoice;
     }
 
+    /**
+     * Returns the top caption. If the game is open, the top caption should be the caption with the
+     * most votes. If the game is closed, the top caption should be the winning caption.
+     *
+     * @return The top caption.
+     */
+    public Caption getTopCaption() {
+        // TODO correctly implement this!
+        //currently returns the first caption in the captions list
+        return captions != null && captions.size() > 0 ? captions.values().iterator().next() : new Caption();
+    }
 }

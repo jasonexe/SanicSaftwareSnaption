@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
-
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -26,14 +25,14 @@ import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
-import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
     private CallbackManager mCallbackManager;
