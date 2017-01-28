@@ -62,6 +62,8 @@ public class Game {
         captions = new HashMap<>();
         isOpen = true;
         judgerRating = 0;
+        winner = "";
+        peoplesChoice = "";
     }
 
     /**
@@ -91,6 +93,8 @@ public class Game {
         isOpen = true;
         judgerRating = 0;
         creationDate = new Date().getTime();
+        winner = "";
+        peoplesChoice = "";
     }
 
     /**
