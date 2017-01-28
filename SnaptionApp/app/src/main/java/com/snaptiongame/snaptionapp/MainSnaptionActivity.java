@@ -102,9 +102,9 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
     public void onClickFab(View view) {
         //TODO replace this with a link to the createGame fragment once that's made
         FirebaseUploader uploadGame = new FirebaseUploader();
-        byte[] test = new byte[10000000];
+        byte[] test = new byte[1000000];
         List<String> playerList = new ArrayList<String>();
-        Game testGame = new Game("testGame", "Jason", "testGame", playerList, playerList,
+        Game testGame = new Game("testGame", "Jason", "testGame.jpg", playerList, playerList,
                 true, 100, 100, "PG");
         // UploadDialogInterface creates the dialog progress bar. Declared in FirebaseUploader
         uploadGame.addGame(testGame, test, new FirebaseUploader.UploadDialogInterface() {
