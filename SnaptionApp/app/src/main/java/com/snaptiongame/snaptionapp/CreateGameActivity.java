@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 
 import butterknife.BindView;
@@ -126,19 +127,24 @@ public class CreateGameActivity extends AppCompatActivity {
 
                 if (imageUri == null) {
                     //Notification to say "You must pick an image"
+                    System.out.println("You must pick an image");
                 }
                 else if (!radioPrivate.isChecked() && !radioPublic.isChecked()) {
                     //Notification to say "You must choose whether the game is public or private"
+                    System.out.println("You must choose whether the game is public or private");
                 }
                 else if (!radioAdult.isChecked() && !radioEveryone.isChecked()) {
                     //Notification to say "You must choose who the game is appropriate for"
+                    System.out.println("You must choose who the game is appropriate for");
+                }
+                else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
+                    //Notification to say "You must select a day in the future"
+                    System.out.println("You must select a day in the future");
                 }
                 else {
                     data = getImageFromUri(imageUri);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
-                    for (String i : categories) {
-                        System.out.println(i);
-                    }
+                    endDate = calendar.getTimeInMillis();
                     final Game game = new Game(gameId, "1", IMAGE_FOLDER + gameId,
                             new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
@@ -280,11 +286,13 @@ public class CreateGameActivity extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker arg0,
-                              int year, int month, int day) {
+                              int arg1, int arg2, int arg3) {
+            year = arg1;
+            month = arg2;
+            day = arg3;
 
             calendar.set(year, month, day);
             showDate(year, month + 1, day);
-
         }
     };
 
