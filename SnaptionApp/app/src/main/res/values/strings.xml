@@ -13,6 +13,9 @@
     <string name="game_public">Public</string>
     <string name="game_private">Private</string>
     <string name="public_or_private">Do you want the game public or private?</string>
+    <string name="maturity_rating">Who is this content appropriate for?</string>
+    <string name="game_adult">Adults</string>
+    <string name="game_everyone">Everyone</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

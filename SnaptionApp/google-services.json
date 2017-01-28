@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "917089676170-o2v12mijd6klihja7j46ncin0j3kictv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.snaptiongame.snaptionapp",
+            "certificate_hash": "3EB354CD83D276B1F88151333827FED8C1A9A563"
+          }
+        },
+        {
           "client_id": "917089676170-lrs7fmid3ihuqsi194qpikca135hlmns.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -40,15 +48,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "917089676170-cvl9abbrfmm607pp1e2o0h5uqdh1ga9a.apps.googleusercontent.com",
+              "client_id": "917089676170-k3rkp00eib280qk4sutrp4cthm3dklls.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "edu.calpoly.csc.2168.snapsquad.verticalprototype"
+                "bundle_id": "adf"
               }
+            },
+            {
+              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },
