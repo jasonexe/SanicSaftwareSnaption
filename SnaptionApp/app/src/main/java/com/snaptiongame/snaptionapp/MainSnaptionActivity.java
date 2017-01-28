@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp;
 
+import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -32,7 +34,7 @@ import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
 
-public class MainSnaptionActivity extends AppCompatActivity {
+public class MainSnaptionActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
     private CallbackManager mCallbackManager;
     private LoginManager loginManager;
 
@@ -99,12 +101,39 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
         //TODO replace this with a link to the createGame fragment once that's made
-        FirebaseUploader uploadGame = new FirebaseUploader(this, view);
-        byte[] test = new byte[1000000];
+        FirebaseUploader uploadGame = new FirebaseUploader();
+        byte[] test = new byte[10000000];
         List<String> playerList = new ArrayList<String>();
         Game testGame = new Game("testGame", "Jason", "testGame", playerList, playerList,
                 true, 100, 100, "PG");
-        uploadGame.addGame(testGame, test);
+        // UploadDialogInterface creates the dialog progress bar. Declared in FirebaseUploader
+        uploadGame.addGame(testGame, test, new FirebaseUploader.UploadDialogInterface() {
+            int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+                                        // IE 1000 = display with kilobytes
+
+            ProgressDialog loadingDialog = new ProgressDialog(MainSnaptionActivity.this);
+            @Override
+            public void onStartUpload(long maxBytes) {
+                loadingDialog.setIndeterminate(false);
+                loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                loadingDialog.setProgress(0);
+                loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+                loadingDialog.setMessage("Uploading photo");
+                loadingDialog.setMax((int) maxBytes/progressDivisor);
+                //Display progress dialog
+                loadingDialog.show();
+            }
+
+            @Override
+            public void onUploadProgress(long bytes) {
+                loadingDialog.setProgress((int) bytes/progressDivisor);
+            }
+
+            @Override
+            public void onUploadDone() {
+                loadingDialog.hide();
+            }
+        });
         Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
     }
@@ -130,6 +159,12 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onDismiss(DialogInterface dialogInterface) {
+        Snackbar.make(findViewById(R.id.drawer_layout), loginManager.getStatus(),Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
@@ -138,9 +173,15 @@ public class MainSnaptionActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_login) {
-            //create pop up for login Facebook or Google+
-            LoginDialog logDialog = new LoginDialog(this, loginManager);
-            logDialog.show();
+            if (!loginManager.isLoggedIn()) {
+                //create pop up for login Facebook or Google+
+                LoginDialog logDialog = new LoginDialog(this, loginManager);
+                logDialog.setOnDismissListener(this);
+                logDialog.show();
+            }
+            else {
+                onDismiss(null);
+            }
         }
 
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
@@ -156,10 +197,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        loginManager.handleOnActivityResult(requestCode, resultCode, data);
+
+        //if returning from google login attempt
         if (requestCode == GOOGLE_LOGIN_RC) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            loginManager.handleGoogleLoginResult(result);
+            if (result.isSuccess()) {
+                loginManager.handleGoogleLoginResult(result);
+            }
+        }
+        //if returning from facebook login attempt
+        else {
+            loginManager.handleFacebookLoginResult(requestCode, resultCode, data);
         }
     }
 }
