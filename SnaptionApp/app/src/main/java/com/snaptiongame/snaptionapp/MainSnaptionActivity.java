@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.DialogInterface;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 
@@ -19,14 +20,16 @@ import android.view.View;
 
 import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
-import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
-import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -98,6 +101,40 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
+        //TODO replace this with a link to the createGame fragment once that's made
+        FirebaseUploader uploadGame = new FirebaseUploader();
+        byte[] test = new byte[10000000];
+        List<String> playerList = new ArrayList<String>();
+        Game testGame = new Game("testGame", "Jason", "testGame", playerList, playerList,
+                true, 100, 100, "PG");
+        // UploadDialogInterface creates the dialog progress bar. Declared in FirebaseUploader
+        uploadGame.addGame(testGame, test, new FirebaseUploader.UploadDialogInterface() {
+            int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+                                        // IE 1000 = display with kilobytes
+
+            ProgressDialog loadingDialog = new ProgressDialog(MainSnaptionActivity.this);
+            @Override
+            public void onStartUpload(long maxBytes) {
+                loadingDialog.setIndeterminate(false);
+                loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                loadingDialog.setProgress(0);
+                loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+                loadingDialog.setMessage("Uploading photo");
+                loadingDialog.setMax((int) maxBytes/progressDivisor);
+                //Display progress dialog
+                loadingDialog.show();
+            }
+
+            @Override
+            public void onUploadProgress(long bytes) {
+                loadingDialog.setProgress((int) bytes/progressDivisor);
+            }
+
+            @Override
+            public void onUploadDone() {
+                loadingDialog.hide();
+            }
+        });
         Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
     }
