@@ -71,7 +71,7 @@ public class FirebaseTests {
         inputArr.add("Cards work");
         FirebaseAuth.getInstance().signOut();
         try {
-            Caption testCaption = new Caption("TestId", "TestGameId", "TestUserId", new Card("Whatevs"), inputArr);
+            Caption testCaption = new Caption("TestId", "TestGameId", new Card("Whatevs"), inputArr);
             assertTrue("User was allowed to submit a caption when not logged in", false);
         } catch (IllegalStateException e){
             assertTrue(true);

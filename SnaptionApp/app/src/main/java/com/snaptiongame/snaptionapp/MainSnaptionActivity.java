@@ -95,7 +95,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
-        loginManager = new LoginManager(this);
+        loginManager = new LoginManager(this, new FirebaseUploader());
     }
 
     @OnClick(R.id.fab)

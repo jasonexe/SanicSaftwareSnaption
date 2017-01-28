@@ -166,6 +166,12 @@ public class FirebaseUploader implements Uploader {
 
     @Override
     public void addUser(User user, byte[] photo) {
+        //upload user
+        uploadObject(usersPath + "/" + user.getId(), user);
+        //upload photo
+        //String photoPath = user.getImagePath().substring(0, user.getImagePath().lastIndexOf('/') + 1);
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+        ref.putBytes(photo);
 
     }
 
