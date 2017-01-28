@@ -88,7 +88,7 @@ public class FirebaseTests {
         String cardText = "%s! %s! I like ice cream";
         Card testCard = new Card(cardText);
         Caption testCaption = new Caption("TestId", "TestGameId", "Test user", testCard, inputArr);
-        assertEquals("Yay! Cards work! I like ice cream", testCaption.getCaptionText().toString());
+        assertEquals("Yay! Cards work! I like ice cream", testCaption.retrieveCaptionText().toString());
     }
 
     @Test
