@@ -36,7 +36,7 @@ import java.util.Observable;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 
 import org.apache.commons.io.IOUtils;
 
@@ -219,7 +219,7 @@ public class LoginManager extends Observable {
 
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            FirebaseUpload.uploadObject(usersFolder + id , user);
+            FirebaseUploader.uploadObject(usersFolder + id , user);
 
             //getting facebook photo
             if (facebookId != null) {
