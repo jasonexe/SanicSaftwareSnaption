@@ -76,5 +76,19 @@
                 android:text="@string/game_adult"/>
         </RadioGroup>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category"
+            android:id="@+id/category_text"
+            android:textSize="35dp"
+            android:textColor="@android:color/black" />
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/category_input"
+            android:inputType="text"/>
+
     </LinearLayout>
 </ScrollView>

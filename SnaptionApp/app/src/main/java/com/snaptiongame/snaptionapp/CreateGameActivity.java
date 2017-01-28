@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 
@@ -30,6 +31,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,6 +79,9 @@ public class CreateGameActivity extends AppCompatActivity {
     @BindView(R.id.radio_adult)
     protected RadioButton radioAdult;
 
+    @BindView(R.id.category_input)
+    protected EditText categoryInput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -116,6 +124,10 @@ public class CreateGameActivity extends AppCompatActivity {
                 }
                 else {
                     data = getImageFromUri(imageUri);
+                    categories = getCategoriesFromText(categoryInput.getText().toString());
+                    for (String i : categories) {
+                        System.out.println(i);
+                    }
                     final Game game = new Game(gameId, "1", IMAGE_FOLDER + gameId,
                             new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
@@ -210,5 +222,23 @@ public class CreateGameActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return data;
+    }
+
+    /**
+     * Takes a string of text, separates each word by comma, and removes any repeated words.
+     *
+     * @param text - The text to parse with comma delimiters
+     * @return A list of strings not containing repeats
+     */
+    private ArrayList<String> getCategoriesFromText(String text) {
+        text = text.toLowerCase();
+
+        String[] list = text.split(",");
+        for (int i = 0; i < list.length; i++) {
+            list[i] = list[i].trim();
+        }
+        ArrayList<String> categories = new ArrayList(new HashSet(Arrays.asList(list)));
+
+        return categories;
     }
 }

@@ -16,6 +16,7 @@
     <string name="maturity_rating">Who is this content appropriate for?</string>
     <string name="game_adult">Adults</string>
     <string name="game_everyone">Everyone</string>
+    <string name="category">What tags would you like to add? (Separate tags by comma)</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
