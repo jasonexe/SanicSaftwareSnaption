@@ -97,8 +97,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        Intent intent = new Intent(this, CreateGameActivity.class);
+        startActivity(intent);
     }
 
     @Override

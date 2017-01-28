@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/content_create_game"
-    tools:context="com.snaptiongame.snaptionapp.ui.wall.CreateGameFragment"
+    tools:context="com.snaptiongame.snaptionapp.CreateGameActivity"
     tools:showIn="@layout/activity_main_snaption">
 
     <ImageView android:id="@+id/imageview"
