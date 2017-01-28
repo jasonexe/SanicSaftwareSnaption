@@ -133,7 +133,7 @@ public class FirebaseUploader implements Uploader {
         // Upload photo to storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
-                .child(imagePath + "/" + game.getId());
+                .child(imagePath + "/" + game.getImagePath());
         UploadTask uploadTask = imageLoc.putBytes(photo);
         //Creating the progress dialog
         uploadCallback.onStartUpload(photo.length);
