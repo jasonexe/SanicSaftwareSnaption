@@ -43,6 +43,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     public static final String IMAGE_FOLDER = "images/";
     public static final String GAMES_PATH_REF = "games";
+    public static final int DATE_DIALOG_ID = 999;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -52,7 +53,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private String maturityRating;
     private boolean isPublic;
     private long endDate;
-    private DatePicker datePicker;
     private Calendar calendar;
     private int year, month, day;
 
@@ -86,7 +86,6 @@ public class CreateGameActivity extends AppCompatActivity {
     @BindView(R.id.button_set_date)
     protected Button buttonSetDate;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -107,7 +106,7 @@ public class CreateGameActivity extends AppCompatActivity {
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        showDate(year, month+1, day);
+        showDate(year, month + 1, day);
 
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -265,16 +264,12 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @SuppressWarnings("deprecation")
     public void setDate(View view) {
-        showDialog(999);
-        Toast.makeText(getApplicationContext(), "ca",
-                Toast.LENGTH_SHORT)
-                .show();
+        showDialog(DATE_DIALOG_ID);
     }
 
     @Override
     protected Dialog onCreateDialog(int id) {
-        // TODO Auto-generated method stub
-        if (id == 999) {
+        if (id == DATE_DIALOG_ID) {
             return new DatePickerDialog(this,
                     myDateListener, year, month, day);
         }
@@ -285,17 +280,16 @@ public class CreateGameActivity extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker arg0,
-                              int arg1, int arg2, int arg3) {
-            // TODO Auto-generated method stub
-            // arg1 = year
-            // arg2 = month
-            // arg3 = day
-            showDate(arg1, arg2+1, arg3);
+                              int year, int month, int day) {
+
+            calendar.set(year, month, day);
+            showDate(year, month + 1, day);
+
         }
     };
 
     private void showDate(int year, int month, int day) {
-        dateView.setText(new StringBuilder().append(day).append("/")
-                .append(month).append("/").append(year));
+        dateView.setText(new StringBuilder().append(month).append("/")
+                .append(day).append("/").append(year));
     }
 }

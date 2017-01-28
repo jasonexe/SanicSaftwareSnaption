@@ -25,13 +25,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="16dp"/>
 
-        <Button android:id="@+id/buttonUpload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/create_game"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -90,14 +83,6 @@
             android:id="@+id/category_input"
             android:inputType="text"/>
 
-        <Button
-            android:id="@+id/button_set_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="70dp"
-            android:onClick="setDate"
-            android:text="@string/date_button_set" />
-
         <TextView
             android:id="@+id/text_set_end_date"
             android:layout_width="wrap_content"
@@ -106,13 +91,29 @@
             android:textSize="35dp"
             android:textColor="@android:color/black" />
 
+        <Button
+            android:id="@+id/button_set_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="setDate"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/date_button_set" />
+
         <TextView
             android:id="@+id/text_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/date_selected"
             android:textSize="35dp"
+            android:layout_gravity="center_horizontal"
             android:textColor="@android:color/black" />
+
+        <Button android:id="@+id/buttonUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_game"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
 
     </LinearLayout>
 </ScrollView>
