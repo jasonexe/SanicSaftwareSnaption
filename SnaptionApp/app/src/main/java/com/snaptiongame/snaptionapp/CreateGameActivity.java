@@ -42,9 +42,9 @@ import butterknife.ButterKnife;
 
 public class CreateGameActivity extends AppCompatActivity {
 
-    public static final String IMAGE_FOLDER = "images/";
-    public static final String GAMES_PATH_REF = "games";
-    public static final int DATE_DIALOG_ID = 999;
+    private static final int DATE_DIALOG_ID = 999;
+    private static final String MATURE = "mature";
+    private static final String PG = "PG";
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -122,8 +122,6 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 byte[] data = null;
-                //Generate unique key for Games
-                final String gameId = uploader.getNewGameKey();
 
                 if (imageUri == null) {
                     //Notification to say "You must pick an image"
@@ -145,8 +143,10 @@ public class CreateGameActivity extends AppCompatActivity {
                     data = getImageFromUri(imageUri);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
-                    final Game game = new Game(gameId, "1", IMAGE_FOLDER + gameId,
-                            new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                    //Generate unique key for Games
+                    final String gameId = uploader.getNewGameKey();
+                    final Game game = new Game(gameId, "1", FirebaseUploader.imagePath + "/" + gameId,
+                        new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
                     //uploader.addGame(data, game); //Questions about interface parameter
                 }
@@ -174,7 +174,7 @@ public class CreateGameActivity extends AppCompatActivity {
             public void onClick(View view) {
                 System.out.println("Is radioEveryone checked? " + radioEveryone.isChecked());
                 System.out.println("Is radioEveryone checked? " + radioAdult.isChecked());
-                maturityRating = "E";
+                maturityRating = PG;
             }
         });
 
@@ -182,7 +182,7 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 System.out.println("Adult");
-                maturityRating = "M";
+                maturityRating = MATURE;
             }
         });
 

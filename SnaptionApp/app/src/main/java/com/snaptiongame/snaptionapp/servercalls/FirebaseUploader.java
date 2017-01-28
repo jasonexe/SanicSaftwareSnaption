@@ -133,7 +133,7 @@ public class FirebaseUploader implements Uploader {
         // Upload photo to storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
-                .child(imagePath + "/" + game.getId() + ".jpg");
+                .child(imagePath + "/" + game.getImagePath());
         UploadTask uploadTask = imageLoc.putBytes(photo);
         //Creating the progress dialog
         uploadCallback.onStartUpload(photo.length);
@@ -166,6 +166,12 @@ public class FirebaseUploader implements Uploader {
 
     @Override
     public void addUser(User user, byte[] photo) {
+        //upload user
+        uploadObject(usersPath + "/" + user.getId(), user);
+        //upload photo
+        //String photoPath = user.getImagePath().substring(0, user.getImagePath().lastIndexOf('/') + 1);
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+        ref.putBytes(photo);
 
     }
 

@@ -37,6 +37,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
 
@@ -49,12 +50,12 @@ public class LoginManager extends Observable {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
 
-    private final String usersFolder = "users/";
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
     private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
 
     private FirebaseAuth mAuth;
+    private Uploader uploader;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
     private AuthCallback mGoogleAuthCallback;
@@ -62,8 +63,9 @@ public class LoginManager extends Observable {
     private boolean isLoggedIn;
     private byte[] profilePhoto;
 
-    public LoginManager(FragmentActivity activity) {
+    public LoginManager(FragmentActivity activity, Uploader uploader) {
         this.activity = activity;
+        this.uploader = uploader;
         mAuth = FirebaseAuth.getInstance();
         //TODO: remove this sign out when sign out is implemented
         //this is just for testing purposes to show snackbar when already logged in
@@ -215,21 +217,17 @@ public class LoginManager extends Observable {
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             //TODO: fill this fields once we reach notifications and friends
-            String notificationId = null;
-
-            //create and upload User to Firebase
-            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            FirebaseUploader.uploadObject(usersFolder + id , user);
+            String notificationId = "";
 
             //getting facebook photo
             if (facebookId != null) {
                 downloadPhoto(String.format(facebookImageUrl, facebookId));
             }
-            //uploading profile picture to firebase
-            if (profilePhoto != null) {
-                StorageReference ref = FirebaseStorage.getInstance().getReference().child(imagePath);
-                ref.putBytes(profilePhoto);
-            }
+
+            //create and upload User to Firebase
+            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
+            uploader.addUser(user, profilePhoto);
+
         }
 
     }
