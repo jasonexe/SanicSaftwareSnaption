@@ -1,28 +1,24 @@
 package com.snaptiongame.snaptionapp;
 
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -32,9 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,6 +52,9 @@ public class CreateGameActivity extends AppCompatActivity {
     private String maturityRating;
     private boolean isPublic;
     private long endDate;
+    private DatePicker datePicker;
+    private Calendar calendar;
+    private int year, month, day;
 
     @BindView(R.id.buttonSelect)
     protected Button buttonSelect;
@@ -82,6 +80,13 @@ public class CreateGameActivity extends AppCompatActivity {
     @BindView(R.id.category_input)
     protected EditText categoryInput;
 
+    @BindView(R.id.text_date)
+    protected TextView dateView;
+
+    @BindView(R.id.button_set_date)
+    protected Button buttonSetDate;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -96,6 +101,13 @@ public class CreateGameActivity extends AppCompatActivity {
         }
 
         uploader = new FirebaseUploader();
+        calendar = Calendar.getInstance();
+
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        showDate(year, month+1, day);
 
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,6 +181,13 @@ public class CreateGameActivity extends AppCompatActivity {
             }
         });
 
+        buttonSetDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setDate(view);
+            }
+        });
+
     }
 
     @Override
@@ -228,7 +247,7 @@ public class CreateGameActivity extends AppCompatActivity {
      * Takes a string of text, separates each word by comma, and removes any repeated words.
      *
      * @param text - The text to parse with comma delimiters
-     * @return A list of strings not containing repeats
+     * @return A list of strings not containing repeats or empty strings
      */
     private ArrayList<String> getCategoriesFromText(String text) {
         text = text.toLowerCase();
@@ -237,8 +256,46 @@ public class CreateGameActivity extends AppCompatActivity {
         for (int i = 0; i < list.length; i++) {
             list[i] = list[i].trim();
         }
+        //Converts the array to a set and removes duplicate elements and converts back to a list
         ArrayList<String> categories = new ArrayList(new HashSet(Arrays.asList(list)));
+        categories.remove("");
 
         return categories;
+    }
+
+    @SuppressWarnings("deprecation")
+    public void setDate(View view) {
+        showDialog(999);
+        Toast.makeText(getApplicationContext(), "ca",
+                Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        // TODO Auto-generated method stub
+        if (id == 999) {
+            return new DatePickerDialog(this,
+                    myDateListener, year, month, day);
+        }
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener myDateListener = new
+        DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker arg0,
+                              int arg1, int arg2, int arg3) {
+            // TODO Auto-generated method stub
+            // arg1 = year
+            // arg2 = month
+            // arg3 = day
+            showDate(arg1, arg2+1, arg3);
+        }
+    };
+
+    private void showDate(int year, int month, int day) {
+        dateView.setText(new StringBuilder().append(day).append("/")
+                .append(month).append("/").append(year));
     }
 }
