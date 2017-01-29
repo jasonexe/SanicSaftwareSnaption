@@ -95,7 +95,6 @@
             android:id="@+id/button_set_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="setDate"
             android:layout_gravity="center_horizontal"
             android:text="@string/date_button_set" />
 
