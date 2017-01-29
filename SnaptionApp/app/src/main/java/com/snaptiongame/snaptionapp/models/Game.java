@@ -93,13 +93,9 @@ public class Game {
         captions = new HashMap<>();
         isOpen = true;
         judgerRating = 0;
-<<<<<<< HEAD
         creationDate = Calendar.getInstance().getTimeInMillis();
-=======
-        creationDate = new Date().getTime();
         winner = "";
         peoplesChoice = "";
->>>>>>> 12acdcc4e4f700678a7d2fcdb7e8a668297d0608
     }
 
     /**

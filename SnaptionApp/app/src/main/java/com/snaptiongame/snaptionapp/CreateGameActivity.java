@@ -2,6 +2,7 @@ package com.snaptiongame.snaptionapp;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -145,10 +146,36 @@ public class CreateGameActivity extends AppCompatActivity {
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
                     final String gameId = uploader.getNewGameKey();
-                    final Game game = new Game(gameId, "1", FirebaseUploader.imagePath + "/" + gameId,
+                    final Game game = new Game(gameId, "1", gameId + ".jpg",
                         new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
-                    //uploader.addGame(data, game); //Questions about interface parameter
+                    uploader.addGame(game, data, new FirebaseUploader.UploadDialogInterface() {
+                        int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+                        // IE 1000 = display with kilobytes
+
+                        ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
+                        @Override
+                        public void onStartUpload(long maxBytes) {
+                            loadingDialog.setIndeterminate(false);
+                            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                            loadingDialog.setProgress(0);
+                            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+                            loadingDialog.setMessage("Uploading photo");
+                            loadingDialog.setMax((int) maxBytes/progressDivisor);
+                            //Display progress dialog
+                            loadingDialog.show();
+                        }
+
+                        @Override
+                        public void onUploadProgress(long bytes) {
+                            loadingDialog.setProgress((int) bytes/progressDivisor);
+                        }
+
+                        @Override
+                        public void onUploadDone() {
+                            loadingDialog.hide();
+                        }
+                    });
                 }
             }
         });
