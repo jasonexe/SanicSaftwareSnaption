@@ -27,6 +27,8 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -108,11 +110,12 @@ public class CreateGameActivity extends AppCompatActivity {
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        showDate(year, month + 1, day);
+        showDate();
 
         buttonSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //Gets the content from the imageview
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
@@ -125,22 +128,25 @@ public class CreateGameActivity extends AppCompatActivity {
                 byte[] data = null;
 
                 if (imageUri == null) {
-                    //Notification to say "You must pick an image"
-                    System.out.println("You must pick an image");
+                    Toast.makeText(CreateGameActivity.this, "You must pick an image.",
+                            Toast.LENGTH_LONG).show();
                 }
                 else if (!radioPrivate.isChecked() && !radioPublic.isChecked()) {
-                    //Notification to say "You must choose whether the game is public or private"
-                    System.out.println("You must choose whether the game is public or private");
+                    Toast.makeText(CreateGameActivity.this,
+                            "You must choose whether the game is public or private.",
+                            Toast.LENGTH_LONG).show();
                 }
                 else if (!radioAdult.isChecked() && !radioEveryone.isChecked()) {
-                    //Notification to say "You must choose who the game is appropriate for"
-                    System.out.println("You must choose who the game is appropriate for");
+                    Toast.makeText(CreateGameActivity.this,
+                            "You must choose who the game is appropriate for.",
+                            Toast.LENGTH_LONG).show();
                 }
                 else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
-                    //Notification to say "You must select a day in the future"
-                    System.out.println("You must select a day in the future");
+                    Toast.makeText(CreateGameActivity.this, "You must select a day in the future.",
+                            Toast.LENGTH_LONG).show();
                 }
                 else {
+                    //Gets data from the views, creates a game, and uploads it to the server
                     data = getImageFromUri(imageUri);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
@@ -183,7 +189,6 @@ public class CreateGameActivity extends AppCompatActivity {
         radioPrivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Private");
                 isPublic = false;
             }
         });
@@ -191,7 +196,6 @@ public class CreateGameActivity extends AppCompatActivity {
         radioPublic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Public");
                 isPublic = true;
             }
         });
@@ -199,8 +203,6 @@ public class CreateGameActivity extends AppCompatActivity {
         radioEveryone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Is radioEveryone checked? " + radioEveryone.isChecked());
-                System.out.println("Is radioEveryone checked? " + radioAdult.isChecked());
                 maturityRating = PG;
             }
         });
@@ -208,7 +210,6 @@ public class CreateGameActivity extends AppCompatActivity {
         radioAdult.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Adult");
                 maturityRating = MATURE;
             }
         });
@@ -295,20 +296,6 @@ public class CreateGameActivity extends AppCompatActivity {
         return categories;
     }
 
-    @SuppressWarnings("deprecation")
-    public void setDate(View view) {
-        showDialog(DATE_DIALOG_ID);
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        if (id == DATE_DIALOG_ID) {
-            return new DatePickerDialog(this,
-                    myDateListener, year, month, day);
-        }
-        return null;
-    }
-
     private DatePickerDialog.OnDateSetListener myDateListener = new
         DatePickerDialog.OnDateSetListener() {
         @Override
@@ -319,12 +306,15 @@ public class CreateGameActivity extends AppCompatActivity {
             day = arg3;
 
             calendar.set(year, month, day);
-            showDate(year, month + 1, day);
+            showDate();
         }
     };
 
-    private void showDate(int year, int month, int day) {
-        dateView.setText(new StringBuilder().append(month).append("/")
-                .append(day).append("/").append(year));
+    public void setDate(View view) {
+        new DatePickerDialog(this, myDateListener, year, month, day).show();
+    }
+
+    private void showDate() {
+        dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
     }
 }
