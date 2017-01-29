@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp.models;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +93,7 @@ public class Game {
         captions = new HashMap<>();
         isOpen = true;
         judgerRating = 0;
-        creationDate = new Date().getTime();
+        creationDate = Calendar.getInstance().getTimeInMillis();
         winner = "";
         peoplesChoice = "";
     }
