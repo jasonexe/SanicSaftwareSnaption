@@ -1,6 +1,9 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.CreateGameActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.List;
 
@@ -19,6 +24,7 @@ import java.util.List;
  */
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
+    public static final String EXTRA_MESSAGE = "fromCurrentUri";
     private static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private List<Game> items;
 
@@ -50,6 +56,30 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
+
+        final String imagePath = game.getImagePath();
+
+        holder.createFromExisting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // If they want to create a game from this one, start the create game intent
+                // with this game's image path
+                FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
+                    @Override
+                    public void onData(Uri data) {
+                        Context buttonContext = holder.createFromExisting.getContext();
+                        Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
+                        createGameIntent.putExtra(EXTRA_MESSAGE, data);
+                        buttonContext.startActivity(createGameIntent);
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return Uri.class;
+                    }
+                });
+            }
+        });
 
 
         // TODO add the actual captioner name and photo

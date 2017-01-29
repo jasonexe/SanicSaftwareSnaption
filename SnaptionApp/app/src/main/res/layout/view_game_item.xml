@@ -38,4 +38,11 @@
         android:layout_marginBottom="4dp"
         android:layout_below="@+id/photo"
         android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/create_from_existing_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/captioner_text"
+        android:text="Create a game with this photo"/>
 </RelativeLayout>

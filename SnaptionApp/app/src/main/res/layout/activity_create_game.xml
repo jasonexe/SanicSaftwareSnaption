@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/content_create_game"
+        tools:context="com.snaptiongame.snaptionapp.CreateGameActivity"
+        tools:showIn="@layout/activity_main_snaption">
+
+        <ImageView android:id="@+id/imageview"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorBlack"/>
+
+        <Button android:id="@+id/buttonSelect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/select_image"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/public_or_private"
+            android:id="@+id/public_or_private_text"
+            android:textSize="35dp"
+            android:textColor="@android:color/black" />
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RadioButton android:id="@+id/radio_public"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/game_public"/>
+            <RadioButton android:id="@+id/radio_private"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/game_private"/>
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/maturity_rating"
+            android:id="@+id/maturity_rating_text"
+            android:textSize="35dp"
+            android:textColor="@android:color/black" />
+
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <RadioButton android:id="@+id/radio_everyone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/game_everyone"/>
+            <RadioButton android:id="@+id/radio_adult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/game_adult"/>
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category"
+            android:id="@+id/category_text"
+            android:textSize="35dp"
+            android:textColor="@android:color/black" />
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/category_input"
+            android:inputType="text"/>
+
+        <TextView
+            android:id="@+id/text_set_end_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/set_end_date"
+            android:textSize="35dp"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/button_set_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="setDate"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/date_button_set" />
+
+        <TextView
+            android:id="@+id/text_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/date_selected"
+            android:textSize="35dp"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black" />
+
+        <Button android:id="@+id/buttonUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_game"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+
+    </LinearLayout>
+</ScrollView>
