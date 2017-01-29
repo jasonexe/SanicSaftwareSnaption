@@ -2,6 +2,7 @@ package com.snaptiongame.snaptionapp;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +33,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 
 import butterknife.BindView;
@@ -47,9 +49,9 @@ import static android.R.attr.data;
 
 public class CreateGameActivity extends AppCompatActivity {
 
-    public static final String IMAGE_FOLDER = "images/";
-    public static final String GAMES_PATH_REF = "games";
-    public static final int DATE_DIALOG_ID = 999;
+    private static final int DATE_DIALOG_ID = 999;
+    private static final String MATURE = "mature";
+    private static final String PG = "PG";
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -61,6 +63,9 @@ public class CreateGameActivity extends AppCompatActivity {
     private long endDate;
     private Calendar calendar;
     private int year, month, day;
+
+    private boolean alreadyExisting; //True if user is creating this from an exisitng game
+    private String existingPhotoPath;
 
     @BindView(R.id.buttonSelect)
     protected Button buttonSelect;
@@ -98,10 +103,13 @@ public class CreateGameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_game);
         ButterKnife.bind(this);
+        alreadyExisting = false;
 
         Intent intent = getIntent();
         Uri uri = intent.getParcelableExtra(WallViewAdapter.EXTRA_MESSAGE);
         if(uri != null) {
+            alreadyExisting = true;
+            existingPhotoPath = intent.getStringExtra(WallViewAdapter.PHOTO_PATH);
             imageUri = uri;
             setImageFromUrl(uri);
         }
@@ -134,28 +142,40 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 byte[] data = null;
-                //Generate unique key for Games
-                final String gameId = uploader.getNewGameKey();
 
                 if (imageUri == null) {
                     //Notification to say "You must pick an image"
+                    System.out.println("You must pick an image");
                 }
                 else if (!radioPrivate.isChecked() && !radioPublic.isChecked()) {
                     //Notification to say "You must choose whether the game is public or private"
+                    System.out.println("You must choose whether the game is public or private");
                 }
                 else if (!radioAdult.isChecked() && !radioEveryone.isChecked()) {
                     //Notification to say "You must choose who the game is appropriate for"
+                    System.out.println("You must choose who the game is appropriate for");
+                }
+                else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
+                    //Notification to say "You must select a day in the future"
+                    System.out.println("You must select a day in the future");
                 }
                 else {
-                    data = getImageFromUri(imageUri);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
-                    for (String i : categories) {
-                        System.out.println(i);
+                    endDate = calendar.getTimeInMillis();
+                    //Generate unique key for Games
+                    String gameId = uploader.getNewGameKey();
+                    if(!alreadyExisting) {
+                        data = getImageFromUri(imageUri);
+                        //TODO change 1 to the actual userID
+                        Game game = new Game(gameId, "1", gameId + ".jpg",
+                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                        uploader.addGame(game, data, new UploaderInterface());
+                    } else {
+                        // If the photo does exist, addGame but without the data
+                        Game game = new Game(gameId, "1", existingPhotoPath,
+                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                        uploader.addGame(game);
                     }
-                    final Game game = new Game(gameId, "1", IMAGE_FOLDER + gameId,
-                            new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
-
-                    //uploader.addGame(data, game); //Questions about interface parameter
                 }
             }
         });
@@ -181,7 +201,7 @@ public class CreateGameActivity extends AppCompatActivity {
             public void onClick(View view) {
                 System.out.println("Is radioEveryone checked? " + radioEveryone.isChecked());
                 System.out.println("Is radioEveryone checked? " + radioAdult.isChecked());
-                maturityRating = "E";
+                maturityRating = PG;
             }
         });
 
@@ -189,7 +209,7 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 System.out.println("Adult");
-                maturityRating = "M";
+                maturityRating = MATURE;
             }
         });
 
@@ -199,6 +219,35 @@ public class CreateGameActivity extends AppCompatActivity {
                 setDate(view);
             }
         });
+
+    }
+
+    class UploaderInterface implements  FirebaseUploader.UploadDialogInterface {
+        int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+        // IE 1000 = display with kilobytes
+
+        ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
+        @Override
+        public void onStartUpload(long maxBytes) {
+            loadingDialog.setIndeterminate(false);
+            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            loadingDialog.setProgress(0);
+            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+            loadingDialog.setMessage("Uploading photo");
+            loadingDialog.setMax((int) maxBytes/progressDivisor);
+            //Display progress dialog
+            loadingDialog.show();
+        }
+
+        @Override
+        public void onUploadProgress(long bytes) {
+            loadingDialog.setProgress((int) bytes/progressDivisor);
+        }
+
+        @Override
+        public void onUploadDone() {
+            loadingDialog.hide();
+        }
 
     }
 
@@ -217,6 +266,7 @@ public class CreateGameActivity extends AppCompatActivity {
     // Sets the image in the imageview
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        alreadyExisting = false;
         imageUri = data.getData();
         try {
             InputStream stream = getContentResolver().openInputStream(imageUri);
@@ -298,11 +348,13 @@ public class CreateGameActivity extends AppCompatActivity {
         DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker arg0,
-                              int year, int month, int day) {
+                              int arg1, int arg2, int arg3) {
+            year = arg1;
+            month = arg2;
+            day = arg3;
 
             calendar.set(year, month, day);
             showDate(year, month + 1, day);
-
         }
     };
 

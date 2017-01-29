@@ -44,5 +44,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/captioner_text"
-        android:text="Create a game with this photo"/>
+        android:text="Create game with this photo"
+        android:fontFamily="sans-serif-medium"
+        android:textAllCaps="false"
+        android:textSize="12sp" />
 </RelativeLayout>

@@ -25,6 +25,7 @@ import java.util.List;
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
+    public static final String PHOTO_PATH = "currentPhotoPath";
     private static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private List<Game> items;
 
@@ -70,6 +71,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                         Context buttonContext = holder.createFromExisting.getContext();
                         Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
                         createGameIntent.putExtra(EXTRA_MESSAGE, data);
+                        createGameIntent.putExtra(PHOTO_PATH, imagePath);
                         buttonContext.startActivity(createGameIntent);
                     }
 

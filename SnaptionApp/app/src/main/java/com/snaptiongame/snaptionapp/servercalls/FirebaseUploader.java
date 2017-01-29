@@ -33,7 +33,7 @@ import java.util.List;
 
 public class FirebaseUploader implements Uploader {
 
-    private static final String usersPath = "usersSnaption";
+    private static final String usersPath = "users";
     private static final String captionPath = "captions";
     private static final String gamesPath = "games";
     public static final String imagePath = "images";
@@ -77,6 +77,14 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         DatabaseReference gamesRef = database.getReference(gamesPath
                 + "/" + gameId);
+        gamesRef.setValue(game);
+    }
+
+    @Override
+    public void addGame(Game game) {
+        addGameToUserTable(game);
+        String gameId = game.getId();
+        DatabaseReference gamesRef = database.getReference(gamesPath + "/" + gameId);
         gamesRef.setValue(game);
     }
 

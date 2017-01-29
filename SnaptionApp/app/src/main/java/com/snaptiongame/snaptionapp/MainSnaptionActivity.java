@@ -105,8 +105,10 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         startActivity(intent);
 
         //TODO replace this with a link to the createGame fragment once that's made
+
         /*FirebaseUploader uploadGame = new FirebaseUploader();
         byte[] test = new byte[10000000];
+
         List<String> playerList = new ArrayList<String>();
         Game testGame = new Game("testGame", "Jason", "testGame.jpg", playerList, playerList,
                 true, 100, 100, "PG");
