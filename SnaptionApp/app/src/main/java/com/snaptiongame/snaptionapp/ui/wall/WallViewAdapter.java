@@ -59,7 +59,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
 
         final String imagePath = game.getImagePath();
-
+        // TODO add a confirmation dialog that they want to create the new game??
         holder.createFromExisting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

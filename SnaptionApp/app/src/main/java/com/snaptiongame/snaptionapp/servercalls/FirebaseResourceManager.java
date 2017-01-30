@@ -168,6 +168,8 @@ public class FirebaseResourceManager {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
+                Log.v("URI Error:", "Something went wrong when trying to get " +
+                        "image URL from Firebase");
             }
         });
     }

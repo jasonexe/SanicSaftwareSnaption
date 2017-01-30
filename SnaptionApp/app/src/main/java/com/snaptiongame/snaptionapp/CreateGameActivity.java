@@ -174,9 +174,10 @@ public class CreateGameActivity extends AppCompatActivity {
                         //TODO change 1 to the actual userID
                         Game game = new Game(gameId, "1", gameId + ".jpg",
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
-                        uploader.addGame(game, data, new UploaderInterface());
+                        uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
+                        // TODO change 1 to the actual userID
                         Game game = new Game(gameId, "1", existingPhotoPath,
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
@@ -222,7 +223,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     }
 
-    class UploaderInterface implements  FirebaseUploader.UploadDialogInterface {
+    class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
         int progressDivisor = 1000; // This converts from bytes to whatever units you want.
         // IE 1000 = display with kilobytes
 
@@ -246,7 +247,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         @Override
         public void onUploadDone() {
-            loadingDialog.hide();
+            loadingDialog.dismiss();
         }
 
     }
@@ -270,11 +271,12 @@ public class CreateGameActivity extends AppCompatActivity {
 
         try {
             imageUri = data.getData();
-            InputStream stream = getContentResolver().openInputStream(data.getData());
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-            imageView.setImageBitmap(bitmap);
-            imageView.setBackground(null);
+            setImageFromUrl(imageUri);
+//            InputStream stream = getContentResolver().openInputStream(data.getData());
+//            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+//            stream.close();
+//            imageView.setImageBitmap(bitmap);
+//            imageView.setBackground(null);
         } catch (Exception e) {
             e.printStackTrace();
         }

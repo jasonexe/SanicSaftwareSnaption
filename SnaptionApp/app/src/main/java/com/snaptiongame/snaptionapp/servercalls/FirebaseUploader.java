@@ -69,20 +69,14 @@ public class FirebaseUploader implements Uploader {
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
         //TODO notify invited players
         uploadPhoto(game, photo, uploadCallback);
-
-        // Add gameId to user's gamesList
-        addGameToUserTable(game);
-
-        // Add game object to games table
-        String gameId = game.getId();
-        DatabaseReference gamesRef = database.getReference(gamesPath
-                + "/" + gameId);
-        gamesRef.setValue(game);
+        addGame(game);
     }
 
     @Override
     public void addGame(Game game) {
+        // Add gameId to user's gamesList
         addGameToUserTable(game);
+        // Add game object to games table
         String gameId = game.getId();
         DatabaseReference gamesRef = database.getReference(gamesPath + "/" + gameId);
         gamesRef.setValue(game);
