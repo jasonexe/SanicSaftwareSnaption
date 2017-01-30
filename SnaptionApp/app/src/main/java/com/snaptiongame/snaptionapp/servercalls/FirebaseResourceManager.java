@@ -98,7 +98,7 @@ public class FirebaseResourceManager {
     public void retrieveSingleWithUpdates(String path, final ResourceListener listener) {
         // if the FirebaseResourceManager is already being used to listen to the db, remove the
         // previous listener
-        removeListener();
+        //removeListener();
 
         databaseReference = database.getReference(path);
         valueEventListener = new ValueEventListener() {

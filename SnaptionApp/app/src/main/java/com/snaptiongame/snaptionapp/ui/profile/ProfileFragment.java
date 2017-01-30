@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
@@ -50,6 +51,8 @@ public class ProfileFragment extends Fragment {
 
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
+    final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+
     ResourceListener gameListener = new ResourceListener() {
         @Override
         public void onData(Object data) {
@@ -72,7 +75,6 @@ public class ProfileFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
-        final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         gameListView.setLayoutManager(gameViewManager);
         gameAdapter = new ProfileGamesAdapter(new ArrayList<Game>());
         gameListView.setAdapter(gameAdapter);
@@ -94,7 +96,7 @@ public class ProfileFragment extends Fragment {
 
                     }
                     //close the listener
-                    firebaseResourceManager.removeListener();
+                    //firebaseResourceManager.removeListener();
                 }
 
                 @Override
@@ -111,12 +113,10 @@ public class ProfileFragment extends Fragment {
         List<String> gameIds = user.getGames();
 
         if (gameIds != null) {
-            //get resourceManager to get games
-            FirebaseResourceManager resourceManager = new FirebaseResourceManager();
             //for each gameId in user's game list
             for (String gameId : gameIds) {
-                resourceManager.retrieveSingleWithUpdates("games/" + gameId, gameListener);
-                resourceManager.removeListener();
+                firebaseResourceManager.retrieveSingleWithUpdates("games/" + gameId, gameListener);
+                //resourceManager.removeListener();
             }
         }
 

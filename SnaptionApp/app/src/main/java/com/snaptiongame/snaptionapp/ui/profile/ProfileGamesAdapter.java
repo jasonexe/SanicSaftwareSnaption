@@ -36,7 +36,8 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
 
     @Override
     public void onBindViewHolder(final ProfileGameViewHolder holder, int position) {
-        Game game = games.get(position);
+        //get last item and show it first
+        Game game = games.get(games.size() - 1 - position);
         FirebaseResourceManager.loadGameImageIntoView(game.getImagePath(), holder.photo);
 
         if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
