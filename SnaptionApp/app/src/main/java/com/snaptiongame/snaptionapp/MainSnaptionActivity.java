@@ -66,7 +66,6 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                                 new WallFragment()).commit();
                         break;
                     case R.id.profile_item:
-                        fab.hide();
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
                         break;

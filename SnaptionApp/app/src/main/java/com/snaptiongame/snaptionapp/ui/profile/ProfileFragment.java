@@ -29,6 +29,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -47,14 +48,29 @@ public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_games_list)
     protected RecyclerView gameListView;
 
+    private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
+    ResourceListener gameListener = new ResourceListener() {
+        @Override
+        public void onData(Object data) {
+            if (data instanceof Game) {
+                gameAdapter.addGame((Game)data);
+            }
+        }
+
+        @Override
+        public Class getDataType() {
+            return Game.class;
+        }
+    };
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
+        //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         gameListView.setLayoutManager(gameViewManager);
@@ -64,11 +80,10 @@ public class ProfileFragment extends Fragment {
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleWithUpdates(firebaseResourceManager.getUserPath(), new ResourceListener() {
+            firebaseResourceManager.retrieveSingleWithUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener() {
                 @Override
                 public void onData(Object data) {
-                    if (data instanceof User)
-                    {
+                    if (data instanceof User) {
                         User user = (User)data;
                         userName.setText(user.getDisplayName());
                         FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
@@ -96,26 +111,21 @@ public class ProfileFragment extends Fragment {
         List<String> gameIds = user.getGames();
 
         if (gameIds != null) {
-            ResourceListener gameListener = new ResourceListener() {
-                @Override
-                public void onData(Object data) {
-                    if (data instanceof Game) {
-                        gameAdapter.addGame((Game)data);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Game.class;
-                }
-            };
             //get resourceManager to get games
-            GameResourceManager resourceManager = new FirebaseGameResourceManager(0, null);
+            FirebaseResourceManager resourceManager = new FirebaseResourceManager();
+            //for each gameId in user's game list
             for (String gameId : gameIds) {
-                resourceManager.retrieveGameById(gameId, gameListener);
+                resourceManager.retrieveSingleWithUpdates("games/" + gameId, gameListener);
+                resourceManager.removeListener();
             }
         }
 
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 }

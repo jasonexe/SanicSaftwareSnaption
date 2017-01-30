@@ -43,7 +43,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
     public void retrieveGameById(String gameId, final ResourceListener<Game> gameListener) {
         DatabaseReference game = database.getReference(GAME_TABLE).child(gameId);
-
+        //if game exists in database
         if (game != null) {
             game.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

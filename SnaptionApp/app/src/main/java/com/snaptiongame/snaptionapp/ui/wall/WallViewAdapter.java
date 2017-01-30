@@ -19,7 +19,7 @@ import java.util.List;
  */
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
-    private static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
+    public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private List<Game> items;
 
     public WallViewAdapter(List<Game> items) {
@@ -50,7 +50,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
-
 
         // TODO add the actual captioner name and photo
         holder.captionerText.setText("First Last");

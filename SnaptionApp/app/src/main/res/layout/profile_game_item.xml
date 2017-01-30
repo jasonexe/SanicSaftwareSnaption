@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="wrap_content"
@@ -8,8 +8,7 @@
     <ImageView
         android:id="@+id/photo"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:layout_marginBottom="4dp"
         android:adjustViewBounds="true"
         android:background="@drawable/rounded_corners" />
@@ -45,10 +44,6 @@
             android:layout_marginBottom="4dp"
             android:textSize="16sp"
             tools:text="This is a caption booya!"/>
-
-
-
-
     </RelativeLayout> -->
 
-</LinearLayout>
+</RelativeLayout>
