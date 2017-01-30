@@ -181,6 +181,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         Game game = new Game(gameId, "1", existingPhotoPath,
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
+                        backToMain();
                     }
                 }
             }
@@ -248,8 +249,13 @@ public class CreateGameActivity extends AppCompatActivity {
         @Override
         public void onUploadDone() {
             loadingDialog.dismiss();
+            backToMain();
         }
+    }
 
+    private void backToMain() {
+        Intent intent = new Intent(CreateGameActivity.this, MainSnaptionActivity.class);
+        startActivity(intent);
     }
 
     @Override
