@@ -20,14 +20,17 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +41,9 @@ import java.util.HashSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.R.attr.bitmap;
+import static android.R.attr.data;
 
 
 /**
@@ -60,6 +66,9 @@ public class CreateGameActivity extends AppCompatActivity {
     private long endDate;
     private Calendar calendar;
     private int year, month, day;
+
+    private boolean alreadyExisting; //True if user is creating this from an exisitng game
+    private String existingPhotoPath;
 
     @BindView(R.id.buttonSelect)
     protected Button buttonSelect;
@@ -97,6 +106,16 @@ public class CreateGameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_game);
         ButterKnife.bind(this);
+        alreadyExisting = false;
+
+        Intent intent = getIntent();
+        Uri uri = intent.getParcelableExtra(WallViewAdapter.EXTRA_MESSAGE);
+        if(uri != null) {
+            alreadyExisting = true;
+            existingPhotoPath = intent.getStringExtra(WallViewAdapter.PHOTO_PATH);
+            imageUri = uri;
+            setImageFromUrl(uri);
+        }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -147,42 +166,25 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
-                    //Gets data from the views, creates a game, and uploads it to the server
-                    data = getImageFromUri(imageUri);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
-                    final String gameId = uploader.getNewGameKey();
-                    final Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                        new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
-                    uploader.addGame(game, data, new FirebaseUploader.UploadDialogInterface() {
-                        int progressDivisor = 1000; // This converts from bytes to whatever units you want.
-                        // IE 1000 = display with kilobytes
-
-                        ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
-                        @Override
-                        public void onStartUpload(long maxBytes) {
-                            loadingDialog.setIndeterminate(false);
-                            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                            loadingDialog.setProgress(0);
-                            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
-                            loadingDialog.setMessage("Uploading photo");
-                            loadingDialog.setMax((int) maxBytes/progressDivisor);
-                            //Display progress dialog
-                            loadingDialog.show();
-                        }
-
-                        @Override
-                        public void onUploadProgress(long bytes) {
-                            loadingDialog.setProgress((int) bytes/progressDivisor);
-                        }
-
-                        @Override
-                        public void onUploadDone() {
-                            loadingDialog.hide();
-                        }
-                    });
+                    String gameId = uploader.getNewGameKey();
+                    if(!alreadyExisting) {
+                        data = getImageFromUri(imageUri);
+                        //TODO change 1 to the actual userID
+                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
+                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                        uploader.addGame(game, data, new UploaderDialog());
+                    } else {
+                        // If the photo does exist, addGame but without the data
+                        // TODO change 1 to the actual userID
+                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
+                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                        uploader.addGame(game);
+                        backToMain();
+                    }
                 }
             }
         });
@@ -224,6 +226,40 @@ public class CreateGameActivity extends AppCompatActivity {
 
     }
 
+    class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
+        int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+        // IE 1000 = display with kilobytes
+
+        ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
+        @Override
+        public void onStartUpload(long maxBytes) {
+            loadingDialog.setIndeterminate(false);
+            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            loadingDialog.setProgress(0);
+            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+            loadingDialog.setMessage("Uploading photo");
+            loadingDialog.setMax((int) maxBytes/progressDivisor);
+            //Display progress dialog
+            loadingDialog.show();
+        }
+
+        @Override
+        public void onUploadProgress(long bytes) {
+            loadingDialog.setProgress((int) bytes/progressDivisor);
+        }
+
+        @Override
+        public void onUploadDone() {
+            loadingDialog.dismiss();
+            backToMain();
+        }
+    }
+
+    private void backToMain() {
+        Intent intent = new Intent(CreateGameActivity.this, MainSnaptionActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
@@ -239,17 +275,20 @@ public class CreateGameActivity extends AppCompatActivity {
     // Sets the image in the imageview
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        alreadyExisting = false;
 
         try {
             imageUri = data.getData();
-            InputStream stream = getContentResolver().openInputStream(data.getData());
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-            imageView.setImageBitmap(bitmap);
-            imageView.setBackground(null);
+            setImageFromUrl(imageUri);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    private void setImageFromUrl(Uri uri) {
+        Glide.with(CreateGameActivity.this).load(uri).into(imageView);
+        imageView.setBackground(null);
     }
 
     /**

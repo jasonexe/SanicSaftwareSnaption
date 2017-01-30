@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -11,6 +13,8 @@ import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.google.android.gms.internal.zzs.TAG;
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 public class FirebaseResourceManager {
     private static final String GAME_IMAGE_DIRECTORY = "images/";
@@ -215,5 +220,21 @@ public class FirebaseResourceManager {
                     }
                 })
                 .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+    }
+
+    public static void getImageURI(String imagePath, final ResourceListener<Uri> pathListener) {
+        storage.child(GAME_IMAGE_DIRECTORY + "/" + imagePath).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                pathListener.onData(uri);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle any errors
+                Log.v("URI Error:", "Something went wrong when trying to get " +
+                        "image URL from Firebase");
+            }
+        });
     }
 }

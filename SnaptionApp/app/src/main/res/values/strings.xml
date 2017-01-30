@@ -20,6 +20,8 @@
     <string name="date_selected"></string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
+    <string name="games_created">Games:</string>
+    <string name="captions_created">Captions:</string>
 
 
     <!--Accessibility strings-->

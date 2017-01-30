@@ -25,6 +25,12 @@ public interface Uploader {
                         FirebaseUploader.UploadDialogInterface uploadCallback);
 
     /**
+     * Responsible for uploading a game whose photo is already in storage.
+     * @param game Game object with fields filled in
+     */
+    public void addGame(Game game);
+
+    /**
      * Create a new key from backend to use as a Game's identity
      * @return a string representing a key so that it can be found later
      */
