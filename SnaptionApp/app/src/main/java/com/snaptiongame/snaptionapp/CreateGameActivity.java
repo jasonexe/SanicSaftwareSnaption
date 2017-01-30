@@ -272,11 +272,6 @@ public class CreateGameActivity extends AppCompatActivity {
         try {
             imageUri = data.getData();
             setImageFromUrl(imageUri);
-//            InputStream stream = getContentResolver().openInputStream(data.getData());
-//            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-//            stream.close();
-//            imageView.setImageBitmap(bitmap);
-//            imageView.setBackground(null);
         } catch (Exception e) {
             e.printStackTrace();
         }
