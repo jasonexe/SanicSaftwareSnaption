@@ -106,9 +106,15 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
+
+        Intent intent = new Intent(this, CreateGameActivity.class);
+        startActivity(intent);
+
         //TODO replace this with a link to the createGame fragment once that's made
-        FirebaseUploader uploadGame = new FirebaseUploader();
-        byte[] test = new byte[1000000];
+
+        /*FirebaseUploader uploadGame = new FirebaseUploader();
+        byte[] test = new byte[10000000];
+
         List<String> playerList = new ArrayList<String>();
         Game testGame = new Game("testGame", "Jason", "testGame.jpg", playerList, playerList,
                 true, 100, 100, "PG");
@@ -140,8 +146,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                 loadingDialog.hide();
             }
         });
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        */
     }
 
     @Override
