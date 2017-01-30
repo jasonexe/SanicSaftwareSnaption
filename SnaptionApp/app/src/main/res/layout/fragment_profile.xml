@@ -149,9 +149,7 @@
             android:layout_height="wrap_content"
             android:text="Captions Created"
             android:background="@color/colorPrimary"
-            android:textColor="#FFFFFF"/>
-
-
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 

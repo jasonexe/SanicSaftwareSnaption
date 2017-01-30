@@ -37,6 +37,7 @@ import butterknife.Unbinder;
  */
 public class ProfileFragment extends Fragment {
 
+    private static final String GAME_DIRECTORY = "games";
 
     @BindView(R.id.profile_picture)
     public ImageView profile;
@@ -52,12 +53,10 @@ public class ProfileFragment extends Fragment {
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
-    private ResourceListener gameListener = new ResourceListener() {
+    private ResourceListener gameListener = new ResourceListener<Game>() {
         @Override
-        public void onData(Object data) {
-            if (data instanceof Game) {
-                gameAdapter.addGame((Game)data);
-            }
+        public void onData(Game data) {
+            gameAdapter.addGame((Game)data);
         }
 
         @Override
@@ -81,20 +80,15 @@ public class ProfileFragment extends Fragment {
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener() {
+            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
-                public void onData(Object data) {
-                    if (data instanceof User) {
-                        User user = (User)data;
-                        userName.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
-                        gamesCreated.setText(Integer.toString(user.retrieveGameCount()));
-                        captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
-                        //get the games based on list of games in user
-                        getUserGames(user);
-
-                    }
-                    //close the listener
+                public void onData(User user) {
+                    userName.setText(user.getDisplayName());
+                    FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
+                    gamesCreated.setText(Integer.toString(user.retrieveGameCount()));
+                    captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
+                    //get the games based on list of games in user
+                    getUserGames(user);
                 }
 
                 @Override
@@ -113,7 +107,7 @@ public class ProfileFragment extends Fragment {
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds) {
-                firebaseResourceManager.retrieveSingleNoUpdates("games/" + gameId, gameListener);
+                firebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
             }
         }
 
