@@ -19,16 +19,18 @@ public class User {
     private Map<String, Caption> captions;
     private String notificationId;
     private String facebookId;
+    private String imagePath;
 
     //needed for firebase compatibility
     public User() {}
 
-    public User(String id, String email, String displayName, String notificationId, String facebookId) {
+    public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
         this.notificationId = notificationId;
         this.facebookId = facebookId;
+        this.imagePath = imagePath;
 
         friends = new ArrayList<>();
         games = new ArrayList<>();
@@ -36,12 +38,14 @@ public class User {
     }
 
     public User(String id, String email, String displayName, String notificationId,
-                String facebookId, List<String> friends, List<String> games, Map<String, Caption> captions) {
+                String facebookId, String imagePath, List<String> friends, List<String> games,
+                Map<String, Caption> captions) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
         this.notificationId = notificationId;
         this.facebookId = facebookId;
+        this.imagePath = imagePath;
 
         this.friends = friends;
         this.games = games;
@@ -80,6 +84,10 @@ public class User {
         return notificationId;
     }
 
+    public String getImagePath() {
+        return imagePath;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -110,6 +118,26 @@ public class User {
 
     public void setFacebookId(String facebookId) {
         this.facebookId = facebookId;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public int retrieveCaptionCount() {
+        int captionCount = 0;
+        if (captions != null) {
+            captionCount = captions.size();
+        }
+        return captionCount;
+    }
+
+    public int retrieveGameCount() {
+        int gameCount = 0;
+        if (games != null) {
+            gameCount = games.size();
+        }
+        return gameCount;
     }
 }
 

@@ -1,12 +1,12 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -29,26 +29,61 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Observable;
+
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
+
+import org.apache.commons.io.IOUtils;
+
 /**
  * Created by brittanyberlanga on 12/2/16.
+ * Edited by Austin Robarts
  */
-
-public class LoginManager {
-    public static final int GOOGLE_LOGIN_RC = 13;
+public class LoginManager extends Observable {
+//TODO: refactor to remove Firebase objects from this class when we establish Uploader class
+    public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
+
+    private final String photosFolder = "ProfilePictures/";
+    private final String photoExtension = ".jpg";
+    private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
+
     private FirebaseAuth mAuth;
+    private Uploader uploader;
     private GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
     private AuthCallback mGoogleAuthCallback;
-    private AuthCallback mFacebookAuthCallback;
-    private AuthCallback mFacebookLogoutAuthCallback;
     private FragmentActivity activity;
-    private AccessTokenTracker accessTokenTracker;
+    private boolean isLoggedIn;
+    private byte[] profilePhoto;
 
-    public LoginManager(FragmentActivity activity) {
+    public LoginManager(FragmentActivity activity, Uploader uploader) {
         this.activity = activity;
+        this.uploader = uploader;
         mAuth = FirebaseAuth.getInstance();
+        //TODO: remove this sign out when sign out is implemented
+        //this is just for testing purposes to show snackbar when already logged in
+        mAuth.signOut();
         mCallbackManager = CallbackManager.Factory.create();
+        isLoggedIn = mAuth.getCurrentUser() != null;
+        profilePhoto = null;
+    }
+
+    public interface AuthCallback {
+        void onSuccess();
+        void onError();
+    }
+
+    public void signInWithGoogle() {
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -67,15 +102,6 @@ public class LoginManager {
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-    }
-
-    public interface AuthCallback {
-        void onSuccess();
-        void onError();
-    }
-
-    public void loginToGoogle(final AuthCallback authCallback) {
-        this.mGoogleAuthCallback = authCallback;
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         //This means that the result function will be triggered, override
         activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
@@ -84,6 +110,7 @@ public class LoginManager {
     public void handleGoogleLoginResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
+            isLoggedIn = true;
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
@@ -113,11 +140,7 @@ public class LoginManager {
         }
     }
 
-
-
-    public void setupFacebookLoginButton(LoginButton loginButton, AuthCallback loginCallback, AuthCallback logoutCallback) {
-        this.mFacebookAuthCallback = loginCallback;
-        this.mFacebookLogoutAuthCallback = logoutCallback;
+    public void setupFacebookLoginButton(LoginButton loginButton) {
         loginButton.setReadPermissions("email", "public_profile");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -129,33 +152,34 @@ public class LoginManager {
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
-                mFacebookAuthCallback.onError();
             }
 
             @Override
             public void onError(FacebookException error) {
                 Log.d(TAG, "facebook:onError", error);
-                mFacebookAuthCallback.onError();
             }
         });
-        accessTokenTracker = new AccessTokenTracker() {
-            @Override
-            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken newAccessToken) {
-                // the newAccessToken becomes null when the user signs out
-                if (newAccessToken == null) {
-                    mFacebookLogoutAuthCallback.onSuccess();
-                }
-            }
-        };
     }
 
-
-    public void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
+    public String getStatus() {
+        String status = "";
+        String provider = getProvider();
+        String userName = getUserName();
+        if (provider != null && userName != null) {
+            status += "You're logged into " + getProvider() + " as " + getUserName();
+        }
+        else {
+            status += "Logout unsuccessful";
+        }
+        return status;
+    }
+
     //TODO this should be pulled from firebase not the auth object
-    public String getUserName() {
+    private String getUserName() {
         String username = null;
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -164,7 +188,7 @@ public class LoginManager {
         return username;
     }
 
-    public String getProvider() {
+    private String getProvider() {
         String provider = null;
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -173,11 +197,76 @@ public class LoginManager {
         return provider;
     }
 
+    public boolean isLoggedIn() {
+        return isLoggedIn;
+    }
+
+    private void setLoggedIn(boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
+        setChanged();
+        notifyObservers();
+    }
+
+    private void uploadUser(final String facebookId) {
+        FirebaseUser fbUser = mAuth.getCurrentUser();
+        //make sure user is signed in before sending
+        if (fbUser != null) {
+            //establish fields needed for constructor
+            final String id = fbUser.getUid();
+            String imagePath = photosFolder + id + photoExtension;
+            String email = fbUser.getEmail();
+            String displayName = fbUser.getDisplayName();
+            //TODO: fill this fields once we reach notifications and friends
+            String notificationId = "";
+
+            //getting facebook photo
+            if (facebookId != null) {
+                downloadPhoto(String.format(facebookImageUrl, facebookId));
+            }
+
+            //create and upload User to Firebase
+            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
+            uploader.addUser(user, profilePhoto);
+
+        }
+
+    }
+
+    private void downloadPhoto(final String imageUrl) {
+        //have to use thread so it is not running on android's main thread
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    InputStream inputStream = (InputStream)new URL(imageUrl).getContent();
+                    profilePhoto = IOUtils.toByteArray(inputStream);
+                }
+                catch (Exception err) {
+                    Log.d("TAG", "Loading Picture FAILED");
+                    err.printStackTrace();
+                }
+            }
+        });
+        thread.start();
+        //wait for thread to finish before going back to main execution
+        //this is so we get the photo before we upload it
+        try {
+            thread.join();
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+        }
+    }
+
     /**
      * Login with Google+
      * @param acct
      */
     private void loginToFirebase(GoogleSignInAccount acct) {
+        Uri photo = acct.getPhotoUrl();
+        //downloading google profile picture
+        downloadPhoto(photo.toString());
+
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
@@ -185,7 +274,8 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            mGoogleAuthCallback.onSuccess();
+                            setLoggedIn(true);
+                            uploadUser(null);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
@@ -200,7 +290,7 @@ public class LoginManager {
      * Login with Facebook
      * @param token
      */
-    private void loginToFirebase(AccessToken token) {
+    private void loginToFirebase(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
@@ -209,11 +299,11 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            mFacebookAuthCallback.onSuccess();
+                            setLoggedIn(true);
+                            uploadUser(token.getUserId());
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            mFacebookAuthCallback.onError();
                         }
                     }
                 });

@@ -7,15 +7,18 @@ import android.support.test.runner.AndroidJUnit4;
 import com.google.firebase.auth.FirebaseAuth;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUpload;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseListener;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -39,11 +42,11 @@ public class FirebaseTests {
     @Test
     public void testDownload() throws InterruptedException {
         //TODO this should login first. Right now won't work if db is only changeable with auth.
-        MessageUpdater updater = new MessageUpdater() {
+        ResourceListener updater = new ResourceListener<String>() {
             @Override
-            public void onUpdate(Object test) {
-                assertEquals("Heyo", test.toString());
-                FirebaseUpload.deleteValue("testing/message");
+            public void onData(String test) {
+                assertEquals("Heyo", test);
+                FirebaseUploader.deleteValue("testing/message");
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -51,11 +54,14 @@ public class FirebaseTests {
                 }
                 assertNull(test);
             }
-
+            @Override
+            public Class getDataType() {
+                return String.class;
+            }
         };
-        FirebaseUpload.uploadObject("testing/message", "Heyo");
+        FirebaseUploader.uploadObject("testing/message", "Heyo");
         Thread.sleep(500); //Need this to upload
-        FirebaseListener testListener = new FirebaseListener("testing/message", updater);
+        new FirebaseResourceManager().retrieveSingleWithUpdates("testing/message", updater);
     }
 
     @Test
@@ -65,7 +71,7 @@ public class FirebaseTests {
         inputArr.add("Cards work");
         FirebaseAuth.getInstance().signOut();
         try {
-            Caption testCaption = new Caption("TestId", "TestGameId", "TestUserId", new Card("Whatevs"), inputArr);
+            Caption testCaption = new Caption("TestId", "TestGameId", new Card("Whatevs"), inputArr);
             assertTrue("User was allowed to submit a caption when not logged in", false);
         } catch (IllegalStateException e){
             assertTrue(true);
@@ -82,7 +88,7 @@ public class FirebaseTests {
         String cardText = "%s! %s! I like ice cream";
         Card testCard = new Card(cardText);
         Caption testCaption = new Caption("TestId", "TestGameId", "Test user", testCard, inputArr);
-        assertEquals("Yay! Cards work! I like ice cream", testCaption.getCaptionText().toString());
+        assertEquals("Yay! Cards work! I like ice cream", testCaption.retrieveCaptionText().toString());
     }
 
     @Test

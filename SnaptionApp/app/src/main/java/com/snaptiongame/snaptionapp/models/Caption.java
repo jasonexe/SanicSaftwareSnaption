@@ -81,8 +81,11 @@ public class Caption {
         return userId;
     }
 
-    public SpannableStringBuilder getCaptionText() {
+    public SpannableStringBuilder retrieveCaptionText() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
+        if(card == null) {
+            return builder;
+        }
         String finalString = card.getCardText();
         int firstModifier = 0;
         int lastModifier = 0;
