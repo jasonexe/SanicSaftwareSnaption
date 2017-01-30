@@ -40,30 +40,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.listener = listener;
     }
 
-
-    public void retrieveGameById(String gameId, final ResourceListener<Game> gameListener) {
-        DatabaseReference game = database.getReference(GAME_TABLE).child(gameId);
-        //if game exists in database
-        if (game != null) {
-            game.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Object game = dataSnapshot.getValue();
-                    if (game instanceof Game) {
-                        gameListener.onData((Game)game);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveGameById - " + databaseError.toString());
-                }
-            });
-        }
-
-
-    }
-
     public void retrieveGamesByCreationDate() {
         Query query = database.getReference(GAME_TABLE).orderByChild(CREATION_DATE_CHILD);
         if (retrievedOnce) {
