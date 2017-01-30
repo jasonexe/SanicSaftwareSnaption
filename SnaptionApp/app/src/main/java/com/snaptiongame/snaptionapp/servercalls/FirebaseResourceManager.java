@@ -71,14 +71,22 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
+    /**
+     * Gets the direct path to the user table in the database
+     * @return a string path from the root node to current user
+     */
     public static String getUserPath() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
-            return USER_DIRECTORY + user.getUid();
+            userPath = USER_DIRECTORY + user.getUid();
         return userPath;
     }
 
+    /**
+     * Get the user id of the current user
+     * @return a string key to the user table
+     */
     public static String getUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String id = null;
@@ -86,6 +94,32 @@ public class FirebaseResourceManager {
             id = user.getUid();
         }
         return id;
+    }
+
+    /**
+     * Set up a listener to receive an object at a specified path without a connection
+     * for future data changes
+     * @param path the path to the object requested from Firebase
+     * @param listener this will be waiting to receive the object requested
+     */
+    public void retrieveSingleNoUpdates(String path, final ResourceListener listener) {
+        //used for just receiving data once
+        DatabaseReference ref = database.getReference(path);
+        ValueEventListener firebaseResponse = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Object data = dataSnapshot.getValue(listener.getDataType());
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "Failed to read value.", databaseError.toException());
+            }
+        };
+        //set up single event listener that only sends info once
+        ref.addListenerForSingleValueEvent(firebaseResponse);
+
     }
 
     /**
@@ -98,7 +132,7 @@ public class FirebaseResourceManager {
     public void retrieveSingleWithUpdates(String path, final ResourceListener listener) {
         // if the FirebaseResourceManager is already being used to listen to the db, remove the
         // previous listener
-        //removeListener();
+        removeListener();
 
         databaseReference = database.getReference(path);
         valueEventListener = new ValueEventListener() {

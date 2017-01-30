@@ -51,9 +51,8 @@ public class ProfileFragment extends Fragment {
 
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
-    final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
-
-    ResourceListener gameListener = new ResourceListener() {
+    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+    private ResourceListener gameListener = new ResourceListener() {
         @Override
         public void onData(Object data) {
             if (data instanceof Game) {
@@ -82,7 +81,7 @@ public class ProfileFragment extends Fragment {
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleWithUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener() {
+            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener() {
                 @Override
                 public void onData(Object data) {
                     if (data instanceof User) {
@@ -96,7 +95,6 @@ public class ProfileFragment extends Fragment {
 
                     }
                     //close the listener
-                    //firebaseResourceManager.removeListener();
                 }
 
                 @Override
@@ -111,12 +109,11 @@ public class ProfileFragment extends Fragment {
     private void getUserGames(User user) {
 
         List<String> gameIds = user.getGames();
-
+        //if User has any games
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds) {
-                firebaseResourceManager.retrieveSingleWithUpdates("games/" + gameId, gameListener);
-                //resourceManager.removeListener();
+                firebaseResourceManager.retrieveSingleNoUpdates("games/" + gameId, gameListener);
             }
         }
 
