@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
@@ -152,7 +153,7 @@ public class CreateGameActivity extends AppCompatActivity {
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
                     final String gameId = uploader.getNewGameKey();
-                    final Game game = new Game(gameId, "1", gameId + ".jpg",
+                    final Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                         new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
 
                     uploader.addGame(game, data, new FirebaseUploader.UploadDialogInterface() {

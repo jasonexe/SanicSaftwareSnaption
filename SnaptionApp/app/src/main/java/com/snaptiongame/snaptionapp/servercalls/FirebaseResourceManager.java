@@ -71,7 +71,7 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
-    public String getUserPath() {
+    public static String getUserPath() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
@@ -79,7 +79,7 @@ public class FirebaseResourceManager {
         return userPath;
     }
 
-    public String getUserId() {
+    public static String getUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String id = null;
         if (user != null) {

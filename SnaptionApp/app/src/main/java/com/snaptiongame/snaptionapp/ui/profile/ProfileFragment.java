@@ -20,7 +20,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileGamesAdapter;
 
 import org.w3c.dom.Text;
 
@@ -47,8 +47,7 @@ public class ProfileFragment extends Fragment {
     @BindView(R.id.profile_games_list)
     protected RecyclerView gameListView;
 
-    private WallViewAdapter gameAdapter;
-
+    private ProfileGamesAdapter gameAdapter;
 
     @Nullable
     @Override
@@ -56,14 +55,14 @@ public class ProfileFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, view);
-        LinearLayoutManager gameViewManager = new LinearLayoutManager(null, LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         gameListView.setLayoutManager(gameViewManager);
-        gameAdapter = new WallViewAdapter(new ArrayList<Game>());
+        gameAdapter = new ProfileGamesAdapter(new ArrayList<Game>());
         gameListView.setAdapter(gameAdapter);
 
         //if the user is logged in
-        if (firebaseResourceManager.getUserPath() != null) {
+        if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
             firebaseResourceManager.retrieveSingleWithUpdates(firebaseResourceManager.getUserPath(), new ResourceListener() {
                 @Override
@@ -75,6 +74,9 @@ public class ProfileFragment extends Fragment {
                         FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
                         gamesCreated.setText(Integer.toString(user.retrieveGameCount()));
                         captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
+                        //get the games based on list of games in user
+                        getUserGames(user);
+
                     }
                     //close the listener
                     firebaseResourceManager.removeListener();
@@ -85,21 +87,35 @@ public class ProfileFragment extends Fragment {
                     return User.class;
                 }
             });
-            GameResourceManager resourceManager = new FirebaseGameResourceManager(10, new ResourceListener<List<Game>>() {
+        }
+        return view;
+    }
+
+    private void getUserGames(User user) {
+
+        List<String> gameIds = user.getGames();
+
+        if (gameIds != null) {
+            ResourceListener gameListener = new ResourceListener() {
                 @Override
-                public void onData(List<Game> data) {
-                    gameAdapter.addItems(data);
+                public void onData(Object data) {
+                    if (data instanceof Game) {
+                        gameAdapter.addGame((Game)data);
+                    }
                 }
 
                 @Override
                 public Class getDataType() {
                     return Game.class;
                 }
-            });
-            resourceManager.retrieveGamesByCreationDate();
+            };
+            //get resourceManager to get games
+            GameResourceManager resourceManager = new FirebaseGameResourceManager(0, null);
+            for (String gameId : gameIds) {
+                resourceManager.retrieveGameById(gameId, gameListener);
+            }
         }
 
 
-        return view;
     }
 }

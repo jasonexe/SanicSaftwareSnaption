@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -37,6 +38,30 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     public FirebaseGameResourceManager(int limit, ResourceListener<List<Game>> listener) {
         this.limit = limit;
         this.listener = listener;
+    }
+
+
+    public void retrieveGameById(String gameId, final ResourceListener<Game> gameListener) {
+        DatabaseReference game = database.getReference(GAME_TABLE).child(gameId);
+
+        if (game != null) {
+            game.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Object game = dataSnapshot.getValue();
+                    if (game instanceof Game) {
+                        gameListener.onData((Game)game);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveGameById - " + databaseError.toString());
+                }
+            });
+        }
+
+
     }
 
     public void retrieveGamesByCreationDate() {
