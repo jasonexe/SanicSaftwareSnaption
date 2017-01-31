@@ -74,7 +74,7 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
         //TODO notify invited players
-        game.setImagePath(imagePath + "/" + game.getImagePath());
+        game.setImagePath(imagePath + "/" + game.getId());
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
     }
