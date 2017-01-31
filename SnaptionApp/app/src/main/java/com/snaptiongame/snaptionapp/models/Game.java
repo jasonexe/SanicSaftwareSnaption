@@ -186,6 +186,10 @@ public class Game {
         return new HashMap(captions);
     }
 
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
     /**
      * Returns the list of players.
      *
