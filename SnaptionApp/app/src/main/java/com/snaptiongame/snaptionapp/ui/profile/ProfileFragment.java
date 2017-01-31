@@ -2,28 +2,21 @@ package com.snaptiongame.snaptionapp.ui.profile;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.LayoutInflaterCompat;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.app.Fragment;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.R;
-import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
-import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.profile.ProfileGamesAdapter;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +76,7 @@ public class ProfileFragment extends Fragment {
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
                     userName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
                     gamesCreated.setText(Integer.toString(user.retrieveGameCount()));

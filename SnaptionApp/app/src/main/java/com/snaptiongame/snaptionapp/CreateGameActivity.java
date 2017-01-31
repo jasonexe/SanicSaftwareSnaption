@@ -1,7 +1,6 @@
 package com.snaptiongame.snaptionapp;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +16,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,20 +30,15 @@ import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.R.attr.bitmap;
-import static android.R.attr.data;
+import butterknife.OnClick;
 
 
 /**
@@ -70,8 +65,8 @@ public class CreateGameActivity extends AppCompatActivity {
     private boolean alreadyExisting; //True if user is creating this from an exisitng game
     private String existingPhotoPath;
 
-    @BindView(R.id.buttonSelect)
-    protected Button buttonSelect;
+    @BindView(R.id.add_photo_layout)
+    protected RelativeLayout addPhotoLayout;
 
     @BindView(R.id.buttonUpload)
     protected Button buttonUpload;
@@ -96,9 +91,6 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.text_date)
     protected TextView dateView;
-
-    @BindView(R.id.button_set_date)
-    protected Button buttonSetDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,16 +124,6 @@ public class CreateGameActivity extends AppCompatActivity {
 
         showDate();
 
-        buttonSelect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Gets the content from the imageview
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("image/*");
-                startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
-            }
-        });
-
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -173,13 +155,11 @@ public class CreateGameActivity extends AppCompatActivity {
                     String gameId = uploader.getNewGameKey();
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
-                        //TODO change 1 to the actual userID
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
-                        // TODO change 1 to the actual userID
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
@@ -216,14 +196,19 @@ public class CreateGameActivity extends AppCompatActivity {
                 maturityRating = MATURE;
             }
         });
+    }
 
-        buttonSetDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setDate(view);
-            }
-        });
+    @OnClick(R.id.add_photo_layout)
+    public void onClickAddPhoto() {
+        //Gets the content from the imageview
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
+    }
 
+    @OnClick(R.id.text_date)
+    public void onClickEndDate() {
+        setDate();
     }
 
     class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
@@ -287,7 +272,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private void setImageFromUrl(Uri uri) {
         Glide.with(CreateGameActivity.this).load(uri).into(imageView);
-        imageView.setBackground(null);
+        addPhotoLayout.setBackground(null);
     }
 
     /**
@@ -349,7 +334,7 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     };
 
-    public void setDate(View view) {
+    public void setDate() {
         new DatePickerDialog(this, myDateListener, year, month, day).show();
     }
 

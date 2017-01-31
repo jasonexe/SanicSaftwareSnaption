@@ -37,7 +37,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".CreateGameActivity"
-            android:screenOrientation="portrait" />
+            android:label="@string/create_game"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden"/>
     </application>
 
 </manifest>

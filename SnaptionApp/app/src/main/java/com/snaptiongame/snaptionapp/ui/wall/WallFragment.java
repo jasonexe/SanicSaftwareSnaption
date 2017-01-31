@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.wall;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -77,6 +78,7 @@ public class WallFragment extends Fragment {
         });
 
         loadMoreGames();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
     }
 
