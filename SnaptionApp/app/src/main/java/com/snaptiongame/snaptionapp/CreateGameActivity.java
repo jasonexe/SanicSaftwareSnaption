@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
@@ -168,17 +169,18 @@ public class CreateGameActivity extends AppCompatActivity {
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
+
                     String gameId = uploader.getNewGameKey();
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
                         //TODO change 1 to the actual userID
-                        Game game = new Game(gameId, "1", gameId + ".jpg",
+                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         // TODO change 1 to the actual userID
-                        Game game = new Game(gameId, "1", existingPhotoPath,
+                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
                                 new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
                         backToMain();

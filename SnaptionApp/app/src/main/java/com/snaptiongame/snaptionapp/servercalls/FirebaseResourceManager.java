@@ -11,6 +11,8 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +31,8 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePat
 
 public class FirebaseResourceManager {
     private static final String GAME_IMAGE_DIRECTORY = "images/";
+    private static final String PROFILE_PIC_DIRECTORY = "ProfilePictures/";
+    private static final String USER_DIRECTORY = "users/";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
@@ -72,6 +76,56 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
+    /**
+     * Gets the direct path to the user table in the database
+     * @return a string path from the root node to current user
+     */
+    public static String getUserPath() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userPath = null;
+        if (user != null)
+            userPath = USER_DIRECTORY + user.getUid();
+        return userPath;
+    }
+
+    /**
+     * Get the user id of the current user
+     * @return a string key to the user table
+     */
+    public static String getUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String id = null;
+        if (user != null) {
+            id = user.getUid();
+        }
+        return id;
+    }
+
+    /**
+     * Set up a listener to receive an object at a specified path without a connection
+     * for future data changes
+     * @param path the path to the object requested from Firebase
+     * @param listener this will be waiting to receive the object requested
+     */
+    public void retrieveSingleNoUpdates(String path, final ResourceListener listener) {
+        //used for just receiving data once
+        DatabaseReference ref = database.getReference(path);
+        ValueEventListener firebaseResponse = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Object data = dataSnapshot.getValue(listener.getDataType());
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w(TAG, "Failed to read value.", databaseError.toException());
+            }
+        };
+        //set up single event listener that only sends info once
+        ref.addListenerForSingleValueEvent(firebaseResponse);
+
+    }
 
     /**
      * Notifies the given ResourceListener of when a single element of the given path is changed
@@ -123,6 +177,16 @@ public class FirebaseResourceManager {
      */
     public static void loadGameImageIntoView(String imagePath, ImageView imageView) {
         loadImageIntoView(GAME_IMAGE_DIRECTORY, imagePath, imageView);
+    }
+
+    /**
+     * Loads an image from the game root directory from Firebase into a given ImageView
+     *
+     * @param imagePath The image file path name
+     * @param imageView The ImageView in which the image should be loaded
+     */
+    public static void loadProfilePictureIntoView(String imagePath, ImageView imageView) {
+        loadImageIntoView("", imagePath, imageView);
     }
 
     /**

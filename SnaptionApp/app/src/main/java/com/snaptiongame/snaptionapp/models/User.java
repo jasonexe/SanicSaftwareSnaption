@@ -123,5 +123,21 @@ public class User {
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
     }
+
+    public int retrieveCaptionCount() {
+        int captionCount = 0;
+        if (captions != null) {
+            captionCount = captions.size();
+        }
+        return captionCount;
+    }
+
+    public int retrieveGameCount() {
+        int gameCount = 0;
+        if (games != null) {
+            gameCount = games.size();
+        }
+        return gameCount;
+    }
 }
 

@@ -24,9 +24,10 @@ import java.util.List;
  */
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
+
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     public static final String PHOTO_PATH = "currentPhotoPath";
-    private static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
+    public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private List<Game> items;
 
     public WallViewAdapter(List<Game> items) {
@@ -82,7 +83,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 });
             }
         });
-
 
         // TODO add the actual captioner name and photo
         holder.captionerText.setText("First Last");

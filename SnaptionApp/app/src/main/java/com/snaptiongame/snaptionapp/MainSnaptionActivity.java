@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
@@ -21,6 +22,7 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
@@ -44,6 +46,8 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
     protected DrawerLayout mDrawerLayout;
     @BindView(R.id.navigation_view)
     protected NavigationView mNavigationView;
+    @BindView(R.id.fab)
+    protected FloatingActionButton fab;
 
     private int currentFragmentMenuItemId;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -62,7 +66,8 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                                 new WallFragment()).commit();
                         break;
                     case R.id.profile_item:
-                        //TODO swap out current fragment with the profile fragment
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new ProfileFragment()).commit();
                         break;
                 }
                 currentFragmentMenuItemId = selectedItemId;
