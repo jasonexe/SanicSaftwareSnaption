@@ -215,7 +215,6 @@ public class FirebaseResourceManager {
                                                    Target<GlideDrawable> target,
                                                    boolean isFromMemoryCache,
                                                    boolean isFirstResource) {
-                        imageView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
                         return false;
                     }
                 })
