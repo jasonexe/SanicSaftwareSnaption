@@ -256,8 +256,7 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     private void backToMain() {
-        Intent intent = new Intent(CreateGameActivity.this, MainSnaptionActivity.class);
-        startActivity(intent);
+        onBackPressed();
     }
 
     @Override
