@@ -3,11 +3,8 @@ package com.snaptiongame.snaptionapp;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
 
@@ -21,12 +18,18 @@ import java.util.Observer;
 public class LoginDialog extends Dialog implements View.OnClickListener, Observer {
 
     private LoginManager manager;
+    private LoginListener loginListener;
     private SignInButton googleLogButton;
     private LoginButton facebookLogButton;
 
-    public LoginDialog(Activity activity, LoginManager manager) {
+    public interface LoginListener {
+        void onLoginComplete();
+    }
+
+    public LoginDialog(Activity activity, LoginManager manager, LoginListener loginListener) {
         super(activity);
         this.manager = manager;
+        this.loginListener = loginListener;
         manager.addObserver(this);
     }
 
@@ -52,6 +55,10 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Observe
      */
     @Override
     public void update(Observable observable, Object o) {
+        // notify listener
+        if (loginListener != null) {
+            loginListener.onLoginComplete();
+        }
         //dismisses the dialog to go back to main screen
         dismiss();
     }

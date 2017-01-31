@@ -43,7 +43,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
-        holder.captionText.setText(game.getTopCaption().retrieveCaptionText() != null ? game.getTopCaption().retrieveCaptionText() : "");
+        holder.captionText.setText(game.getTopCaption() != null ?
+                game.getTopCaption().retrieveCaptionText() :
+                holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
         FirebaseResourceManager.loadGameImageIntoView(game.getImagePath(), holder.photo);
 
         // distinguish between complete and incomplete games

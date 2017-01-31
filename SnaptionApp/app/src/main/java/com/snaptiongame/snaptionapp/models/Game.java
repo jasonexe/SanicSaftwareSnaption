@@ -2,7 +2,6 @@ package com.snaptiongame.snaptionapp.models;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -286,6 +285,6 @@ public class Game {
     public Caption getTopCaption() {
         // TODO correctly implement this!
         //currently returns the first caption in the captions list
-        return captions != null && captions.size() > 0 ? captions.values().iterator().next() : new Caption();
+        return captions != null && captions.size() > 0 ? captions.values().iterator().next() : null;
     }
 }

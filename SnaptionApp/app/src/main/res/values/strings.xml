@@ -14,14 +14,19 @@
     <string name="game_private">Private</string>
     <string name="public_or_private">Do you want the game public or private?</string>
     <string name="maturity_rating">Who is this content appropriate for?</string>
-    <string name="game_adult">Adults</string>
+    <string name="game_adult">Mature</string>
     <string name="game_everyone">Everyone</string>
-    <string name="category">What tags would you like to add? (Separate tags by comma)</string>
+    <string name="category">Tags (Separate by commas)</string>
     <string name="date_selected"></string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
     <string name="games_created">Games:</string>
     <string name="captions_created">Captions:</string>
+    <string name="end_date">End date</string>
+    <string name="privacy">Privacy</string>
+    <string name="content_rating">Content rating</string>
+    <string name="new_game">Create new game</string>
+    <string name="caption_filler">Be the first to caption this photo!</string>
 
 
     <!--Accessibility strings-->

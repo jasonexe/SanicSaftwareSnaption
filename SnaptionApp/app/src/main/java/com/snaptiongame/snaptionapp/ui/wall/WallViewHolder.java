@@ -1,8 +1,8 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,7 +25,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.caption_photo)
     public ImageView captionPhoto;
     @BindView(R.id.create_from_existing_button)
-    public Button createFromExisting;
+    public FloatingActionButton createFromExisting;
 
     public WallViewHolder(View itemView) {
         super(itemView);

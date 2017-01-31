@@ -1,7 +1,6 @@
 package com.snaptiongame.snaptionapp;
 
 import android.content.DialogInterface;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -17,18 +16,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.facebook.CallbackManager;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
-import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -37,17 +36,20 @@ import butterknife.OnClick;
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
-    private CallbackManager mCallbackManager;
     private LoginManager loginManager;
 
     @BindView(R.id.toolbar)
-    protected Toolbar mToolbar;
+    protected Toolbar toolbar;
     @BindView(R.id.drawer_layout)
-    protected DrawerLayout mDrawerLayout;
+    protected DrawerLayout drawerLayout;
     @BindView(R.id.navigation_view)
-    protected NavigationView mNavigationView;
+    protected NavigationView navigationView;
     @BindView(R.id.fab)
     protected FloatingActionButton fab;
+    protected ImageView navDrawerPhoto;
+    protected TextView navDrawerName;
+    protected TextView navDrawerEmail;
+
 
     private int currentFragmentMenuItemId;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -64,15 +66,17 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                     case R.id.wall_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
+                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.profile_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
+                        fab.setVisibility(View.INVISIBLE);
                         break;
                 }
                 currentFragmentMenuItemId = selectedItemId;
             }
-            mDrawerLayout.closeDrawers();
+            drawerLayout.closeDrawers();
             return true;
         }
     };
@@ -88,19 +92,47 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         ButterKnife.bind(this);
 
         // toolbar and navigation drawer setup
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mNavigationView.setNavigationItemSelectedListener(mNavListener);
+        drawerLayout.addDrawerListener(mDrawerToggle);
+        navigationView.setNavigationItemSelectedListener(mNavListener);
+
+        // navigation drawer view setup
+        View navigationHeaderView = navigationView.getHeaderView(0);
+        navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
+        navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
+        navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
+        setupNavigationView();
 
         // wall fragment instantiation
         currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
         loginManager = new LoginManager(this, new FirebaseUploader());
+    }
+
+    private void setupNavigationView() {
+        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+        //if the user is logged in
+        if (FirebaseResourceManager.getUserPath() != null) {
+            //retrieve information from User table
+            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    navDrawerName.setText(user.getDisplayName());
+                    navDrawerEmail.setText(user.getEmail());
+                    FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), navDrawerPhoto);
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
     }
 
     @OnClick(R.id.fab)
@@ -147,7 +179,12 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         else if (id == R.id.action_login) {
             if (!loginManager.isLoggedIn()) {
                 //create pop up for login Facebook or Google+
-                LoginDialog logDialog = new LoginDialog(this, loginManager);
+                LoginDialog logDialog = new LoginDialog(this, loginManager, new LoginDialog.LoginListener() {
+                    @Override
+                    public void onLoginComplete() {
+                        setupNavigationView();
+                    }
+                });
                 logDialog.setOnDismissListener(this);
                 logDialog.show();
             }
