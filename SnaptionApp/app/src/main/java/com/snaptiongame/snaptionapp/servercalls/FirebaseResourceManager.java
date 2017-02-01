@@ -30,8 +30,6 @@ import static com.google.android.gms.internal.zzs.TAG;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 public class FirebaseResourceManager {
-    private static final String GAME_IMAGE_DIRECTORY = "images/";
-    private static final String PROFILE_PIC_DIRECTORY = "ProfilePictures/";
     private static final String USER_DIRECTORY = "users/";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -176,7 +174,7 @@ public class FirebaseResourceManager {
      * @param imageView The ImageView in which the image should be loaded
      */
     public static void loadGameImageIntoView(String imagePath, ImageView imageView) {
-        loadImageIntoView(GAME_IMAGE_DIRECTORY, imagePath, imageView);
+        loadImageIntoView(imagePath, imageView);
     }
 
     /**
@@ -186,18 +184,17 @@ public class FirebaseResourceManager {
      * @param imageView The ImageView in which the image should be loaded
      */
     public static void loadProfilePictureIntoView(String imagePath, ImageView imageView) {
-        loadImageIntoView("", imagePath, imageView);
+        loadImageIntoView(imagePath, imageView);
     }
 
     /**
      * Loads an image from Firebase into a given ImageView.
      *
-     * @param imageDirectory The root directory of the image
      * @param imagePath The image file path name
      * @param imageView The ImageView in which the image should be loaded
      */
-    private static void loadImageIntoView(String imageDirectory, String imagePath, final ImageView imageView) {
-        StorageReference ref = storage.child(imageDirectory + imagePath);
+    private static void loadImageIntoView(String imagePath, final ImageView imageView) {
+        StorageReference ref = storage.child(imagePath);
         Glide.with(imageView.getContext())
                 .using(new FirebaseImageLoader())
                 .load(ref).fitCenter()
@@ -222,7 +219,7 @@ public class FirebaseResourceManager {
     }
 
     public static void getImageURI(String imagePath, final ResourceListener<Uri> pathListener) {
-        storage.child(GAME_IMAGE_DIRECTORY + "/" + imagePath).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        storage.child(imagePath).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
                 pathListener.onData(uri);

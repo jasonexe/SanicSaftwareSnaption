@@ -65,15 +65,32 @@ public class FirebaseUploader implements Uploader {
         public void onUploadDone();
     }
 
+    /**
+     * Call this if the game needs to be uploaded
+     * @param game The game to upload. Its image path should be just the name of the file.
+     * @param photo Byte array of photo
+     * @param uploadCallback interface to call that activates the upload dialog
+     */
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
         //TODO notify invited players
+        game.setImagePath(imagePath + "/" + game.getId());
         uploadPhoto(game, photo, uploadCallback);
-        addGame(game);
+        addCompletedGameObj(game);
     }
 
+    /**
+     * Call this if you're adding a game with an existing photo. AKA create game from existing
+     * @param game Game object with fields filled in
+     */
     @Override
     public void addGame(Game game) {
+        // AddNewGame activity calls this if game already exists,
+        // so image path should be fine already, since it was pulled from the existing game
+        addCompletedGameObj(game);
+    }
+
+    private void addCompletedGameObj(Game game) {
         // Add gameId to user's gamesList
         addGameToUserTable(game);
         // Add game object to games table
@@ -135,7 +152,7 @@ public class FirebaseUploader implements Uploader {
         // Upload photo to storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
-                .child(imagePath + "/" + game.getImagePath());
+                .child(game.getImagePath());
         UploadTask uploadTask = imageLoc.putBytes(photo);
         //Creating the progress dialog
         uploadCallback.onStartUpload(photo.length);
