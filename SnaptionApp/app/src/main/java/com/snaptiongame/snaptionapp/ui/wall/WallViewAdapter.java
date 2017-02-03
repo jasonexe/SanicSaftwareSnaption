@@ -14,10 +14,12 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.CreateGameActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
@@ -27,7 +29,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     public static final String PHOTO_PATH = "currentPhotoPath";
+    public static final String USER_PATH = "users/";
+
+    public static final String DEFAULT_NAME = "Anonymous";
+    public static final String DEFAULT_PROFILE = "https://ssl.gstatic.com/docs/common/profile/hedgehog_lg.png";
+
     public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
+    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private List<Game> items;
 
     public WallViewAdapter(List<Game> items) {
@@ -86,9 +94,35 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             }
         });
 
-        // TODO add the actual captioner name and photo
-        holder.captionerText.setText("First Last");
-        Glide.with(holder.captionPhoto.getContext()).load("http://i75.servimg.com/u/f75/11/25/80/77/210.jpg").into(holder.captionPhoto);
+        // TODO add the actual captioner name and photo instead of picker's
+        // retrieve information from User table
+        // game.getTopCaption().getUserId() instead of game.getPicker()
+        String user = USER_PATH + game.getPicker();
+        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
+        // check situation where an invalid id is put into firebase that isn't matched to a user
+        if (!pattern.matcher(user).find()) {
+            // display the name and profile picture if a valid user is obtained from the user id
+            firebaseResourceManager.retrieveSingleNoUpdates(user, new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    // if the user is invalid use the default
+                    if (user != null) {
+                        holder.captionerText.setText(user.getDisplayName());
+                        FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), holder.captionPhoto);
+                    }
+                    else {
+                        // remove this portion if firebase is guaranteed to not have invalid users
+                        holder.captionerText.setText(DEFAULT_NAME);
+                        Glide.with(holder.captionPhoto.getContext()).load(DEFAULT_PROFILE).into(holder.captionPhoto);
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
     }
 
     @Override
