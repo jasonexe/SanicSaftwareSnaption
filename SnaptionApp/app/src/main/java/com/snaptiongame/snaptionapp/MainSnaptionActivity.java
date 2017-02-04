@@ -22,12 +22,17 @@ import android.widget.TextView;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
+import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -73,6 +78,11 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                                 new ProfileFragment()).commit();
                         fab.setVisibility(View.INVISIBLE);
                         break;
+                    case R.id.friends_item:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new FriendsFragment()).commit();
+                        fab.setVisibility(View.VISIBLE);
+                        break;
                 }
                 currentFragmentMenuItemId = selectedItemId;
             }
@@ -88,9 +98,8 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_main_snaption);
-        
-        ButterKnife.bind(this);
 
+        ButterKnife.bind(this);
         // toolbar and navigation drawer setup
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -124,7 +133,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                 public void onData(User user) {
                     navDrawerName.setText(user.getDisplayName());
                     navDrawerEmail.setText(user.getEmail());
-                    FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), navDrawerPhoto);
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
                 }
 
                 @Override
@@ -137,9 +146,14 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
-
-        Intent intent = new Intent(this, CreateGameActivity.class);
-        startActivity(intent);
+        if (currentFragmentMenuItemId == R.id.wall_item) {
+            Intent intent = new Intent(this, CreateGameActivity.class);
+            startActivity(intent);
+        }
+        else if (currentFragmentMenuItemId == R.id.friends_item) {
+            Intent intent = new Intent(this, AddInviteFriendsActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override

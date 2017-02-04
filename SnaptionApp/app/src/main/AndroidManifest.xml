@@ -40,6 +40,12 @@
             android:label="@string/create_game"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"/>
+        <activity android:name=".ui.friends.AddInviteFriendsActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/friends"/>
+        <activity android:name=".ui.captions.CaptionActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/captions"/>
     </application>
 
 </manifest>
