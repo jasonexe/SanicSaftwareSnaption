@@ -185,19 +185,15 @@ public class FirebaseResourceManager {
         String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
                 + "/" + packName;
         DatabaseReference cardsRef = database.getReference(directory);
-        // Would only query some, but there isn't an easy way to get list
-        // length without getting everything
+        // Return all the cards, then we don't have to pull from database to refresh every time
         cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Random rand = new Random();
                 GenericTypeIndicator<List<Card>> typeIndicator =
                         new GenericTypeIndicator<List<Card>>() {};
                 List<Card> allCards = dataSnapshot.getValue(typeIndicator);
                 // Need to subtract from total size so there's no overflow
-                int randStart = rand.nextInt(allCards.size()- NUM_CARDS_IN_HAND - 1);
-                List<Card> someCards = allCards.subList(randStart, randStart + NUM_CARDS_IN_HAND);
-                listener.onData(someCards);
+                listener.onData(allCards);
             }
 
             @Override
