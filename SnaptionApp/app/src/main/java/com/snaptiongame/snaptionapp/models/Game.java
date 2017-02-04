@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @author Cameron Geehr
  */
 
-public class Game {
+public class Game implements Serializable {
     private String id; //The ID of the game
     private String picker; //The ID of the picker
     private String imagePath; //The path of the image on Firebase

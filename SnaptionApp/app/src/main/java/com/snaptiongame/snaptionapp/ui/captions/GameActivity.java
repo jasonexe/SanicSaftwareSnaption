@@ -9,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuInflater;
 import android.view.View;
 
-import com.google.firebase.database.GenericTypeIndicator;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
@@ -17,14 +16,14 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.List;
 
-public class CaptionActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity {
     List<Card> allCards;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_caption);
+        setContentView(R.layout.activity_game);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
         populateCards();
