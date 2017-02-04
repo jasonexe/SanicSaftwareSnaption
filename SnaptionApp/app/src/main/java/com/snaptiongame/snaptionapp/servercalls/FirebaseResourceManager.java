@@ -19,21 +19,27 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.models.Card;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 import static com.google.android.gms.internal.zzs.TAG;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 public class FirebaseResourceManager {
     private static final String USER_DIRECTORY = "users/";
-
+    public static final String CARDS_DIRECTORY = "cards";
+    public static final int NUM_CARDS_IN_HAND = 5;
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
+
 
     private ValueEventListener valueEventListener;
     private DatabaseReference databaseReference;
@@ -168,23 +174,41 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Loads an image from the game root directory from Firebase into a given ImageView
-     *
-     * @param imagePath The image file path name
-     * @param imageView The ImageView in which the image should be loaded
+     * Loads a random five cards from the given pack name.
+     * @param packName Name of the pack
+     * @param listener Listener to call with the arraylist of strings containing the cards
      */
-    public static void loadGameImageIntoView(String imagePath, ImageView imageView) {
-        loadImageIntoView(imagePath, imageView);
-    }
+    public static void loadCardsFromPack(String packName,
+                                         final ResourceListener<List<Card>> listener) {
 
-    /**
-     * Loads an image from the game root directory from Firebase into a given ImageView
-     *
-     * @param imagePath The image file path name
-     * @param imageView The ImageView in which the image should be loaded
-     */
-    public static void loadProfilePictureIntoView(String imagePath, ImageView imageView) {
-        loadImageIntoView(imagePath, imageView);
+        //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
+        String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
+                + "/" + packName;
+        DatabaseReference cardsRef = database.getReference(directory);
+        // Would only query some, but there isn't an easy way to get list
+        // length without getting everything
+        cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Random rand = new Random();
+                GenericTypeIndicator<List<Card>> typeIndicator =
+                        new GenericTypeIndicator<List<Card>>() {};
+                List<Card> allCards = dataSnapshot.getValue(typeIndicator);
+                // Need to subtract from total size so there's no overflow
+                int randStart = rand.nextInt(allCards.size()- NUM_CARDS_IN_HAND - 1);
+                List<Card> someCards = allCards.subList(randStart, randStart + NUM_CARDS_IN_HAND);
+                listener.onData(someCards);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println(databaseError.getMessage());
+            }
+        });
+
+
+
+
     }
 
     /**
@@ -193,7 +217,7 @@ public class FirebaseResourceManager {
      * @param imagePath The image file path name
      * @param imageView The ImageView in which the image should be loaded
      */
-    private static void loadImageIntoView(String imagePath, final ImageView imageView) {
+    public static void loadImageIntoView(String imagePath, final ImageView imageView) {
         StorageReference ref = storage.child(imagePath);
         Glide.with(imageView.getContext())
                 .using(new FirebaseImageLoader())

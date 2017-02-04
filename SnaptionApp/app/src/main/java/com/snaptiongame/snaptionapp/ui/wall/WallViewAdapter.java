@@ -46,7 +46,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         holder.captionText.setText(game.getTopCaption() != null ?
                 game.getTopCaption().retrieveCaptionText() :
                 holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
-        FirebaseResourceManager.loadGameImageIntoView(game.getImagePath(), holder.photo);
+        FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
 
         // distinguish between complete and incomplete games
         if (game.getIsOpen()) {

@@ -78,7 +78,7 @@ public class ProfileFragment extends Fragment {
                 public void onData(User user) {
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
                     userName.setText(user.getDisplayName());
-                    FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), profile);
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
                     gamesCreated.setText(Integer.toString(user.retrieveGameCount()));
                     captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
                     //get the games based on list of games in user
