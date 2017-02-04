@@ -17,7 +17,6 @@
     <string name="game_adult">Mature</string>
     <string name="game_everyone">Everyone</string>
     <string name="category">Tags (Separate by commas)</string>
-    <string name="date_selected"></string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
     <string name="games_created">Games:</string>
@@ -27,6 +26,8 @@
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>
     <string name="caption_filler">Be the first to caption this photo!</string>
+    <string name="friends">Friends</string>
+    <string name="captions">Captions</string>
 
 
     <!--Accessibility strings-->
