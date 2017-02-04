@@ -201,10 +201,6 @@ public class FirebaseResourceManager {
                 System.err.println(databaseError.getMessage());
             }
         });
-
-
-
-
     }
 
     /**
