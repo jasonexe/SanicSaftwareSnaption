@@ -30,10 +30,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     public static final String PHOTO_PATH = "currentPhotoPath";
     public static final String USER_PATH = "users/";
-
-    public static final String DEFAULT_NAME = "Anonymous";
-    public static final String DEFAULT_PROFILE = "https://ssl.gstatic.com/docs/common/profile/hedgehog_lg.png";
-
     public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private List<Game> items;
@@ -95,25 +91,35 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         });
 
         // TODO add the actual captioner name and photo instead of picker's
-        // retrieve information from User table
         // game.getTopCaption().getUserId() instead of game.getPicker()
-        String user = USER_PATH + game.getPicker();
-        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
-        // check situation where an invalid id is put into firebase that isn't matched to a user
-        if (!pattern.matcher(user).find()) {
+        displayUser(holder, USER_PATH + game.getPicker());
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    /**
+     * Displays the profile picture and username of a valid User. Shows the default if invalid
+     * @param holder The view that needs to be set with the User's name and avatar
+     * @param userPath The path to the desired User
+     */
+    private void displayUser(final WallViewHolder holder, String userPath) {
+        // remove this portion if firebase is guaranteed to not have invalid users
+        holder.captionerText.setText(" ");
+        Glide.with(holder.captionPhoto.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(holder.captionPhoto);
+
+        // ensure the user id is a valid one to avoid errors
+        if(validFirebasePath(userPath)) {
             // display the name and profile picture if a valid user is obtained from the user id
-            firebaseResourceManager.retrieveSingleNoUpdates(user, new ResourceListener<User>() {
+            firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    // if the user is invalid use the default
+                    // replace default is the User is valid
                     if (user != null) {
                         holder.captionerText.setText(user.getDisplayName());
                         FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), holder.captionPhoto);
-                    }
-                    else {
-                        // remove this portion if firebase is guaranteed to not have invalid users
-                        holder.captionerText.setText(DEFAULT_NAME);
-                        Glide.with(holder.captionPhoto.getContext()).load(DEFAULT_PROFILE).into(holder.captionPhoto);
                     }
                 }
 
@@ -125,9 +131,16 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return items.size();
+    /**
+     * Checks if a String is valid for a Firebase path by making sure it does not contain
+     * any of the following characters: '.', '#', '$', '[', or ']'
+     *
+     * @param path The path to be checked
+     * @return True if the path does not contain any of the characters, false otherwise.
+     */
+    public static boolean validFirebasePath(String path) {
+        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
+        return !pattern.matcher(path).find();
     }
 
     public void addItems(List<Game> newGames) {
