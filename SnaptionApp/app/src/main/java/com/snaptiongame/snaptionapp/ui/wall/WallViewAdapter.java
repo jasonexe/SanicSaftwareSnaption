@@ -139,7 +139,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                     // replace default is the User is valid
                     if (user != null) {
                         holder.captionerText.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadProfilePictureIntoView(user.getImagePath(), holder.captionPhoto);
+                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionPhoto);
                     }
                 }
 
