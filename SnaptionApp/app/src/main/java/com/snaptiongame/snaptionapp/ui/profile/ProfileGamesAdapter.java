@@ -38,7 +38,7 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
     public void onBindViewHolder(final ProfileGameViewHolder holder, int position) {
         //get last item and show it first
         Game game = games.get(games.size() - 1 - position);
-        FirebaseResourceManager.loadGameImageIntoView(game.getImagePath(), holder.photo);
+        FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
 
         if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
             // allows the image to be clipped with rounded edges

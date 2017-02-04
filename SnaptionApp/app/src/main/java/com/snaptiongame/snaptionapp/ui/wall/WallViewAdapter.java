@@ -16,8 +16,12 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.captions.CaptionActivity;
 
 import java.util.List;
+
+import static android.R.attr.data;
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
@@ -40,13 +44,29 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         return new WallViewHolder(view);
     }
 
+    class PhotoClickListener implements View.OnClickListener {
+        String imagePath;
+        public PhotoClickListener(String imagePath) {
+            this.imagePath = imagePath;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Context imageContext = view.getContext();
+            Intent createGameIntent = new Intent(imageContext, CaptionActivity.class);
+            createGameIntent.putExtra(PHOTO_PATH, imagePath);
+            imageContext.startActivity(createGameIntent);
+        }
+    }
+
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
         holder.captionText.setText(game.getTopCaption() != null ?
                 game.getTopCaption().retrieveCaptionText() :
                 holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
-        FirebaseResourceManager.loadGameImageIntoView(game.getImagePath(), holder.photo);
+        FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
+        holder.photo.setOnClickListener(new PhotoClickListener(game.getImagePath()));
 
         // distinguish between complete and incomplete games
         if (game.getIsOpen()) {
