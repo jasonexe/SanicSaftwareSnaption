@@ -26,6 +26,8 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
+import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
@@ -72,6 +74,11 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
                         fab.setVisibility(View.INVISIBLE);
+                        break;
+                    case R.id.friends_item:
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                new FriendsFragment()).commit();
+                        fab.setVisibility(View.VISIBLE);
                         break;
                 }
                 currentFragmentMenuItemId = selectedItemId;
@@ -137,9 +144,14 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
-
-        Intent intent = new Intent(this, CreateGameActivity.class);
-        startActivity(intent);
+        if (currentFragmentMenuItemId == R.id.wall_item) {
+            Intent intent = new Intent(this, CreateGameActivity.class);
+            startActivity(intent);
+        }
+        else if (currentFragmentMenuItemId == R.id.friends_item) {
+            Intent intent = new Intent(this, AddInviteFriendsActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override
