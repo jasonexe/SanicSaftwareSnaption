@@ -93,6 +93,15 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Gets the direct path to the user table in the database
+     * @param id The ID of the user whose path to find
+     * @return a string path from the root node to current user
+     */
+    public static String getUserPath(String id) {
+        return USER_DIRECTORY + id;
+    }
+
+    /**
      * Get the user id of the current user
      * @return a string key to the user table
      */
