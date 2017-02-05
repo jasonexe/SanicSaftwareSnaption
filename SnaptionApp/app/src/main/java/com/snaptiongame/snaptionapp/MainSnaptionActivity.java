@@ -92,7 +92,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                             item.setTitle(getResources().getString(R.string.logout));
                         }
                         else {
-                            new AlertDialog.Builder(getParent())
+                            new AlertDialog.Builder(getApplicationContext(), 0)
                                     .setMessage("Are you sure you want to log out?")
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         @Override
