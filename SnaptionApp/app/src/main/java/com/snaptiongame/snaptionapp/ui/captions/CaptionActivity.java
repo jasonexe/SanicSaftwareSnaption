@@ -2,7 +2,6 @@ package com.snaptiongame.snaptionapp.ui.captions;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -36,23 +36,26 @@ public class CaptionActivity extends AppCompatActivity {
     public static final int NUM_CARDS_IN_HAND = 5;
     private static final float rotationDeg = -135f;
     private static final int ROTATION_TIME = 600;
-    private static final String CARD_OBJECT = "card_obj";
     private PopupMenu poppedUp = null;
     private List<Card> allCards = null;
+    private List<Card> handCards = null;
     private boolean isRefreshing = false;
     private Card curUserCard;
 
-    @BindView(R.id.firstHalfText)
+    @BindView(R.id.first_half_text)
     public TextView firstHalfCardText;
 
-    @BindView(R.id.secondHalfText)
+    @BindView(R.id.second_half_text)
     public TextView secondHalfCardText;
 
-    @BindView(R.id.editCaptionText)
+    @BindView(R.id.edit_caption_text)
     public EditText captionTextEntry;
 
     @BindView(R.id.card_input)
     public View cardInputView;
+
+    @BindView(R.id.submitCaptionButton)
+    public Button submitButton;
 
 
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {
@@ -60,16 +63,16 @@ public class CaptionActivity extends AppCompatActivity {
         public boolean onEditorAction(TextView textView, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_NULL
                     && event.getAction() == KeyEvent.ACTION_DOWN) {
-                System.out.println("Adding the caption");
-                addCaption(captionTextEntry.getText().toString());
+                addCaption();
             }
             return true;
         }
     };
 
-    private void addCaption(String userInput) {
+    private void addCaption() {
         // Should never be null, but ya can't be too sure
         if (curUserCard != null) {
+            String userInput = captionTextEntry.getText().toString();
             Uploader uploader = new FirebaseUploader();
             // TODO replace this with the ID of the actual game.
             String gameId = "-Kbqjvc3cVKVPtcmTr6A";
@@ -87,6 +90,7 @@ public class CaptionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_caption);
         populateCards();
         ButterKnife.bind(this);
+        // Listen for if the user presses "enter." They can also submit by clicking the button
         captionTextEntry.setOnEditorActionListener(enterListener);
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -95,7 +99,13 @@ public class CaptionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 createCardMenu();
+            }
+        });
 
+        submitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addCaption();
             }
         });
     }
@@ -106,6 +116,12 @@ public class CaptionActivity extends AppCompatActivity {
         if(poppedUp != null) {
             poppedUp.dismiss();
         }
+        // If refresh was clicked or there are no hand cards, get a new hand
+        if(isRefreshing || handCards == null) {
+            Random rand = new Random();
+            int randStart = rand.nextInt(allCards.size() - NUM_CARDS_IN_HAND - 1);
+            handCards = allCards.subList(randStart, randStart + NUM_CARDS_IN_HAND);
+        }
         // After the popup is dismissed, refreshing will definitely be false.
         // Make sure to set it after dismiss, otherwise if "refresh" is clicked, the
         // menu pops up in the wrong spot
@@ -114,9 +130,6 @@ public class CaptionActivity extends AppCompatActivity {
         fab.setRotation(0f);
         // Rotate the fab counter-clockwise 135 degrees when popping up the cards
         ObjectAnimator.ofFloat(fab, "rotation", 0f, rotationDeg).setDuration(ROTATION_TIME).start();
-        Random rand = new Random();
-        int randStart = rand.nextInt(allCards.size() - NUM_CARDS_IN_HAND - 1);
-        List<Card> handCards = allCards.subList(randStart, randStart + NUM_CARDS_IN_HAND);
         poppedUp = showCardSelectPopup(fab, handCards);
         poppedUp.setOnDismissListener(new PopupMenu.OnDismissListener() {
             @Override
@@ -137,19 +150,14 @@ public class CaptionActivity extends AppCompatActivity {
         // Make sure cards list got populated
         if(allCards != null) {
             Menu cardMenu = popup.getMenu();
-            for (Card curCard : handCards) {
+            for (final Card curCard : handCards) {
                 MenuItem thisItem = cardMenu.add(curCard.getCardText().replace("%s", "______"));
-                Intent cardIntent = new Intent();
-                cardIntent.putExtra(CARD_OBJECT, curCard);
-                thisItem.setIntent(cardIntent);
                 thisItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        Card clickedCard = (Card) menuItem.getIntent()
-                                .getSerializableExtra(CARD_OBJECT);
-                        curUserCard = clickedCard;
-                        firstHalfCardText.setText(clickedCard.retrieveFirstHalfText());
-                        secondHalfCardText.setText(clickedCard.retrieveSecondHalfText());
+                        curUserCard = curCard;
+                        firstHalfCardText.setText(curCard.retrieveFirstHalfText());
+                        secondHalfCardText.setText(curCard.retrieveSecondHalfText());
                         cardInputView.setVisibility(View.VISIBLE);
                         return true;
                     }

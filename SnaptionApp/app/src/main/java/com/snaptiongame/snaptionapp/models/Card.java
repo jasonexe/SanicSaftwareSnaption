@@ -23,6 +23,7 @@ public class Card implements Serializable{
 
     public Card (Card oldCard) {
         this.cardText = oldCard.getCardText();
+        this.id = oldCard.getId();
     }
 
     // Call this after firebase generates the key that the card will have.
