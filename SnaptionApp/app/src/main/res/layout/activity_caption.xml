@@ -7,7 +7,9 @@
     android:fitsSystemWindows="true"
     tools:context="com.snaptiongame.snaptionapp.ui.captions.CaptionActivity">
 
-    <include layout="@layout/content_caption" />
+    <include layout="@layout/card_input_layout"
+        android:visibility="invisible"
+        android:id="@+id/card_input"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
