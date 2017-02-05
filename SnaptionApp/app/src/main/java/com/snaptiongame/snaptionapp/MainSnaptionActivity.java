@@ -11,6 +11,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -31,6 +32,8 @@ import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -63,7 +66,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         @Override
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
             int selectedItemId = item.getItemId();
             // if the selected item is different than the currently selected item, replace the fragment
             if (selectedItemId != currentFragmentMenuItemId) {
@@ -83,6 +86,26 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                                 new FriendsFragment()).commit();
                         fab.setVisibility(View.VISIBLE);
                         break;
+                    case R.id.log_option:
+                        if (item.getTitle().equals(getResources().getString(R.string.login))) {
+                            setupLoginDialog();
+                            item.setTitle(getResources().getString(R.string.logout));
+                        }
+                        else {
+                            new AlertDialog.Builder(getParent())
+                                    .setMessage("Are you sure you want to log out?")
+                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            loginManager.signOut();
+                                            setupNavigationView();
+                                            item.setTitle(getResources().getString(R.string.login));
+                                        }
+                                    }).setNegativeButton("No", null).show();
+
+                        }
+                        break;
+
                 }
                 currentFragmentMenuItemId = selectedItemId;
             }
@@ -107,13 +130,10 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
         drawerLayout.addDrawerListener(mDrawerToggle);
+
+
         navigationView.setNavigationItemSelectedListener(mNavListener);
 
-        // navigation drawer view setup
-        View navigationHeaderView = navigationView.getHeaderView(0);
-        navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
-        navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
-        navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
         setupNavigationView();
 
         // wall fragment instantiation
@@ -121,12 +141,25 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
         loginManager = new LoginManager(this, new FirebaseUploader());
+        //set Login button in Navigation drawer
+        if (FirebaseResourceManager.getUserPath() != null) {
+            navigationView.getMenu().findItem(R.id.log_option).setTitle("Log Out");
+        }
+        else {
+            navigationView.getMenu().findItem(R.id.log_option).setTitle("Log In");
+        }
+
     }
 
     private void setupNavigationView() {
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+        // navigation drawer view setup
+        final View navigationHeaderView = navigationView.getHeaderView(0);
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
+            navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
+            navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
+            navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
             //retrieve information from User table
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
@@ -180,6 +213,18 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
     public void onDismiss(DialogInterface dialogInterface) {
         Snackbar.make(findViewById(R.id.drawer_layout), loginManager.getStatus(),Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
+    }
+
+    private void setupLoginDialog() {
+        //create pop up for login Facebook or Google+
+        LoginDialog logDialog = new LoginDialog(this, loginManager, new LoginDialog.LoginListener() {
+            @Override
+            public void onLoginComplete() {
+                setupNavigationView();
+            }
+        });
+        logDialog.setOnDismissListener(this);
+        logDialog.show();
     }
 
     @Override

@@ -28,6 +28,8 @@
     <string name="caption_filler">Be the first to caption this photo!</string>
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
+    <string name="login">Log In</string>
+    <string name="logout">Log Out</string>
 
 
     <!--Accessibility strings-->

@@ -62,6 +62,8 @@ public class LoginManager extends Observable {
     private FragmentActivity activity;
     private boolean isLoggedIn;
     private byte[] profilePhoto;
+    private boolean isLoggedInFacebook;
+    private boolean isLoggedInGoogle;
 
     public LoginManager(FragmentActivity activity, Uploader uploader) {
         this.activity = activity;
@@ -69,7 +71,7 @@ public class LoginManager extends Observable {
         mAuth = FirebaseAuth.getInstance();
         //TODO: remove this sign out when sign out is implemented
         //this is just for testing purposes to show snackbar when already logged in
-        mAuth.signOut();
+        signOut();
         mCallbackManager = CallbackManager.Factory.create();
         isLoggedIn = mAuth.getCurrentUser() != null;
         profilePhoto = null;
@@ -197,6 +199,25 @@ public class LoginManager extends Observable {
         return provider;
     }
 
+    public boolean signOut() {
+        //sign out of facebook
+        com.facebook.login.LoginManager.getInstance().logOut();
+        logoutOfGoogle(new AuthCallback() {
+            @Override
+            public void onSuccess() {
+                System.out.println("We logged out son");
+            }
+
+            @Override
+            public void onError() {
+                System.out.println("Uh oh Uh oh!");
+            }
+        });
+        mAuth.signOut();
+
+        return false;
+    }
+
     public boolean isLoggedIn() {
         return isLoggedIn;
     }
@@ -274,8 +295,8 @@ public class LoginManager extends Observable {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            setLoggedIn(true);
                             uploadUser(null);
+                            setLoggedIn(true);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
@@ -299,8 +320,8 @@ public class LoginManager extends Observable {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            setLoggedIn(true);
                             uploadUser(token.getUserId());
+                            setLoggedIn(true);
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());

@@ -12,4 +12,9 @@
         android:id="@+id/friends_item"
         android:title="@string/friends"
         android:icon="@drawable/ic_supervisor_account_grey_400_18dp"/>
+    <group />
+        <item
+            android:id="@+id/log_option"
+            android:title="@string/login"
+            android:icon="@drawable/ic_supervisor_account_grey_400_18dp"/>
 </menu>
