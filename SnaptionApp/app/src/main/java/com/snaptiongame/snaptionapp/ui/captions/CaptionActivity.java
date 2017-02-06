@@ -58,6 +58,9 @@ public class CaptionActivity extends AppCompatActivity {
     @BindView(R.id.submitCaptionButton)
     public Button submitButton;
 
+    @BindView(R.id.fab)
+    public FloatingActionButton fab;
+
 
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {
         @Override
@@ -111,7 +114,6 @@ public class CaptionActivity extends AppCompatActivity {
         // Listen for if the user presses "enter." They can also submit by clicking the button
         captionTextEntry.setOnEditorActionListener(enterListener);
 
-        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             // This will pop up the caption options
             @Override
@@ -144,7 +146,6 @@ public class CaptionActivity extends AppCompatActivity {
         // Make sure to set it after dismiss, otherwise if "refresh" is clicked, the
         // menu pops up in the wrong spot
         isRefreshing = false;
-        View fab = findViewById(R.id.fab);
         fab.setRotation(0f);
         // Rotate the fab counter-clockwise 135 degrees when popping up the cards
         ObjectAnimator.ofFloat(fab, "rotation", 0f, rotationDeg).setDuration(ROTATION_TIME).start();
@@ -154,7 +155,7 @@ public class CaptionActivity extends AppCompatActivity {
             public void onDismiss(PopupMenu menu) {
                 // Make sure to rotate it back when the popup is closed if it's not being refreshed
                 if(!isRefreshing) {
-                    ObjectAnimator.ofFloat(findViewById(R.id.fab), "rotation",
+                    ObjectAnimator.ofFloat(fab, "rotation",
                             rotationDeg, 0f).setDuration(ROTATION_TIME).start();
                 }
             }
@@ -184,7 +185,7 @@ public class CaptionActivity extends AppCompatActivity {
                     }
                 });
             }
-            // TODO how to add an icon?
+            // TODO figure out how to add icon/if it's possible to add one
             MenuItem refreshItem = cardMenu.add("Refresh");
             refreshItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
