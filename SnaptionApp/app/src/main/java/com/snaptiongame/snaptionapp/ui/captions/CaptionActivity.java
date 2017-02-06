@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -81,7 +82,24 @@ public class CaptionActivity extends AppCompatActivity {
             allInput.add(userInput);
             Caption userCaption = new Caption(captionId, gameId, curUserCard, allInput);
             uploader.addCaptions(userCaption);
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(captionTextEntry.getWindowToken(), 0);
+            cardInputView.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(captionTextEntry.getWindowToken(), 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(captionTextEntry.getWindowToken(), 0);
     }
 
     @Override
@@ -159,6 +177,9 @@ public class CaptionActivity extends AppCompatActivity {
                         firstHalfCardText.setText(curCard.retrieveFirstHalfText());
                         secondHalfCardText.setText(curCard.retrieveSecondHalfText());
                         cardInputView.setVisibility(View.VISIBLE);
+                        // TODO figure out why it won't pop up the initial time something is selected
+                        ((InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .showSoftInput(captionTextEntry, InputMethodManager.SHOW_FORCED);
                         return true;
                     }
                 });
