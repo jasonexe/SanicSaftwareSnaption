@@ -33,7 +33,7 @@ import java.util.Random;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CaptionActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity {
     public static final int NUM_CARDS_IN_HAND = 5;
     private static final float rotationDeg = -135f;
     private static final int ROTATION_TIME = 600;
