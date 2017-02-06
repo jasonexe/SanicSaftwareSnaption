@@ -28,6 +28,7 @@
     <string name="caption_filler">Be the first to caption this photo!</string>
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
+    <string name="submit_caption">Submit</string>
 
 
     <!--Accessibility strings-->
