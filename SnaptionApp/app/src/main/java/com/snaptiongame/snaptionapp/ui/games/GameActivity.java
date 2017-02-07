@@ -30,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
 
 /**
@@ -95,7 +96,7 @@ public class GameActivity extends AppCompatActivity {
         List<String> empty = new ArrayList<>();
         // TODO remove this when Cameron's code is merged in
         Game game = new Game("-Kbqjvc3cVKVPtcmTr6A", "", "", empty, empty, true, 0, 0, "mature");
-        addCaption(userInput, uploader, game);
+        addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
         cardInputView.setVisibility(View.GONE);
         hideKeyboard();
     }
@@ -117,26 +118,14 @@ public class GameActivity extends AppCompatActivity {
         }
     };
 
-    // Creates the caption object, then uploads it to firebase using the uploader
-    private void addCaption(String userInput, Uploader uploader, Game game) {
-        // Should never be null, but ya can't be too sure
-        if (curUserCard != null) {
-            String gameId = game.getId();
-            String captionId = uploader.getNewCaptionKey(gameId);
-            List<String> allInput = new ArrayList<>();
-            allInput.add(userInput);
-            Caption userCaption = new Caption(captionId, gameId,
-                    curUserCard, allInput);
-            uploader.addCaptions(userCaption);
-        }
-    }
+
 
     /**
      * This class is used in the Adapter, and is called when a card is clicked.
      */
     class CardToTextConverter {
         public void convertCard(Card curCard) {
-            if(curCard.getId().equals(REFRESH_STRING)) {
+            if (curCard.getId().equals(REFRESH_STRING)) {
                 refreshCards();
             } else {
                 curUserCard = curCard;
@@ -159,7 +148,7 @@ public class GameActivity extends AppCompatActivity {
         // Add refresh card  is in the activity so that we can use the resource file. Easier to test
         handCards = addRefreshCard(getRandomCardsFromList(allCards, rand));
 
-        if(cardListAdapter != null) {
+        if (cardListAdapter != null) {
             cardListAdapter.removeAndAddOptions(handCards);
         }
 //        captionCardsList.smoothScrollToPosition(0);

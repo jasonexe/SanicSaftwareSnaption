@@ -61,6 +61,8 @@ dependencies {
     // Glide - image retrieval and caching
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
+    // Mockito
+    testCompile "org.mockito:mockito-core:2.+"
 }
 
 apply plugin: 'com.google.gms.google-services'
