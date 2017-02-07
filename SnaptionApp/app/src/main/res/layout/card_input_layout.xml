@@ -17,6 +17,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/first_half_text"
             android:layout_weight="0"
+            android:text="Test"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
         <EditText

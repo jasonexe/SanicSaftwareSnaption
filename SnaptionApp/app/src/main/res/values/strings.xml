@@ -29,6 +29,7 @@
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
     <string name="submit_caption">Submit</string>
+    <string name="refresh">Refresh</string>
 
 
     <!--Accessibility strings-->
