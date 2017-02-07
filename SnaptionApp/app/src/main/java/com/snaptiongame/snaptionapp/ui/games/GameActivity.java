@@ -36,6 +36,7 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
 /**
  * This class is the core of the game screen, is in charge of basically all the UI-related, and some
  * logic-related Game code. This Activity is started when a user clicks on a photo on the wall
+ * TODO needs to verify that a user is logged in before adding captions.
  * @Author Jason Krein, Cameron Geehr
  */
 public class GameActivity extends AppCompatActivity {
