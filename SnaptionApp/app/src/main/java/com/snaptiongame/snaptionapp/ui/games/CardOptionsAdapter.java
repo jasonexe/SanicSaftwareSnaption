@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp.ui.captions;
+package com.snaptiongame.snaptionapp.ui.games;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Card;
-import com.snaptiongame.snaptionapp.ui.profile.ProfileGameViewHolder;
 
 import java.util.List;
 
@@ -32,7 +31,6 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
         holder.possibleCardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                
                 converter.convertCard(getCardAtPos(position));
             }
         });
@@ -54,8 +52,10 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
         return options.get(position);
     }
 
-    public void setOptions(List<Card> options) {
-        this.options = options;
-        this.notifyDataSetChanged();
+    public void removeAndAddOptions(List<Card> cards) {
+        options.clear();
+        this.notifyItemRangeRemoved(0, cards.size());
+        options.addAll(cards);
+        this.notifyItemRangeInserted(0, options.size());
     }
 }

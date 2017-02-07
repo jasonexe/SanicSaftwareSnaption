@@ -36,7 +36,7 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePat
 public class FirebaseResourceManager {
     private static final String USER_DIRECTORY = "users/";
     public static final String CARDS_DIRECTORY = "cards";
-    public static final int NUM_CARDS_IN_HAND = 5;
+    public static final int NUM_CARDS_IN_HAND = 10;
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
 

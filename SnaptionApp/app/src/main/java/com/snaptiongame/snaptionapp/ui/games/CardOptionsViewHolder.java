@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp.ui.captions;
+package com.snaptiongame.snaptionapp.ui.games;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
