@@ -43,7 +43,7 @@
         <activity android:name=".ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"
             android:label="@string/friends"/>
-        <activity android:name=".ui.captions.GameActivity"
+        <activity android:name=".ui.games.GameActivity"
             android:screenOrientation="portrait"
             android:label="@string/captions"/>
     </application>

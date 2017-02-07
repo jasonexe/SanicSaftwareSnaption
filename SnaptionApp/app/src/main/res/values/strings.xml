@@ -29,7 +29,6 @@
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
 
-
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
     <string name="close_nav_drawer">Close navigation drawer</string>
