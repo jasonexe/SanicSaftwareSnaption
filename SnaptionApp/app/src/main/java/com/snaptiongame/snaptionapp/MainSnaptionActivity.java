@@ -87,23 +87,26 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.log_option:
+                        //check if we are logging in our out based on item text
                         if (item.getTitle().equals(getResources().getString(R.string.login))) {
+                            //display dialog
                             setupLoginDialog();
-                            item.setTitle(getResources().getString(R.string.logout));
                         }
                         else {
-                            new AlertDialog.Builder(getApplicationContext(), 0)
+                            new AlertDialog.Builder(MainSnaptionActivity.this, 0)
                                     .setMessage("Are you sure you want to log out?")
                                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
-                                            loginManager.signOut();
+                                            loginManager.logOut();
                                             setupNavigationView();
                                             item.setTitle(getResources().getString(R.string.login));
                                         }
-                                    }).setNegativeButton("No", null).show();
+                                    }).setNegativeButton("No", null).create().show();
 
                         }
+                        //because this is not a fragment we cannot set currentFragment to it so we reset it to last fragment
+                        selectedItemId = currentFragmentMenuItemId;
                         break;
 
                 }
@@ -141,32 +144,35 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
         loginManager = new LoginManager(this, new FirebaseUploader());
-        //set Login button in Navigation drawer
-        if (FirebaseResourceManager.getUserPath() != null) {
-            navigationView.getMenu().findItem(R.id.log_option).setTitle("Log Out");
-        }
-        else {
-            navigationView.getMenu().findItem(R.id.log_option).setTitle("Log In");
-        }
-
     }
 
     private void setupNavigationView() {
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
+        navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
+        navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
+        navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
-            navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
-            navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
-            navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
+
             //retrieve information from User table
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
+                    //load user data into views
                     navDrawerName.setText(user.getDisplayName());
                     navDrawerEmail.setText(user.getEmail());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                    //set user info to visible now they are logged in
+                    navDrawerPhoto.setVisibility(View.VISIBLE);
+                    navDrawerName.setVisibility(View.VISIBLE);
+                    navDrawerEmail.setVisibility(View.VISIBLE);
+                    //set logged in only options to visible
+                    navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
+                    navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+                    //set drawer item to say log out
+                    navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
                 }
 
                 @Override
@@ -174,6 +180,17 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                     return User.class;
                 }
             });
+        }
+        else {
+            //hide elements because user is logged out
+            navDrawerPhoto.setVisibility(View.INVISIBLE);
+            navDrawerName.setVisibility(View.INVISIBLE);
+            navDrawerEmail.setVisibility(View.INVISIBLE);
+            //set logged in only options to hidden
+            navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
+            navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+            //set drawer item to say login
+            navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
         }
     }
 
@@ -235,23 +252,6 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         if (id == R.id.action_settings) {
             return true;
         }
-        else if (id == R.id.action_login) {
-            if (!loginManager.isLoggedIn()) {
-                //create pop up for login Facebook or Google+
-                LoginDialog logDialog = new LoginDialog(this, loginManager, new LoginDialog.LoginListener() {
-                    @Override
-                    public void onLoginComplete() {
-                        setupNavigationView();
-                    }
-                });
-                logDialog.setOnDismissListener(this);
-                logDialog.show();
-            }
-            else {
-                onDismiss(null);
-            }
-        }
-
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
@@ -269,9 +269,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         //if returning from google login attempt
         if (requestCode == GOOGLE_LOGIN_RC) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                loginManager.handleGoogleLoginResult(result);
-            }
+            loginManager.handleGoogleLoginResult(result);
         }
         //if returning from facebook login attempt
         else {

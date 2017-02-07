@@ -33,15 +33,15 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Observable;
 
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
 
 /**
+ * Handles logging in and logging out of Facebook and Google and connecting these services with
+ * our backend
+ *
  * Created by brittanyberlanga on 12/2/16.
  * Edited by Austin Robarts
  */
@@ -49,32 +49,38 @@ public class LoginManager extends Observable {
 //TODO: refactor to remove Firebase objects from this class when we establish Uploader class
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
-
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
     private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth auth;
     private Uploader uploader;
-    private GoogleApiClient mGoogleApiClient;
-    private CallbackManager mCallbackManager;
-    private AuthCallback mGoogleAuthCallback;
+    private GoogleApiClient googleApiClient;
+    private CallbackManager callbackManager;
+    private AuthCallback googleAuthCallback;
     private FragmentActivity activity;
     private boolean isLoggedIn;
     private byte[] profilePhoto;
-    private boolean isLoggedInFacebook;
-    private boolean isLoggedInGoogle;
 
     public LoginManager(FragmentActivity activity, Uploader uploader) {
         this.activity = activity;
         this.uploader = uploader;
-        mAuth = FirebaseAuth.getInstance();
-        //TODO: remove this sign out when sign out is implemented
-        //this is just for testing purposes to show snackbar when already logged in
-        signOut();
-        mCallbackManager = CallbackManager.Factory.create();
-        isLoggedIn = mAuth.getCurrentUser() != null;
+        auth = FirebaseAuth.getInstance();
+        callbackManager = CallbackManager.Factory.create();
+        isLoggedIn = auth.getCurrentUser() != null;
         profilePhoto = null;
+
+        googleAuthCallback = new AuthCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d("TAG", "GoogleAuth: SUCCESS");
+            }
+
+            @Override
+            public void onError() {
+                Log.d("TAG", "GoogleAuth: FAILURE");
+            }
+        };
     }
 
     public interface AuthCallback {
@@ -82,9 +88,9 @@ public class LoginManager extends Observable {
         void onError();
     }
 
-    public void signInWithGoogle() {
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
+    public void loginWithGoogle() {
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
         }
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -94,41 +100,29 @@ public class LoginManager extends Observable {
                 .build();
         // Build a GoogleApiClient with access to the Google Sign-In API and the
         // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(activity)
+        googleApiClient = new GoogleApiClient.Builder(activity)
                 .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        mGoogleAuthCallback.onError();
-                        mGoogleAuthCallback = null;
+                        googleAuthCallback.onError();
                     }
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
         //This means that the result function will be triggered, override
         activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
     }
 
-    public void handleGoogleLoginResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            isLoggedIn = true;
-            GoogleSignInAccount acct = result.getSignInAccount();
-            loginToFirebase(acct);
-        } else {
-            mGoogleAuthCallback.onError();
-            mGoogleAuthCallback = null;
-        }
-    }
-
     public void logoutOfGoogle(final AuthCallback authCallback) {
-        if (mGoogleApiClient != null && mAuth.getCurrentUser() != null) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+        if (googleApiClient != null && googleApiClient.isConnected() &&
+                auth.getCurrentUser() != null) {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
                     new ResultCallback<Status>() {
                         @Override
                         public void onResult(@NonNull Status status) {
                             if (status.isSuccess()) {
-                                mAuth.signOut();
+                                auth.signOut();
                                 authCallback.onSuccess();
                             }
                             else {
@@ -136,21 +130,32 @@ public class LoginManager extends Observable {
                             }
                         }
                     });
+            googleApiClient.stopAutoManage(activity);
+            googleApiClient.disconnect();
         }
         else {
             authCallback.onError();
         }
     }
 
+    public void handleGoogleLoginResult(GoogleSignInResult result) {
+        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            GoogleSignInAccount acct = result.getSignInAccount();
+            loginToFirebase(acct);
+        } else {
+            googleApiClient.disconnect();
+        }
+    }
+
     public void setupFacebookLoginButton(LoginButton loginButton) {
         loginButton.setReadPermissions("email", "public_profile");
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 loginToFirebase(loginResult.getAccessToken());
             }
-
             @Override
             public void onCancel() {
                 Log.d(TAG, "facebook:onCancel");
@@ -164,57 +169,34 @@ public class LoginManager extends Observable {
     }
 
     public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     public String getStatus() {
-        String status = "";
+        String status = "You are not logged in";
         String provider = getProvider();
         String userName = getUserName();
         if (provider != null && userName != null) {
-            status += "You're logged into " + getProvider() + " as " + getUserName();
-        }
-        else {
-            status += "Logout unsuccessful";
+            status = "You're logged into " + getProvider() + " as " + getUserName();
         }
         return status;
     }
 
-    //TODO this should be pulled from firebase not the auth object
-    private String getUserName() {
-        String username = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            username = user.getDisplayName();
-        }
-        return username;
-    }
-
-    private String getProvider() {
-        String provider = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            provider = user.getProviders().get(0);
-        }
-        return provider;
-    }
-
-    public boolean signOut() {
+    public boolean logOut() {
         //sign out of facebook
         com.facebook.login.LoginManager.getInstance().logOut();
         logoutOfGoogle(new AuthCallback() {
             @Override
             public void onSuccess() {
-                System.out.println("We logged out son");
+                Log.d("TAG", "Successfully logged out of Google");
             }
-
             @Override
             public void onError() {
-                System.out.println("Uh oh Uh oh!");
+                Log.d("TAG", "Failed to log out of Google");
             }
         });
-        mAuth.signOut();
-
+        auth.signOut();
+        setLoggedIn(false);
         return false;
     }
 
@@ -229,7 +211,7 @@ public class LoginManager extends Observable {
     }
 
     private void uploadUser(final String facebookId) {
-        FirebaseUser fbUser = mAuth.getCurrentUser();
+        FirebaseUser fbUser = auth.getCurrentUser();
         //make sure user is signed in before sending
         if (fbUser != null) {
             //establish fields needed for constructor
@@ -244,13 +226,10 @@ public class LoginManager extends Observable {
             if (facebookId != null) {
                 downloadPhoto(String.format(facebookImageUrl, facebookId));
             }
-
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
             uploader.addUser(user, profilePhoto);
-
         }
-
     }
 
     private void downloadPhoto(final String imageUrl) {
@@ -289,7 +268,7 @@ public class LoginManager extends Observable {
         downloadPhoto(photo.toString());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
+        auth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -300,9 +279,9 @@ public class LoginManager extends Observable {
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            mGoogleAuthCallback.onError();
+                            googleAuthCallback.onError();
                         }
-                        mGoogleAuthCallback = null;
+                        googleAuthCallback = null;
                     }
                 });
     }
@@ -314,7 +293,7 @@ public class LoginManager extends Observable {
     private void loginToFirebase(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
+        auth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -328,5 +307,24 @@ public class LoginManager extends Observable {
                         }
                     }
                 });
+    }
+
+    //TODO this should be pulled from firebase not the auth object
+    private String getUserName() {
+        String username = null;
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            username = user.getDisplayName();
+        }
+        return username;
+    }
+
+    private String getProvider() {
+        String provider = null;
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            provider = user.getProviders().get(0);
+        }
+        return provider;
     }
 }
