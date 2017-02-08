@@ -1,7 +1,9 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +44,8 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
 public class GameActivity extends AppCompatActivity {
     public static final String REFRESH_STRING = "refresh";
     private static final String DEFAULT_PACK = "InitialPack";
+    private static final int ROTATION_TIME = 600;
+    private static final float FAB_ROTATION = 135f;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
@@ -64,8 +68,8 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.submit_caption_button)
     public Button submitCaptionButton;
 
-//    @BindView(R.id.fab)
-//    public FloatingActionButton fab;
+    @BindView(R.id.fab)
+    public FloatingActionButton fab;
 
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
@@ -88,6 +92,36 @@ public class GameActivity extends AppCompatActivity {
         captionCardsList.setAdapter(cardListAdapter);
     }
 
+    @OnClick(R.id.fab)
+    public void displayCardOptions() {
+        toggleVisibility(captionCardsList);
+    }
+
+    private void toggleVisibility(View view) {
+        if(view.getVisibility() == View.VISIBLE) {
+            view.setVisibility(View.GONE);
+        } else {
+            view.setVisibility(View.VISIBLE);
+        }
+        setFabRotation();
+    }
+
+    private void setFabRotation() {
+        float curRotation = fab.getRotation();
+        // If the caption card list is visible, fab should be rotated to 135 deg. If it isn't,
+        // then rotate it.
+        if(captionCardsList.getVisibility() == View.VISIBLE) {
+            if(curRotation != FAB_ROTATION) {
+                ObjectAnimator.ofFloat(fab, "rotation",
+                        0f, FAB_ROTATION).setDuration(ROTATION_TIME).start();
+            }
+        } else if(curRotation != 0) {
+            // Rotate back to 0 if it's not already there and the card list is hidden
+            ObjectAnimator.ofFloat(fab, "rotation",
+                    FAB_ROTATION, 0f).setDuration(ROTATION_TIME).start();
+        }
+    }
+
     @OnClick(R.id.submit_caption_button)
     public void submit() {
         String userInput = editCaptionText.getText().toString();
@@ -98,7 +132,8 @@ public class GameActivity extends AppCompatActivity {
         // TODO remove this when Cameron's code is merged in
         Game game = new Game("-Kbqjvc3cVKVPtcmTr6A", "", "", empty, empty, true, 0, 0, "mature");
         addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
-        cardInputView.setVisibility(View.GONE);
+        toggleVisibility(cardInputView);
+        toggleVisibility(captionCardsList);
         hideKeyboard();
     }
 
