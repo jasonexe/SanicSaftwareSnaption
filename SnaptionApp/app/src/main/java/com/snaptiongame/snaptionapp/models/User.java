@@ -24,6 +24,17 @@ public class User {
     //needed for firebase compatibility
     public User() {}
 
+    /**
+     * Constructor used to construct a Facebook friend
+     *
+     * @param displayName Facebook display name
+     * @param facebookId Facebook unique id
+     */
+    public User(String displayName, String facebookId) {
+        this.displayName = displayName;
+        this.facebookId = facebookId;
+    }
+
     public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
         this.id = id;
         this.email = email;

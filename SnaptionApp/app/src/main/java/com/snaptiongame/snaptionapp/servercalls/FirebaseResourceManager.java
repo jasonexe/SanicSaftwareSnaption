@@ -3,18 +3,21 @@ package com.snaptiongame.snaptionapp.servercalls;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -24,18 +27,25 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.Card;
+import com.snaptiongame.snaptionapp.models.User;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import static com.google.android.gms.internal.zzs.TAG;
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 public class FirebaseResourceManager {
     private static final String USER_DIRECTORY = "users/";
     public static final String CARDS_DIRECTORY = "cards";
+    private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
+    private static final String FB_FRIENDS_REQUEST = "/%s/friends";
+    private static final String FB_REQUEST_DATA = "data";
+    private static final String FB_REQUEST_NAME = "name";
+    private static final String FB_REQUEST_ID = "id";
     public static final int NUM_CARDS_IN_HAND = 5;
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
@@ -252,5 +262,66 @@ public class FirebaseResourceManager {
                         "image URL from Firebase");
             }
         });
+    }
+
+    /**
+     * Retrieves a list of Users, representing the current User's Facebook friends that have logged
+     * into Snaption, and returns the list of Users to the given ResourceListener
+     *
+     * @param friendListener ResourceListener the list of Users is returned to
+     */
+    public static void getFacebookFriends(final ResourceListener<List<User>> friendListener) {
+        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+        if (FirebaseResourceManager.getUserPath() != null) {
+            // retrieve the current User
+            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
+                    new ResourceListener<User>() {
+                        @Override
+                        public void onData(User user) {
+                            if (user.getFacebookId() != null) {
+                                // retrieve the current User's Facebook friends
+                                new GraphRequest(
+                                        AccessToken.getCurrentAccessToken(),
+                                        String.format(FB_FRIENDS_REQUEST, user.getFacebookId()),
+                                        null,
+                                        HttpMethod.GET,
+                                        new GraphRequest.Callback() {
+                                            public void onCompleted(GraphResponse response) {
+                                                List<User> friendList = new ArrayList<>();
+                                                // parse the Facebook response to a list of Users
+                                                JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
+                                                if (friends != null) {
+                                                    for (int ndx = 0; ndx < friends.length(); ndx++) {
+                                                        JSONObject friend = friends.optJSONObject(ndx);
+                                                        if (friend != null) {
+                                                            friendList.add(new User(friend.optString(FB_REQUEST_NAME), friend.optString(FB_REQUEST_ID)));
+                                                        }
+                                                    }
+                                                }
+                                                // return the list of Users to the listener
+                                                friendListener.onData(friendList);
+                                            }
+                                        }
+                                ).executeAsync();
+                            }
+                        }
+
+                        @Override
+                        public Class getDataType() {
+                            return User.class;
+                        }
+                    });
+        }
+    }
+
+
+    /**
+     * Loads a small Facebook photo into an ImageView given a Facebook user's unique Facebook id
+     *
+     * @param facebookId Facebook user's unique Facebook id
+     * @param imageView ImageView in which the photo should be loaded
+     */
+    public static void loadSmallFbPhotoIntoImageView(String facebookId, ImageView imageView) {
+        Glide.with(imageView.getContext()).load(String.format(SMALL_FB_PHOTO_REQUEST, facebookId)).into(imageView);
     }
 }
