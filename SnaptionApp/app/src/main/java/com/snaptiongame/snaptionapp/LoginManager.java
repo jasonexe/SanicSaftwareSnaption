@@ -34,6 +34,7 @@ import java.net.URL;
 import java.util.Observable;
 
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
@@ -61,10 +62,16 @@ public class LoginManager extends Observable {
     private FragmentActivity activity;
     private boolean isLoggedIn;
     private byte[] profilePhoto;
+    private LoginListener listener;
 
-    public LoginManager(FragmentActivity activity, Uploader uploader) {
+    public interface LoginListener {
+        void onLoginComplete();
+    }
+
+    public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener) {
         this.activity = activity;
         this.uploader = uploader;
+        this.listener = listener;
         auth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
         isLoggedIn = auth.getCurrentUser() != null;
@@ -197,6 +204,7 @@ public class LoginManager extends Observable {
         });
         auth.signOut();
         setLoggedIn(false);
+        listener.onLoginComplete();
         return false;
     }
 
@@ -228,7 +236,17 @@ public class LoginManager extends Observable {
             }
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            uploader.addUser(user, profilePhoto);
+            uploader.addUser(user, profilePhoto, new ResourceListener<User>() {
+                @Override
+                public void onData(User data) {
+                    listener.onLoginComplete();
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
         }
     }
 
@@ -262,7 +280,7 @@ public class LoginManager extends Observable {
      * Login with Google+
      * @param acct
      */
-    private void loginToFirebase(GoogleSignInAccount acct) {
+    private void loginToFirebase(final GoogleSignInAccount acct) {
         Uri photo = acct.getPhotoUrl();
         //downloading google profile picture
         downloadPhoto(photo.toString());
@@ -292,7 +310,7 @@ public class LoginManager extends Observable {
      */
     private void loginToFirebase(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                     @Override

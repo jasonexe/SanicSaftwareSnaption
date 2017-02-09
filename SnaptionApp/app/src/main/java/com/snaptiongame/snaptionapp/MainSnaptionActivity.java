@@ -23,19 +23,15 @@ import android.widget.TextView;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
+import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
-
-import org.w3c.dom.Text;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -99,7 +95,6 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             loginManager.logOut();
-                                            setupNavigationView();
                                             item.setTitle(getResources().getString(R.string.login));
                                         }
                                     }).setNegativeButton("No", null).create().show();
@@ -143,7 +138,12 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
-        loginManager = new LoginManager(this, new FirebaseUploader());
+        loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
+            @Override
+            public void onLoginComplete() {
+                setupNavigationView();
+            }
+        });
     }
 
     private void setupNavigationView() {
@@ -153,26 +153,30 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
         navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
         navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
         navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
-        //if the user is logged in
-        if (FirebaseResourceManager.getUserPath() != null) {
 
+        if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    //load user data into views
-                    navDrawerName.setText(user.getDisplayName());
-                    navDrawerEmail.setText(user.getEmail());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
-                    //set user info to visible now they are logged in
-                    navDrawerPhoto.setVisibility(View.VISIBLE);
-                    navDrawerName.setVisibility(View.VISIBLE);
-                    navDrawerEmail.setVisibility(View.VISIBLE);
-                    //set logged in only options to visible
-                    navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
-                    navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
-                    //set drawer item to say log out
-                    navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
+                    if (user != null) {
+                        //load user data into views
+                        navDrawerName.setText(user.getDisplayName());
+                        navDrawerEmail.setText(user.getEmail());
+                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                        //set user info to visible now they are logged in
+                        navDrawerPhoto.setVisibility(View.VISIBLE);
+                        navDrawerName.setVisibility(View.VISIBLE);
+                        navDrawerEmail.setVisibility(View.VISIBLE);
+                        //set logged in only options to visible
+                        navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
+                        navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+                        //set drawer item to say log out
+                        navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
+
+                    } else {
+                        removeUserInfoFromNavDrawer();
+                    }
                 }
 
                 @Override
@@ -180,18 +184,23 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                     return User.class;
                 }
             });
+        } else {
+            removeUserInfoFromNavDrawer();
         }
-        else {
-            //hide elements because user is logged out
-            navDrawerPhoto.setVisibility(View.INVISIBLE);
-            navDrawerName.setVisibility(View.INVISIBLE);
-            navDrawerEmail.setVisibility(View.INVISIBLE);
-            //set logged in only options to hidden
-            navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
-            navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
-            //set drawer item to say login
-            navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
-        }
+
+
+    }
+
+    private void removeUserInfoFromNavDrawer() {
+        //hide elements because user is logged out
+        navDrawerPhoto.setVisibility(View.INVISIBLE);
+        navDrawerName.setVisibility(View.INVISIBLE);
+        navDrawerEmail.setVisibility(View.INVISIBLE);
+        //set logged in only options to hidden
+        navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
+        navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+        //set drawer item to say login
+        navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
     }
 
     @OnClick(R.id.fab)
@@ -234,12 +243,7 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
 
     private void setupLoginDialog() {
         //create pop up for login Facebook or Google+
-        LoginDialog logDialog = new LoginDialog(this, loginManager, new LoginDialog.LoginListener() {
-            @Override
-            public void onLoginComplete() {
-                setupNavigationView();
-            }
-        });
+        LoginDialog logDialog = new LoginDialog(this, loginManager);
         logDialog.setOnDismissListener(this);
         logDialog.show();
     }
