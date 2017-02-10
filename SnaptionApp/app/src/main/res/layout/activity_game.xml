@@ -15,13 +15,14 @@
         android:id="@+id/image_view" />
 
     <RelativeLayout
-        android:id="@+id/picker_line"
+        android:id="@+id/picker_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/image_view"
         android:layout_marginTop="5dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
         <ImageView
@@ -46,14 +47,23 @@
 
     </RelativeLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/picker_container"
+        android:id="@+id/black_line1"
+        android:background="@color/colorBlack"/>
+
     <RelativeLayout
+        android:id="@+id/date_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="5dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_below="@+id/picker_line">
+        android:layout_marginBottom="5dp"
+        android:layout_below="@+id/black_line1">
 
         <TextView
             android:layout_width="wrap_content"
@@ -87,6 +97,13 @@
             android:layout_toStartOf="@id/captions_icon"/>
 
     </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/date_container"
+        android:id="@+id/black_line2"
+        android:background="@color/colorBlack"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

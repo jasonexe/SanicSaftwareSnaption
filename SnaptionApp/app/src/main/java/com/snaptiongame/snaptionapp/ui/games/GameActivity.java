@@ -5,16 +5,20 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
@@ -32,6 +36,7 @@ public class GameActivity extends AppCompatActivity {
 
     private Game game;
     private String photoPath;
+    private GameCaptionViewAdapter captionAdapter;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -50,6 +55,23 @@ public class GameActivity extends AppCompatActivity {
 
     @BindView(R.id.text_date)
     protected TextView endDate;
+
+    private ResourceListener<List<Caption>> listener = new ResourceListener<List<Caption>>() {
+        @Override
+        public void onData(List<Caption> games) {
+            captionAdapter.addItems(games);
+            isLoading = false;
+        }
+
+        @Override
+        public Class getDataType() {
+            return Game.class;
+        }
+    };
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, listener);
+
+    @BindView(R.id.wall_list)
+    protected RecyclerView wallListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

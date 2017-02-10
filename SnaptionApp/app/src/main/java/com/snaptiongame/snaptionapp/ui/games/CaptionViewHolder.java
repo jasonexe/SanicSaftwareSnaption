@@ -11,10 +11,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by camgeehr on 2/6/17.
+ * Provides a class to bind the captions to a view.
+ *
+ * @author Cameron Geehr
  */
 
-public class GameViewHolder extends RecyclerView.ViewHolder {
+public class CaptionViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.captioner_photo)
     protected ImageView captionerPhoto;
     @BindView(R.id.captioner_name)
@@ -26,7 +28,7 @@ public class GameViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.caption_text)
     protected TextView captionText;
 
-    public GameViewHolder(View itemView) {
+    public CaptionViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
     }
