@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
-import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
@@ -185,7 +184,7 @@ public class GameActivity extends AppCompatActivity {
         handCards = addRefreshCard(getRandomCardsFromList(allCards, rand));
 
         if (cardListAdapter != null) {
-            cardListAdapter.removeAndAddOptions(handCards);
+            cardListAdapter.replaceOptions(handCards);
         }
 //        captionCardsList.smoothScrollToPosition(0);
         captionCardsList.scrollToPosition(0);

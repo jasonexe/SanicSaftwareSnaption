@@ -52,7 +52,7 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
         return options.get(position);
     }
 
-    public void removeAndAddOptions(List<Card> cards) {
+    public void replaceOptions(List<Card> cards) {
         options.clear();
         this.notifyItemRangeRemoved(0, cards.size());
         options.addAll(cards);
