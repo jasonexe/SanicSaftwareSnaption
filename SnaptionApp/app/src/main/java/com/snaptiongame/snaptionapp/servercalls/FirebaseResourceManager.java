@@ -23,10 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.Card;
+import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
 
 import org.json.JSONArray;
@@ -46,6 +48,7 @@ public class FirebaseResourceManager {
     private static final String FB_REQUEST_DATA = "data";
     private static final String FB_REQUEST_NAME = "name";
     private static final String FB_REQUEST_ID = "id";
+    private static final String FB_ID_CHILD = "facebookId";
     public static final int NUM_CARDS_IN_HAND = 5;
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
@@ -121,7 +124,7 @@ public class FirebaseResourceManager {
      * @param path the path to the object requested from Firebase
      * @param listener this will be waiting to receive the object requested
      */
-    public void retrieveSingleNoUpdates(String path, final ResourceListener listener) {
+    public static void retrieveSingleNoUpdates(String path, final ResourceListener listener) {
         //used for just receiving data once
         DatabaseReference ref = database.getReference(path);
         ValueEventListener firebaseResponse = new ValueEventListener() {
@@ -265,53 +268,111 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Retrieves a list of Users, representing the current User's Facebook friends that have logged
-     * into Snaption, and returns the list of Users to the given ResourceListener
+     * Retrieves a list of Friends, representing the Facebook friends that have logged
+     * into Snaption of the User associated with the given Facebook id, and returns the list of
+     * Friends to the given ResourceListener
      *
-     * @param friendListener ResourceListener the list of Users is returned to
+     * @param facebookId String unique Facebook id of a Facebook user
+     * @param friendListener ResourceListener the list of Friends is returned to
      */
-    public static void getFacebookFriends(final ResourceListener<List<User>> friendListener) {
-        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
-        if (FirebaseResourceManager.getUserPath() != null) {
-            // retrieve the current User
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                    new ResourceListener<User>() {
+    public static void getFacebookFriends(String facebookId,
+                                          final ResourceListener<List<Friend>> friendListener) {
+        // create Facebook graph request callback
+        GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
+            public void onCompleted(GraphResponse response) {
+                handleFacebookFriendsResponse(response, friendListener);
+            }
+        };
+        makeFacebookFriendsRequest(friendsCallback, facebookId);
+    }
+
+    /**
+     * Parses a Facebook graph response from requesting a list of friends into a list of Friend
+     * model objects and replaces each friend's Facebook display name with their Snaption display
+     * name. Returns the list of Friends to the given ResourceListener
+     *
+     * @param response Facebook graph response from requesting a list of friends
+     * @param friendListener ResourceListener the list of Friends is returned to
+     */
+    private static void handleFacebookFriendsResponse(
+            GraphResponse response, final ResourceListener<List<Friend>> friendListener) {
+        final List<Friend> friendList = new ArrayList<>();
+        // parse the Facebook response to a list of Friends
+        final JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
+        if (friends != null) {
+            for (int ndx = 0; ndx < friends.length(); ndx++) {
+                final JSONObject friend = friends.optJSONObject(ndx);
+                if (friend != null) {
+                    final String friendFacebookId = friend.optString(FB_REQUEST_ID);
+                    // get the friend's Snaption display name
+                    getUserDisplayName(friendFacebookId, new ResourceListener<String>() {
                         @Override
-                        public void onData(User user) {
-                            if (user.getFacebookId() != null) {
-                                // retrieve the current User's Facebook friends
-                                new GraphRequest(
-                                        AccessToken.getCurrentAccessToken(),
-                                        String.format(FB_FRIENDS_REQUEST, user.getFacebookId()),
-                                        null,
-                                        HttpMethod.GET,
-                                        new GraphRequest.Callback() {
-                                            public void onCompleted(GraphResponse response) {
-                                                List<User> friendList = new ArrayList<>();
-                                                // parse the Facebook response to a list of Users
-                                                JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
-                                                if (friends != null) {
-                                                    for (int ndx = 0; ndx < friends.length(); ndx++) {
-                                                        JSONObject friend = friends.optJSONObject(ndx);
-                                                        if (friend != null) {
-                                                            friendList.add(new User(friend.optString(FB_REQUEST_NAME), friend.optString(FB_REQUEST_ID)));
-                                                        }
-                                                    }
-                                                }
-                                                // return the list of Users to the listener
-                                                friendListener.onData(friendList);
-                                            }
-                                        }
-                                ).executeAsync();
+                        public void onData(String displayName) {
+                            // if the friend's display name cannot be found, use their Facebook name
+                            if (displayName == null) {
+                                displayName = friend.optString(FB_REQUEST_NAME);
+                            }
+                            friendList.add(new Friend(displayName, friendFacebookId));
+                            // if all the calls have returned, notify listener
+                            if (friendList.size() == friends.length()) {
+                                friendListener.onData(friendList);
                             }
                         }
 
                         @Override
                         public Class getDataType() {
-                            return User.class;
+                            return String.class;
                         }
                     });
+                }
+            }
         }
+        else {
+            friendListener.onData(null);
+        }
+    }
+
+    /**
+     * Retrieves the Snaption display name of the User associated with the given Facebook unique id,
+     * and returns the display name to the given ResourceListener
+     *
+     * @param facebookId String unique Facebook id of a Facebook user
+     * @param resourceListener ResourceListener the display name is returned to
+     */
+    public static void getUserDisplayName(String facebookId, final ResourceListener<String> resourceListener) {
+        Query query = database.getReference(USER_DIRECTORY).orderByChild(FB_ID_CHILD)
+                .equalTo(facebookId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> facebookUser = dataSnapshot.getChildren();
+                if (facebookUser.iterator().hasNext()) {
+                    User user = facebookUser.iterator().next().getValue(User.class);
+                    resourceListener.onData(user.getDisplayName());
+                }
+                else {
+                    resourceListener.onData(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                resourceListener.onData(null);
+            }
+        });
+    }
+
+    /**
+     * Creates and executes a Facebook graph request to retrieve the Facebook friends of the
+     * Facebook user with the given facebookId and returns the results to the given friendsCallback
+     *
+     * @param friendsCallback GraphRequest.Callback the results are returned to
+     * @param facebookId String unique Facebook id of a Facebook user
+     */
+    public static void makeFacebookFriendsRequest(GraphRequest.Callback friendsCallback,
+                                                   String facebookId) {
+        new GraphRequest(AccessToken.getCurrentAccessToken(), String.format(FB_FRIENDS_REQUEST,
+                facebookId), null, HttpMethod.GET, friendsCallback).executeAsync();
     }
 
 
@@ -322,6 +383,7 @@ public class FirebaseResourceManager {
      * @param imageView ImageView in which the photo should be loaded
      */
     public static void loadSmallFbPhotoIntoImageView(String facebookId, ImageView imageView) {
-        Glide.with(imageView.getContext()).load(String.format(SMALL_FB_PHOTO_REQUEST, facebookId)).into(imageView);
+        Glide.with(imageView.getContext()).load(String.format(SMALL_FB_PHOTO_REQUEST,
+                facebookId)).into(imageView);
     }
 }

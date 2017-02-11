@@ -5,7 +5,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.R;
-import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 
 import java.util.List;
@@ -16,8 +16,8 @@ import java.util.List;
  * @author Brittany Berlanga
  */
 public class FriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
-    private List<User> friends;
-    public FriendAdapter(List<User> friends) {
+    private List<Friend> friends;
+    public FriendAdapter(List<Friend> friends) {
         this.friends = friends;
     }
 
@@ -33,12 +33,12 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
 
     @Override
     public void onBindViewHolder(FriendViewHolder holder, int position) {
-        User friend = friends.get(position);
-        holder.friendName.setText(friend.getDisplayName());
-        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.getFacebookId(), holder.friendPhoto);
+        Friend friend = friends.get(position);
+        holder.friendName.setText(friend.displayName);
+        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.friendPhoto);
     }
 
-    public void update(List<User> friends) {
+    public void update(List<Friend> friends) {
         this.friends.addAll(friends);
         notifyDataSetChanged();
     }
