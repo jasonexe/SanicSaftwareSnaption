@@ -116,7 +116,7 @@
         app:srcCompat="@drawable/ic_add_white_24dp" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_game_list"
+        android:id="@+id/recycler_caption_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/image_view">

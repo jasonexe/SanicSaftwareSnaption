@@ -149,6 +149,13 @@ public class Game implements Serializable {
         judgerRating++;
     }
 
+    /**
+     * Downvotes the game.
+     */
+    public void downvote() {
+        judgerRating--;
+    }
+
     /** Accessor Methods **/
 
     /**

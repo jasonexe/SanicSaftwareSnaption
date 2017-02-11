@@ -107,12 +107,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     /**
      * Adds more captions into the list of captions.
      *
-     * @param newCaptions More captions to add to the list
+     * @param newCaption A caption to add to the list
      */
-    public void addItems(List<Caption> newCaptions) {
-        int startPos = items.size();
-        items.addAll(newCaptions);
-        this.notifyItemRangeChanged(startPos, newCaptions.size());
+    public void addCaption(Caption newCaption) {
+        items.add(newCaption);
+        this.notifyDataSetChanged();
     }
 
 }
