@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -345,9 +346,9 @@ public class FirebaseResourceManager {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Iterable<DataSnapshot> facebookUser = dataSnapshot.getChildren();
-                if (facebookUser.iterator().hasNext()) {
-                    User user = facebookUser.iterator().next().getValue(User.class);
+                Iterator<DataSnapshot> facebookUserIterator = dataSnapshot.getChildren().iterator();
+                if (facebookUserIterator.hasNext()) {
+                    User user = facebookUserIterator.next().getValue(User.class);
                     resourceListener.onData(user.getDisplayName());
                 }
                 else {
