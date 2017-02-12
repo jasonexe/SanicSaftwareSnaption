@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
@@ -35,7 +36,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         Caption caption;
 
         public UpvoteClickListener(Caption caption) {
-            caption = caption;
+            this.caption = caption;
         }
 
         @Override
@@ -45,7 +46,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     }
 
     public GameCaptionViewAdapter(List<Caption> items) {
-        items = new ArrayList<>(items);
+        this.items = new ArrayList<>(items);
         firebaseResourceManager = new FirebaseResourceManager();
     }
 
@@ -82,17 +83,17 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     }
 
     @Override
+    public CaptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_caption_item, parent, false);
+        return new CaptionViewHolder(view);
+    }
+
+    @Override
     public int getItemCount() {
         if (items == null) {
             return 0;
         }
         return items.size();
-    }
-
-    @Override
-    public CaptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_caption_item, parent, false);
-        return new CaptionViewHolder(view);
     }
 
     private void handleClickUpvote(ImageView upvote, Caption caption) {

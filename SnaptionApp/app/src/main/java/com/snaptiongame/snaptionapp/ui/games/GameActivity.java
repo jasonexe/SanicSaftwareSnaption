@@ -68,7 +68,9 @@ public class GameActivity extends AppCompatActivity {
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
-            captionAdapter.addCaption(data);
+            if (data != null) {
+                captionAdapter.addCaption(data);
+            }
         }
 
         @Override
@@ -112,9 +114,9 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        LinearLayoutManager captionViewManager = new LinearLayoutManager(numberCaptions.getContext(), LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
-        captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
+        captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
         captionListView.setAdapter(captionAdapter);
 
 //        setSupportActionBar(toolbar);
@@ -150,15 +152,6 @@ public class GameActivity extends AppCompatActivity {
                 return null; // Not used.
             }
         });
-    }
-
-    private void getGameCaptions(Game game) {
-
-        List<Caption> captions = new ArrayList<>(game.getCaptions().values());
-        for (Caption caption: captions) {
-            firebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + game.getId() +
-                    "/" + CAPTION_DIRECTORY + caption.getId(), captionListener);
-        }
     }
 
 }
