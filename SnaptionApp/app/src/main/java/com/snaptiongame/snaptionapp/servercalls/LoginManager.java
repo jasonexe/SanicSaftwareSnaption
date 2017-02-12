@@ -136,6 +136,8 @@ public class LoginManager {
                     new ResultCallback<Status>() {
                         @Override
                         public void onResult(@NonNull Status status) {
+                            googleApiClient.stopAutoManage(activity);
+                            googleApiClient.disconnect();
                             if (status.isSuccess()) {
                                 logoutAuthCallback.onSuccess();
                             }
@@ -144,8 +146,7 @@ public class LoginManager {
                             }
                         }
                     });
-            googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
+
         }
     }
 
