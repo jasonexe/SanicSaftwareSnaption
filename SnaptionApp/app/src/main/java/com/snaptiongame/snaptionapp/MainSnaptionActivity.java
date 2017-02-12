@@ -39,8 +39,9 @@ import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
 
-public class MainSnaptionActivity extends AppCompatActivity implements DialogInterface.OnDismissListener {
+public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
+    private LoginDialog loginDialog;
 
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
@@ -86,18 +87,20 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
                         //check if we are logging in our out based on item text
                         if (item.getTitle().equals(getResources().getString(R.string.login))) {
                             //display dialog
-                            setupLoginDialog();
+                            loginDialog.show();
                         }
                         else {
                             new AlertDialog.Builder(MainSnaptionActivity.this, 0)
-                                    .setMessage("Are you sure you want to log out?")
-                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    .setMessage(getResources().getString(R.string.logout_prompt))
+                                    .setPositiveButton(getResources().getString(R.string.yes),
+                                            new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
                                             loginManager.logOut();
                                             item.setTitle(getResources().getString(R.string.login));
                                         }
-                                    }).setNegativeButton("No", null).create().show();
+                                    }).setNegativeButton(getResources().getString(R.string.no),
+                                            null).create().show();
 
                         }
                         //because this is not a fragment we cannot set currentFragment to it so we reset it to last fragment
@@ -143,7 +146,37 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
             public void onLoginComplete() {
                 setupNavigationView();
             }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //login was a success
+                showPostLogDialog("Successfully logged in");
+            }
+
+            @Override
+            public void onError() {
+                //login was a failure
+                showPostLogDialog("Failed to log in, please try again");
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //logout was a success
+                showPostLogDialog("Successfully logged out");
+            }
+
+            @Override
+            public void onError() {
+                //logout was a failure
+                showPostLogDialog("Failed to log out, please try again");
+            }
         });
+        loginDialog = new LoginDialog(this, loginManager);
+    }
+
+    private void showPostLogDialog(String text) {
+        Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
+        loginDialog.dismiss();
     }
 
     private void setupNavigationView() {
@@ -233,19 +266,6 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialogInterface) {
-        Snackbar.make(findViewById(R.id.drawer_layout), loginManager.getStatus(),Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
-    }
-
-    private void setupLoginDialog() {
-        //create pop up for login Facebook or Google+
-        LoginDialog logDialog = new LoginDialog(this, loginManager);
-        logDialog.setOnDismissListener(this);
-        logDialog.show();
     }
 
     @Override

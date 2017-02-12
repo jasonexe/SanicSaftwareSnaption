@@ -87,6 +87,9 @@ public class Caption {
             return builder;
         }
         String finalString = card.getCardText();
+        if(!finalString.contains("%s")) {
+            return builder.append(finalString);
+        }
         int firstModifier = 0;
         int lastModifier = 0;
         for(String userText : userInput) {

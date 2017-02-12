@@ -192,13 +192,16 @@ public class FirebaseUploader implements Uploader {
             public void onData(User data) {
                 //if User does not exist
                 if (data == null) {
-                    //upload user
-                    uploadObject(usersPath + "/" + user.getId(), user);
                     //upload user photo
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
                     ref.putBytes(photo);
-                    listener.onData(data);
+                    //upload user
+                    uploadObject(usersPath + "/" + user.getId(), user);
+
+
                 }
+                //notify user has been added or found
+                listener.onData(data);
             }
 
             @Override

@@ -30,6 +30,9 @@
     <string name="captions">Captions</string>
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
+    <string name="logout_prompt">Are you sure you want to log out?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 
     <!--Accessibility strings-->

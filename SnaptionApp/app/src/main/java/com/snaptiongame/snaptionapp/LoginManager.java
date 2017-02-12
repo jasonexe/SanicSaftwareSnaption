@@ -46,7 +46,7 @@ import org.apache.commons.io.IOUtils;
  * Created by brittanyberlanga on 12/2/16.
  * Edited by Austin Robarts
  */
-public class LoginManager extends Observable {
+public class LoginManager {
 //TODO: refactor to remove Firebase objects from this class when we establish Uploader class
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
@@ -58,9 +58,9 @@ public class LoginManager extends Observable {
     private Uploader uploader;
     private GoogleApiClient googleApiClient;
     private CallbackManager callbackManager;
-    private AuthCallback googleAuthCallback;
+    private AuthCallback loginAuthCallback;
+    private AuthCallback logoutAuthCallback;
     private FragmentActivity activity;
-    private boolean isLoggedIn;
     private byte[] profilePhoto;
     private LoginListener listener;
 
@@ -68,26 +68,16 @@ public class LoginManager extends Observable {
         void onLoginComplete();
     }
 
-    public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener) {
+    public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener,
+                        AuthCallback loginAuthCallback, AuthCallback logoutAuthCallback) {
         this.activity = activity;
         this.uploader = uploader;
         this.listener = listener;
+        this.loginAuthCallback = loginAuthCallback;
+        this.logoutAuthCallback = logoutAuthCallback;
         auth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
-        isLoggedIn = auth.getCurrentUser() != null;
         profilePhoto = null;
-
-        googleAuthCallback = new AuthCallback() {
-            @Override
-            public void onSuccess() {
-                Log.d("TAG", "GoogleAuth: SUCCESS");
-            }
-
-            @Override
-            public void onError() {
-                Log.d("TAG", "GoogleAuth: FAILURE");
-            }
-        };
     }
 
     public interface AuthCallback {
@@ -111,7 +101,7 @@ public class LoginManager extends Observable {
                 .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        googleAuthCallback.onError();
+                        loginAuthCallback.onError();
                     }
                 })
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -121,7 +111,7 @@ public class LoginManager extends Observable {
         activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
     }
 
-    public void logoutOfGoogle(final AuthCallback authCallback) {
+    public void logoutOfGoogle() {
         if (googleApiClient != null && googleApiClient.isConnected() &&
                 auth.getCurrentUser() != null) {
             Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
@@ -129,19 +119,15 @@ public class LoginManager extends Observable {
                         @Override
                         public void onResult(@NonNull Status status) {
                             if (status.isSuccess()) {
-                                auth.signOut();
-                                authCallback.onSuccess();
+                                logoutAuthCallback.onSuccess();
                             }
                             else {
-                                authCallback.onError();
+                                logoutAuthCallback.onError();
                             }
                         }
                     });
             googleApiClient.stopAutoManage(activity);
             googleApiClient.disconnect();
-        }
-        else {
-            authCallback.onError();
         }
     }
 
@@ -151,6 +137,7 @@ public class LoginManager extends Observable {
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
+            googleApiClient.stopAutoManage(activity);
             googleApiClient.disconnect();
         }
     }
@@ -160,16 +147,18 @@ public class LoginManager extends Observable {
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 loginToFirebase(loginResult.getAccessToken());
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
             }
             @Override
             public void onCancel() {
+                loginAuthCallback.onError();
                 Log.d(TAG, "facebook:onCancel");
             }
 
             @Override
             public void onError(FacebookException error) {
+                loginAuthCallback.onError();
                 Log.d(TAG, "facebook:onError", error);
             }
         });
@@ -179,43 +168,12 @@ public class LoginManager extends Observable {
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    public String getStatus() {
-        String status = "You are not logged in";
-        String provider = getProvider();
-        String userName = getUserName();
-        if (provider != null && userName != null) {
-            status = "You're logged into " + getProvider() + " as " + getUserName();
-        }
-        return status;
-    }
-
-    public boolean logOut() {
+    public void logOut() {
         //sign out of facebook
         com.facebook.login.LoginManager.getInstance().logOut();
-        logoutOfGoogle(new AuthCallback() {
-            @Override
-            public void onSuccess() {
-                Log.d("TAG", "Successfully logged out of Google");
-            }
-            @Override
-            public void onError() {
-                Log.d("TAG", "Failed to log out of Google");
-            }
-        });
+        logoutOfGoogle();
         auth.signOut();
-        setLoggedIn(false);
         listener.onLoginComplete();
-        return false;
-    }
-
-    public boolean isLoggedIn() {
-        return isLoggedIn;
-    }
-
-    private void setLoggedIn(boolean isLoggedIn) {
-        this.isLoggedIn = isLoggedIn;
-        setChanged();
-        notifyObservers();
     }
 
     private void uploadUser(final String facebookId) {
@@ -293,13 +251,12 @@ public class LoginManager extends Observable {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
                             uploadUser(null);
-                            setLoggedIn(true);
+                            loginAuthCallback.onSuccess();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            googleAuthCallback.onError();
+                            loginAuthCallback.onError();
                         }
-                        googleAuthCallback = null;
                     }
                 });
     }
@@ -318,31 +275,13 @@ public class LoginManager extends Observable {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
                             uploadUser(token.getUserId());
-                            setLoggedIn(true);
+                            loginAuthCallback.onSuccess();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
+                            loginAuthCallback.onError();
                         }
                     }
                 });
-    }
-
-    //TODO this should be pulled from firebase not the auth object
-    private String getUserName() {
-        String username = null;
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            username = user.getDisplayName();
-        }
-        return username;
-    }
-
-    private String getProvider() {
-        String provider = null;
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            provider = user.getProviders().get(0);
-        }
-        return provider;
     }
 }

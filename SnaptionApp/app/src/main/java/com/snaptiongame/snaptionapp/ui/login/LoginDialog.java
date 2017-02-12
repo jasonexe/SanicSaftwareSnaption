@@ -3,11 +3,13 @@ package com.snaptiongame.snaptionapp.ui.login;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
 import com.snaptiongame.snaptionapp.LoginManager;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 
 import java.util.Observable;
@@ -17,7 +19,7 @@ import java.util.Observer;
  * Created by austinrobarts on 1/16/17.
  */
 
-public class LoginDialog extends Dialog implements View.OnClickListener, Observer {
+public class LoginDialog extends Dialog implements View.OnClickListener {
 
     private LoginManager manager;
     private SignInButton googleLogButton;
@@ -28,7 +30,6 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Observe
     public LoginDialog(Activity activity, LoginManager manager) {
         super(activity);
         this.manager = manager;
-        manager.addObserver(this);
     }
 
     @Override
@@ -46,19 +47,8 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Observe
         manager.setupFacebookLoginButton(facebookLogButton);
     }
 
-    /**
-     * Update when login status changes
-     * @param observable
-     * @param o
-     */
     @Override
-    public void update(Observable observable, Object o) {
-        //dismisses the dialog to go back to main screen
-        dismiss();
-    }
-
-    @Override
-    public void onClick(View view) {
+    public void onClick(final View view) {
         switch (view.getId()) {
             //cases will be added here to deal with logout
             case R.id.google_login_button:
