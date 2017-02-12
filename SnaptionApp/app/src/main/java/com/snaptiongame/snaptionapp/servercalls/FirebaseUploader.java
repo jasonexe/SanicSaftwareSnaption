@@ -218,17 +218,15 @@ public class FirebaseUploader implements Uploader {
 
     }
 
-
-    @Override
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
         // TODO check if already friends before adding
         // add the friend to the user's friends list
-        addFriend(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
+        addFriendToList(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError == null) {
                     // add the user to the friend's friends list
-                    addFriend(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
+                    addFriendToList(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             if (databaseError == null) {
@@ -248,9 +246,45 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    private void addFriend(String userId, String friendId, DatabaseReference.CompletionListener listener) {
-        DatabaseReference userRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
-        DatabaseReference friendRef = userRef.push();
+    /**
+     * Adds the friendId to the friend list of User associated with the userId
+     *
+     * @param userId
+     * @param friendId
+     * @param listener
+     */
+    private void addFriendToList(String userId, final String friendId, final DatabaseReference.CompletionListener listener) {
+        final DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
+        userFriendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                List<String> userFriends = dataSnapshot.getValue(t);
+                if(userFriends == null) {
+                    //create a new list if there isn't one in Firebase yet (user's first friend!)
+                    userFriends = new ArrayList<String>();
+                }
+                userFriends.add(friendId);
+                userFriendsRef.setValue(userFriends, listener);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onComplete(databaseError, null);
+            }
+        });
+    }
+
+    /**
+     * Adds the friendId to the friend hash map of User associated with the userId
+     *
+     * @param userId
+     * @param friendId
+     * @param listener
+     */
+    private void addFriendToHashMap(String userId, String friendId, DatabaseReference.CompletionListener listener) {
+        DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
+        DatabaseReference friendRef = userFriendsRef.push();
         friendRef.setValue(friendId, listener);
     }
 }
