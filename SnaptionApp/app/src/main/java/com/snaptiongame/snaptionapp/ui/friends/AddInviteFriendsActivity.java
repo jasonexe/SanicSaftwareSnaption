@@ -4,16 +4,18 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,8 +34,10 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
 
+    private User user;
+    private Uploader uploader;
     private FriendAdapter friendAdapter;
-    private FriendsViewModel presenter;
+    private FriendsViewModel viewModel;
 
     @BindView(R.id.login_provider_friends)
     protected RecyclerView loginProviderFriends;
@@ -49,20 +53,50 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         ButterKnife.bind(this);
 
         // Login provider friends recycler view and adapter setup
-        loginProviderFriends.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        friendAdapter = new FriendAdapter(new ArrayList<Friend>());
-        loginProviderFriends.setAdapter(friendAdapter);
+        setupLoginProviderView();
 
-        // Initialize the view model
+        // Initialize the uploader and view model
+        uploader = new FirebaseUploader();
         initializeViewModel();
     }
 
+    private void setupLoginProviderView() {
+        loginProviderFriends.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        friendAdapter = new FriendAdapter(new ArrayList<Friend>(), new FriendAdapter.AddInviteFriendCallback() {
+            @Override
+            public void addInviteClicked(final Friend friend) {
+                viewModel.addFriend(friend, new Uploader.UploadListener() {
+                    @Override
+                    public void onComplete() {
+                        // notify user
+                        Toast.makeText(AddInviteFriendsActivity.this,
+                                viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
+                                        friend.displayName, true), Toast.LENGTH_LONG).show();
+                        // remove friend from view
+                        friendAdapter.removeSingleItem(friend);
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        // notify user
+                        Toast.makeText(AddInviteFriendsActivity.this,
+                                viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
+                                        friend.displayName, false), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+        loginProviderFriends.setAdapter(friendAdapter);
+    }
+
     private void initializeViewModel() {
-        FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+        FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
+                new ResourceListener<User>() {
             @Override
             public void onData(User user) {
                 if (user != null) {
-                    presenter = new FriendsViewModel(user);
+                    viewModel = new FriendsViewModel(user, uploader);
                     setLoginProviderFriendsLabel();
                     populateLoginProviderFriends();
                 }
@@ -76,23 +110,23 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     }
 
     private void populateLoginProviderFriends() {
-        presenter.getLoginProviderFriends(new ResourceListener<List<Friend>>() {
+        viewModel.getLoginProviderFriends(new ResourceListener<Friend>() {
             @Override
-            public void onData(List<Friend> friends) {
-                if (friends != null) {
+            public void onData(Friend friend) {
+                if (friend != null) {
                     // update the list of login provider friends
-                    friendAdapter.update(friends);
+                    friendAdapter.addSingleItem(friend);
                 }
             }
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return Friend.class;
             }
         });
     }
 
     private void setLoginProviderFriendsLabel() {
-        loginProviderFriendsLabel.setText(presenter.getLoginProviderLabel(getApplicationContext()));
+        loginProviderFriendsLabel.setText(viewModel.getLoginProviderLabel(getApplicationContext()));
     }
 }

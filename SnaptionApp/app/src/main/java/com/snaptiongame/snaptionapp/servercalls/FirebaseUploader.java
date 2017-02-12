@@ -1,15 +1,9 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,6 +15,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
@@ -33,11 +28,11 @@ import java.util.List;
 
 public class FirebaseUploader implements Uploader {
 
-    private static final String usersPath = "users";
-    private static final String captionPath = "captions";
-    private static final String gamesPath = "games";
-    public static final String imagePath = "images";
-
+    private static final String USERS_PATH = "users";
+    private static final String CAPTION_PATH = "captions";
+    private static final String GAMES_PATH = "games";
+    private static final String IMAGE_PATH = "images";
+    private static final String FRIENDS_PATH = "users/%s/friends";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -74,7 +69,7 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
         //TODO notify invited players
-        game.setImagePath(imagePath + "/" + game.getId());
+        game.setImagePath(IMAGE_PATH + "/" + game.getId());
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
     }
@@ -95,21 +90,21 @@ public class FirebaseUploader implements Uploader {
         addGameToUserTable(game);
         // Add game object to games table
         String gameId = game.getId();
-        DatabaseReference gamesRef = database.getReference(gamesPath + "/" + gameId);
+        DatabaseReference gamesRef = database.getReference(GAMES_PATH + "/" + gameId);
         gamesRef.setValue(game);
     }
 
     @Override
     public String getNewGameKey() {
-        DatabaseReference gamesFolderRef = database.getReference(gamesPath);
+        DatabaseReference gamesFolderRef = database.getReference(GAMES_PATH);
         String key = gamesFolderRef.push().getKey();
         return key;
     }
 
     @Override
     public String getNewCaptionKey(String gameId) {
-        DatabaseReference captionFolderRef = database.getReference(gamesPath + "/" + gameId + "/" +
-                captionPath);
+        DatabaseReference captionFolderRef = database.getReference(GAMES_PATH + "/" + gameId + "/" +
+                CAPTION_PATH);
         return captionFolderRef.push().getKey();
     }
 
@@ -122,7 +117,7 @@ public class FirebaseUploader implements Uploader {
     private void addGameToUserTable(Game game) {
         final String gameId = game.getId();
         String userId = game.getPicker();
-        DatabaseReference userRef = database.getReference(usersPath + "/" + userId);
+        DatabaseReference userRef = database.getReference(USERS_PATH + "/" + userId);
         //TODO if games stays as a List instead of map, is PITA (can't do .push()). See below
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
 //        userRef.child("games").push().setValue(gameId);
@@ -188,9 +183,9 @@ public class FirebaseUploader implements Uploader {
         String gameId = caption.getGameId();
         String userId = caption.getUserId();
         String captId = caption.getId();
-        String gameCaptionPath = gamesPath + "/" + gameId + "/" + captionPath + "/" + captId;
+        String gameCaptionPath = GAMES_PATH + "/" + gameId + "/" + CAPTION_PATH + "/" + captId;
         uploadObject(gameCaptionPath, caption);
-        String userCaptionPath = usersPath + "/" + userId + "/" + captionPath + "/" + captId;
+        String userCaptionPath = USERS_PATH + "/" + userId + "/" + CAPTION_PATH + "/" + captId;
         uploadObject(userCaptionPath, caption);
     }
 
@@ -198,13 +193,13 @@ public class FirebaseUploader implements Uploader {
     public void addUser(final User user, final byte[] photo) {
         //check if User already exists in Database
         FirebaseResourceManager manager = new FirebaseResourceManager();
-        manager.retrieveSingleNoUpdates(usersPath + "/" + user.getId(), new ResourceListener() {
+        manager.retrieveSingleNoUpdates(USERS_PATH + "/" + user.getId(), new ResourceListener() {
             @Override
             public void onData(Object data) {
                 //if User does not exist
                 if (data == null || !(data instanceof User)) {
                     //upload user
-                    uploadObject(usersPath + "/" + user.getId(), user);
+                    uploadObject(USERS_PATH + "/" + user.getId(), user);
                     //upload user photo
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
                     ref.putBytes(photo);
@@ -221,5 +216,41 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId) {
 
+    }
+
+
+    @Override
+    public void addFriend(final User user, final Friend friend, final UploadListener listener) {
+        // TODO check if already friends before adding
+        // add the friend to the user's friends list
+        addFriend(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    // add the user to the friend's friends list
+                    addFriend(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError == null) {
+                                listener.onComplete();
+                            }
+                            else {
+                                // this is a problem if one friend was added but the other one was not
+                                listener.onError();
+                            }
+                        }
+                    });
+                }
+                else {
+                    listener.onError();
+                }
+            }
+        });
+    }
+
+    private void addFriend(String userId, String friendId, DatabaseReference.CompletionListener listener) {
+        DatabaseReference userRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
+        DatabaseReference friendRef = userRef.push();
+        friendRef.setValue(friendId, listener);
     }
 }
