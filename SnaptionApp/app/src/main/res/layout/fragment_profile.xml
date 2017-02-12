@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        android:layout_weight="1">
+        android:layout_weight=".8">
 
         <android.support.v7.widget.CardView
             android:layout_width="80dp"
@@ -73,10 +74,6 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:paddingStart="10dp" />
-
-
-
-
         </RelativeLayout>
 
         <RelativeLayout
@@ -105,14 +102,7 @@
                 android:layout_alignParentTop="true"
                 android:paddingStart="10dp"/>
 
-
-
         </RelativeLayout>
-
-
-
-
-
     </RelativeLayout>
 
     <LinearLayout
@@ -129,7 +119,7 @@
             android:gravity="center_vertical"
             android:background="@color/colorPrimary"
             android:textColor="#FFFFFF"/>
-        
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/profile_games_list"
             android:layout_weight="4"
@@ -142,7 +132,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_marginBottom="40dp">
 
         <TextView
             android:layout_width="match_parent"
@@ -151,7 +142,11 @@
             android:background="@color/colorPrimary"
             android:textColor="@android:color/white" />
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/profile_captions_list"
+            android:layout_weight="4"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
     </LinearLayout>
-
-
 </LinearLayout >
