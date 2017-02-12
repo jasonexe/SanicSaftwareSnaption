@@ -109,4 +109,20 @@ public class Caption {
         builder.append(finalString.substring(firstModifier));
         return builder;
     }
+
+    public boolean equals(Object other) {
+        if(other.getClass() == this.getClass()) {
+            Caption otherCap = (Caption) other;
+            return this.getId().equals(otherCap.getId())
+                    && this.getGameId().equals(otherCap.getGameId())
+                    && this.getCard().equals(otherCap.getCard())
+                    && this.getUserId().equals(otherCap.getUserId())
+                    && this.getUserInput().equals(otherCap.getUserInput());
+        }
+        return false;
+    }
+
+    public String toString() {
+        return this.getId();
+    }
 }

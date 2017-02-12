@@ -178,9 +178,20 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
+    /**
+     * This adds the caption to the database. The Caption needs to be added to both
+     * the game, and to the user "Captions" map, which maps from caption Ids to captions
+     * @param caption The Caption object, has all the necessary stuff
+     */
     @Override
     public void addCaptions(Caption caption) {
-
+        String gameId = caption.getGameId();
+        String userId = caption.getUserId();
+        String captId = caption.getId();
+        String gameCaptionPath = gamesPath + "/" + gameId + "/" + captionPath + "/" + captId;
+        uploadObject(gameCaptionPath, caption);
+        String userCaptionPath = usersPath + "/" + userId + "/" + captionPath + "/" + captId;
+        uploadObject(userCaptionPath, caption);
     }
 
     @Override
