@@ -10,7 +10,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by jason_000 on 2/12/2017.
+ * Created by Jason Krein on 2/12/2017.
  */
 
 public class ProfileCaptionsViewHolder extends RecyclerView.ViewHolder {

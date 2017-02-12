@@ -8,16 +8,15 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
-import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
 
-import static com.snaptiongame.snaptionapp.R.string.profile;
 import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.PHOTO_PATH;
 
 /**
- * Created by jason_000 on 2/12/2017.
+ * The adapter for the recycler view that holds the user's captions
+ * Created by Jason Krein on 2/12/2017.
  */
 
 public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptionsViewHolder> {

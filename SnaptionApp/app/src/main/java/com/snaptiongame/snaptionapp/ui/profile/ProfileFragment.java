@@ -106,6 +106,7 @@ public class ProfileFragment extends Fragment {
                 LinearLayoutManager.HORIZONTAL, false);
         captionsListView.setLayoutManager(captionViewManager);
         Map<String, Caption> mapUserCaptions = user.getCaptions();
+        // If the user has made any captions, display them, otherwise use an empty arraylist
         if(mapUserCaptions != null) {
             captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
         } else {
