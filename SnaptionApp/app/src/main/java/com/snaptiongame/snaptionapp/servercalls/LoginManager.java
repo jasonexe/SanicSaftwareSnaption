@@ -82,8 +82,6 @@ public class LoginManager {
         void onError();
     }
 
-
-
     public void logOut() {
         //sign out of facebook
         com.facebook.login.LoginManager.getInstance().logOut();
@@ -146,7 +144,6 @@ public class LoginManager {
                             }
                         }
                     });
-
         }
     }
 
@@ -182,7 +179,6 @@ public class LoginManager {
             }
         });
     }
-
 
     private void uploadUser(final String facebookId) {
         FirebaseUser fbUser = auth.getCurrentUser();

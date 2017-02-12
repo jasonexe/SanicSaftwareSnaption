@@ -11,16 +11,16 @@ import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.R;
 
 /**
+ * Dialog that is displayed when a user is trying to log in.
+ * It will offer an option for Facebook or Google+ login
+ *
  * Created by austinrobarts on 1/16/17.
  */
 
 public class LoginDialog extends Dialog implements View.OnClickListener {
-
     private LoginManager manager;
     private SignInButton googleLogButton;
     private LoginButton facebookLogButton;
-
-
 
     public LoginDialog(Activity activity, LoginManager manager) {
         super(activity);
@@ -45,7 +45,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
     @Override
     public void onClick(final View view) {
         switch (view.getId()) {
-            //cases will be added here to deal with logout
+            //only needs to handle login for google here
             case R.id.google_login_button:
                 manager.loginWithGoogle();
                 break;

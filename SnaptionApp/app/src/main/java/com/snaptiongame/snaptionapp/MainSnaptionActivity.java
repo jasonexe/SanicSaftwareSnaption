@@ -153,7 +153,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 //login was a success
                 showPostLogDialog("Successfully logged in");
             }
-
             @Override
             public void onError() {
                 //login was a failure
@@ -178,7 +177,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
     private void showPostLogDialog(String text) {
         loginDialog.dismiss();
         Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
-
     }
 
     private void setupNavigationView() {
@@ -213,7 +211,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
                         removeUserInfoFromNavDrawer();
                     }
                 }
-
                 @Override
                 public Class getDataType() {
                     return User.class;
@@ -222,8 +219,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         } else {
             removeUserInfoFromNavDrawer();
         }
-
-
     }
 
     private void removeUserInfoFromNavDrawer() {
