@@ -28,7 +28,7 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
     public void onBindViewHolder(CardOptionsViewHolder holder, final int position) {
         holder.possibleCardView.setText(getCardAtPos(position)
                 .getCardText().replace("%s", "_____"));
-        holder.possibleCardView.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 converter.convertCard(getCardAtPos(position));

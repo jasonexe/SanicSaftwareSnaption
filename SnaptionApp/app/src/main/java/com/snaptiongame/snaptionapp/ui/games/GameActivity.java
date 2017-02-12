@@ -169,8 +169,6 @@ public class GameActivity extends AppCompatActivity {
                 secondHalfCardText.setText(
                         curCard.retrieveSecondHalfText());
                 cardInputView.setVisibility(View.VISIBLE);
-                // TODO figure out why it won't pop up the
-                // initial time something is selected
                 editCaptionText.requestFocus();
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(editCaptionText, InputMethodManager.SHOW_IMPLICIT);
@@ -186,7 +184,6 @@ public class GameActivity extends AppCompatActivity {
         if (cardListAdapter != null) {
             cardListAdapter.replaceOptions(handCards);
         }
-//        captionCardsList.smoothScrollToPosition(0);
         captionCardsList.scrollToPosition(0);
     }
 
