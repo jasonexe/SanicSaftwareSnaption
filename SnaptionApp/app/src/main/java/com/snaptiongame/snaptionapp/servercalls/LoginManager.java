@@ -34,8 +34,14 @@ import java.net.URL;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Observable;
 
 /**
  * Handles logging in and logging out of Facebook and Google and connecting these services with
@@ -47,6 +53,8 @@ import org.apache.commons.io.IOUtils;
 public class LoginManager {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
+    private static final String FB_FRIENDS_PERMISSION = "user_friends";
+
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
     private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
@@ -159,8 +167,9 @@ public class LoginManager {
     }
 
     public void setupFacebookLoginButton(LoginButton loginButton) {
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions("email", "public_profile", FB_FRIENDS_PERMISSION);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
             @Override
             public void onSuccess(LoginResult loginResult) {
                 loginToFirebase(loginResult.getAccessToken());
