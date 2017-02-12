@@ -128,9 +128,11 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    navDrawerName.setText(user.getDisplayName());
-                    navDrawerEmail.setText(user.getEmail());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                    if(user != null) {
+                        navDrawerName.setText(user.getDisplayName());
+                        navDrawerEmail.setText(user.getEmail());
+                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                    }
                 }
 
                 @Override

@@ -17,13 +17,10 @@ import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.captions.CaptionActivity;
+import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static android.R.attr.data;
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseUploader.imagePath;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
@@ -57,7 +54,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         @Override
         public void onClick(View view) {
             Context imageContext = view.getContext();
-            Intent createGameIntent = new Intent(imageContext, CaptionActivity.class);
+            Intent createGameIntent = new Intent(imageContext, GameActivity.class);
             createGameIntent.putExtra(PHOTO_PATH, imagePath);
             imageContext.startActivity(createGameIntent);
         }

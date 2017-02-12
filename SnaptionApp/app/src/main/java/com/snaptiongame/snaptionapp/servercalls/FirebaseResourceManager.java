@@ -44,13 +44,13 @@ import static com.google.android.gms.internal.zzs.TAG;
 public class FirebaseResourceManager {
     private static final String USER_DIRECTORY = "users/";
     public static final String CARDS_DIRECTORY = "cards";
+    public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";
     private static final String FB_REQUEST_DATA = "data";
     private static final String FB_REQUEST_NAME = "name";
     private static final String FB_REQUEST_ID = "id";
     private static final String FB_ID_CHILD = "facebookId";
-    public static final int NUM_CARDS_IN_HAND = 5;
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
 
