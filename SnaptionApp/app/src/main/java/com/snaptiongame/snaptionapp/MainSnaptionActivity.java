@@ -26,6 +26,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
@@ -37,7 +38,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -175,8 +176,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     private void showPostLogDialog(String text) {
-        Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
         loginDialog.dismiss();
+        Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
+
     }
 
     private void setupNavigationView() {

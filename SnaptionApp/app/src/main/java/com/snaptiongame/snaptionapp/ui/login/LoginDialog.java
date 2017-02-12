@@ -3,17 +3,12 @@ package com.snaptiongame.snaptionapp.ui.login;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
-import com.snaptiongame.snaptionapp.LoginManager;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
+import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.R;
-
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by austinrobarts on 1/16/17.

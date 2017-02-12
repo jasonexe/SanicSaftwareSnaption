@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.servercalls;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -31,23 +31,20 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Observable;
 
+import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
 
 /**
  * Handles logging in and logging out of Facebook and Google and connecting these services with
- * our backend
+ * our backend, Firebase
  *
  * Created by brittanyberlanga on 12/2/16.
  * Edited by Austin Robarts
  */
 public class LoginManager {
-//TODO: refactor to remove Firebase objects from this class when we establish Uploader class
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
     private final String photosFolder = "ProfilePictures/";
@@ -85,33 +82,54 @@ public class LoginManager {
         void onError();
     }
 
+
+
+    public void logOut() {
+        //sign out of facebook
+        com.facebook.login.LoginManager.getInstance().logOut();
+        logoutOfGoogle();
+        auth.signOut();
+        listener.onLoginComplete();
+    }
+
     public void loginWithGoogle() {
         if (googleApiClient != null) {
             googleApiClient.disconnect();
         }
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(activity.getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        googleApiClient = new GoogleApiClient.Builder(activity)
-                .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        loginAuthCallback.onError();
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-        //This means that the result function will be triggered, override
-        activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+        try {
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(activity.getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
+            // Build a GoogleApiClient with access to the Google Sign-In API and the
+            // options specified by gso.
+            googleApiClient = new GoogleApiClient.Builder(activity)
+                    .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                            loginAuthCallback.onError();
+                        }
+                    })
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+            //This means that the result function will be triggered, override
+            activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+        }
+        catch (Exception err) {
+            Log.d(TAG, "loginWithGoogle:" + err.getStackTrace().toString());
+            loginAuthCallback.onError();
+        }
+
     }
 
-    public void logoutOfGoogle() {
+    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void logoutOfGoogle() {
         if (googleApiClient != null && googleApiClient.isConnected() &&
                 auth.getCurrentUser() != null) {
             Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
@@ -164,17 +182,6 @@ public class LoginManager {
         });
     }
 
-    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
-        callbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public void logOut() {
-        //sign out of facebook
-        com.facebook.login.LoginManager.getInstance().logOut();
-        logoutOfGoogle();
-        auth.signOut();
-        listener.onLoginComplete();
-    }
 
     private void uploadUser(final String facebookId) {
         FirebaseUser fbUser = auth.getCurrentUser();
@@ -229,13 +236,13 @@ public class LoginManager {
         try {
             thread.join();
         }
-        catch (Exception err) {
+        catch (InterruptedException err) {
             err.printStackTrace();
         }
     }
 
     /**
-     * Login with Google+
+     * Login to Firebase with Google+
      * @param acct
      */
     private void loginToFirebase(final GoogleSignInAccount acct) {
@@ -262,7 +269,7 @@ public class LoginManager {
     }
 
     /**
-     * Login with Facebook
+     * Login to Firebase with Facebook
      * @param token
      */
     private void loginToFirebase(final AccessToken token) {
