@@ -191,6 +191,9 @@ public class Game implements Serializable {
      * @return The list of captions in the game
      */
     public Map getCaptions() {
+        if (captions == null) {
+            return null;
+        }
         return new HashMap(captions);
     }
 
@@ -204,6 +207,9 @@ public class Game implements Serializable {
      * @return The list of players
      */
     public List getPlayers() {
+        if (players == null) {
+            return null;
+        }
         return new ArrayList(players);
     }
 
@@ -213,6 +219,9 @@ public class Game implements Serializable {
      * @return The list of categories
      */
     public List getCategories() {
+        if (categories == null) {
+            return null;
+        }
         return new ArrayList(categories);
     }
 

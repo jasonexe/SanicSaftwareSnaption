@@ -83,6 +83,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     @Override
     public int getItemCount() {
+        if (items == null) {
+            return 0;
+        }
         return items.size();
     }
 

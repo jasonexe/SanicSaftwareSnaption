@@ -37,6 +37,7 @@ public class GameActivity extends AppCompatActivity {
     private final static String INITIAL_PACK = "InitialPack";
     private final static String GAME_DIRECTORY = "games";
     private final static String CAPTION_DIRECTORY = "captions";
+    private final static String EMPTY_SIZE = "0";
 
     private Game game;
     private String photoPath;
@@ -86,7 +87,12 @@ public class GameActivity extends AppCompatActivity {
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
 
-        numberCaptions.setText(Integer.toString(game.getCaptions().size()));
+        if (game.getCaptions() != null) {
+            numberCaptions.setText(Integer.toString(game.getCaptions().size()));
+        }
+        else {
+            numberCaptions.setText(EMPTY_SIZE);
+        }
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
