@@ -93,8 +93,11 @@ public class LoginManager {
     public void logOut() {
         //sign out of facebook
         com.facebook.login.LoginManager.getInstance().logOut();
+        //sign out of google
         logoutOfGoogle();
+        //sign out of firebase
         auth.signOut();
+        //tell the view to update
         listener.onLoginComplete();
     }
 
