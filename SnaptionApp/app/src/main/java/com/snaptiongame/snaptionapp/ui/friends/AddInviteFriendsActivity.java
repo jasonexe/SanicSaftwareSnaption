@@ -74,7 +74,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                                         friend.displayName, true), Toast.LENGTH_LONG).show();
                         // remove friend from view
                         friendAdapter.removeSingleItem(friend);
-
                     }
 
                     @Override
