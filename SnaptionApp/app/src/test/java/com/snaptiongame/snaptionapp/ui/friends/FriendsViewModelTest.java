@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.*;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,6 +44,7 @@ public class FriendsViewModelTest {
     private static final String GOOGLE_PROVIDER_LABEL = "Google+ friends on Snaption";
     private static final String ADD_FRIEND_SUCCESS = "Brittany is now your friend!";
     private static final String ADD_FRIEND_FAIL = "Problem adding Brittany as your friend.";
+    private static final String ADD_FRIEND_ALREADY_EXISTS = "Brittany is already your friend.";
     private static final String TEST_FB_ID = "123456789";
     private static final String TEST_FRIEND_NAME = "Brittany";
     private FriendsViewModel viewModel;
@@ -56,7 +58,7 @@ public class FriendsViewModelTest {
     @Mock
     private Uploader uploader;
     @Mock
-    private Uploader.UploadListener uploadListener;
+    private UploadListener uploadListener;
     @Mock
     private ResourceListener resourceListener;
 
@@ -87,14 +89,17 @@ public class FriendsViewModelTest {
     public void testGetAddedFriendTextSuccess() {
         assertEquals(ADD_FRIEND_SUCCESS,
                 viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
-                        true));
+                        true, ""));
     }
 
     @Test
     public void testGetAddedFriendTextFail() {
         assertEquals(ADD_FRIEND_FAIL,
                 viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
-                        false));
+                        false, ""));
+        assertEquals(ADD_FRIEND_ALREADY_EXISTS,
+                viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
+                        false, ITEM_ALREADY_EXISTS_ERROR));
     }
 
     @Test

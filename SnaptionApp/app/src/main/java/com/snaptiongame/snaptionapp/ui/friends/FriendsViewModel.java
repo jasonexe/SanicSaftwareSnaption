@@ -10,6 +10,8 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.*;
+
 /**
  * FriendsViewModel is used by a view to retrieve and display information about the current user's
  * actual and potential friends
@@ -44,13 +46,16 @@ public class FriendsViewModel {
         }
     }
 
-    public void addFriend(Friend friend, Uploader.UploadListener listener) {
+    public void addFriend(Friend friend, UploadListener listener) {
         uploader.addFriend(user, friend, listener);
     }
 
-    public String getAddedFriendText(Context appContext, String friendName, boolean successfulAdd) {
+    public String getAddedFriendText(Context appContext, String friendName, boolean successfulAdd,
+                                     String errorMessage) {
         return successfulAdd ?
-                (String.format(appContext.getString(R.string.added_friend), friendName)) :
-                (String.format(appContext.getString(R.string.problem_adding_friend), friendName));
+                String.format(appContext.getString(R.string.added_friend), friendName) :
+                TextUtils.isEmpty(errorMessage) || !errorMessage.equals(ITEM_ALREADY_EXISTS_ERROR) ?
+                        String.format(appContext.getString(R.string.problem_adding_friend), friendName) :
+                        String.format(appContext.getString(R.string.already_friend), friendName) ;
     }
 }
