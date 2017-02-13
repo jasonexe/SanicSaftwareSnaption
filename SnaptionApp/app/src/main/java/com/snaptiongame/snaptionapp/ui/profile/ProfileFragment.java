@@ -13,13 +13,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,9 +45,12 @@ public class ProfileFragment extends Fragment {
     public TextView captionsCreated;
     @BindView(R.id.profile_games_list)
     protected RecyclerView gameListView;
+    @BindView(R.id.profile_captions_list)
+    protected RecyclerView captionsListView;
 
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
+    private ProfileCaptionsAdapter captionsAdapter;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private ResourceListener gameListener = new ResourceListener<Game>() {
         @Override
@@ -83,6 +89,7 @@ public class ProfileFragment extends Fragment {
                     captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
                     //get the games based on list of games in user
                     getUserGames(user);
+                    getUserCaptions(user, view);
                 }
 
                 @Override
@@ -94,8 +101,21 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private void getUserGames(User user) {
+    private void getUserCaptions(User user, View view) {
+        LinearLayoutManager captionViewManager = new LinearLayoutManager(view.getContext(),
+                LinearLayoutManager.HORIZONTAL, false);
+        captionsListView.setLayoutManager(captionViewManager);
+        Map<String, Caption> mapUserCaptions = user.getCaptions();
+        // If the user has made any captions, display them, otherwise use an empty arraylist
+        if(mapUserCaptions != null) {
+            captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
+        } else {
+            captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
+        }
+        captionsListView.setAdapter(captionsAdapter);
+    }
 
+    private void getUserGames(User user) {
         List<String> gameIds = user.getGames();
         //if User has any games
         if (gameIds != null) {
@@ -104,8 +124,6 @@ public class ProfileFragment extends Fragment {
                 firebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
             }
         }
-
-
     }
 
     @Override

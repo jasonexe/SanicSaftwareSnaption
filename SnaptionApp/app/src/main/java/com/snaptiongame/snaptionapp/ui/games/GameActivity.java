@@ -112,7 +112,6 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
-    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -154,7 +153,7 @@ public class GameActivity extends HomeAppCompatActivity {
         endDate.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
 
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
-        firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+        FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
             public void onData(User user) {
                 if (user != null) {
@@ -184,6 +183,11 @@ public class GameActivity extends HomeAppCompatActivity {
     @OnClick(R.id.fab)
     public void displayCardOptions() {
         toggleVisibility(captionCardsList);
+        //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+        if(cardInputView.getVisibility() == View.VISIBLE) {
+            cardInputView.setVisibility(View.GONE);
+            hideKeyboard();
+        }
     }
 
     private void toggleVisibility(View view) {
@@ -218,8 +222,7 @@ public class GameActivity extends HomeAppCompatActivity {
         Uploader uploader = new FirebaseUploader();
         // Game will be a class variable probs
         List<String> empty = new ArrayList<>();
-        // TODO remove this when Cameron's code is merged in
-        Game game = new Game("-Kbqjvc3cVKVPtcmTr6A", "", "", empty, empty, true, 0, 0, "mature");
+        Game game = this.game;
         addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
         toggleVisibility(cardInputView);
         toggleVisibility(captionCardsList);
