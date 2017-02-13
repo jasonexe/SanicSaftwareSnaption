@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.servercalls;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -28,6 +28,12 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+
+import java.io.InputStream;
+import java.net.URL;
+
+import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
@@ -38,37 +44,46 @@ import java.net.URL;
 import java.util.Observable;
 
 /**
+ * Handles logging in and logging out of Facebook and Google and connecting these services with
+ * our backend, Firebase
+ *
  * Created by brittanyberlanga on 12/2/16.
  * Edited by Austin Robarts
  */
-public class LoginManager extends Observable {
-//TODO: refactor to remove Firebase objects from this class when we establish Uploader class
+public class LoginManager {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
+    private static final String FB_EMAIL_PERMISSION = "email";
+    private static final String FB_PROFILE_PERMISSION = "public_profile";
 
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
     private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth auth;
     private Uploader uploader;
-    private GoogleApiClient mGoogleApiClient;
-    private CallbackManager mCallbackManager;
-    private AuthCallback mGoogleAuthCallback;
+    private GoogleApiClient googleApiClient;
+    private CallbackManager callbackManager;
+    private AuthCallback loginAuthCallback;
+    private AuthCallback logoutAuthCallback;
     private FragmentActivity activity;
-    private boolean isLoggedIn;
     private byte[] profilePhoto;
+    private LoginListener listener;
 
-    public LoginManager(FragmentActivity activity, Uploader uploader) {
+    public interface LoginListener {
+        void onLoginComplete();
+    }
+
+    public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener,
+                        AuthCallback loginAuthCallback, AuthCallback logoutAuthCallback) {
         this.activity = activity;
         this.uploader = uploader;
-        mAuth = FirebaseAuth.getInstance();
-        //TODO: remove this sign out when sign out is implemented
-        //this is just for testing purposes to show snackbar when already logged in
-        mAuth.signOut();
-        mCallbackManager = CallbackManager.Factory.create();
-        isLoggedIn = mAuth.getCurrentUser() != null;
+        this.listener = listener;
+        this.loginAuthCallback = loginAuthCallback;
+        this.logoutAuthCallback = logoutAuthCallback;
+        auth = FirebaseAuth.getInstance();
+        callbackManager = CallbackManager.Factory.create();
         profilePhoto = null;
     }
 
@@ -77,135 +92,110 @@ public class LoginManager extends Observable {
         void onError();
     }
 
-    public void signInWithGoogle() {
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
+    public void logOut() {
+        //sign out of facebook
+        com.facebook.login.LoginManager.getInstance().logOut();
+        //sign out of google
+        logoutOfGoogle();
+        //sign out of firebase
+        auth.signOut();
+        //tell the view to update
+        listener.onLoginComplete();
+    }
+
+    public void loginWithGoogle() {
+        if (googleApiClient != null) {
+            googleApiClient.disconnect();
         }
-        // Configure sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(activity.getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        // Build a GoogleApiClient with access to the Google Sign-In API and the
-        // options specified by gso.
-        mGoogleApiClient = new GoogleApiClient.Builder(activity)
-                .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        mGoogleAuthCallback.onError();
-                        mGoogleAuthCallback = null;
-                    }
-                })
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        //This means that the result function will be triggered, override
-        activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+        try {
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(activity.getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
+            // Build a GoogleApiClient with access to the Google Sign-In API and the
+            // options specified by gso.
+            googleApiClient = new GoogleApiClient.Builder(activity)
+                    .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                            loginAuthCallback.onError();
+                        }
+                    })
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+            //This means that the result function will be triggered, override
+            activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+        }
+        catch (Exception err) {
+            Log.d(TAG, "loginWithGoogle:" + err.getStackTrace().toString());
+            loginAuthCallback.onError();
+        }
+
+    }
+
+    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void logoutOfGoogle() {
+        if (googleApiClient != null && googleApiClient.isConnected() &&
+                auth.getCurrentUser() != null) {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            googleApiClient.stopAutoManage(activity);
+                            googleApiClient.disconnect();
+                            if (status.isSuccess()) {
+                                logoutAuthCallback.onSuccess();
+                            }
+                            else {
+                                logoutAuthCallback.onError();
+                            }
+                        }
+                    });
+        }
     }
 
     public void handleGoogleLoginResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
-            isLoggedIn = true;
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
-            mGoogleAuthCallback.onError();
-            mGoogleAuthCallback = null;
-        }
-    }
-
-    public void logoutOfGoogle(final AuthCallback authCallback) {
-        if (mGoogleApiClient != null && mAuth.getCurrentUser() != null) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(@NonNull Status status) {
-                            if (status.isSuccess()) {
-                                mAuth.signOut();
-                                authCallback.onSuccess();
-                            }
-                            else {
-                                authCallback.onError();
-                            }
-                        }
-                    });
-        }
-        else {
-            authCallback.onError();
+            googleApiClient.stopAutoManage(activity);
+            googleApiClient.disconnect();
         }
     }
 
     public void setupFacebookLoginButton(LoginButton loginButton) {
-        loginButton.setReadPermissions("email", "public_profile", FB_FRIENDS_PERMISSION);
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
-                loginToFirebase(loginResult.getAccessToken());
-            }
+        loginButton.setReadPermissions(FB_EMAIL_PERMISSION, FB_PROFILE_PERMISSION, FB_FRIENDS_PERMISSION);
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
             @Override
+            public void onSuccess(LoginResult loginResult) {
+                loginToFirebase(loginResult.getAccessToken());
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+            }
+            @Override
             public void onCancel() {
+                loginAuthCallback.onError();
                 Log.d(TAG, "facebook:onCancel");
             }
 
             @Override
             public void onError(FacebookException error) {
+                loginAuthCallback.onError();
                 Log.d(TAG, "facebook:onError", error);
             }
         });
     }
 
-    public void handleFacebookLoginResult(int requestCode, int resultCode, Intent data) {
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public String getStatus() {
-        String status = "";
-        String provider = getProvider();
-        String userName = getUserName();
-        if (provider != null && userName != null) {
-            status += "You're logged into " + getProvider() + " as " + getUserName();
-        }
-        else {
-            status += "Logout unsuccessful";
-        }
-        return status;
-    }
-
-    //TODO this should be pulled from firebase not the auth object
-    private String getUserName() {
-        String username = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            username = user.getDisplayName();
-        }
-        return username;
-    }
-
-    private String getProvider() {
-        String provider = null;
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            provider = user.getProviders().get(0);
-        }
-        return provider;
-    }
-
-    public boolean isLoggedIn() {
-        return isLoggedIn;
-    }
-
-    private void setLoggedIn(boolean isLoggedIn) {
-        this.isLoggedIn = isLoggedIn;
-        setChanged();
-        notifyObservers();
-    }
-
     private void uploadUser(final String facebookId) {
-        FirebaseUser fbUser = mAuth.getCurrentUser();
+        FirebaseUser fbUser = auth.getCurrentUser();
         //make sure user is signed in before sending
         if (fbUser != null) {
             //establish fields needed for constructor
@@ -220,13 +210,20 @@ public class LoginManager extends Observable {
             if (facebookId != null) {
                 downloadPhoto(String.format(facebookImageUrl, facebookId));
             }
-
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            uploader.addUser(user, profilePhoto);
+            uploader.addUser(user, profilePhoto, new ResourceListener<User>() {
+                @Override
+                public void onData(User data) {
+                    listener.onLoginComplete();
+                }
 
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
         }
-
     }
 
     private void downloadPhoto(final String imageUrl) {
@@ -250,57 +247,57 @@ public class LoginManager extends Observable {
         try {
             thread.join();
         }
-        catch (Exception err) {
+        catch (InterruptedException err) {
             err.printStackTrace();
         }
     }
 
     /**
-     * Login with Google+
+     * Login to Firebase with Google+
      * @param acct
      */
-    private void loginToFirebase(GoogleSignInAccount acct) {
+    private void loginToFirebase(final GoogleSignInAccount acct) {
         Uri photo = acct.getPhotoUrl();
         //downloading google profile picture
         downloadPhoto(photo.toString());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
+        auth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            setLoggedIn(true);
                             uploadUser(null);
+                            loginAuthCallback.onSuccess();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
-                            mGoogleAuthCallback.onError();
+                            loginAuthCallback.onError();
                         }
-                        mGoogleAuthCallback = null;
                     }
                 });
     }
 
     /**
-     * Login with Facebook
+     * Login to Firebase with Facebook
      * @param token
      */
     private void loginToFirebase(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
+        final AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        auth.signInWithCredential(credential)
                 .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            setLoggedIn(true);
                             uploadUser(token.getUserId());
+                            loginAuthCallback.onSuccess();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
+                            loginAuthCallback.onError();
                         }
                     }
                 });
