@@ -108,7 +108,7 @@ public class FirebaseResourceManager {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 // No op, not updating yet.
-                // Will put stuff in here once upvotes happen, probably
+                // TODO Will put stuff in here once upvotes happen, probably
             }
 
             @Override
