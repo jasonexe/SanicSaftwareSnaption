@@ -1,7 +1,8 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
-import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.Friend;
+import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
 /**
@@ -11,6 +12,11 @@ import com.snaptiongame.snaptionapp.models.User;
  */
 
 public interface Uploader {
+    public interface UploadListener{
+        public void onComplete();
+        public void onError();
+    }
+
     /**
      * Responsible for:
      *  notify invited users
@@ -76,4 +82,13 @@ public interface Uploader {
      * @return a string representing a key so that it can be found later
      */
     public String getNewUpvoteKey();
+
+    /**
+     * Responsible for adding the friend to the user's friends list and adding the user to the
+     * friend's friends list
+     *
+     * @param user
+     * @param friend
+     */
+    public void addFriend(User user, Friend friend, UploadListener listener);
 }

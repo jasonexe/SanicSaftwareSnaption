@@ -2,10 +2,14 @@ package com.snaptiongame.snaptionapp.ui.friends;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * FriendViewHolder is a RecyclerView.ViewHolder used to hold a simple friend view displaying a
@@ -14,11 +18,16 @@ import com.snaptiongame.snaptionapp.R;
  * @author Brittany Berlanga
  */
 public class FriendViewHolder extends RecyclerView.ViewHolder {
-    public final TextView friendName;
-    public final ImageView friendPhoto;
+    @BindView(R.id.friend_name)
+    TextView friendName;
+    @BindView(R.id.friend_photo)
+    ImageView friendPhoto;
+    @BindView(R.id.add_invite_button)
+    Button addInviteButton;
+
+
     public FriendViewHolder(View itemView) {
         super(itemView);
-        friendName = (TextView) this.itemView.findViewById(R.id.friend_name);
-        friendPhoto = (ImageView) this.itemView.findViewById(R.id.friend_photo);
+        ButterKnife.bind(this, itemView);
     }
 }
