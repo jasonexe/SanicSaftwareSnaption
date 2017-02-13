@@ -195,7 +195,7 @@ public class FirebaseUploader implements Uploader {
         FirebaseResourceManager manager = new FirebaseResourceManager();
         manager.retrieveSingleNoUpdates(USERS_PATH + "/" + user.getId(), new ResourceListener() {
             @Override
-            public void onData(User data) {
+            public void onData(Object data) {
                 //if User does not exist
                 if (data == null || !(data instanceof User)) {
                     //upload user
