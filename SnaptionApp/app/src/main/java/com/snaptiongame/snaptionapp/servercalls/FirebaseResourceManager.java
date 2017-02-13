@@ -277,7 +277,7 @@ public class FirebaseResourceManager {
      * @param friendListener ResourceListener the list of Friends is returned to
      */
     public static void getFacebookFriends(String facebookId,
-                                          final ResourceListener<List<Friend>> friendListener) {
+                                          final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
             public void onCompleted(GraphResponse response) {
@@ -296,8 +296,7 @@ public class FirebaseResourceManager {
      * @param friendListener ResourceListener the list of Friends is returned to
      */
     private static void handleFacebookFriendsResponse(
-            GraphResponse response, final ResourceListener<List<Friend>> friendListener) {
-        final List<Friend> friendList = new ArrayList<>();
+            GraphResponse response, final ResourceListener<Friend> friendListener) {
         // parse the Facebook response to a list of Friends
         final JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
         if (friends != null) {
@@ -305,18 +304,13 @@ public class FirebaseResourceManager {
                 final JSONObject friend = friends.optJSONObject(ndx);
                 if (friend != null) {
                     final String friendFacebookId = friend.optString(FB_REQUEST_ID);
-                    // get the friend's Snaption display name
-                    getUserDisplayName(friendFacebookId, new ResourceListener<String>() {
+                    // get the friend's User info
+                    getFacebookUser(friendFacebookId, new ResourceListener<User>() {
                         @Override
-                        public void onData(String displayName) {
-                            // if the friend's display name cannot be found, use their Facebook name
-                            if (displayName == null) {
-                                displayName = friend.optString(FB_REQUEST_NAME);
-                            }
-                            friendList.add(new Friend(displayName, friendFacebookId));
-                            // if all the calls have returned, notify listener
-                            if (friendList.size() == friends.length()) {
-                                friendListener.onData(friendList);
+                        public void onData(User user) {
+                            if (user != null) {
+                                friendListener.onData(new Friend(user.getId(),
+                                        user.getDisplayName(), friendFacebookId));
                             }
                         }
 
@@ -334,13 +328,13 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Retrieves the Snaption display name of the User associated with the given Facebook unique id,
-     * and returns the display name to the given ResourceListener
+     * Retrieves the Snaption User associated with the given Facebook unique id, and returns the
+     * User to the given ResourceListener
      *
      * @param facebookId String unique Facebook id of a Facebook user
-     * @param resourceListener ResourceListener the display name is returned to
+     * @param resourceListener ResourceListener the user is returned to
      */
-    public static void getUserDisplayName(String facebookId, final ResourceListener<String> resourceListener) {
+    public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
         Query query = database.getReference(USER_DIRECTORY).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -349,7 +343,7 @@ public class FirebaseResourceManager {
                 Iterator<DataSnapshot> facebookUserIterator = dataSnapshot.getChildren().iterator();
                 if (facebookUserIterator.hasNext()) {
                     User user = facebookUserIterator.next().getValue(User.class);
-                    resourceListener.onData(user.getDisplayName());
+                    resourceListener.onData(user);
                 }
                 else {
                     resourceListener.onData(null);
