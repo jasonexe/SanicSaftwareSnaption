@@ -54,6 +54,8 @@ public class LoginManager {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
+    private static final String FB_EMAIL_PERMISSION = "email";
+    private static final String FB_PROFILE_PERMISSION = "public_profile";
 
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
@@ -167,7 +169,7 @@ public class LoginManager {
     }
 
     public void setupFacebookLoginButton(LoginButton loginButton) {
-        loginButton.setReadPermissions("email", "public_profile", FB_FRIENDS_PERMISSION);
+        loginButton.setReadPermissions(FB_EMAIL_PERMISSION, FB_PROFILE_PERMISSION, FB_FRIENDS_PERMISSION);
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
 
             @Override

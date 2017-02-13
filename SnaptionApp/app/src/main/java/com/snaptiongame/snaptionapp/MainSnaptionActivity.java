@@ -151,24 +151,24 @@ public class MainSnaptionActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 //login was a success
-                showPostLogDialog("Successfully logged in");
+                showPostLogDialog(getResources().getString(R.string.login_success));
             }
             @Override
             public void onError() {
                 //login was a failure
-                showPostLogDialog("Failed to log in, please try again");
+                showPostLogDialog(getResources().getString(R.string.login_failure));
             }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 //logout was a success
-                showPostLogDialog("Successfully logged out");
+                showPostLogDialog(getResources().getString(R.string.logout_success));
             }
 
             @Override
             public void onError() {
                 //logout was a failure
-                showPostLogDialog("Failed to log out, please try again");
+                showPostLogDialog(getResources().getString(R.string.logout_failure));
             }
         });
         loginDialog = new LoginDialog(this, loginManager);
