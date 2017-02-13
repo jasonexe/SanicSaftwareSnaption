@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -18,6 +19,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -92,6 +94,39 @@ public class FirebaseResourceManager {
             }
         };
         databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    public void addChildListener(String path, final ResourceListener listener) {
+        removeListener();
+        databaseReference = database.getReference(path);
+        ChildEventListener childListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                listener.onData(dataSnapshot.getValue(listener.getDataType()));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                // No op, not updating yet.
+                // TODO Will put stuff in here once upvotes happen, probably
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                // No op, don't need to do anything if a comment is removed
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                // No op, comments won't be moved.
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // No op for now.
+            }
+        };
+        databaseReference.addChildEventListener(childListener);
     }
 
     /**
