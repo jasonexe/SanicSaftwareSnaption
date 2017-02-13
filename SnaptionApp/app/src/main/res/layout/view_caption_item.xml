@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginBottom="5dp"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp">
 
@@ -22,22 +23,26 @@
 
     <ImageView
         android:id="@+id/upvote"
+        android:src="@drawable/thumbs_up_blank"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_marginStart="10dp"
         android:layout_alignParentEnd="true"/>
 
     <TextView
         android:id="@+id/number_upvotes"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
-        android:layout_alignStart="@id/upvote"/>
+        android:gravity="center_vertical"
+        android:layout_toStartOf="@id/upvote"/>
 
     <TextView
         android:id="@+id/caption_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/captioner_photo"
-        android:layout_marginTop="5dp"/>
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
 
     <View
         android:layout_width="match_parent"

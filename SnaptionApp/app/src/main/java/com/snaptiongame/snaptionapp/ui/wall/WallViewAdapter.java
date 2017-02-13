@@ -161,6 +161,11 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         return !pattern.matcher(path).find();
     }
 
+    /**
+     * Adds a list of games.
+     *
+     * @param newGames a list of games to add
+     */
     public void addItems(List<Game> newGames) {
         int startPos = items.size();
         items.addAll(newGames);

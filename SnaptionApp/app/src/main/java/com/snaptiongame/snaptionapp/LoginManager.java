@@ -28,18 +28,14 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Observable;
-
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * Created by brittanyberlanga on 12/2/16.
@@ -49,6 +45,7 @@ public class LoginManager extends Observable {
 //TODO: refactor to remove Firebase objects from this class when we establish Uploader class
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final String TAG = LoginManager.class.getSimpleName();
+    private static final String FB_FRIENDS_PERMISSION = "user_friends";
 
     private final String photosFolder = "ProfilePictures/";
     private final String photoExtension = ".jpg";
@@ -141,7 +138,7 @@ public class LoginManager extends Observable {
     }
 
     public void setupFacebookLoginButton(LoginButton loginButton) {
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions("email", "public_profile", FB_FRIENDS_PERMISSION);
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {

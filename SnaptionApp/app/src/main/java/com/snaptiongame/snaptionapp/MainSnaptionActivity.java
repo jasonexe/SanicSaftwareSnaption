@@ -22,7 +22,6 @@ import android.widget.TextView;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
@@ -31,8 +30,6 @@ import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -131,9 +128,11 @@ public class MainSnaptionActivity extends AppCompatActivity implements DialogInt
             firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    navDrawerName.setText(user.getDisplayName());
-                    navDrawerEmail.setText(user.getEmail());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                    if(user != null) {
+                        navDrawerName.setText(user.getDisplayName());
+                        navDrawerEmail.setText(user.getEmail());
+                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+                    }
                 }
 
                 @Override

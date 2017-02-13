@@ -9,8 +9,8 @@ import java.io.Serializable;
  */
 
 public class Card implements Serializable {
-    public String id;
-    public String cardText;
+    private String id;
+    private String cardText;
 
     /**
      * Default empty constructor required by Firebase
@@ -21,8 +21,14 @@ public class Card implements Serializable {
         this.cardText = cardText;
     }
 
+    public Card (String cardText, String id) {
+        this.cardText = cardText;
+        this.id = id;
+    }
+
     public Card (Card oldCard) {
         this.cardText = oldCard.getCardText();
+        this.id = oldCard.getId();
     }
 
     // Call this after firebase generates the key that the card will have.
@@ -36,5 +42,25 @@ public class Card implements Serializable {
 
     public String getCardText() {
         return cardText;
+    }
+
+    public String retrieveFirstHalfText() {
+        int endIndex = cardText.indexOf("%s");
+        return cardText.substring(0, endIndex);
+    }
+
+    public String retrieveSecondHalfText() {
+        int endIndex = cardText.indexOf("%s");
+        return cardText.substring(endIndex + 2);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj.getClass() == this.getClass()) {
+            Card oCard = (Card)obj;
+            return this.getId().equals(oCard.getId())
+                    && this.getCardText().equals(oCard.getCardText());
+        }
+        return false;
     }
 }

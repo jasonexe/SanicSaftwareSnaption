@@ -78,7 +78,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         holder.numberUpvotes.setText(Integer.valueOf(caption.getVotes()).toString());
-        holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
+        //holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }
 
@@ -97,15 +97,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     }
 
     private void handleClickUpvote(ImageView upvote, Caption caption) {
-        Drawable image = upvote.getDrawable();
         //Using the deprecated method because the current version isn't compatible with our min API
-        if (image.equals(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank))) {
-            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-
-        }
-        else {
-            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank));
-        }
+        //TODO check if the user has upvoted the caption already
+        //upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
+        //upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank));
     }
 
     /**

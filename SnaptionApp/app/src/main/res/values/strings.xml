@@ -28,6 +28,11 @@
     <string name="caption_filler">Be the first to caption this photo!</string>
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
+    <string name="submit_caption">Submit</string>
+    <string name="refresh">Refresh all cards</string>
+    <string name="fb_friends">Facebook friends on Snaption</string>
+    <string name="google_friends">Google+ friends on Snaption</string>
+    <string name="add">Add</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
