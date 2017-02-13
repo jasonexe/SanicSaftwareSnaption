@@ -304,7 +304,7 @@ public class FirebaseResourceManager {
                 final JSONObject friend = friends.optJSONObject(ndx);
                 if (friend != null) {
                     final String friendFacebookId = friend.optString(FB_REQUEST_ID);
-                    // get the friend's Snaption display name
+                    // get the friend's User info
                     getFacebookUser(friendFacebookId, new ResourceListener<User>() {
                         @Override
                         public void onData(User user) {
