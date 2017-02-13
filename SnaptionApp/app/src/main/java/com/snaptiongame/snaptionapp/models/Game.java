@@ -13,7 +13,7 @@ import java.util.Map;
  * @author Cameron Geehr
  */
 
-public class Game implements Serializable{
+public class Game implements Serializable {
     private String id; //The ID of the game
     private String picker; //The ID of the picker
     private String imagePath; //The path of the image on Firebase
