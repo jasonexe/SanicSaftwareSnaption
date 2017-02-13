@@ -136,12 +136,17 @@ public class GameActivity extends AppCompatActivity {
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
 
+        LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
         }
         else {
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList());
             numberCaptions.setText(EMPTY_SIZE);
         }
+        captionListView.setAdapter(captionAdapter);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
@@ -158,29 +163,6 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public Class getDataType() {
                 return User.class;
-            }
-        });
-
-        LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        captionListView.setLayoutManager(captionViewManager);
-        if (game.getCaptions() != null) {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
-        }
-        else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList());
-        }
-        captionListView.setAdapter(captionAdapter);
-
-//        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            // This will pop up the caption options
-            @Override
-            public void onClick(View view) {
-
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
 
@@ -201,8 +183,6 @@ public class GameActivity extends AppCompatActivity {
         MenuInflater inflater = popup.getMenuInflater();
 
     }
-
-
 
     @OnClick(R.id.fab)
     public void displayCardOptions() {
