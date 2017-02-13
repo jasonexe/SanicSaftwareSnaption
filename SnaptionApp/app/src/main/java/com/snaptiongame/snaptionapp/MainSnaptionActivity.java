@@ -85,7 +85,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.log_option:
-                        //check if we are logging in our out based on item text
+                        //check if we are logging in or out based on item text
                         if (item.getTitle().equals(getResources().getString(R.string.login))) {
                             //display dialog
                             loginDialog.show();
@@ -132,10 +132,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
         drawerLayout.addDrawerListener(mDrawerToggle);
-
-
         navigationView.setNavigationItemSelectedListener(mNavListener);
-
         setupNavigationView();
 
         // wall fragment instantiation
@@ -151,24 +148,24 @@ public class MainSnaptionActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 //login was a success
-                showPostLogDialog("Successfully logged in");
+                showPostLogDialog(getResources().getString(R.string.login_success));
             }
             @Override
             public void onError() {
                 //login was a failure
-                showPostLogDialog("Failed to log in, please try again");
+                showPostLogDialog(getResources().getString(R.string.login_failure));
             }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 //logout was a success
-                showPostLogDialog("Successfully logged out");
+                showPostLogDialog(getResources().getString(R.string.logout_success));
             }
 
             @Override
             public void onError() {
                 //logout was a failure
-                showPostLogDialog("Failed to log out, please try again");
+                showPostLogDialog(getResources().getString(R.string.logout_failure));
             }
         });
         loginDialog = new LoginDialog(this, loginManager);
@@ -193,20 +190,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 @Override
                 public void onData(User user) {
                     if (user != null) {
-                        //load user data into views
-                        navDrawerName.setText(user.getDisplayName());
-                        navDrawerEmail.setText(user.getEmail());
-                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
-                        //set user info to visible now they are logged in
-                        navDrawerPhoto.setVisibility(View.VISIBLE);
-                        navDrawerName.setVisibility(View.VISIBLE);
-                        navDrawerEmail.setVisibility(View.VISIBLE);
-                        //set logged in only options to visible
-                        navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
-                        navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
-                        //set drawer item to say log out
-                        navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
-
+                        addUserInfoToNavDrawer(user);
                     } else {
                         removeUserInfoFromNavDrawer();
                     }
@@ -219,6 +203,23 @@ public class MainSnaptionActivity extends AppCompatActivity {
         } else {
             removeUserInfoFromNavDrawer();
         }
+    }
+
+    private void addUserInfoToNavDrawer(User user) {
+        //load user data into views
+        navDrawerName.setText(user.getDisplayName());
+        navDrawerEmail.setText(user.getEmail());
+        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+        //set user info to visible now they are logged in
+        navDrawerPhoto.setVisibility(View.VISIBLE);
+        navDrawerName.setVisibility(View.VISIBLE);
+        navDrawerEmail.setVisibility(View.VISIBLE);
+        //set logged in only options to visible
+        navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
+        navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+        //set drawer item to say log out
+        navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
+
     }
 
     private void removeUserInfoFromNavDrawer() {
