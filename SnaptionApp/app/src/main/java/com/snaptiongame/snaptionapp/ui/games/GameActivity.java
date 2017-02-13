@@ -163,7 +163,12 @@ public class GameActivity extends AppCompatActivity {
 
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
-        captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
+        if (game.getCaptions() != null) {
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
+        }
+        else {
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList());
+        }
         captionListView.setAdapter(captionAdapter);
 
 //        setSupportActionBar(toolbar);
