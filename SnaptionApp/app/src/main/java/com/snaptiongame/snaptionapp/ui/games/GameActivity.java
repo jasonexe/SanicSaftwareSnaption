@@ -29,6 +29,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.text.SimpleDateFormat;
@@ -50,7 +51,7 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
  * TODO needs to verify that a user is logged in before adding captions.
  * @Author Jason Krein, Cameron Geehr
  */
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends HomeAppCompatActivity {
     public static final String REFRESH_STRING = "refresh";
     private final static String DEFAULT_PACK = "InitialPack";
     private final static String GAME_DIRECTORY = "games";
@@ -140,10 +141,10 @@ public class GameActivity extends AppCompatActivity {
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList(game.getCaptions().values()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()));
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList());
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -156,8 +157,10 @@ public class GameActivity extends AppCompatActivity {
         firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
             public void onData(User user) {
-                pickerName.setText(user.getDisplayName());
-                FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
+                if (user != null) {
+                    pickerName.setText(user.getDisplayName());
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
+                }
             }
 
             @Override
@@ -176,12 +179,6 @@ public class GameActivity extends AppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
-    }
-
-    private void showCardSelectPopup(View v) {
-        PopupMenu popup = new PopupMenu(this, v);
-        MenuInflater inflater = popup.getMenuInflater();
-
     }
 
     @OnClick(R.id.fab)

@@ -65,8 +65,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
             public void onData(User user) {
-                holder.captionerName.setText(user.getDisplayName());
-                FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionerPhoto);
+                if (user != null) {
+                    holder.captionerName.setText(user.getDisplayName());
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionerPhoto);
+                }
             }
 
             @Override
