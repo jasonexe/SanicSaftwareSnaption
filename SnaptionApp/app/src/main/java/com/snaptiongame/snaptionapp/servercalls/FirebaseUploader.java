@@ -203,10 +203,6 @@ public class FirebaseUploader implements Uploader {
                     //upload user photo
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
                     ref.putBytes(photo);
-                    //upload user
-                    uploadObject(usersPath + "/" + user.getId(), user);
-
-
                 }
                 //notify user has been added or found
                 listener.onData(data);
