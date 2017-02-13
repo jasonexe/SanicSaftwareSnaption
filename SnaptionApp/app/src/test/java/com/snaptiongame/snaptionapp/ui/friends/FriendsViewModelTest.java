@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
@@ -21,6 +22,8 @@ import org.robolectric.annotation.Config;
 
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -49,7 +52,11 @@ public class FriendsViewModelTest {
     @Mock
     private User user;
     @Mock
+    private Friend friend;
+    @Mock
     private Uploader uploader;
+    @Mock
+    private Uploader.UploadListener uploadListener;
     @Mock
     private ResourceListener resourceListener;
 
@@ -106,5 +113,12 @@ public class FriendsViewModelTest {
         // check that the static method was called with the correct arguments
         assertEquals(TEST_FB_ID, idCaptor.getValue());
         assertEquals(resourceListener, listenerCaptor.getValue());
+    }
+
+    @Test
+    public void testAddFriend() {
+        viewModel.addFriend(friend, uploadListener);
+        // check that the method was called once with the correct arguments
+        verify(uploader, times(1)).addFriend(user, friend, uploadListener);
     }
 }
