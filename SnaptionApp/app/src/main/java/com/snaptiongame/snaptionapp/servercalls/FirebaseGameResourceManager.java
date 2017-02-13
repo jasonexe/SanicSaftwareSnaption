@@ -19,8 +19,8 @@ import java.util.List;
  */
 
 public class FirebaseGameResourceManager implements GameResourceManager {
+    public static final String GAME_TABLE = "games";
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private static final String GAME_TABLE = "games";
     private static final String CREATION_DATE_CHILD = "creationDate";
     private ResourceListener<List<Game>> listener;
     private int limit;

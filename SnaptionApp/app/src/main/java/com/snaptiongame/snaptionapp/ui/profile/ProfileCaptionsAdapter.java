@@ -8,10 +8,17 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
+import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.List;
 
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager.GAME_TABLE;
 import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.PHOTO_PATH;
 
 /**
@@ -32,12 +39,24 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
         holder.captionText.setText(curCaption.retrieveCaptionText());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 String gameId = curCaption.getGameId();
-                Intent intent = new Intent(view.getContext(), GameActivity.class);
-                //TODO change this to whatever Cameron's code needs.
-                intent.putExtra(PHOTO_PATH, gameId);
-                view.getContext().startActivity(intent);
+                FirebaseResourceManager.retrieveSingleNoUpdates(
+                        FirebaseGameResourceManager.GAME_TABLE + "/" + gameId,
+                        new ResourceListener<Game>() {
+                            @Override
+                            public void onData(Game data) {
+                                Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
+                                gamePageIntent.putExtra(WallViewAdapter.GAME, data);
+                                view.getContext().startActivity(gamePageIntent);
+                            }
+
+                            @Override
+                            public Class getDataType() {
+                                return Game.class;
+                            }
+                        });
+
             }
         });
     }

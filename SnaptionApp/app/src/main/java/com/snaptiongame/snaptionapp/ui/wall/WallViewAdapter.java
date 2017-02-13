@@ -30,6 +30,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     public static final String PHOTO_PATH = "currentPhotoPath";
+    public static final String GAME = "game";
     public static final String USER_PATH = "users/";
     public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
