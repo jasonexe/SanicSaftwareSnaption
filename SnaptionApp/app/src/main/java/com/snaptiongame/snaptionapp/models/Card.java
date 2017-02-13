@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Jason Krein
  */
 
-public class Card implements Serializable{
+public class Card implements Serializable {
     private String id;
     private String cardText;
 

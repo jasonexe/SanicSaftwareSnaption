@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
  * @author Cameron Geehr
  */
 
-public class Game {
+public class Game implements Serializable {
     private String id; //The ID of the game
     private String picker; //The ID of the picker
     private String imagePath; //The path of the image on Firebase
@@ -148,6 +149,14 @@ public class Game {
         judgerRating++;
     }
 
+    /**
+     * Downvotes the game.
+     */
+    public void downvote() {
+        if (judgerRating > 0)
+            judgerRating--;
+    }
+
     /** Accessor Methods **/
 
     /**
@@ -183,6 +192,9 @@ public class Game {
      * @return The list of captions in the game
      */
     public Map getCaptions() {
+        if (captions == null) {
+            return null;
+        }
         return new HashMap(captions);
     }
 
@@ -196,6 +208,9 @@ public class Game {
      * @return The list of players
      */
     public List getPlayers() {
+        if (players == null) {
+            return null;
+        }
         return new ArrayList(players);
     }
 
@@ -205,6 +220,9 @@ public class Game {
      * @return The list of categories
      */
     public List getCategories() {
+        if (categories == null) {
+            return null;
+        }
         return new ArrayList(categories);
     }
 

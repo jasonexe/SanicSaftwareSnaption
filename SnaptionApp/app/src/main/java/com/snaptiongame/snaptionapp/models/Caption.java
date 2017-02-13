@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.InvalidClassException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ import java.util.List;
  * @author Jason Krein
  */
 
-public class Caption {
+public class Caption implements Serializable {
     public String id;       // The id of the caption
     public String userId;   // The person who created the caption
     public String gameId;   // The game the caption was made on

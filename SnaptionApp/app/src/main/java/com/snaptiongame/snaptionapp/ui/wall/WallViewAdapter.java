@@ -30,6 +30,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     public static final String PHOTO_PATH = "currentPhotoPath";
+    public static final String GAME = "game";
     public static final String USER_PATH = "users/";
     public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
@@ -46,16 +47,16 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     class PhotoClickListener implements View.OnClickListener {
-        String imagePath;
-        public PhotoClickListener(String imagePath) {
-            this.imagePath = imagePath;
+        Game game;
+        public PhotoClickListener(Game game) {
+            this.game = game;
         }
 
         @Override
         public void onClick(View view) {
             Context imageContext = view.getContext();
             Intent createGameIntent = new Intent(imageContext, GameActivity.class);
-            createGameIntent.putExtra(PHOTO_PATH, imagePath);
+            createGameIntent.putExtra(GAME, game);
             imageContext.startActivity(createGameIntent);
         }
     }
@@ -67,7 +68,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 game.getTopCaption().retrieveCaptionText() :
                 holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
-        holder.photo.setOnClickListener(new PhotoClickListener(game.getImagePath()));
+        holder.photo.setOnClickListener(new PhotoClickListener(game));
 
         // distinguish between complete and incomplete games
         if (game.getIsOpen()) {
@@ -160,6 +161,11 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         return !pattern.matcher(path).find();
     }
 
+    /**
+     * Adds a list of games.
+     *
+     * @param newGames a list of games to add
+     */
     public void addItems(List<Game> newGames) {
         int startPos = items.size();
         items.addAll(newGames);
