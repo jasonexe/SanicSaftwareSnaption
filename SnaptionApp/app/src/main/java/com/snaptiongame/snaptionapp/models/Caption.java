@@ -22,7 +22,7 @@ import java.util.List;
  * @author Jason Krein
  */
 
-public class Caption implements Serializable{
+public class Caption implements Serializable {
     public String id;       // The id of the caption
     public String userId;   // The person who created the caption
     public String gameId;   // The game the caption was made on

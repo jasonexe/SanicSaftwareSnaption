@@ -2,28 +2,39 @@ package com.snaptiongame.snaptionapp.ui.games;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
+import android.support.v7.widget.RecyclerView;
+import android.view.MenuInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
-import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -40,15 +51,43 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
  * TODO needs to verify that a user is logged in before adding captions.
  * @Author Jason Krein, Cameron Geehr
  */
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends HomeAppCompatActivity {
     public static final String REFRESH_STRING = "refresh";
-    private static final String DEFAULT_PACK = "InitialPack";
+    private final static String DEFAULT_PACK = "InitialPack";
+    private final static String GAME_DIRECTORY = "games";
+    private final static String CAPTION_DIRECTORY = "captions";
+    private final static String EMPTY_SIZE = "0";
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
     private CardOptionsAdapter cardListAdapter;
+
+    private Game game;
+    private String photoPath;
+    private GameCaptionViewAdapter captionAdapter;
+
+    @BindView(R.id.image_view)
+    protected ImageView imageView;
+
+    @BindView(R.id.picker_photo)
+    protected ImageView pickerPhoto;
+
+    @BindView(R.id.picker_name)
+    protected TextView pickerName;
+
+    @BindView(R.id.flag_icon)
+    protected ImageView flag;
+
+    @BindView(R.id.number_captions)
+    protected TextView numberCaptions;
+
+    @BindView(R.id.text_date)
+    protected TextView endDate;
+
+    @BindView(R.id.recycler_caption_list)
+    protected RecyclerView captionListView;
 
     // Since the view will be formatted as "Card text" "Input Field" "More card text"
     // Need to get the first half of card text, and second half (hence the two halves)
@@ -73,12 +112,63 @@ public class GameActivity extends AppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+    private ResourceListener captionListener = new ResourceListener<Caption>() {
+        @Override
+        public void onData(Caption data) {
+            if (data != null) {
+                captionAdapter.addCaption(data);
+            }
+        }
+
+        @Override
+        public Class getDataType() {
+            return Game.class;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_caption);
+        setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
+
+        game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
+        photoPath = game.getImagePath();
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+
+        LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        captionListView.setLayoutManager(captionViewManager);
+        if (game.getCaptions() != null) {
+            numberCaptions.setText(Integer.toString(game.getCaptions().size()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()));
+        }
+        else {
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
+            numberCaptions.setText(EMPTY_SIZE);
+        }
+        captionListView.setAdapter(captionAdapter);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(game.getEndDate());
+        endDate.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
+
+        String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
+        firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            @Override
+            public void onData(User user) {
+                if (user != null) {
+                    pickerName.setText(user.getDisplayName());
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return User.class;
+            }
+        });
+
         populateCards(DEFAULT_PACK);
         // Listen for if the user presses "enter."
         // They can also submit by clicking the button
@@ -152,8 +242,6 @@ public class GameActivity extends AppCompatActivity {
             return true;
         }
     };
-
-
 
     /**
      * This class is used in the Adapter, and is called when a card is clicked.
