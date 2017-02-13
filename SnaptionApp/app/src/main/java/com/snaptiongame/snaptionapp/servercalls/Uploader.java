@@ -65,7 +65,7 @@ public interface Uploader {
      * @param user
      * @param photo
      */
-    public void addUser(User user, byte[] photo);
+    public void addUser(User user, byte[] photo, ResourceListener<User> listener);
 
     /**
      * Responsbile for:

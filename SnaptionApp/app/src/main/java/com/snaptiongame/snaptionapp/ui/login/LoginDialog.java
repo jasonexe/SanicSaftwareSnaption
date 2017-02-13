@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.login;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -7,30 +7,24 @@ import android.view.View;
 
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.SignInButton;
-
-import java.util.Observable;
-import java.util.Observer;
+import com.snaptiongame.snaptionapp.servercalls.LoginManager;
+import com.snaptiongame.snaptionapp.R;
 
 /**
+ * Dialog that is displayed when a user is trying to log in.
+ * It will offer an option for Facebook or Google+ login
+ *
  * Created by austinrobarts on 1/16/17.
  */
 
-public class LoginDialog extends Dialog implements View.OnClickListener, Observer {
-
+public class LoginDialog extends Dialog implements View.OnClickListener {
     private LoginManager manager;
-    private LoginListener loginListener;
     private SignInButton googleLogButton;
     private LoginButton facebookLogButton;
 
-    public interface LoginListener {
-        void onLoginComplete();
-    }
-
-    public LoginDialog(Activity activity, LoginManager manager, LoginListener loginListener) {
+    public LoginDialog(Activity activity, LoginManager manager) {
         super(activity);
         this.manager = manager;
-        this.loginListener = loginListener;
-        manager.addObserver(this);
     }
 
     @Override
@@ -48,27 +42,12 @@ public class LoginDialog extends Dialog implements View.OnClickListener, Observe
         manager.setupFacebookLoginButton(facebookLogButton);
     }
 
-    /**
-     * Update when login status changes
-     * @param observable
-     * @param o
-     */
     @Override
-    public void update(Observable observable, Object o) {
-        // notify listener
-        if (loginListener != null) {
-            loginListener.onLoginComplete();
-        }
-        //dismisses the dialog to go back to main screen
-        dismiss();
-    }
-
-    @Override
-    public void onClick(View view) {
+    public void onClick(final View view) {
         switch (view.getId()) {
-            //cases will be added here to deal with logout
+            //only needs to handle login for google here
             case R.id.google_login_button:
-                manager.signInWithGoogle();
+                manager.loginWithGoogle();
                 break;
         }
     }

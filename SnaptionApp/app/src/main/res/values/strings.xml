@@ -35,6 +35,15 @@
     <string name="add">Add</string>
     <string name="added_friend">%s is now your friend!</string>
     <string name="problem_adding_friend">Problem adding %s as your friend.</string>
+    <string name="login">Log In</string>
+    <string name="logout">Log Out</string>
+    <string name="logout_prompt">Are you sure you want to log out?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="login_success">Successfully logged in</string>
+    <string name="logout_success">Successfully logged out</string>
+    <string name="login_failure">Failed to log in</string>
+    <string name="logout_failure">Failed to log out</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
