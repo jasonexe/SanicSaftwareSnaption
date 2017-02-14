@@ -77,7 +77,7 @@ public class FriendsFragment extends Fragment {
                     }
                     else {
                         friendNotice.setVisibility(View.VISIBLE);
-                        friendNotice.setText("You don't have any friends yet!\n\nClick on the button below to find someone you know.");
+                        friendNotice.setText(R.string.empty_friends);
                     }
                 }
 

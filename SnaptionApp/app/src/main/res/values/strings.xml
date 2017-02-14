@@ -45,6 +45,7 @@
     <string name="logout_success">Successfully logged out</string>
     <string name="login_failure">Failed to log in</string>
     <string name="logout_failure">Failed to log out</string>
+    <string name="empty_friends">You don\'t have any friends yet!\n\nClick on the button below to find someone you know.</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
