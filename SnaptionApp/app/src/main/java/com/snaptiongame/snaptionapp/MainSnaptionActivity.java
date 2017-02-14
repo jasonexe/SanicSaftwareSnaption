@@ -42,7 +42,7 @@ import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
-    private LoginDialog loginDialog;
+    public LoginDialog loginDialog;
 
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
