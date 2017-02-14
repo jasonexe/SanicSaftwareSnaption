@@ -20,7 +20,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +54,7 @@ public class ProfileFragment extends Fragment {
     private ResourceListener gameListener = new ResourceListener<Game>() {
         @Override
         public void onData(Game data) {
-            gameAdapter.addGame((Game)data);
+            gameAdapter.addGame(data);
         }
 
         @Override
@@ -79,7 +78,7 @@ public class ProfileFragment extends Fragment {
         //if the user is logged in
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
@@ -116,12 +115,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void getUserGames(User user) {
-        List<String> gameIds = user.getGames();
+        Map<String, Integer> gameIds = user.getCreatedGames();
         //if User has any games
         if (gameIds != null) {
             //for each gameId in user's game list
-            for (String gameId : gameIds) {
-                firebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
+            for (String gameId : gameIds.keySet()) {
+                System.out.println(gameId);
+                FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
             }
         }
     }

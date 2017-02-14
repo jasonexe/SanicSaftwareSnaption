@@ -29,6 +29,7 @@ import java.util.List;
 public class FirebaseUploader implements Uploader {
 
     private static final String USERS_PATH = "users";
+    private static final String USERS_CREATED_GAMES =  "createdGames";
     private static final String CAPTION_PATH = "captions";
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
@@ -118,29 +119,8 @@ public class FirebaseUploader implements Uploader {
         final String gameId = game.getId();
         String userId = game.getPicker();
         DatabaseReference userRef = database.getReference(USERS_PATH + "/" + userId);
-        //TODO if games stays as a List instead of map, is PITA (can't do .push()). See below
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
-//        userRef.child("games").push().setValue(gameId);
-        //Assuming we'll leave it as a list
-        final DatabaseReference userGameListRef = userRef.child("games");
-        userGameListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> userGames = dataSnapshot.getValue(t);
-                if(userGames == null) {
-                    //create a new list if there isn't one in Firebase yet (user's first game!)
-                    userGames = new ArrayList<String>();
-                }
-                userGames.add(gameId);
-                userGameListRef.setValue(userGames);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.err.println("Adding game error");
-            }
-        });
+        userRef.child(USERS_CREATED_GAMES).child(gameId).setValue(1);
     }
 
     private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {

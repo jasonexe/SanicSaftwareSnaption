@@ -18,6 +18,7 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.OnClick;
 
@@ -79,7 +80,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         holder.captionText.setText(caption.retrieveCaptionText());
 
-        holder.numberUpvotes.setText(Integer.valueOf(caption.getVotes()).toString());
+        holder.numberUpvotes.setText(String.format(Locale.getDefault(),
+                "%d", caption.getVotes().size()));
         //holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }

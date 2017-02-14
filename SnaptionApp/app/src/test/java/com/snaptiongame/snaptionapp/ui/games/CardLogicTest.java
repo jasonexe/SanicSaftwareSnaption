@@ -8,7 +8,9 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -27,13 +29,14 @@ public class CardLogicTest {
     @Test
     public void testAddCaption() {
         List<String> empty = new ArrayList<>();
+        Map<String, Integer> emptyMap = new HashMap<>();
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String captionId = "testCapId";
         String userInput = "Test Input";
         String userId = "testUserId";
         String cardText = "testCard %s";
         String cardId = "testCardId";
-        Game game = new Game(gameId, "", "", empty, empty, true, 0, 0, "mature");
+        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = new Card(cardText, cardId);
         expectedInput.add(userInput);
@@ -51,10 +54,11 @@ public class CardLogicTest {
     public void testAddCaptionNoCard() {
         Uploader mockedUploader = mock(Uploader.class);
         List<String> empty = new ArrayList<>();
+        Map<String, Integer> emptyMap = new HashMap<>();
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
         String userId = "testUserId";
-        Game game = new Game(gameId, "", "", empty, empty, true, 0, 0, "mature");
+        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = null;
         expectedInput.add(userInput);

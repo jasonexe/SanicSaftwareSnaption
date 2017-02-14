@@ -14,12 +14,14 @@ public class User {
     private String id;
     private String email;
     private String displayName;
-    private List<String> friends;
-    private List<String> games;
+    private Map<String, Integer> friends;
+    private Map<String, Integer> createdGames;
     private Map<String, Caption> captions;
     private String notificationId;
     private String facebookId;
     private String imagePath;
+    private Map<String, Integer> blockedUsers; // Ids of users this user has blocked
+    private Map<String, Integer> privateGames; // Private games this user was invited to
 
     //needed for firebase compatibility
     public User() {}
@@ -32,14 +34,17 @@ public class User {
         this.facebookId = facebookId;
         this.imagePath = imagePath;
 
-        friends = new ArrayList<>();
-        games = new ArrayList<>();
+        friends = new HashMap<>();
+        createdGames = new HashMap<>();
         captions = new HashMap<>();
+        blockedUsers = new HashMap<>();
+        privateGames = new HashMap<>();
     }
 
     public User(String id, String email, String displayName, String notificationId,
-                String facebookId, String imagePath, List<String> friends, List<String> games,
-                Map<String, Caption> captions) {
+                String facebookId, String imagePath, Map<String, Integer> friends,
+                Map<String, Integer> games, Map<String, Caption> captions,
+                Map<String, Integer> blockedUsers, Map<String, Integer> privateGames) {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
@@ -48,16 +53,26 @@ public class User {
         this.imagePath = imagePath;
 
         this.friends = friends;
-        this.games = games;
+        this.createdGames = games;
         this.captions = captions;
+        this.blockedUsers = blockedUsers;
+        this.privateGames = privateGames;
     }
 
-    public List<String> getFriends() {
+    public Map<String, Integer> getFriends() {
         return friends;
     }
 
-    public List<String> getGames() {
-        return games;
+    public Map<String, Integer> getBlockedUsers() {
+        return blockedUsers;
+    }
+
+    public Map<String, Integer> getPrivateGames() {
+        return privateGames;
+    }
+
+    public Map<String, Integer> getCreatedGames() {
+        return createdGames;
     }
 
     public Map<String, Caption> getCaptions() {
@@ -100,12 +115,12 @@ public class User {
         this.displayName = displayName;
     }
 
-    public void setFriends(List<String> friends) {
+    public void setFriends(Map<String, Integer> friends) {
         this.friends = friends;
     }
 
-    public void setGames(List<String> games) {
-        this.games = games;
+    public void setGames(Map<String, Integer> games) {
+        this.createdGames = games;
     }
 
     public void setCaptions(Map<String, Caption> captions) {
@@ -134,8 +149,8 @@ public class User {
 
     public int retrieveGameCount() {
         int gameCount = 0;
-        if (games != null) {
-            gameCount = games.size();
+        if (createdGames != null) {
+            gameCount = createdGames.size();
         }
         return gameCount;
     }
