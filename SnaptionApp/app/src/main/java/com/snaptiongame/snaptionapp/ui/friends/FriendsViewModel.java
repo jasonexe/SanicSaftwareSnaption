@@ -67,8 +67,23 @@ public class FriendsViewModel {
         uploader.addFriend(user, friend, listener);
     }
 
+    /**
+     * Returns text to be displayed to the user after a friend has been added / attempted to be
+     * added and failed.
+     *
+     * @param appContext Application context
+     * @param friendName display name of added friend
+     * @param successfulAdd whether the add was successful
+     * @param errorMessage Uploader error message. Null if the add was successful
+     * @return
+     */
     public String getAddedFriendText(Context appContext, String friendName, boolean successfulAdd,
                                      String errorMessage) {
+        // if adding a friend was successful, return text explaining the friend was added
+        // if adding a friend failed, return text explaining the add failed
+        //      if the error message was ITEM_ALREADY_EXISTS_ERROR, return text explaining the
+        //          friend is already a friend of the user
+        //      else return a generic text explaining the friend could not be added
         return successfulAdd ?
                 String.format(appContext.getString(R.string.added_friend), friendName) :
                 TextUtils.isEmpty(errorMessage) || !errorMessage.equals(ITEM_ALREADY_EXISTS_ERROR) ?
