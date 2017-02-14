@@ -245,9 +245,7 @@ public class GameActivity extends HomeAppCompatActivity {
             });
             dialog.setLoginManager(loginManager);
             dialog.show();
-
         }
-
     }
 
     private void toggleVisibility(View view) {
