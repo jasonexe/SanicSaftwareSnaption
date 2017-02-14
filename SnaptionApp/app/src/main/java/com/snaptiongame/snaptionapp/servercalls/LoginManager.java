@@ -75,6 +75,14 @@ public class LoginManager {
         void onLoginComplete();
     }
 
+    /**
+     * Constructor used when login and logout callbacks want to be defined on construction
+     * @param activity activity used for GoogleAPI for managing
+     * @param uploader to upload user to backend
+     * @param listener callback for when login complete
+     * @param loginAuthCallback called for succesful or unsuccessful login
+     * @param logoutAuthCallback called for successful or unsuccessful logout
+     */
     public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener,
                         AuthCallback loginAuthCallback, AuthCallback logoutAuthCallback) {
         this.activity = activity;
@@ -105,6 +113,7 @@ public class LoginManager {
 
     public void loginWithGoogle() {
         if (googleApiClient != null) {
+            googleApiClient.stopAutoManage(activity);
             googleApiClient.disconnect();
         }
         try {

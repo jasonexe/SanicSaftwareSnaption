@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.games;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 
+import android.content.Intent;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -20,16 +21,21 @@ import android.widget.TextView;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.text.SimpleDateFormat;
@@ -42,6 +48,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
 
@@ -68,6 +75,8 @@ public class GameActivity extends HomeAppCompatActivity {
     private String photoPath;
     private GameCaptionViewAdapter captionAdapter;
     private FirebaseResourceManager commentManager;
+
+    private LoginManager loginManager;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -193,11 +202,51 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.fab)
     public void displayCardOptions() {
-        toggleVisibility(captionCardsList);
-        //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-        if(cardInputView.getVisibility() == View.VISIBLE) {
-            cardInputView.setVisibility(View.GONE);
-            hideKeyboard();
+        //if the user is logged in they can caption
+        if (FirebaseResourceManager.getUserId() != null) {
+            toggleVisibility(captionCardsList);
+            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+            if(cardInputView.getVisibility() == View.VISIBLE) {
+                cardInputView.setVisibility(View.GONE);
+                hideKeyboard();
+            }
+        }
+        else { //if they are logged out
+            //display the loginDialog
+            final LoginDialog dialog = new LoginDialog(this);
+            //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
+            //these callbacks every time we need to add in a login prompt in a new Activity
+            loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
+                @Override
+                public void onLoginComplete() {
+                    //probably do not need to do anything here
+                }
+            }, new LoginManager.AuthCallback() {
+                @Override
+                public void onSuccess() {
+                    //login was a success
+                    dialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                }
+                @Override
+                public void onError() {
+                    //login was a failure
+                    dialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+                }
+            }, new LoginManager.AuthCallback() {
+                @Override
+                public void onSuccess() {
+                    //logout was a success
+                    dialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                }
+
+                @Override
+                public void onError() {
+                    //logout was a failure
+                    dialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+                }
+            });
+            dialog.setLoginManager(loginManager);
+            dialog.show();
         }
     }
 
@@ -310,6 +359,28 @@ public class GameActivity extends HomeAppCompatActivity {
                 return null; // Not used.
             }
         });
+    }
+
+    /**
+     * This is called after returning from a login intent from either Facebook or Google
+     * This initiates the connection with firebase after contacting Facebook or Google
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        //if returning from google login attempt
+        if (requestCode == GOOGLE_LOGIN_RC) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            loginManager.handleGoogleLoginResult(result);
+        }
+        //if returning from facebook login attempt
+        else {
+            loginManager.handleFacebookLoginResult(requestCode, resultCode, data);
+        }
     }
 
 }
