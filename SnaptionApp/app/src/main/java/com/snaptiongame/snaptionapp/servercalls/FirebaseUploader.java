@@ -221,7 +221,6 @@ public class FirebaseUploader implements Uploader {
     }
 
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
-        // TODO check if already friends before adding
         // add the friend to the user's friends list
         addFriendToList(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
             @Override
@@ -236,16 +235,30 @@ public class FirebaseUploader implements Uploader {
                             }
                             else {
                                 // this is a problem if one friend was added but the other one was not
-                                listener.onError();
+                                listener.onError(getErrorMessage(databaseError));
                             }
                         }
                     });
                 }
                 else {
-                    listener.onError();
+                    listener.onError(getErrorMessage(databaseError));
                 }
             }
         });
+    }
+
+    /**
+     * Determines the proper Uploader error message to display depending on the DatabaseError
+     * received
+     * @param databaseError received DatabaseError
+     * @return Uploader error message
+     */
+    private String getErrorMessage(DatabaseError databaseError) {
+        String errorMessage = "";
+        if (databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)) {
+            errorMessage = ITEM_ALREADY_EXISTS_ERROR;
+        }
+        return errorMessage;
     }
 
     /**
@@ -266,8 +279,16 @@ public class FirebaseUploader implements Uploader {
                     //create a new list if there isn't one in Firebase yet (user's first friend!)
                     userFriends = new ArrayList<String>();
                 }
-                userFriends.add(friendId);
-                userFriendsRef.setValue(userFriends, listener);
+                // if the friend is not already in the user's friend list, add them
+                if (!userFriends.contains(friendId)) {
+                    userFriends.add(friendId);
+                    userFriendsRef.setValue(userFriends, listener);
+                }
+                // else propagate an error
+                else {
+                    listener.onComplete(DatabaseError.fromException(
+                            new Throwable(ITEM_ALREADY_EXISTS_ERROR)), null);
+                }
             }
 
             @Override

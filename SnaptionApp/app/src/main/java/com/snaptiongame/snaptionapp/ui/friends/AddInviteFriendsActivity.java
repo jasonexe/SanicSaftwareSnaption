@@ -71,17 +71,17 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                         // notify user
                         Toast.makeText(AddInviteFriendsActivity.this,
                                 viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
-                                        friend.displayName, true), Toast.LENGTH_LONG).show();
+                                        friend.displayName, true, null), Toast.LENGTH_LONG).show();
                         // remove friend from view
                         friendAdapter.removeSingleItem(friend);
                     }
 
                     @Override
-                    public void onError() {
+                    public void onError(String errorMessage) {
                         // notify user
                         Toast.makeText(AddInviteFriendsActivity.this,
                                 viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
-                                        friend.displayName, false), Toast.LENGTH_LONG).show();
+                                        friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
                     }
                 });
             }

@@ -20,6 +20,11 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.UploadListener;
 import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,6 +48,9 @@ public class FriendsViewModelTest {
     private static final String GOOGLE_PROVIDER_LABEL = "Google+ friends on Snaption";
     private static final String ADD_FRIEND_SUCCESS = "Brittany is now your friend!";
     private static final String ADD_FRIEND_FAIL = "Problem adding Brittany as your friend.";
+    private static final String ADD_FRIEND_ALREADY_EXISTS = "Brittany is already your friend.";
+    private static final String TEST_SNAPTION_ID = "snaption123456789";
+    private static final String FRIENDS_PATH = "users/snaption123456789/friends";
     private static final String TEST_FB_ID = "123456789";
     private static final String TEST_FRIEND_NAME = "Brittany";
     private FriendsViewModel viewModel;
@@ -56,7 +64,7 @@ public class FriendsViewModelTest {
     @Mock
     private Uploader uploader;
     @Mock
-    private Uploader.UploadListener uploadListener;
+    private UploadListener uploadListener;
     @Mock
     private ResourceListener resourceListener;
 
@@ -87,31 +95,53 @@ public class FriendsViewModelTest {
     public void testGetAddedFriendTextSuccess() {
         assertEquals(ADD_FRIEND_SUCCESS,
                 viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
-                        true));
+                        true, ""));
     }
 
     @Test
     public void testGetAddedFriendTextFail() {
         assertEquals(ADD_FRIEND_FAIL,
                 viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
-                        false));
+                        false, ""));
+        assertEquals(ADD_FRIEND_ALREADY_EXISTS,
+                viewModel.getAddedFriendText(RuntimeEnvironment.application, TEST_FRIEND_NAME,
+                        false, ITEM_ALREADY_EXISTS_ERROR));
     }
 
     @Test
     public void testGetFbProviderFriends() {
         mockStatic(FirebaseResourceManager.class);
         when(user.getFacebookId()).thenReturn(TEST_FB_ID);
-        ArgumentCaptor<String> idCaptor = ArgumentCaptor.forClass(String.class);
+        when(user.getId()).thenReturn(TEST_SNAPTION_ID);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<List> friendsListCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<ResourceListener> friendsListListenerCaptor = ArgumentCaptor.forClass(ResourceListener.class);
         ArgumentCaptor<ResourceListener> listenerCaptor = ArgumentCaptor.forClass(ResourceListener.class);
         try {
             doNothing().when(
-                    FirebaseResourceManager.class, "getFacebookFriends", idCaptor.capture(), listenerCaptor.capture());
+                    FirebaseResourceManager.class, "retrieveStringListNoUpdates",
+                    pathCaptor.capture(), friendsListListenerCaptor.capture());
+            doNothing().when(
+                    FirebaseResourceManager.class, "getFacebookFriends", userCaptor.capture(),
+                    friendsListCaptor.capture(), listenerCaptor.capture());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
         viewModel.getLoginProviderFriends(resourceListener);
-        // check that the static method was called with the correct arguments
-        assertEquals(TEST_FB_ID, idCaptor.getValue());
+
+        // check that retrieveStringListNoUpdates was called with the correct arguments
+        assertEquals(FRIENDS_PATH, pathCaptor.getValue());
+
+        // emulate data returning from the call
+        List<Friend> mockFriends = new ArrayList();
+        mockFriends.add(friend);
+        friendsListListenerCaptor.getValue().onData(mockFriends);
+
+        // check that getFacebookFriends was called with the correct arguments
+        assertEquals(user, userCaptor.getValue());
+        assertEquals(mockFriends, friendsListCaptor.getValue());
         assertEquals(resourceListener, listenerCaptor.getValue());
     }
 
