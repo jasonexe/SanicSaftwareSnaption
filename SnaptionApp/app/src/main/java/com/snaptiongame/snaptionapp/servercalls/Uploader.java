@@ -12,9 +12,14 @@ import com.snaptiongame.snaptionapp.models.User;
  */
 
 public interface Uploader {
+    public String ITEM_ALREADY_EXISTS_ERROR = "Item already exists";
     public interface UploadListener{
         public void onComplete();
-        public void onError();
+        /**
+         * Called when the Uploader is unable to finish a transaction
+         * @param errorMessage an empty string or one of the predefined Uploader errors
+         */
+        public void onError(String errorMessage);
     }
 
     /**

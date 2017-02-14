@@ -35,6 +35,7 @@
     <string name="add">Add</string>
     <string name="added_friend">%s is now your friend!</string>
     <string name="problem_adding_friend">Problem adding %s as your friend.</string>
+    <string name="already_friend">%s is already your friend.</string>
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
     <string name="logout_prompt">Are you sure you want to log out?</string>
