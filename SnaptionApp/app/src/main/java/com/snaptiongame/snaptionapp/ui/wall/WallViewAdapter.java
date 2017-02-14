@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.CreateGameActivity;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
@@ -35,9 +36,11 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private List<Game> items;
+    private MainSnaptionActivity activity;
 
-    public WallViewAdapter(List<Game> items) {
+    public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
         this.items = items;
+        this.activity = activity;
     }
 
     @Override
@@ -88,23 +91,29 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         holder.createFromExisting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // If they want to create a game from this one, start the create game intent
-                // with this game's image path
-                FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
-                    @Override
-                    public void onData(Uri data) {
-                        Context buttonContext = holder.createFromExisting.getContext();
-                        Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
-                        createGameIntent.putExtra(EXTRA_MESSAGE, data);
-                        createGameIntent.putExtra(PHOTO_PATH, imagePath);
-                        buttonContext.startActivity(createGameIntent);
-                    }
+                //if the user is logged in
+                if (FirebaseResourceManager.getUserId() != null) {
+                    // If they want to create a game from this one, start the create game intent
+                    // with this game's image path
+                    FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
+                        @Override
+                        public void onData(Uri data) {
+                            Context buttonContext = holder.createFromExisting.getContext();
+                            Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
+                            createGameIntent.putExtra(EXTRA_MESSAGE, data);
+                            createGameIntent.putExtra(PHOTO_PATH, imagePath);
+                            buttonContext.startActivity(createGameIntent);
+                        }
 
-                    @Override
-                    public Class getDataType() {
-                        return Uri.class;
-                    }
-                });
+                        @Override
+                        public Class getDataType() {
+                            return Uri.class;
+                        }
+                    });
+                }
+                else { //prompt user to log in
+                    activity.loginDialog.show();
+                }
             }
         });
 

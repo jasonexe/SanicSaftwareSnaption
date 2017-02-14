@@ -42,7 +42,7 @@ import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
-    private LoginDialog loginDialog;
+    public LoginDialog loginDialog;
 
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
@@ -139,6 +139,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
         currentFragmentMenuItemId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
+        //create loginDialog and LoginManager to manager user
+        loginDialog = new LoginDialog(this);
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
             @Override
             public void onLoginComplete() {
@@ -148,27 +150,27 @@ public class MainSnaptionActivity extends AppCompatActivity {
             @Override
             public void onSuccess() {
                 //login was a success
-                showPostLogDialog(getResources().getString(R.string.login_success));
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
             }
             @Override
             public void onError() {
                 //login was a failure
-                showPostLogDialog(getResources().getString(R.string.login_failure));
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
             }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 //logout was a success
-                showPostLogDialog(getResources().getString(R.string.logout_success));
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
             }
 
             @Override
             public void onError() {
                 //logout was a failure
-                showPostLogDialog(getResources().getString(R.string.logout_failure));
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
             }
         });
-        loginDialog = new LoginDialog(this, loginManager);
+        loginDialog.setLoginManager(loginManager);
     }
 
     private void showPostLogDialog(String text) {
@@ -237,13 +239,25 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
         if (currentFragmentMenuItemId == R.id.wall_item) {
-            Intent intent = new Intent(this, CreateGameActivity.class);
-            startActivity(intent);
+            if (FirebaseResourceManager.getUserId() != null) {
+                Intent intent = new Intent(this, CreateGameActivity.class);
+                startActivity(intent);
+            }
+            else {
+                loginDialog.show();
+            }
+
         }
         else if (currentFragmentMenuItemId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setupNavigationView();
     }
 
     @Override
