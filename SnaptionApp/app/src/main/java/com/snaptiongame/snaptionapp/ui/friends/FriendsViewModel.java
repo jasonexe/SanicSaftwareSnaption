@@ -10,7 +10,11 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
-import static com.snaptiongame.snaptionapp.servercalls.Uploader.*;
+import java.util.List;
+
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.FRIENDS_PATH;
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
+import static com.snaptiongame.snaptionapp.servercalls.Uploader.UploadListener;
 
 /**
  * FriendsViewModel is used by a view to retrieve and display information about the current user's
@@ -26,10 +30,23 @@ public class FriendsViewModel {
     }
 
     public void getLoginProviderFriends(final ResourceListener<Friend> listener) {
-        // TODO remove all Facebook friends that are already in your Snaption friend list
         // if the user logged in with Facebook
         if (!TextUtils.isEmpty(user.getFacebookId())) {
-            FirebaseResourceManager.getFacebookFriends(user.getFacebookId(), listener);
+            // retrieve user's friends to use for filtering out Facebook friends that are already
+            // their friends
+            FirebaseResourceManager.retrieveStringListNoUpdates(String.format(FRIENDS_PATH, user.getId()),
+                    new ResourceListener<List<String>>() {
+                @Override
+                public void onData(List<String> data) {
+                    FirebaseResourceManager.getFacebookFriends(user, data, listener);
+                }
+
+                @Override
+                public Class getDataType() {
+                    return String.class;
+                }
+            });
+
         }
         // else the user logged in with Google+
         else {

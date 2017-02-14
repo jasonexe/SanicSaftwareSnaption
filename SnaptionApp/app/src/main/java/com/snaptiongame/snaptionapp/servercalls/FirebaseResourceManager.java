@@ -42,13 +42,13 @@ import java.util.Locale;
 import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
+    public static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USER_DIRECTORY = "users/";
     public static final String CARDS_DIRECTORY = "cards";
     public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";
     private static final String FB_REQUEST_DATA = "data";
-    private static final String FB_REQUEST_NAME = "name";
     private static final String FB_REQUEST_ID = "id";
     private static final String FB_ID_CHILD = "facebookId";
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -152,6 +152,30 @@ public class FirebaseResourceManager {
         //set up single event listener that only sends info once
         ref.addListenerForSingleValueEvent(firebaseResponse);
 
+    }
+
+    /**
+     * Set up a listener to receive a list of strings at a specified path without a connection
+     * for future data changes
+     *
+     * @param path the path to the list of strings requested from Firebase
+     * @param listener this will be waiting to receive the object requested
+     */
+    public static void retrieveStringListNoUpdates(String path, final ResourceListener<List<String>> listener) {
+        final DatabaseReference ref = database.getReference().child(path);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
+                List<String> items = dataSnapshot.getValue(t);
+                listener.onData(items);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onData(null);
+            }
+        });
     }
 
     /**
@@ -279,13 +303,13 @@ public class FirebaseResourceManager {
 
     /**
      * Retrieves a list of Friends, representing the Facebook friends that have logged
-     * into Snaption of the User associated with the given Facebook id, and returns the list of
+     * into Snaption of the given User, and returns the list of
      * Friends to the given ResourceListener
      *
-     * @param facebookId String unique Facebook id of a Facebook user
+     * @param user Facebook user
      * @param friendListener ResourceListener the list of Friends is returned to
      */
-    public static void getFacebookFriends(String facebookId,
+    private static void getFacebookFriends(final User user,
                                           final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
@@ -293,7 +317,35 @@ public class FirebaseResourceManager {
                 handleFacebookFriendsResponse(response, friendListener);
             }
         };
-        makeFacebookFriendsRequest(friendsCallback, facebookId);
+        makeFacebookFriendsRequest(friendsCallback, user.getFacebookId());
+    }
+
+    /**
+     * Retrieves a list of Friends, representing the Facebook friends that have logged
+     * into Snaption of the given User, and returns the list of
+     * Friends to the given ResourceListener. The friendsFilter is used to filter out all users
+     * with the specified Snaption ids.
+     *
+     * @param user Facebook user
+     * @param friendsFilter Snaption ids of friends that should not be returned
+     * @param friendListener ResourceListener the list of Friends is returned to
+     */
+    public static void getFacebookFriends(final User user, final List<String> friendsFilter,
+                                          final ResourceListener<Friend> friendListener) {
+        getFacebookFriends(user, new ResourceListener<Friend>() {
+            @Override
+            public void onData(Friend friend) {
+                // filter out the friends
+                if (friendsFilter == null || !friendsFilter.contains(friend.snaptionId)) {
+                    friendListener.onData(friend);
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return Friend.class;
+            }
+        });
     }
 
     /**
