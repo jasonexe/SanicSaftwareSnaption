@@ -74,6 +74,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private Game game;
     private String photoPath;
     private GameCaptionViewAdapter captionAdapter;
+    private FirebaseResourceManager commentManager;
 
     private LoginManager loginManager;
 
@@ -131,7 +132,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
         @Override
         public Class getDataType() {
-            return Game.class;
+            return Caption.class;
         }
     };
 
@@ -187,6 +188,16 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
+
+        commentManager = new FirebaseResourceManager();
+        commentManager.addChildListener(GAME_DIRECTORY + "/" + game.getId() + "/" + CAPTION_DIRECTORY,
+                captionListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        commentManager.removeListener();
     }
 
     @OnClick(R.id.fab)
