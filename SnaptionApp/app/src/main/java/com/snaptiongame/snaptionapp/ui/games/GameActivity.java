@@ -214,6 +214,8 @@ public class GameActivity extends HomeAppCompatActivity {
         else { //if they are logged out
             //display the loginDialog
             final LoginDialog dialog = new LoginDialog(this);
+            //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
+            //these callbacks every time we need to add in a login prompt in a new Activity
             loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
                 @Override
                 public void onLoginComplete() {
