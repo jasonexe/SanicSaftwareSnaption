@@ -18,10 +18,9 @@ import java.util.List;
  * @author Hristo Stoytchev
  */
 public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListHolder> {
-    private List<String> friends;
-    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+    private List<User> friends;
 
-    public FriendsListAdapter(List<String> friends) {
+    public FriendsListAdapter(List<User> friends) {
         this.friends = friends;
     }
 
@@ -33,28 +32,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListHolder> 
 
     @Override
     public void onBindViewHolder(final FriendsListHolder holder, int position) {
-        // to avoid making another constant variable
-        String friend = WallViewAdapter.USER_PATH + friends.get(position);
-
-        // TODO change where the validFirebasePath method is called from
-        // ensure the user id is a valid one to avoid errors
-        if(WallViewAdapter.validFirebasePath(friend)) {
-            // display the name and profile picture if a valid user is obtained from the user id
-            firebaseResourceManager.retrieveSingleNoUpdates(friend, new ResourceListener<User>() {
-                @Override
-                public void onData(User user) {
-                    if (user != null) {
-                        holder.friendName.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.friendPicture);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return User.class;
-                }
-            });
-        }
+        holder.friendName.setText(friends.get(position).getDisplayName());
+        FirebaseResourceManager.loadImageIntoView(friends.get(position).getImagePath(), holder.friendPicture);
     }
 
     @Override
@@ -62,4 +41,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListHolder> 
         return friends.size();
     }
 
+    public void addSingleItem(User user) {
+        friends.add(user);
+        notifyItemInserted(friends.size() - 1);
+    }
 }

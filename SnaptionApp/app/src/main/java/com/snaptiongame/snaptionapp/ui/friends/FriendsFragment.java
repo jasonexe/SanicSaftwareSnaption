@@ -16,6 +16,10 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -26,11 +30,13 @@ import butterknife.Unbinder;
  */
 
 public class FriendsFragment extends Fragment {
+
+    @BindView(R.id.friend_notice)
+    public TextView friendNotice;
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
 
-    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
-    private FriendsListAdapter friendsAdapter;
+    private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
 
     @Nullable
@@ -42,23 +48,7 @@ public class FriendsFragment extends Fragment {
         LinearLayoutManager friendsViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false);
         friendsListView.setLayoutManager(friendsViewManager);
 
-        if (FirebaseResourceManager.getUserPath() != null) {
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
-                @Override
-                public void onData(User user) {
-                    if (user != null && user.getFriends() != null) {
-                        FriendsListAdapter adapter = new FriendsListAdapter(user.getFriends());
-                        friendsListView.setAdapter(adapter);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return User.class;
-                }
-            });
-        }
-
+        populateFriends();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.friends));
 
         return view;
@@ -68,5 +58,60 @@ public class FriendsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+    }
+
+    /**
+     * Populates the friends list with your current snaption friends.
+     */
+    private void populateFriends() {
+        if (FirebaseResourceManager.getUserPath() != null) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    if (user != null && user.getFriends() != null) {
+                        friendNotice.setVisibility(View.GONE);
+                        List<User> users = new ArrayList<>();
+                        friendsListAdapter = new FriendsListAdapter(users);
+                        friendsListView.setAdapter(friendsListAdapter);
+                        loadUsers(user.getFriends());
+                    }
+                    else {
+                        friendNotice.setVisibility(View.VISIBLE);
+                        friendNotice.setText("You don't have any friends yet!\n\nClick on the button below to find someone you know.");
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
+    }
+
+    private void loadUsers(List<String> uids) {
+        for (String uid : uids) {
+            // to avoid making another constant variable
+            String friend = WallViewAdapter.USER_PATH + uid;
+
+            // TODO change where the validFirebasePath method is called from
+            // ensure the user id is a valid one to avoid errors
+            if (WallViewAdapter.validFirebasePath(friend)) {
+                // display the name and profile picture if a valid user is obtained from the user id
+                FirebaseResourceManager.retrieveSingleNoUpdates(friend, new ResourceListener<User>() {
+                    @Override
+                    public void onData(User user) {
+                        if (user != null) {
+                            friendsListAdapter.addSingleItem(user);
+                        }
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return User.class;
+                    }
+                });
+            }
+        }
     }
 }
