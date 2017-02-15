@@ -69,29 +69,50 @@ public class CardLogicTest {
         Card card1 = new Card("card1", "1");
         Card card2 = new Card("card2", "2");
         Card card3 = new Card("card3", "3");
+        Card card4 = new Card("card4", "4");
+        Card card5 = new Card("card5", "5");
+        Card card6 = new Card("card6", "6");
+        Card card7 = new Card("card7", "7");
+        Card card8 = new Card("card8", "8");
+        Card card9 = new Card("card9", "9");
+        Card card10 = new Card("card10", "10");
 
         randomCards.add(card1);
         randomCards.add(card2);
-        randomCards.add(card2);
-        randomCards.add(card2);
-        randomCards.add(card2);
         randomCards.add(card3);
-        randomCards.add(card2);
-        randomCards.add(card1);
-        randomCards.add(card3);
-        randomCards.add(card3);
-        randomCards.add(card3);
-        randomCards.add(card1);
-        randomCards.add(card1);
-        randomCards.add(card1);
-        randomCards.add(card2);
-        randomCards.add(card2);
-        randomCards.add(card2);
-        randomCards.add(card2);
+        randomCards.add(card4);
+        randomCards.add(card5);
+        randomCards.add(card6);
+        randomCards.add(card7);
+        randomCards.add(card8);
+        randomCards.add(card9);
+        randomCards.add(card10);
 
-        List<Card> expectedList = randomCards.subList(0, 10);
+        List<Card> expectedList = new ArrayList<>();
+        expectedList.add(card1);
+        expectedList.add(card9);
+        expectedList.add(card8);
+        expectedList.add(card7);
+        expectedList.add(card6);
+        expectedList.add(card5);
+        expectedList.add(card4);
+        expectedList.add(card3);
+        expectedList.add(card2);
+        expectedList.add(card10);
         Random mockedRandom = mock(Random.class);
-        when(mockedRandom.nextInt(randomCards.size())).thenReturn(0);
+        when(mockedRandom.nextInt(randomCards.size()-1)).thenReturn(0)
+                .thenReturn(8)
+                .thenReturn(7)
+                .thenReturn(6)
+                .thenReturn(5)
+                .thenReturn(4)
+                .thenReturn(3)
+                .thenReturn(5)
+                .thenReturn(2)
+                .thenReturn(8)
+                .thenReturn(3)
+                .thenReturn(1)
+                .thenReturn(9);
         List actualList = CardLogic.getRandomCardsFromList(randomCards, mockedRandom);
         assertEquals(expectedList, actualList);
     }

@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -113,8 +114,8 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.card_input)
     public View cardInputView;
 
-    @BindView(R.id.submit_caption_button)
-    public Button submitCaptionButton;
+//    @BindView(R.id.submit_caption_button)
+//    public Button submitCaptionButton;
 
     @BindView(R.id.fab)
     public FloatingActionButton fab;
@@ -127,6 +128,8 @@ public class GameActivity extends HomeAppCompatActivity {
         public void onData(Caption data) {
             if (data != null) {
                 captionAdapter.addCaption(data);
+                numberCaptions.setText(String.format(Locale.getDefault(),
+                        "%d", captionAdapter.getItemCount()));
             }
         }
 
@@ -275,7 +278,8 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
-    @OnClick(R.id.submit_caption_button)
+    //TODO decide if button should stay or not. I vote not.
+//    @OnClick(R.id.submit_caption_button)
     public void submit() {
         String userInput = editCaptionText.getText().toString();
         editCaptionText.setText("");
