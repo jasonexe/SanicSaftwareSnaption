@@ -172,7 +172,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
         private int scrolledDistance = 0;
         private final static int HIDE_THRESHOLD = 10;
-        private boolean fabVisible = true; // This is because the animations take too long
+        private boolean fabVisible = true; // This is used because the animations take too long
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
@@ -188,8 +188,8 @@ public class GameActivity extends HomeAppCompatActivity {
                 fabVisible = false;
                 fab.hide();
             } else if (scrolledDistance < -HIDE_THRESHOLD && !isFabVisible()) {
-                fab.show();
                 fabVisible = true;
+                fab.show();
             }
 
             // If the user scrolls in a direction that would change the fab visibility, increment
