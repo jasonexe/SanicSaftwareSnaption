@@ -202,12 +202,12 @@ public class FirebaseUploader implements Uploader {
 
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
         // add the friend to the user's friends list
-        addFriendToList(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
+        addFriendToHashMap(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError == null) {
                     // add the user to the friend's friends list
-                    addFriendToList(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
+                    addFriendToHashMap(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             if (databaseError == null) {
@@ -287,7 +287,7 @@ public class FirebaseUploader implements Uploader {
      */
     private void addFriendToHashMap(String userId, String friendId, DatabaseReference.CompletionListener listener) {
         DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
-        DatabaseReference friendRef = userFriendsRef.push();
-        friendRef.setValue(friendId, listener);
+        DatabaseReference friendRef = userFriendsRef.child(friendId);
+        friendRef.setValue(1, listener);
     }
 }
