@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 
 import android.content.Intent;
+import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -114,9 +115,6 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.card_input)
     public View cardInputView;
 
-//    @BindView(R.id.submit_caption_button)
-//    public Button submitCaptionButton;
-
     @BindView(R.id.fab)
     public FloatingActionButton fab;
 
@@ -148,7 +146,14 @@ public class GameActivity extends HomeAppCompatActivity {
         game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        setupCaptionList();
+        setupEndDate();
+        setupPickerName();
+        setupCaptionCardView();
+        startCommentManager();
+    }
 
+    private void setupCaptionList() {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
@@ -160,11 +165,57 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
+        captionListView.addOnScrollListener(scrollFabHider);
+    }
 
+    // Scroll listener that hides the fab during scrolling down, shows it when going up
+    private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
+        private int scrolledDistance = 0;
+        private final static int HIDE_THRESHOLD = 10;
+        private boolean fabVisible = true; // This is because the animations take too long
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            // If they've scrolled more than HIDE_THRESHOLD units, and fab is visible, hide it
+            // If they've scrolled less than the units (means they goin up)
+            // and fab isn't visible, show it
+            if (scrolledDistance > HIDE_THRESHOLD && isFabVisible()) {
+                fabVisible = false;
+                fab.hide();
+            } else if (scrolledDistance < -HIDE_THRESHOLD && !isFabVisible()) {
+                fab.show();
+                fabVisible = true;
+            }
+
+            // If the user scrolls in a direction that would change the fab visibility, increment
+            // the distance. If they've already hidden the fab and are still scrolling down,
+            // for example, don't increment the distance. But if they are scrolling down while
+            // fab is showing, increment it.
+            if((isFabVisible() && dy > 0) || (!isFabVisible()) && dy < 0) {
+                scrolledDistance += dy;
+            }
+        }
+
+        private boolean isFabVisible() {
+            return fabVisible;
+        }
+    };
+
+    // Displays the date that the game will end underneath the picture
+    private void setupEndDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
         endDate.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
+    }
 
+    // Displays the name of the picture underneath the picture, and
+    // also displays the picker's profile photo.
+    private void setupPickerName() {
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
@@ -180,10 +231,12 @@ public class GameActivity extends HomeAppCompatActivity {
                 return User.class;
             }
         });
+    }
 
-        populateCards(DEFAULT_PACK);
-        // Listen for if the user presses "enter."
-        // They can also submit by clicking the button
+    // Downloads the possible cards for captions,
+    // and sets up the recycler view for once the cards are downloaded
+    private void setupCaptionCardView() {
+        // Sees if user clicks check button
         editCaptionText.setOnEditorActionListener(enterListener);
         // Setup recycler view
         LinearLayoutManager gameViewManager = new LinearLayoutManager(getApplicationContext(),
@@ -191,7 +244,10 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
+        populateCards(DEFAULT_PACK);
+    }
 
+    private void startCommentManager() {
         commentManager = new FirebaseResourceManager();
         commentManager.addChildListener(GAME_DIRECTORY + "/" + game.getId() + "/" + CAPTION_DIRECTORY,
                 captionListener);
@@ -278,8 +334,6 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
-    //TODO decide if button should stay or not. I vote not.
-//    @OnClick(R.id.submit_caption_button)
     public void submit() {
         String userInput = editCaptionText.getText().toString();
         editCaptionText.setText("");
