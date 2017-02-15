@@ -81,7 +81,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         holder.numberUpvotes.setText(String.format(Locale.getDefault(),
-                "%d", caption.getVotes().size()));
+                "%d", caption.retrieveNumVotes()));
         //holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }

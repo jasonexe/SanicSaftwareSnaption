@@ -84,6 +84,14 @@ public class Caption implements Serializable {
         return userId;
     }
 
+    public int retrieveNumVotes() {
+        if(votes == null) {
+            return 0;
+        } else {
+            return votes.size();
+        }
+    }
+
     public SpannableStringBuilder retrieveCaptionText() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         if(card == null) {
