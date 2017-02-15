@@ -21,7 +21,9 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.UploadListener;
@@ -120,7 +122,7 @@ public class FriendsViewModelTest {
         ArgumentCaptor<ResourceListener> listenerCaptor = ArgumentCaptor.forClass(ResourceListener.class);
         try {
             doNothing().when(
-                    FirebaseResourceManager.class, "retrieveStringListNoUpdates",
+                    FirebaseResourceManager.class, "retrieveStringMapNoUpdates",
                     pathCaptor.capture(), friendsListListenerCaptor.capture());
             doNothing().when(
                     FirebaseResourceManager.class, "getFacebookFriends", userCaptor.capture(),
@@ -135,8 +137,8 @@ public class FriendsViewModelTest {
         assertEquals(FRIENDS_PATH, pathCaptor.getValue());
 
         // emulate data returning from the call
-        List<Friend> mockFriends = new ArrayList();
-        mockFriends.add(friend);
+        Map<Friend, Integer> mockFriends = new HashMap<>();
+        mockFriends.put(friend, 1);
         friendsListListenerCaptor.getValue().onData(mockFriends);
 
         // check that getFacebookFriends was called with the correct arguments
