@@ -215,7 +215,7 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Set up a listener to receive a list of strings at a specified path without a connection
+     * Set up a listener to receive a map of strings at a specified path without a connection
      * for future data changes
      *
      * @param path the path to the list of strings requested from Firebase

@@ -20,7 +20,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -84,7 +83,7 @@ public class ProfileFragment extends Fragment {
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
                     userName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
-                    gamesCreated.setText(Integer.toString(user.retrieveGameCount()));
+                    gamesCreated.setText(Integer.toString(user.retrieveCreatedGameCount()));
                     captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
                     //get the games based on list of games in user
                     getUserGames(user);
@@ -120,7 +119,6 @@ public class ProfileFragment extends Fragment {
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds.keySet()) {
-                System.out.println(gameId);
                 FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
             }
         }

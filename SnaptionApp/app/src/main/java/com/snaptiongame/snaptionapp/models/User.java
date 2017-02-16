@@ -147,7 +147,7 @@ public class User {
         return captionCount;
     }
 
-    public int retrieveGameCount() {
+    public int retrieveCreatedGameCount() {
         int gameCount = 0;
         if (createdGames != null) {
             gameCount = createdGames.size();
