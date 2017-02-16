@@ -242,43 +242,6 @@ public class FirebaseUploader implements Uploader {
     }
 
     /**
-     * Adds the friendId to the friend list of User associated with the userId
-     *
-     * @param userId
-     * @param friendId
-     * @param listener
-     */
-    private void addFriendToList(String userId, final String friendId, final DatabaseReference.CompletionListener listener) {
-        final DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
-        userFriendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> userFriends = dataSnapshot.getValue(t);
-                if(userFriends == null) {
-                    //create a new list if there isn't one in Firebase yet (user's first friend!)
-                    userFriends = new ArrayList<String>();
-                }
-                // if the friend is not already in the user's friend list, add them
-                if (!userFriends.contains(friendId)) {
-                    userFriends.add(friendId);
-                    userFriendsRef.setValue(userFriends, listener);
-                }
-                // else propagate an error
-                else {
-                    listener.onComplete(DatabaseError.fromException(
-                            new Throwable(ITEM_ALREADY_EXISTS_ERROR)), null);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onComplete(databaseError, null);
-            }
-        });
-    }
-
-    /**
      * Adds the friendId to the friend hash map of User associated with the userId
      *
      * @param userId
