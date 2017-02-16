@@ -173,10 +173,6 @@ public class GameActivity extends HomeAppCompatActivity {
         private int scrolledDistance = 0;
         private final static int HIDE_THRESHOLD = 10;
         private boolean fabVisible = true; // This is used because the animations take too long
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-        }
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
