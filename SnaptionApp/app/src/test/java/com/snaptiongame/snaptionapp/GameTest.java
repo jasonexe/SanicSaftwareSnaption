@@ -25,12 +25,12 @@ public class GameTest {
 
     @Test
     public void verifyConstructors() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, "G");
@@ -48,19 +48,21 @@ public class GameTest {
 
         assertTrue(game.getCaptions().isEmpty());
         assertTrue(game.getIsOpen());
-        assertTrue(game.getPlayers().containsAll(players));
+        for(String key : players.keySet()) {
+            assertTrue(game.getPlayers().containsKey(key));
+        }
         assertTrue(game.getCategories().containsAll(categories));
         assertTrue(game.getIsPublic());
     }
 
     @Test
     public void verifyAddCaption() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -77,31 +79,31 @@ public class GameTest {
 
     @Test
     public void verifyAddPlayer() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
 
-        assertFalse(game.getPlayers().contains("player3"));
+        assertFalse(game.getPlayers().containsKey("player3"));
         game.addPlayer("player3");
-        assertTrue(game.getPlayers().contains("player1"));
-        assertTrue(game.getPlayers().contains("player2"));
-        assertTrue(game.getPlayers().contains("player3"));
+        assertTrue(game.getPlayers().containsKey("player1"));
+        assertTrue(game.getPlayers().containsKey("player2"));
+        assertTrue(game.getPlayers().containsKey("player3"));
     }
 
     @Test
     public void verifySetWinner() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -112,12 +114,12 @@ public class GameTest {
 
     @Test
     public void verifyPeoplesChoice() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -128,12 +130,12 @@ public class GameTest {
 
     @Test
     public void verifyCloseGame() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -144,12 +146,12 @@ public class GameTest {
 
     @Test
     public void verifyUpvote() {
-        List<String> players = new ArrayList<>();
-        players.add("player1");
-        players.add("player2");
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
         List<String> categories = new ArrayList<>();
-        players.add("lol");
-        players.add("kitten");
+        categories.add("lol");
+        categories.add("kitten");
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");

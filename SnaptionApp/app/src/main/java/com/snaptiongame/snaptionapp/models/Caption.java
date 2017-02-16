@@ -13,7 +13,9 @@ import com.google.firebase.auth.FirebaseUser;
 import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Captions will be contained inside of games. They keep track of their id, the id of the
@@ -28,7 +30,7 @@ public class Caption implements Serializable {
     public String gameId;   // The game the caption was made on
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
-    public int votes;
+    public Map<String, Integer> votes; // List of users who have upvoted this caption
 
     //Needed for firebase compatibility
     public Caption() {}
@@ -40,7 +42,7 @@ public class Caption implements Serializable {
         this.userInput = new ArrayList<>(userInput);
         this.userId = userId;
         this.gameId = gameId;
-        votes = 0;
+        votes = new HashMap<>();
     }
 
     public Caption(String id, String gameId, Card card, List<String> userInput) throws IllegalStateException{
@@ -57,14 +59,14 @@ public class Caption implements Serializable {
         } else {
             throw new IllegalStateException("User should be logged in when creating a caption");
         }
-        votes = 0;
+        votes = new HashMap<>();
     }
 
     public Card getCard() {
         return card;
     }
 
-    public int getVotes() {
+    public Map<String, Integer> getVotes() {
         return votes;
     }
 
@@ -80,6 +82,14 @@ public class Caption implements Serializable {
 
     public String getUserId() {
         return userId;
+    }
+
+    public int retrieveNumVotes() {
+        if(votes == null) {
+            return 0;
+        } else {
+            return votes.size();
+        }
     }
 
     public SpannableStringBuilder retrieveCaptionText() {

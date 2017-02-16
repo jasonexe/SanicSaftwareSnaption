@@ -16,16 +16,16 @@ import java.util.Map;
 public class Game implements Serializable {
     private String id; //The ID of the game
     private String picker; //The ID of the picker
-    private String imagePath; //The path of the image on Firebase
-    private Map<String, Caption> captions; //The list of captions
-    private List<String> players; //The list of players
-    private List<String> categories; //The list of categories
     private boolean isPublic; //Whether the game is open to the public
+    private Map<String, Caption> captions; //The list of captions
+    private String imagePath; //The path of the image on Firebase
     private boolean isOpen; //Whether the game is still open
+    private Map<String, Integer> players; //The list of players in the private game
     private long endDate; //When the game ends
     private long creationDate; //When the game was created
     private int judgerRating; //The rating that judgers have given the game
     private String maturityRating; //The maturity rating of the game
+    private List<String> categories; //The list of categories
     private String winner; //The id of the winning caption
     private String peoplesChoice; //The id of the caption selected by the players
 
@@ -47,13 +47,13 @@ public class Game implements Serializable {
      * @param creationDate The time when the game was started
      * @param maturityRating The maturity rating of the card
      */
-    public Game(String id, String picker, String imagePath, List<String> playerList,
+    public Game(String id, String picker, String imagePath, Map<String, Integer> playerList,
                 List<String> categories, boolean isPublic, long endDate, long creationDate,
                 String maturityRating) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.players = new ArrayList<>(playerList);
+        this.players = new HashMap<>(playerList);
         this.categories = new ArrayList<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
@@ -79,12 +79,12 @@ public class Game implements Serializable {
      * @param endDate The time when the game ends
      * @param maturityRating The maturity rating of the card
      */
-    public Game(String id, String picker, String imagePath, List<String> playerList,
+    public Game(String id, String picker, String imagePath, Map<String, Integer> playerList,
                 List<String> categories, boolean isPublic, long endDate, String maturityRating) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.players = new ArrayList<>(playerList);
+        this.players = new HashMap<>(playerList);
         this.categories = new ArrayList<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
@@ -114,7 +114,7 @@ public class Game implements Serializable {
      * @param playerId The ID of the player being added
      */
     public void addPlayer(String playerId) {
-        players.add(playerId);
+        players.put(playerId, 1);
     }
 
     /**
@@ -207,11 +207,11 @@ public class Game implements Serializable {
      *
      * @return The list of players
      */
-    public List getPlayers() {
+    public Map getPlayers() {
         if (players == null) {
             return null;
         }
-        return new ArrayList(players);
+        return new HashMap<>(players);
     }
 
     /**
@@ -223,7 +223,7 @@ public class Game implements Serializable {
         if (categories == null) {
             return null;
         }
-        return new ArrayList(categories);
+        return new ArrayList<>(categories);
     }
 
     /**

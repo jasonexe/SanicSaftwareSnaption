@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import butterknife.BindView;
@@ -156,12 +157,12 @@ public class CreateGameActivity extends AppCompatActivity {
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                new ArrayList<String>(), categories, isPublic, endDate, maturityRating);
+                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
                         backToMain();
                     }

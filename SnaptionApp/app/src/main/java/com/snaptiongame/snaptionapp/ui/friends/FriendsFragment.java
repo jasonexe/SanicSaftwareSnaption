@@ -20,6 +20,7 @@ import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -89,8 +90,8 @@ public class FriendsFragment extends Fragment {
         }
     }
 
-    private void loadUsers(List<String> uids) {
-        for (String uid : uids) {
+    private void loadUsers(Map<String, Integer> uids) {
+        for (String uid : uids.keySet()) {
             // to avoid making another constant variable
             String friend = WallViewAdapter.USER_PATH + uid;
 

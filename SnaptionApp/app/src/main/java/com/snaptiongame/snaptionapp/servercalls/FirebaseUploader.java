@@ -29,6 +29,7 @@ import java.util.List;
 public class FirebaseUploader implements Uploader {
 
     private static final String USERS_PATH = "users";
+    private static final String USERS_CREATED_GAMES =  "createdGames";
     private static final String CAPTION_PATH = "captions";
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
@@ -118,29 +119,8 @@ public class FirebaseUploader implements Uploader {
         final String gameId = game.getId();
         String userId = game.getPicker();
         DatabaseReference userRef = database.getReference(USERS_PATH + "/" + userId);
-        //TODO if games stays as a List instead of map, is PITA (can't do .push()). See below
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
-//        userRef.child("games").push().setValue(gameId);
-        //Assuming we'll leave it as a list
-        final DatabaseReference userGameListRef = userRef.child("games");
-        userGameListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> userGames = dataSnapshot.getValue(t);
-                if(userGames == null) {
-                    //create a new list if there isn't one in Firebase yet (user's first game!)
-                    userGames = new ArrayList<String>();
-                }
-                userGames.add(gameId);
-                userGameListRef.setValue(userGames);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.err.println("Adding game error");
-            }
-        });
+        userRef.child(USERS_CREATED_GAMES).child(gameId).setValue(1);
     }
 
     private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
@@ -222,12 +202,12 @@ public class FirebaseUploader implements Uploader {
 
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
         // add the friend to the user's friends list
-        addFriendToList(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
+        addFriendToHashMap(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 if (databaseError == null) {
                     // add the user to the friend's friends list
-                    addFriendToList(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
+                    addFriendToHashMap(friend.snaptionId, user.getId(), new DatabaseReference.CompletionListener() {
                         @Override
                         public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                             if (databaseError == null) {
@@ -262,43 +242,6 @@ public class FirebaseUploader implements Uploader {
     }
 
     /**
-     * Adds the friendId to the friend list of User associated with the userId
-     *
-     * @param userId
-     * @param friendId
-     * @param listener
-     */
-    private void addFriendToList(String userId, final String friendId, final DatabaseReference.CompletionListener listener) {
-        final DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
-        userFriendsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> userFriends = dataSnapshot.getValue(t);
-                if(userFriends == null) {
-                    //create a new list if there isn't one in Firebase yet (user's first friend!)
-                    userFriends = new ArrayList<String>();
-                }
-                // if the friend is not already in the user's friend list, add them
-                if (!userFriends.contains(friendId)) {
-                    userFriends.add(friendId);
-                    userFriendsRef.setValue(userFriends, listener);
-                }
-                // else propagate an error
-                else {
-                    listener.onComplete(DatabaseError.fromException(
-                            new Throwable(ITEM_ALREADY_EXISTS_ERROR)), null);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onComplete(databaseError, null);
-            }
-        });
-    }
-
-    /**
      * Adds the friendId to the friend hash map of User associated with the userId
      *
      * @param userId
@@ -307,7 +250,7 @@ public class FirebaseUploader implements Uploader {
      */
     private void addFriendToHashMap(String userId, String friendId, DatabaseReference.CompletionListener listener) {
         DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
-        DatabaseReference friendRef = userFriendsRef.push();
-        friendRef.setValue(friendId, listener);
+        DatabaseReference friendRef = userFriendsRef.child(friendId);
+        friendRef.setValue(1, listener);
     }
 }

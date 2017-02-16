@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import static com.google.android.gms.internal.zzs.TAG;
 
@@ -214,6 +215,31 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Set up a listener to receive a map of strings at a specified path without a connection
+     * for future data changes
+     *
+     * @param path the path to the list of strings requested from Firebase
+     * @param listener this will be waiting to receive the object requested
+     */
+    public static void retrieveStringMapNoUpdates(String path,
+                                                  final ResourceListener<Map<String, Integer>> listener) {
+        final DatabaseReference ref = database.getReference().child(path);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<Map<String, Integer>> t = new GenericTypeIndicator<Map<String, Integer>>() {};
+                Map<String, Integer> items = dataSnapshot.getValue(t);
+                listener.onData(items);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onData(null);
+            }
+        });
+    }
+
+    /**
      * Notifies the given ResourceListener of when a single element of the given path is changed
      *
      * @param path The single element path name
@@ -365,13 +391,13 @@ public class FirebaseResourceManager {
      * @param friendsFilter Snaption ids of friends that should not be returned
      * @param friendListener ResourceListener the list of Friends is returned to
      */
-    public static void getFacebookFriends(final User user, final List<String> friendsFilter,
+    public static void getFacebookFriends(final User user, final Map<String, Integer> friendsFilter,
                                           final ResourceListener<Friend> friendListener) {
         getFacebookFriends(user, new ResourceListener<Friend>() {
             @Override
             public void onData(Friend friend) {
                 // filter out the friends
-                if (friendsFilter == null || !friendsFilter.contains(friend.snaptionId)) {
+                if (friendsFilter == null || !friendsFilter.containsKey(friend.snaptionId)) {
                     friendListener.onData(friend);
                 }
             }
