@@ -115,6 +115,9 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="10dp"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_add_white_24dp" />
 
@@ -131,6 +134,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="vertical"
+        android:id="@+id/caption_items"
         android:background="#80000000">
 
         <include layout="@layout/card_input_layout"
