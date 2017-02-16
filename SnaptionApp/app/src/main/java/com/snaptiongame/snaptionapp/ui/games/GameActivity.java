@@ -196,8 +196,9 @@ public class GameActivity extends HomeAppCompatActivity {
             // the distance. If they've already hidden the fab and are still scrolling down,
             // for example, don't increment the distance. But if they are scrolling down while
             // fab is showing, increment it.
-            if((isFabVisible() && dy > 0) || (!isFabVisible()) && dy < 0) {
-                scrolledDistance += dy;
+            if((isFabVisible() && dy > 0) || !isFabVisible() && dy < 0 || isFabVisible() && dx > 0
+                    || !isFabVisible() && dx < 0){
+                scrolledDistance += dy + dx;
             }
         }
 
@@ -210,7 +211,8 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setupEndDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
-        endDate.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
+        endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
+                .format(calendar.getTime()));
     }
 
     // Displays the name of the picture underneath the picture, and
@@ -244,6 +246,7 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
+        captionCardsList.addOnScrollListener(scrollFabHider);
         populateCards(DEFAULT_PACK);
     }
 
@@ -267,6 +270,8 @@ public class GameActivity extends HomeAppCompatActivity {
             //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
             if(cardInputView.getVisibility() == View.VISIBLE) {
                 cardInputView.setVisibility(View.GONE);
+                // In case they press the fab while it's being hidden after scrolling
+                // This prevents it from being hidden forever.
                 hideKeyboard();
             }
         }
@@ -321,7 +326,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setFabRotation() {
         float curRotation = fab.getRotation();
         // If the caption card list is visible, fab should be rotated to 135 deg. If it isn't,
-        // then rotate it.
+        // then rotate it. and make it smaller
         if(captionCardsList.getVisibility() == View.VISIBLE) {
             if(curRotation != FAB_ROTATION) {
                 ObjectAnimator.ofFloat(fab, "rotation",
@@ -332,6 +337,9 @@ public class GameActivity extends HomeAppCompatActivity {
             ObjectAnimator.ofFloat(fab, "rotation",
                     FAB_ROTATION, 0f).setDuration(ROTATION_TIME).start();
         }
+        // In case they click the fab too quick while scrolling in the caption cards, this will make
+        // it not disappear forever
+        fab.show();
     }
 
     public void submit() {
