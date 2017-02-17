@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,15 +22,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.FacebookSdk;
+import com.google.android.gms.appinvite.AppInvite;
+import com.google.android.gms.appinvite.AppInviteInvitationResult;
+import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
+import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
@@ -39,6 +48,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -171,6 +181,52 @@ public class MainSnaptionActivity extends AppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
+
+        checkIfDeepLink();
+    }
+
+    private void checkIfDeepLink() {
+        GoogleApiClient deepLinkReceiver = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        showPostLogDialog("You appear to not have internet");
+                    }
+                })
+                .addApi(AppInvite.API)
+                .build();
+
+        boolean autoLaunchDeepLink = false;
+        AppInvite.AppInviteApi.getInvitation(deepLinkReceiver, this, autoLaunchDeepLink)
+                .setResultCallback(
+                        new ResultCallback<AppInviteInvitationResult>() {
+                            @Override
+                            public void onResult(@NonNull AppInviteInvitationResult result) {
+                                if(result.getStatus().isSuccess()) {
+                                    //Extract deep link, then do stuff with it
+                                    Intent intent = result.getInvitationIntent();
+                                    String deepLink = AppInviteReferral.getDeepLink(intent);
+                                    launchIntentFromDeepLink(deepLink);
+                                    System.out.println("DeepLink is: " + deepLink);
+                                } else {
+                                    Log.d("No invitation", "No deep link found");
+                                }
+                            }
+                        }
+                );
+    }
+
+    private void launchIntentFromDeepLink(String deepLink) {
+        FirebaseDeepLinker.DeepLinkInfo info = FirebaseDeepLinker.interpretDeepLinkString(deepLink);
+        // If we actually got back some info, we'll be launching another activity. Otherwise stay.
+        if(info != null) {
+            Class toLaunch = info.getClassForIntent();
+            if(toLaunch == GameActivity.class) {
+                Intent launchIntent = new Intent(this, toLaunch);
+                launchIntent.putExtra(USE_GAME_ID, info.getIntentString());
+                this.startActivity(launchIntent);
+            }
+        }
     }
 
     private void showPostLogDialog(String text) {
