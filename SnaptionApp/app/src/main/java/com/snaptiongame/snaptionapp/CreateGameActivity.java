@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -266,6 +267,7 @@ public class CreateGameActivity extends AppCompatActivity {
             imageUri = data.getData();
             setImageFromUrl(imageUri);
         } catch (Exception e) {
+            FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
         }
     }
@@ -296,6 +298,7 @@ public class CreateGameActivity extends AppCompatActivity {
             baos.close();
         }
         catch (IOException e) {
+            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
             e.printStackTrace();
         }
         return data;
