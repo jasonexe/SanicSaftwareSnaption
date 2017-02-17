@@ -73,13 +73,8 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.email_invite)
     public void createEmailIntent() {
-//        AlertDialog.Builder emailDialog = new AlertDialog.Builder(this);
-//        LayoutInflater inflater = this.getLayoutInflater();
-//
-//        emailDialog.setView(inflater.inflate(R.layout.dialog_email_create, null));
-//        Dialog dialog = emailDialog.create();
-//        dialog.show();
         // TODO if this was started from the create game screen, get a custom deep link
+        // from FirebaseDeepLinker class. URL will be https://snaptiongame.com/games/<GAME_ID>
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);

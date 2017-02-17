@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -22,8 +24,8 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker.LINK_K
 
 
 /**
- * Class that will create deep links.
- * Created by jason_000 on 2/16/2017.
+ * Class that will create and interpret deep links.
+ * Created by Jason Krein on 2/16/2017.
  */
 
 interface DeepLink {
@@ -56,7 +58,8 @@ public class FirebaseDeepLinker {
      *                     https://snaptiongame.com/games/_gameId_
      * @return The short link that a user can click to get to the app.
      */
-    public static void getDeepLink(String expectedLink, final ResourceListener<String> listener) {
+    public static void getDeepLink(String expectedLink, final ResourceListener<String> listener)
+            throws IllegalArgumentException {
         // Make sure the link is valid
         if(!expectedLink.contains(LINK_BEGINNING)) {
             throw new IllegalArgumentException("Incorrectly formatted link. Must have " +
@@ -71,7 +74,6 @@ public class FirebaseDeepLinker {
         longDynamicLink += "&apn=" + ANDROID_PACKAGE;
         // Name of the IOS package linked with Firebase
         longDynamicLink += "&ibi=" + IOS_PACKAGE;
-        System.out.println(longDynamicLink);
 
         RestAdapter adapter = new RestAdapter.Builder()
                 .setEndpoint(SHORT_LINK_GENERATOR_URL) // Firebase's short link generator url
@@ -99,7 +101,6 @@ public class FirebaseDeepLinker {
                         output += nextLine;
                         nextLine = reader.readLine();
                     }
-//                            System.out.println(output);
                     // Parse the result into JSON, and then get the header for short link
                     JsonParser parser = new JsonParser();
                     JsonObject json = (JsonObject) parser.parse(output);
@@ -123,14 +124,9 @@ public class FirebaseDeepLinker {
     public static class DeepLinkInfo {
         private Class classForIntent;
         private String intentString;
-        private Game intentGame;
 
         public DeepLinkInfo(Class classForIntent) {
             this.classForIntent = classForIntent;
-        }
-
-        public void setIntentGame(Game intentGame) {
-            this.intentGame = intentGame;
         }
 
         public void setIntentString(String intentString) {
@@ -141,20 +137,18 @@ public class FirebaseDeepLinker {
             return classForIntent;
         }
 
-        public Game getIntentGame() {
-            return intentGame;
-        }
 
         public String getIntentString() {
             return intentString;
         }
     }
 
+    @Nullable
     public static DeepLinkInfo interpretDeepLinkString(String deepLink) {
         // If it has "games" in the url, it'll be a deep link with the game ID as the last thing
         if(deepLink.contains("games")) {
             Class toSend = GameActivity.class;
-            String gameId = deepLink.substring(deepLink.lastIndexOf("/"));
+            String gameId = deepLink.substring(deepLink.lastIndexOf("/") + 1);
             DeepLinkInfo info = new DeepLinkInfo(toSend);
             info.setIntentString(gameId);
             return info;

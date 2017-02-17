@@ -4,6 +4,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import org.junit.Test;
 
@@ -17,15 +18,13 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class ModelTests {
+public class DeepLinkTests {
 
     @Test
-    public void DeepLinkTest() {
-
+    public void CreateDeepLinkTest() {
         FirebaseDeepLinker.getDeepLink("https://snaptiongame.com/games/-Kd9NH2qekgIvTnTr_-v", new ResourceListener<String>() {
             @Override
             public void onData(String data) {
-                System.out.println(data);
                 assertTrue("Got the wrong short link", data.contains("ba63n.app.goo.gl"));
             }
 
@@ -40,6 +39,32 @@ public class ModelTests {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void DeepLinkerRejectsInvalidLink() {
+        try {
+            FirebaseDeepLinker.getDeepLink("incorrectly formatted link", null);
+            assertFalse("Deep linker should have thrown an error", true);
+        } catch (IllegalArgumentException e) {
+            assertTrue(true);
+        }
+    }
+
+    @Test
+    public void InterpretDeepLinkNoGame() {
+        FirebaseDeepLinker.DeepLinkInfo info =
+                FirebaseDeepLinker.interpretDeepLinkString("https://snaptiongame.com");
+        assertNull(info);
+    }
+
+    @Test
+    public void InterpretDeepLinkWithGame() {
+        String expectedId = "gameId";
+        FirebaseDeepLinker.DeepLinkInfo info =
+                FirebaseDeepLinker.interpretDeepLinkString("https://snaptiongame.com/games/" + expectedId);
+        assertEquals(GameActivity.class, info.getClassForIntent());
+        assertEquals(expectedId, info.getIntentString());
     }
 
 }
