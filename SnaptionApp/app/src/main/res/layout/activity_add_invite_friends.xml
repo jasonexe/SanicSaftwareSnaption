@@ -15,5 +15,18 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/login_provider_friends"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/black_line2"
+        android:background="@color/colorBlack"/>
+    <Button
+        android:layout_gravity="end"
+        android:layout_marginRight="16dp"
+        android:id="@+id/email_invite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/send_invites"/>
 </LinearLayout>

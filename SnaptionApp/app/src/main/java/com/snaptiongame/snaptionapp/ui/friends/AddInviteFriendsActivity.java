@@ -1,8 +1,14 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -10,6 +16,7 @@ import android.widget.Toast;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
@@ -35,6 +42,8 @@ import butterknife.OnClick;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
+    private String deepLink = "https://snaptiongame.com";
+    private String homescreenDeepLink = "https://ba63n.app.goo.gl/a10w";
 
     private User user;
     private Uploader uploader;
@@ -60,6 +69,24 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         // Initialize the uploader and view model
         uploader = new FirebaseUploader();
         initializeViewModel();
+    }
+
+    @OnClick(R.id.email_invite)
+    public void createEmailIntent() {
+//        AlertDialog.Builder emailDialog = new AlertDialog.Builder(this);
+//        LayoutInflater inflater = this.getLayoutInflater();
+//
+//        emailDialog.setView(inflater.inflate(R.layout.dialog_email_create, null));
+//        Dialog dialog = emailDialog.create();
+//        dialog.show();
+        // TODO if this was started from the create game screen, get a custom deep link
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, String.format(getApplicationContext()
+                .getString(R.string.join_snaption_email_body), homescreenDeepLink));
+        startActivity(Intent.createChooser(emailIntent, "Send Email"));
+
     }
 
     private void setupLoginProviderView() {
