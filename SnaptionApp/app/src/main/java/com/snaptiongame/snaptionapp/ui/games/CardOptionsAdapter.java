@@ -12,10 +12,9 @@ import com.snaptiongame.snaptionapp.models.Card;
 
 import java.util.List;
 
-import static com.snaptiongame.snaptionapp.ui.games.GameActivity.REFRESH_STRING;
-
 /**
- * Created by jason_000 on 2/6/2017.
+ * Adapter that puts cards in their spots in the recycler view
+ * Created by Jason Krein on 2/6/2017.
  */
 
 public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHolder> {
@@ -29,16 +28,17 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
     }
 
     @Override
-    public void onBindViewHolder(CardOptionsViewHolder holder, final int position) {
-        holder.possibleCardView.setText(getCardAtPos(position)
+    public void onBindViewHolder(CardOptionsViewHolder holder, int position) {
+        final Card cardAtPos = getCardAtPos(position);
+        holder.possibleCardView.setText(cardAtPos
                 .getCardText().replace("%s", "_____"));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                converter.convertCard(getCardAtPos(position));
+                converter.convertCard(cardAtPos);
             }
         });
-        if(getCardAtPos(position).getId().equals(GameActivity.REFRESH_STRING)) {
+        if(cardAtPos.getId().equals(GameActivity.REFRESH_STRING)) {
             holder.itemView.getBackground().setColorFilter(Color.parseColor("#30D93E"),
                     PorterDuff.Mode.DARKEN);
             holder.possibleCardView.setTextColor(0xFFFFFFFF);
@@ -64,11 +64,11 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
         return options.size();
     }
 
-    public Card getCardAtPos(int position) {
+    private Card getCardAtPos(int position) {
         return options.get(position);
     }
 
-    public void replaceOptions(List<Card> cards) {
+    void replaceOptions(List<Card> cards) {
         options.clear();
         this.notifyItemRangeRemoved(0, cards.size());
         options.addAll(cards);
