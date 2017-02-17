@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="90dp"
     android:layout_height="match_parent"
     android:background="@drawable/image_border"
@@ -12,11 +13,21 @@
     android:translationZ="2dp"
     android:elevation="2dp">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:id="@+id/refresh_icon"
+        android:src="@drawable/ic_refresh_white_24dp" />
+
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/possible_caption_card_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp"
         android:gravity="center"
+        android:layout_gravity="center"
         android:text=""/>
+
 </LinearLayout>
