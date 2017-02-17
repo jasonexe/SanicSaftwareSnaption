@@ -34,11 +34,11 @@ public class User {
         this.facebookId = facebookId;
         this.imagePath = imagePath;
 
-        friends = new HashMap<>();
-        createdGames = new HashMap<>();
-        captions = new HashMap<>();
-        blockedUsers = new HashMap<>();
-        privateGames = new HashMap<>();
+        friends = null;
+        createdGames = null;
+        captions = null;
+        blockedUsers = null;
+        privateGames = null;
     }
 
     public User(String id, String email, String displayName, String notificationId,
@@ -119,12 +119,20 @@ public class User {
         this.friends = friends;
     }
 
-    public void setGames(Map<String, Integer> games) {
+    public void setCreatedGames(Map<String, Integer> games) {
         this.createdGames = games;
     }
 
     public void setCaptions(Map<String, Caption> captions) {
         this.captions = captions;
+    }
+
+    public void setPrivateGames(Map<String, Integer> privateGames) {
+        this.privateGames = privateGames;
+    }
+
+    public void setBlockedUsers(Map<String, Integer> blockedUsers) {
+        this.blockedUsers = blockedUsers;
     }
 
     public void setNotificationId(String notificationId) {
