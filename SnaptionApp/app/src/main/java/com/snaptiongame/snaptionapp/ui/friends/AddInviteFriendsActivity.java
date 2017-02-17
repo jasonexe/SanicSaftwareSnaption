@@ -3,9 +3,13 @@ package com.snaptiongame.snaptionapp.ui.friends;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.share.model.AppInviteContent;
+import com.facebook.share.widget.AppInviteDialog;
+import com.google.android.gms.appinvite.AppInvite;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
@@ -19,6 +23,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * AddInviteFriendsActivity
@@ -33,6 +38,11 @@ import butterknife.ButterKnife;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
+    //created app link from Facebook to link to our application when its on Google Play
+    private static final String appLinkUrl = "https://fb.me/1862755674010471\"";
+    //currently goes to the Snaption icon on google search
+    private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
+
 
     private User user;
     private Uploader uploader;
@@ -44,6 +54,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.login_provider_friends_label)
     protected TextView loginProviderFriendsLabel;
+
+    @BindView(R.id.invite_friends_button)
+    protected Button inviteFriendsButton;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +71,18 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         // Initialize the uploader and view model
         uploader = new FirebaseUploader();
         initializeViewModel();
+    }
+
+    @OnClick(R.id.invite_friends_button)
+    public void inviteFriends() {
+        //display facebook invite dialog
+        if (AppInviteDialog.canShow()) {
+            AppInviteContent content = new AppInviteContent.Builder()
+                    .setApplinkUrl(appLinkUrl)
+                    .setPreviewImageUrl(previewImageUrl)
+                    .build();
+            AppInviteDialog.show(this, content);
+        }
     }
 
     private void setupLoginProviderView() {
