@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.friends;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -114,6 +115,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         loginProviderFriends.setAdapter(friendAdapter);
     }
 
+    @SuppressWarnings("ResourceType")
     private void initializeViewModel() {
         FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
                 new ResourceListener<User>() {
@@ -123,6 +125,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                     viewModel = new FriendsViewModel(user, uploader);
                     setLoginProviderFriendsLabel();
                     populateLoginProviderFriends();
+                    //must suppress resource type for this method to work
+                    inviteFriendsButton.setVisibility(viewModel.getFacebookButtonVisibility());
+                    //TODO: Set visibility of Google+ invite button here after facebook invite
                 }
             }
 
