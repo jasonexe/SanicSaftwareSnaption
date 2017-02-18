@@ -13,14 +13,15 @@ import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
 
 /**
- * Created by jason_000 on 2/18/2017.
+ * Class that will deal with getting deep links out of an activity, and doing any necessary
+ * operation related to the retrieved deep link.
+ * Created by Jason Krein on 2/18/2017.
  */
 
 public class DeepLinkGetter {
