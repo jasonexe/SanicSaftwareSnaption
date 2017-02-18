@@ -181,18 +181,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
 
 
-    public void launchIntentFromDeepLink(String deepLink) {
-        FirebaseDeepLinkCreator.DeepLinkInfo info = FirebaseDeepLinkCreator.interpretDeepLinkString(deepLink);
-        // If we actually got back some info, we'll be launching another activity. Otherwise stay.
-        if(info != null) {
-            Class toLaunch = info.getClassForIntent();
-            if(toLaunch == GameActivity.class) {
-                Intent launchIntent = new Intent(this, toLaunch);
-                launchIntent.putExtra(USE_GAME_ID, info.getIntentString());
-                this.startActivity(launchIntent);
-            }
-        }
-    }
+
 
     public void showPostLogDialog(String text) {
         loginDialog.dismiss();
