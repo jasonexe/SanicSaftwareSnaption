@@ -157,7 +157,11 @@ public class GameActivity extends HomeAppCompatActivity {
                     new ResourceListener<Game>() {
                         @Override
                         public void onData(Game data) {
-                            setupGameElements(data);
+                            if(data != null) {
+                                setupGameElements(data);
+                            } else {
+                                System.err.println("Game activity was passed an incorrect gameId");
+                            }
                         }
 
                         @Override

@@ -4,7 +4,6 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.io.BufferedReader;
@@ -19,8 +18,8 @@ import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker.KEY_STRING;
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker.LINK_KEY;
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.KEY_STRING;
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.LINK_KEY;
 
 
 /**
@@ -36,7 +35,7 @@ interface DeepLink {
             Callback<Response> callback);
 }
 
-public class FirebaseDeepLinker {
+public class FirebaseDeepLinkCreator {
     public static final String LINK_BEGINNING =  "https://snaptiongame.com"; // Use this at beginning of links
 
     static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyAa9WDzfmNN5j3i8jn0smpHkZypMmxFCMI";
@@ -47,6 +46,35 @@ public class FirebaseDeepLinker {
     private static final String ANDROID_PACKAGE = "com.snaptiongame.snaptionapp";
     private static final String IOS_PACKAGE = "edu.calpoly.csc.2168.snapsquad.verticalprototype";
     private static final String SHORTLINK_KEY = "shortLink";
+    private static RestAdapter adapter = new RestAdapter.Builder()
+            .setEndpoint(SHORT_LINK_GENERATOR_URL) // Firebase's short link generator url
+            .build();
+    private static DeepLink linkJSON = adapter.create(DeepLink.class);
+
+    // Contains anything that could be needed for deep linking.
+    // If classForIntent = GameActivity.class, then get the intentGame and string to put in
+    // could be other stuff, maybe.
+    public static class DeepLinkInfo {
+        private Class classForIntent;
+        private String intentString;
+
+        public DeepLinkInfo(Class classForIntent) {
+            this.classForIntent = classForIntent;
+        }
+
+        public void setIntentString(String intentString) {
+            this.intentString = intentString;
+        }
+
+        public Class getClassForIntent() {
+            return classForIntent;
+        }
+
+
+        public String getIntentString() {
+            return intentString;
+        }
+    }
 
 
     /**
@@ -75,11 +103,6 @@ public class FirebaseDeepLinker {
         // Name of the IOS package linked with Firebase
         longDynamicLink += "&ibi=" + IOS_PACKAGE;
 
-        RestAdapter adapter = new RestAdapter.Builder()
-                .setEndpoint(SHORT_LINK_GENERATOR_URL) // Firebase's short link generator url
-                .build();
-
-        DeepLink linkJSON = adapter.create(DeepLink.class);
         linkJSON.getShortLink(
                 longDynamicLink,
                 createDeepLinkCallback(listener)
@@ -118,30 +141,7 @@ public class FirebaseDeepLinker {
         };
     }
 
-    // Contains anything that could be needed for deep linking.
-    // If classForIntent = GameActivity.class, then get the intentGame and string to put in
-    // could be other stuff, maybe.
-    public static class DeepLinkInfo {
-        private Class classForIntent;
-        private String intentString;
 
-        public DeepLinkInfo(Class classForIntent) {
-            this.classForIntent = classForIntent;
-        }
-
-        public void setIntentString(String intentString) {
-            this.intentString = intentString;
-        }
-
-        public Class getClassForIntent() {
-            return classForIntent;
-        }
-
-
-        public String getIntentString() {
-            return intentString;
-        }
-    }
 
     @Nullable
     public static DeepLinkInfo interpretDeepLinkString(String deepLink) {

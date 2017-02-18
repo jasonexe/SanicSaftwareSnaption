@@ -1,22 +1,15 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Layout;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinker;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
@@ -42,7 +35,9 @@ import butterknife.OnClick;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
+    // Start of any deep link that you create
     private String deepLink = "https://snaptiongame.com";
+    // Pre-generated deep link to the home screen, allows for tracking through firebase console
     private String homescreenDeepLink = "https://ba63n.app.goo.gl/a10w";
 
     private User user;
@@ -74,7 +69,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     @OnClick(R.id.email_invite)
     public void createEmailIntent() {
         // TODO if this was started from the create game screen, get a custom deep link
-        // from FirebaseDeepLinker class. URL will be https://snaptiongame.com/games/<GAME_ID>
+        // from FirebaseDeepLinkCreator class. URL will be https://snaptiongame.com/games/<GAME_ID>
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.setType("text/plain");
         emailIntent.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
