@@ -36,7 +36,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     private User user;
     private Uploader uploader;
-    private FriendAdapter friendAdapter;
+    private AddFriendAdapter addFriendAdapter;
     private FriendsViewModel viewModel;
 
     @BindView(R.id.login_provider_friends)
@@ -62,7 +62,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     private void setupLoginProviderView() {
         loginProviderFriends.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        friendAdapter = new FriendAdapter(new ArrayList<Friend>(), new FriendAdapter.AddInviteFriendCallback() {
+        addFriendAdapter = new AddFriendAdapter(new ArrayList<Friend>(), new AddFriendAdapter.AddInviteFriendCallback() {
             @Override
             public void addInviteClicked(final Friend friend) {
                 viewModel.addFriend(friend, new Uploader.UploadListener() {
@@ -73,7 +73,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                                 viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
                                         friend.displayName, true, null), Toast.LENGTH_LONG).show();
                         // remove friend from view
-                        friendAdapter.removeSingleItem(friend);
+                        addFriendAdapter.removeSingleItem(friend);
                     }
 
                     @Override
@@ -86,7 +86,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                 });
             }
         });
-        loginProviderFriends.setAdapter(friendAdapter);
+        loginProviderFriends.setAdapter(addFriendAdapter);
     }
 
     private void initializeViewModel() {
@@ -114,7 +114,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
             public void onData(Friend friend) {
                 if (friend != null) {
                     // update the list of login provider friends
-                    friendAdapter.addSingleItem(friend);
+                    addFriendAdapter.addSingleItem(friend);
                 }
             }
 

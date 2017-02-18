@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -432,7 +431,7 @@ public class FirebaseResourceManager {
                         public void onData(User user) {
                             if (user != null) {
                                 friendListener.onData(new Friend(user.getId(),
-                                        user.getDisplayName(), friendFacebookId));
+                                        user.getDisplayName(), user.getEmail(), friendFacebookId));
                             }
                         }
 
