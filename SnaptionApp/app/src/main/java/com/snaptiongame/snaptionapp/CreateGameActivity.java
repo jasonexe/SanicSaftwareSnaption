@@ -120,7 +120,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         uploader = new FirebaseUploader();
         calendar = Calendar.getInstance();
-        calendar.setTime(getDefaultDate());
+        calendar.add(Calendar.DATE, DEFAULT_DAYS_AHEAD);
 
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
@@ -323,7 +323,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         return categories;
     }
-
+    
     private DatePickerDialog.OnDateSetListener myDateListener = new
         DatePickerDialog.OnDateSetListener() {
         @Override
@@ -338,18 +338,21 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Displays the datepicker dialog to allow the user to input the date.
+     */
     public void setDate() {
         new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DATE)).show();
     }
 
+    /**
+     * Displays the date in the textview.
+     *
+     * @param calendar The calendar to take the date from
+     */
     private void showDate(Calendar calendar) {
-        //TODO have configurable for spanish dates
+        //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
-    }
-
-    private Date getDefaultDate() {
-        Date date = new Date(new Date().getTime() + MILISECONDS_IN_DAY * DEFAULT_DAYS_AHEAD);
-        return date;
     }
 }
