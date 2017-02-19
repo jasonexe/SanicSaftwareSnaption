@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.text.TextUtils;
+
 import com.google.firebase.crash.FirebaseCrash;
 
 /**
@@ -15,7 +17,7 @@ public class FirebaseReporter {
      */
     public static void reportException(Throwable e, String message) {
         FirebaseCrash.report(e);
-        if(message != null && !message.isEmpty()) {
+        if(!TextUtils.isEmpty(message)) {
             FirebaseCrash.log(message);
         }
     }
