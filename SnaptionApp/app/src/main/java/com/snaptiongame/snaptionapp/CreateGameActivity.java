@@ -52,7 +52,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private static final String MATURE = "mature";
     private static final String PG = "PG";
     private static final int DEFAULT_DAYS_AHEAD = 5;
-    private static final int MILISECONDS_IN_DAY = 86400000;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -323,7 +322,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         return categories;
     }
-    
+
     private DatePickerDialog.OnDateSetListener myDateListener = new
         DatePickerDialog.OnDateSetListener() {
         @Override
