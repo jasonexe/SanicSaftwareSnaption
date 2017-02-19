@@ -24,12 +24,15 @@ import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.DeepLinkGetter;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
+import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
@@ -39,6 +42,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -171,9 +175,15 @@ public class MainSnaptionActivity extends AppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
+
+        DeepLinkGetter.checkIfDeepLink(this);
     }
 
-    private void showPostLogDialog(String text) {
+
+
+
+
+    public void showPostLogDialog(String text) {
         loginDialog.dismiss();
         Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
     }

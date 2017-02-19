@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * AddInviteFriendsActivity
@@ -33,6 +35,10 @@ import butterknife.ButterKnife;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
+    // Start of any deep link that you create
+    private String deepLink = "https://snaptiongame.com";
+    // Pre-generated deep link to the home screen, allows for tracking through firebase console
+    private String homescreenDeepLink = "https://ba63n.app.goo.gl/a10w";
 
     private User user;
     private Uploader uploader;
@@ -58,6 +64,19 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         // Initialize the uploader and view model
         uploader = new FirebaseUploader();
         initializeViewModel();
+    }
+
+    @OnClick(R.id.email_invite)
+    public void createEmailIntent() {
+        // TODO if this was started from the create game screen, get a custom deep link
+        // from FirebaseDeepLinkCreator class. URL will be https://snaptiongame.com/games/<GAME_ID>
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT, String.format(getApplicationContext()
+                .getString(R.string.join_snaption_email_body), homescreenDeepLink));
+        startActivity(Intent.createChooser(emailIntent, "Send Email"));
+
     }
 
     private void setupLoginProviderView() {

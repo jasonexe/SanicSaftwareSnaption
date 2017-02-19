@@ -61,6 +61,7 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
  * @Author Jason Krein, Cameron Geehr
  */
 public class GameActivity extends HomeAppCompatActivity {
+    public static final String USE_GAME_ID = "useGameId";
     public static final String REFRESH_STRING = "refresh";
     private final static String DEFAULT_PACK = "InitialPack";
     private final static String GAME_DIRECTORY = "games";
@@ -143,17 +144,45 @@ public class GameActivity extends HomeAppCompatActivity {
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
 
-        game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
-        photoPath = game.getImagePath();
-        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
-        setupCaptionList();
-        setupEndDate();
-        setupPickerName();
-        setupCaptionCardView();
-        startCommentManager();
+        Intent startedIntent = getIntent();
+        // If started from the wall, we'll have been sent the Game object, so can use that for stuff
+        if(startedIntent.hasExtra(WallViewAdapter.GAME)) {
+            game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
+            setupGameElements(game);
+        } else if(startedIntent.hasExtra(USE_GAME_ID)) {
+            // If we were started via deep link, we'll only have the game ID. Have to pull
+            // from firebase
+            String gameId = startedIntent.getStringExtra(USE_GAME_ID);
+            FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId,
+                    new ResourceListener<Game>() {
+                        @Override
+                        public void onData(Game data) {
+                            if(data != null) {
+                                setupGameElements(data);
+                            } else {
+                                System.err.println("Game activity was passed an incorrect gameId");
+                            }
+                        }
+
+                        @Override
+                        public Class getDataType() {
+                            return Game.class;
+                        }
+                    });
+        }
     }
 
-    private void setupCaptionList() {
+    private void setupGameElements(Game game) {
+        photoPath = game.getImagePath();
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        setupCaptionList(game);
+        setupEndDate(game);
+        setupPickerName(game);
+        setupCaptionCardView();
+        startCommentManager(game);
+    }
+
+    private void setupCaptionList(Game game) {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
@@ -204,7 +233,7 @@ public class GameActivity extends HomeAppCompatActivity {
     };
 
     // Displays the date that the game will end underneath the picture
-    private void setupEndDate() {
+    private void setupEndDate(Game game) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
         endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
@@ -213,7 +242,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName() {
+    private void setupPickerName(Game game) {
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
@@ -246,7 +275,7 @@ public class GameActivity extends HomeAppCompatActivity {
         populateCards(DEFAULT_PACK);
     }
 
-    private void startCommentManager() {
+    private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
         commentManager.addChildListener(GAME_DIRECTORY + "/" + game.getId() + "/" + CAPTION_DIRECTORY,
                 captionListener);
