@@ -39,12 +39,14 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
             }
         });
         if(cardAtPos.getId().equals(GameActivity.REFRESH_STRING)) {
-            holder.itemView.getBackground().setColorFilter(Color.parseColor("#30D93E"),
+            holder.itemView.getBackground().setColorFilter(holder.possibleCardView.getResources()
+                    .getColor(R.color.greenBackground),
                     PorterDuff.Mode.DARKEN);
             holder.possibleCardView.setTextColor(0xFFFFFFFF);
             holder.refreshIcon.setVisibility(View.VISIBLE);
         } else {
-            holder.itemView.getBackground().setColorFilter(Color.parseColor("#FFFFFF"),
+            holder.itemView.getBackground().setColorFilter(holder.possibleCardView.getResources()
+                    .getColor(android.R.color.white),
                     PorterDuff.Mode.DARKEN);
             holder.possibleCardView.setTextColor(holder.possibleCardView.getResources()
                     .getColor(R.color.colorText));
