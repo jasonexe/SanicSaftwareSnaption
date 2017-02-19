@@ -139,6 +139,7 @@ public class LoginManager {
             activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
         }
         catch (Exception err) {
+            FirebaseReporter.reportException(err, "Google login error");
             Log.d(TAG, "loginWithGoogle:" + err.getStackTrace().toString());
             loginAuthCallback.onError();
         }
@@ -245,6 +246,7 @@ public class LoginManager {
                     profilePhoto = IOUtils.toByteArray(inputStream);
                 }
                 catch (Exception err) {
+                    FirebaseReporter.reportException(err, "Loading profile picture failed");
                     Log.d("TAG", "Loading Picture FAILED");
                     err.printStackTrace();
                 }
