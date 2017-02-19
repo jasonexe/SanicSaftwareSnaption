@@ -120,6 +120,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         uploader = new FirebaseUploader();
         calendar = Calendar.getInstance();
+        calendar.setTime(getDefaultDate());
 
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
@@ -343,7 +344,6 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     private void showDate(Calendar calendar) {
-        calendar.setTime(getDefaultDate());
         //TODO have configurable for spanish dates
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
     }
