@@ -113,6 +113,9 @@ public class Caption implements Serializable {
      * @return true if the user has upvoted the caption, false otherwise
      */
     public boolean hasUpvoted(String id) {
+        if (votes == null) {
+            return false;
+        }
         return votes.containsKey(id);
     }
 

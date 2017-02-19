@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.snaptiongame.snaptionapp.R;
@@ -15,6 +16,8 @@ import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +85,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         holder.numberUpvotes.setText(String.format(Locale.getDefault(),
                 "%d", caption.retrieveNumVotes()));
-        //holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
+        holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
+        if (caption.hasUpvoted(FirebaseResourceManager.getUserId())) {
+            holder.upvote.setImageDrawable(holder.upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
+        }
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }
 
@@ -103,8 +109,14 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private void handleClickUpvote(ImageView upvote, Caption caption) {
         //Using the deprecated method because the current version isn't compatible with our min API
         //TODO check if the user has upvoted the caption already
-        //upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-        //upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank));
+        if (caption.hasUpvoted(FirebaseResourceManager.getUserId())) {
+            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank));
+            caption.removeUpvote(FirebaseResourceManager.getUserId());
+        }
+        else {
+            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
+            caption.addUpvote(FirebaseResourceManager.getUserId());
+        }
     }
 
     /**
