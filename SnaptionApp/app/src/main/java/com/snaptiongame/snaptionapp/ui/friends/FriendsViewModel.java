@@ -10,8 +10,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.FRIENDS_PATH;
