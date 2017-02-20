@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
@@ -42,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -56,12 +58,12 @@ import butterknife.OnClick;
 
 public class CreateGameActivity extends AppCompatActivity {
 
-    private static final int DATE_DIALOG_ID = 999;
     private static final String MATURE = "mature";
     private static final String PG = "PG";
     private static final int FRIENDS_LIST_MIN_HEIGHT = 0;
     private static final int FRIENDS_LIST_MAX_HEIGHT = 250;
     private static final long FRIENDS_ANIMATION_DURATION = 400;
+    private static final int DEFAULT_DAYS_AHEAD = 5;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -139,12 +141,13 @@ public class CreateGameActivity extends AppCompatActivity {
 
         uploader = new FirebaseUploader();
         calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, DEFAULT_DAYS_AHEAD);
 
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
         day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        showDate();
+        showDate(calendar);
 
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -351,6 +354,7 @@ public class CreateGameActivity extends AppCompatActivity {
             imageUri = data.getData();
             setImageFromUrl(imageUri);
         } catch (Exception e) {
+            FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
         }
     }
@@ -381,6 +385,7 @@ public class CreateGameActivity extends AppCompatActivity {
             baos.close();
         }
         catch (IOException e) {
+            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
             e.printStackTrace();
         }
         return data;
@@ -416,15 +421,25 @@ public class CreateGameActivity extends AppCompatActivity {
             day = arg3;
 
             calendar.set(year, month, day);
-            showDate();
+            showDate(calendar);
         }
     };
 
+    /**
+     * Displays the datepicker dialog to allow the user to input the date.
+     */
     public void setDate() {
-        new DatePickerDialog(this, myDateListener, year, month, day).show();
+        new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DATE)).show();
     }
 
-    private void showDate() {
+    /**
+     * Displays the date in the textview.
+     *
+     * @param calendar The calendar to take the date from
+     */
+    private void showDate(Calendar calendar) {
+        //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
     }
 }
