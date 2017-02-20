@@ -34,7 +34,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
 
-    private User user;
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
     private FriendsViewModel viewModel;
