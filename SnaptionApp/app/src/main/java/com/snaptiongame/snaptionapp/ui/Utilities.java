@@ -25,12 +25,12 @@ public class Utilities {
         final float minHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, minHeight,
                 view.getResources().getDisplayMetrics());
 
+        // if the height is the minHeight, expand the view
         final boolean expand = view.getLayoutParams().height == (int) minHeightPx;
         float startAlpha;
         float endAlpha;
         final int endHeight;
 
-        // if the height is the minHeight, expand the view
         if (expand) {
             startAlpha = 0.0f;
             endAlpha = 1.0f;
