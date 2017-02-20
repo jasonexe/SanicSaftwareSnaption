@@ -10,6 +10,15 @@ import android.view.ViewGroup;
  */
 
 public class Utilities {
+    /**
+     * Expands or collapses the given view by increasing/reducing height of the view and fading
+     * in/out the view.
+     *
+     * @param view View to be animated
+     * @param minHeight minimum height of the view when collapsed
+     * @param maxHeight maximum height of the view when expanded
+     * @param duration duration of the animation
+     */
     public static void expandCollapseView(final View view, final int minHeight, final int maxHeight, final long duration) {
         final float maxHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, maxHeight,
                 view.getResources().getDisplayMetrics());
