@@ -20,7 +20,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import java.util.Map;
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.UploadListener;
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -73,9 +71,6 @@ public class FriendsViewModelTest {
     @Before
     public void setup() {
         initMocks(this);
-        user = mock(User.class);
-        uploader = mock(Uploader.class);
-        resourceListener = mock(ResourceListener.class);
         viewModel = new FriendsViewModel(user, uploader);
     }
 
