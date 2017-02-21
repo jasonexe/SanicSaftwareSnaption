@@ -72,6 +72,13 @@ public interface Uploader {
      */
     public void addUser(User user, byte[] photo, ResourceListener<User> listener);
 
+
+    /**
+     * Create a new key from backend to use as an Upvote's identity
+     * @return a string representing a key so that it can be found later
+     */
+    public String getNewUpvoteKey();
+
     /**
      * Responsbile for:
      *  adds to a map in users table, increment upvote in the caption in game and user table
@@ -79,14 +86,10 @@ public interface Uploader {
      * @param upvoterId
      * @param captionerId
      * @param gameId
+     * @param listener
      */
-    public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId);
-
-    /**
-     * Create a new key from backend to use as an Upvote's identity
-     * @return a string representing a key so that it can be found later
-     */
-    public String getNewUpvoteKey();
+    void addUpvote(String captionId, String upvoterId, String captionerId, String gameId,
+                   UploadListener listener);
 
     /**
      * Responsible for adding the friend to the user's friends list and adding the user to the

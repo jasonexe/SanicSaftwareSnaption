@@ -15,9 +15,9 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-
-import org.w3c.dom.Text;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     FirebaseResourceManager firebaseResourceManager;
+    FirebaseUploader firebaseUploader;
 
     private class UpvoteClickListener implements View.OnClickListener {
         Caption caption;
@@ -52,6 +53,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     public GameCaptionViewAdapter(List<Caption> items) {
         this.items = new ArrayList<>(items);
         firebaseResourceManager = new FirebaseResourceManager();
+        firebaseUploader = new FirebaseUploader();
     }
 
     /**
@@ -106,7 +108,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         return items.size();
     }
 
-    private void handleClickUpvote(ImageView upvote, Caption caption) {
+    private void handleClickUpvote(final ImageView upvote, Caption caption) {
         //Using the deprecated method because the current version isn't compatible with our min API
         //TODO check if the user has upvoted the caption already
         if (caption.hasUpvoted(FirebaseResourceManager.getUserId())) {
@@ -114,8 +116,18 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             caption.removeUpvote(FirebaseResourceManager.getUserId());
         }
         else {
-            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
             caption.addUpvote(FirebaseResourceManager.getUserId());
+            firebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(), caption.getUserId(), caption.getGameId(), new Uploader.UploadListener() {
+                @Override
+                public void onComplete() {
+                    upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+
+                }
+            });
         }
     }
 

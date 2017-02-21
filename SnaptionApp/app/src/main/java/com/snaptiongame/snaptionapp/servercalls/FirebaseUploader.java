@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -23,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jason_000 on 1/21/2017.
+ * FirebaseUploader is used for uploading data to Firebase and updating values.
+ *
+ * @author Jason Krein, Cameron Geehr
  */
 
 public class FirebaseUploader implements Uploader {
@@ -34,6 +37,8 @@ public class FirebaseUploader implements Uploader {
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
+    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/upvotes";
+    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/upvotes";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -195,9 +200,40 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
+    /**
+     * Adds the upvote to the caption in the user object and in the game object.
+     *
+     * @param captionId The ID of the caption
+     * @param upvoterId The ID of the player upvoting the caption
+     * @param captionerId The ID of the player who created the caption
+     * @param gameId The ID of the game that the caption is in
+     */
     @Override
-    public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId) {
-
+    public void addUpvote(final String captionId, final String upvoterId, final String captionerId, String gameId,
+                          final UploadListener listener) {
+        // add the upvote to the game's caption's upvote list
+        addUpvoteToHashMapGame(captionId, upvoterId, gameId, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    addUpvoteToHashMapUser(captionId, upvoterId, captionerId, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError == null) {
+                                listener.onComplete();
+                            }
+                            else {
+                                // this is a problem if one upvote was added but the other was not
+                                listener.onError(getErrorMessage(databaseError));
+                            }
+                        }
+                    });
+                }
+                else {
+                    listener.onError(getErrorMessage(databaseError));
+                }
+            }
+        });
     }
 
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
@@ -252,5 +288,35 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
         DatabaseReference friendRef = userFriendsRef.child(friendId);
         friendRef.setValue(1, listener);
+    }
+
+    /**
+     * Adds the upvoterId to the upvotes hash map of Caption associated with the captionId in the Game associated with gameId
+     *
+     * @param captionId
+     * @param upvoterId
+     * @param gameId
+     * @param listener
+     */
+    private void addUpvoteToHashMapGame(String captionId, String upvoterId, String gameId,
+                                        DatabaseReference.CompletionListener listener) {
+        DatabaseReference gameCaptionsRef = database.getReference().child(String.format(GAME_CAPTIONS_UPVOTES_PATH, gameId, captionId));
+        DatabaseReference upvoteRef = gameCaptionsRef.child(upvoterId);
+        upvoteRef.setValue(1, listener);
+    }
+
+    /**
+     * Adds the upvoterId to the upvotes hash map of Caption associated with the captionId in the User associated with userId
+     *
+     * @param captionId
+     * @param upvoterId
+     * @param captionerId
+     * @param listener
+     */
+    private void addUpvoteToHashMapUser(String captionId, String upvoterId, String captionerId,
+                                        DatabaseReference.CompletionListener listener) {
+        DatabaseReference userCaptionsRef = database.getReference().child(String.format(USER_CAPTIONS_UPVOTES_PATH, captionerId, captionId));
+        DatabaseReference upvoteRef = userCaptionsRef.child(upvoterId);
+        upvoteRef.setValue(1, listener);
     }
 }
