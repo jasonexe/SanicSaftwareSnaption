@@ -185,7 +185,7 @@ public class FirebaseDeepLinkCreator {
      * @param activity The activity users are inviting their friends from
      * @param game The game friends should get a deep link to
      * @param progressView The progress bar to be displayed while loading the image (optional)
-     * @param image Bitmat containing the image to send in the intent
+     * @param image Bitmap containing the image to send in the intent
      */
     public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final Bitmap image) {
         if(progressView != null) {
