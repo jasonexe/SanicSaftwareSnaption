@@ -18,6 +18,7 @@ import com.google.gson.JsonParser;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
+import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,6 +42,7 @@ import static android.R.attr.data;
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.KEY_STRING;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.LINK_KEY;
+import static com.snaptiongame.snaptionapp.utilities.BitmapConverter.drawableToBitmap;
 
 
 /**
@@ -182,10 +184,10 @@ public class FirebaseDeepLinkCreator {
      * apps that accept the ACTION_SEND intent.
      * @param activity The activity users are inviting their friends from
      * @param game The game friends should get a deep link to
-     * @param progressView The progress bar to be displayed while loading the image
-     * @param image ImageView containing the game's image
+     * @param progressView The progress bar to be displayed while loading the image (optional)
+     * @param image Bitmat containing the image to send in the intent
      */
-    public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final ImageView image) {
+    public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final Bitmap image) {
         if(progressView != null) {
             progressView.setVisibility(View.VISIBLE);
         }
@@ -205,11 +207,8 @@ public class FirebaseDeepLinkCreator {
                 // If there is actually an image, do the converting stuff
                 if(image != null) {
                     try {
-                        //Take the image out of the imageView instead of downloading from Firebase again
-                        Bitmap bmp = drawableToBitmap(image.getDrawable());
                         out = new FileOutputStream(file);
-                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-
+                        image.compress(Bitmap.CompressFormat.JPEG, 100, out);
                         toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
                         out.close();
                     } catch (IOException e) {
@@ -241,26 +240,5 @@ public class FirebaseDeepLinkCreator {
         });
     }
 
-    // StackOverflow code to convert drawable to a bitmap
-    private static Bitmap drawableToBitmap (Drawable drawable) {
-        Bitmap bitmap = null;
 
-        if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
-                return bitmapDrawable.getBitmap();
-            }
-        }
-
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
-
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-        return bitmap;
-    }
 }

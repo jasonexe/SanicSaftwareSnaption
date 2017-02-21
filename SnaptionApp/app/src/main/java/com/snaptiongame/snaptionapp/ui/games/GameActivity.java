@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -39,6 +40,7 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -347,7 +349,8 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.invite_friends)
     public void createGameInvite() {
-        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, imageView);
+        Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp);
     }
 
     private void toggleVisibility(View view) {
