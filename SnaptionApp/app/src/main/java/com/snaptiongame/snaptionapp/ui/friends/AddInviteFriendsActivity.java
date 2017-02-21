@@ -40,7 +40,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
     //created app link from Facebook to link to our application when its on Google Play
-    private static final String appLinkUrl = "https://fb.me/1862755674010471\"";
+    private static final String appLinkUrl = "https://fb.me/1863284123957626";
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
 
