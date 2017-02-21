@@ -20,8 +20,10 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import butterknife.OnClick;
 
@@ -34,6 +36,7 @@ import butterknife.OnClick;
 public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHolder> {
 
     private List<Caption> items;
+    private static final String UPVOTES_PATH = "games/%s/captions/%s/votes";
     FirebaseResourceManager firebaseResourceManager;
     FirebaseUploader firebaseUploader;
 
@@ -49,6 +52,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             handleClickUpvote((ImageView) upvote, caption);
         }
     }
+
+    private ResourceListener upvoteListener;
 
     public GameCaptionViewAdapter(List<Caption> items) {
         this.items = new ArrayList<>(items);
@@ -83,6 +88,27 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         });
 
+        upvoteListener = new ResourceListener<List<Map<String, Integer>>>() {
+            @Override
+            public void onData(List<Map<String, Integer>> upvotes) {
+                if (upvotes != null) {
+                    // Set upvotes to be the list of upvotes;
+                    holder.numberUpvotes.setText(String.format(Locale.getDefault(),
+                            "%d", upvotes.size()));
+                    System.out.println("onData ran " + upvotes.size());
+                    //TODO find out how to get the data back
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return List.class;
+            }
+        };
+
+        firebaseResourceManager.retrieveAllWithUpdates(String.format(UPVOTES_PATH, caption.getGameId(), caption.getId()), upvoteListener);
+        //TODO find out how to get the upvotes to start
+
         holder.captionText.setText(caption.retrieveCaptionText());
 
         holder.numberUpvotes.setText(String.format(Locale.getDefault(),
@@ -116,16 +142,16 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             caption.removeUpvote(FirebaseResourceManager.getUserId());
         }
         else {
+            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
             caption.addUpvote(FirebaseResourceManager.getUserId());
             firebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(), caption.getUserId(), caption.getGameId(), new Uploader.UploadListener() {
                 @Override
-                public void onComplete() {
-                    upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-                }
+                public void onComplete() {}
 
                 @Override
                 public void onError(String errorMessage) {
-
+                    upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
+                    //TODO do something with toast that says the upvote didn't go through
                 }
             });
         }

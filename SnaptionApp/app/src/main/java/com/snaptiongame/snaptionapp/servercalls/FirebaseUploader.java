@@ -37,8 +37,8 @@ public class FirebaseUploader implements Uploader {
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
-    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/upvotes";
-    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/upvotes";
+    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
+    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 

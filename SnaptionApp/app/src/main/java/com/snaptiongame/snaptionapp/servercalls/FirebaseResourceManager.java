@@ -82,7 +82,7 @@ public class FirebaseResourceManager {
                 List data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 for (DataSnapshot snapshot : snapshots) {
-                    data.add(snapshot.getValue(listener.getDataType()));
+                    data.add(snapshot.getValue(listener.getDataType())); //TODO something with generictypeindicator
                 }
                 // Notify the ResourceListener that data was received
                 listener.onData(data);
