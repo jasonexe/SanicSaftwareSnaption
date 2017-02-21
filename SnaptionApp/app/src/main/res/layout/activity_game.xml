@@ -99,6 +99,17 @@
             android:id="@+id/number_captions"
             android:layout_toStartOf="@id/captions_icon"/>
 
+        <Button
+            android:id="@+id/invite_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:textColor="@color/colorAccent"
+            android:layout_gravity="center_horizontal"
+            android:layout_toStartOf="@id/number_captions"
+            android:paddingEnd="10dp"
+            android:text="@string/game_invite"/>
+
     </RelativeLayout>
 
     <View

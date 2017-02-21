@@ -30,6 +30,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -50,6 +51,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -122,6 +124,9 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    @BindView(R.id.invite_friends)
+    public Button inviteFriendsButton;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -173,6 +178,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void setupGameElements(Game game) {
+        this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
         setupCaptionList(game);
@@ -337,6 +343,12 @@ public class GameActivity extends HomeAppCompatActivity {
             dialog.setLoginManager(loginManager);
             dialog.show();
         }
+    }
+
+    @OnClick(R.id.invite_friends)
+    public void createGameInvite() {
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game);
+
     }
 
     private void toggleVisibility(View view) {

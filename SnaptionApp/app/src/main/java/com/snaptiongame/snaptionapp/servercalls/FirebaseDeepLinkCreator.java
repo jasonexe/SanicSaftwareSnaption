@@ -1,14 +1,27 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -18,6 +31,8 @@ import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
+import static android.R.attr.data;
+import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.KEY_STRING;
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.LINK_KEY;
 
@@ -46,6 +61,7 @@ public class FirebaseDeepLinkCreator {
     private static final String ANDROID_PACKAGE = "com.snaptiongame.snaptionapp";
     private static final String IOS_PACKAGE = "edu.calpoly.csc.2168.snapsquad.verticalprototype";
     private static final String SHORTLINK_KEY = "shortLink";
+    private static final String INTENT_IMAGE_TYPE = "image/jpeg";
     private static RestAdapter adapter = new RestAdapter.Builder()
             .setEndpoint(SHORT_LINK_GENERATOR_URL) // Firebase's short link generator url
             .build();
@@ -141,8 +157,6 @@ public class FirebaseDeepLinkCreator {
         };
     }
 
-
-
     @Nullable
     public static DeepLinkInfo interpretDeepLinkString(String deepLink) {
         // If it has "games" in the url, it'll be a deep link with the game ID as the last thing
@@ -155,5 +169,87 @@ public class FirebaseDeepLinkCreator {
         } else {
             return null;
         }
+    }
+
+    public static void createGameInviteIntent(final FragmentActivity activity, final Game game) {
+        String linkDestination = LINK_BEGINNING + "/games/" + game.getId();
+        // First, create the deep link to this specific game
+        getDeepLink(linkDestination, new ResourceListener<String>() {
+            @Override
+            public void onData(final String shortLink) {
+                // Retrieve the image URI to be sent in the message
+                File file = new File(activity.getExternalCacheDir(), "gamePreview.jpg");
+                FirebaseResourceManager.downloadImageToFile(game.getImagePath(), file, new ResourceListener<File>() {
+                    @Override
+                    public void onData(File data) {
+                        Intent toStart = new Intent(Intent.ACTION_SEND);
+                        toStart.setType(INTENT_IMAGE_TYPE);
+                        toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
+//                        toStart.putExtra("sms_body", "Hey come play snaption!");
+                        toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
+                                .getString(R.string.join_snaption_email_body), shortLink));
+
+                        toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(data));
+                        activity.startActivity(Intent.createChooser(toStart, activity
+                                .getResources().getString(R.string.game_invite)));
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return null;
+                    }
+                });
+
+//                FirebaseResourceManager.getImageURI(game.getImagePath(), new ResourceListener<Uri>() {
+//                    @Override
+//                    public void onData(Uri data) {
+//
+//
+//                    }
+//
+//                    @Override
+//                    public Class getDataType() {
+//                        return null;
+//                    }
+//                });
+//                final long ONE_MEG = 1024*1024;
+//                FirebaseResourceManager.downloadImageToFile(game.getImagePath(), ONE_MEG,
+//                        downloadListenerFactory(shortLink, activity));
+            }
+
+            @Override
+            public Class getDataType() {
+                return String.class;
+            }
+        });
+    }
+
+    public static ResourceListener<byte[]> downloadListenerFactory(final String shortLink,
+                                                                 final FragmentActivity activity) {
+        return new ResourceListener<byte[]>() {
+            @Override
+            public void onData(byte[] downloadedBytes) {
+                // Create the intent with the message saying
+                // "join me" and an image of the game attached
+                Intent toStart = new Intent(Intent.ACTION_SEND);
+                toStart.setType("image/jpg");
+                toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
+                toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
+                        .getString(R.string.join_snaption_email_body), shortLink));
+
+                Bitmap bmp = BitmapFactory.decodeByteArray(downloadedBytes, 0, downloadedBytes.length);
+                toStart.putExtra(Intent.EXTRA_STREAM, downloadedBytes);
+
+
+                // Start the intent
+                activity.startActivity(Intent.createChooser(toStart, activity
+                        .getResources().getString(R.string.game_invite)));
+            }
+
+            @Override
+            public Class getDataType() {
+                return File.class;
+            }
+        };
     }
 }
