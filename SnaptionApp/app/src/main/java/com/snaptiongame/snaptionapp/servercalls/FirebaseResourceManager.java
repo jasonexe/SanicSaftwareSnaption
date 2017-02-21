@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -27,7 +26,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaptionapp.models.Card;
@@ -37,7 +35,6 @@ import com.snaptiongame.snaptionapp.models.User;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -356,15 +353,6 @@ public class FirebaseResourceManager {
                 // Handle any errors
                 Log.v("URI Error:", "Something went wrong when trying to get " +
                         "image URL from Firebase");
-            }
-        });
-    }
-
-    public static void downloadImageToFile(String imagePath, final File imageFile, final ResourceListener<File> listener) {
-        storage.child(imagePath).getFile(imageFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(FileDownloadTask.TaskSnapshot snapshot) {
-                listener.onData(imageFile);
             }
         });
     }

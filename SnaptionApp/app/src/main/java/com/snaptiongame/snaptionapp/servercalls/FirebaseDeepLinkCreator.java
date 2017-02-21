@@ -177,8 +177,18 @@ public class FirebaseDeepLinkCreator {
         }
     }
 
+    /**
+     * Creates an intent for inviting people to a specific game through
+     * apps that accept the ACTION_SEND intent.
+     * @param activity The activity users are inviting their friends from
+     * @param game The game friends should get a deep link to
+     * @param progressView The progress bar to be displayed while loading the image
+     * @param image ImageView containing the game's image
+     */
     public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final ImageView image) {
-        progressView.setVisibility(View.VISIBLE);
+        if(progressView != null) {
+            progressView.setVisibility(View.VISIBLE);
+        }
         String linkDestination = LINK_BEGINNING + "/games/" + game.getId();
         // First, create the deep link to this specific game
         getDeepLink(linkDestination, new ResourceListener<String>() {
@@ -186,36 +196,42 @@ public class FirebaseDeepLinkCreator {
             public void onData(String shortLink) {
                 File file = new File(activity.getExternalCacheDir(), "gamePreview.jpg");
                 Intent toStart = new Intent(Intent.ACTION_SEND);
+                // Put in stuff we're guaranteed to have in the intent, the message and title
                 toStart.setType(INTENT_IMAGE_TYPE);
                 toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
                 toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
                         .getString(R.string.join_snaption_email_body), shortLink));
                 FileOutputStream out = null;
-                try {
-                    //Take the image out of the imageView instead of downloading from Firebase again
-                    Bitmap bmp = drawableToBitmap(image.getDrawable());
-                    out = new FileOutputStream(file);
-                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                // If there is actually an image, do the converting stuff
+                if(image != null) {
+                    try {
+                        //Take the image out of the imageView instead of downloading from Firebase again
+                        Bitmap bmp = drawableToBitmap(image.getDrawable());
+                        out = new FileOutputStream(file);
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
-                    toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                    out.close();
-                } catch (IOException e) {
-                    // Don't have to worry too much about errors here, since we'll just keep
-                    // going just not have the image in the invite
-                    e.printStackTrace();
-                } finally {
-                    if(out != null) {
-                        try {
-                            out.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                        out.close();
+                    } catch (IOException e) {
+                        // Don't have to worry too much about errors here, since we'll just keep
+                        // going just not have the image in the invite
+                        e.printStackTrace();
+                    } finally {
+                        if (out != null) {
+                            try {
+                                out.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }
 
                 activity.startActivity(Intent.createChooser(toStart, activity
                         .getResources().getString(R.string.game_invite)));
-                progressView.setVisibility(View.GONE);
+                if(progressView != null) {
+                    progressView.setVisibility(View.GONE);
+                }
             }
 
             @Override
