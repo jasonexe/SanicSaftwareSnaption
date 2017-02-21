@@ -124,8 +124,8 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
-    @BindView(R.id.invite_friends)
-    public Button inviteFriendsButton;
+    @BindView(R.id.intent_load_progress)
+    public View progressSpinner;
 
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
@@ -347,8 +347,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.invite_friends)
     public void createGameInvite() {
-        FirebaseDeepLinkCreator.createGameInviteIntent(this, game);
-
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, imageView);
     }
 
     private void toggleVisibility(View view) {

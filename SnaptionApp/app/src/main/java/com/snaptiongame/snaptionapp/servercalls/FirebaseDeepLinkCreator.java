@@ -3,10 +3,15 @@ package com.snaptiongame.snaptionapp.servercalls;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -16,6 +21,7 @@ import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -171,85 +177,74 @@ public class FirebaseDeepLinkCreator {
         }
     }
 
-    public static void createGameInviteIntent(final FragmentActivity activity, final Game game) {
+    public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final ImageView image) {
+        progressView.setVisibility(View.VISIBLE);
         String linkDestination = LINK_BEGINNING + "/games/" + game.getId();
         // First, create the deep link to this specific game
         getDeepLink(linkDestination, new ResourceListener<String>() {
             @Override
-            public void onData(final String shortLink) {
-                // Retrieve the image URI to be sent in the message
+            public void onData(String shortLink) {
                 File file = new File(activity.getExternalCacheDir(), "gamePreview.jpg");
-                FirebaseResourceManager.downloadImageToFile(game.getImagePath(), file, new ResourceListener<File>() {
-                    @Override
-                    public void onData(File data) {
-                        Intent toStart = new Intent(Intent.ACTION_SEND);
-                        toStart.setType(INTENT_IMAGE_TYPE);
-                        toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
-//                        toStart.putExtra("sms_body", "Hey come play snaption!");
-                        toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
-                                .getString(R.string.join_snaption_email_body), shortLink));
+                Intent toStart = new Intent(Intent.ACTION_SEND);
+                toStart.setType(INTENT_IMAGE_TYPE);
+                toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
+                toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
+                        .getString(R.string.join_snaption_email_body), shortLink));
+                FileOutputStream out = null;
+                try {
+                    //Take the image out of the imageView instead of downloading from Firebase again
+                    Bitmap bmp = drawableToBitmap(image.getDrawable());
+                    out = new FileOutputStream(file);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
-                        toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(data));
-                        activity.startActivity(Intent.createChooser(toStart, activity
-                                .getResources().getString(R.string.game_invite)));
+                    toStart.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                    out.close();
+                } catch (IOException e) {
+                    // Don't have to worry too much about errors here, since we'll just keep
+                    // going just not have the image in the invite
+                    e.printStackTrace();
+                } finally {
+                    if(out != null) {
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                }
 
-                    @Override
-                    public Class getDataType() {
-                        return null;
-                    }
-                });
-
-//                FirebaseResourceManager.getImageURI(game.getImagePath(), new ResourceListener<Uri>() {
-//                    @Override
-//                    public void onData(Uri data) {
-//
-//
-//                    }
-//
-//                    @Override
-//                    public Class getDataType() {
-//                        return null;
-//                    }
-//                });
-//                final long ONE_MEG = 1024*1024;
-//                FirebaseResourceManager.downloadImageToFile(game.getImagePath(), ONE_MEG,
-//                        downloadListenerFactory(shortLink, activity));
+                activity.startActivity(Intent.createChooser(toStart, activity
+                        .getResources().getString(R.string.game_invite)));
+                progressView.setVisibility(View.GONE);
             }
 
             @Override
             public Class getDataType() {
-                return String.class;
+                return null;
             }
         });
     }
 
-    public static ResourceListener<byte[]> downloadListenerFactory(final String shortLink,
-                                                                 final FragmentActivity activity) {
-        return new ResourceListener<byte[]>() {
-            @Override
-            public void onData(byte[] downloadedBytes) {
-                // Create the intent with the message saying
-                // "join me" and an image of the game attached
-                Intent toStart = new Intent(Intent.ACTION_SEND);
-                toStart.setType("image/jpg");
-                toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
-                toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
-                        .getString(R.string.join_snaption_email_body), shortLink));
+    // StackOverflow code to convert drawable to a bitmap
+    private static Bitmap drawableToBitmap (Drawable drawable) {
+        Bitmap bitmap = null;
 
-                Bitmap bmp = BitmapFactory.decodeByteArray(downloadedBytes, 0, downloadedBytes.length);
-                toStart.putExtra(Intent.EXTRA_STREAM, downloadedBytes);
-
-
-                // Start the intent
-                activity.startActivity(Intent.createChooser(toStart, activity
-                        .getResources().getString(R.string.game_invite)));
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if(bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
             }
+        }
 
-            @Override
-            public Class getDataType() {
-                return File.class;
-            }
-        };
+        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 }
