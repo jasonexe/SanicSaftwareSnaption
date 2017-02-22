@@ -84,49 +84,6 @@ public class Caption implements Serializable {
         return userId;
     }
 
-    /**
-     * Adds a user to the list of upvotes.
-     *
-     * @param id The id of the player whose upvote to add
-     */
-    public void addUpvote(String id) {
-        if (votes == null) {
-            votes = new HashMap<>();
-        }
-        votes.put(id, 1);
-    }
-
-    /**
-     * Removes a user from the list of upvotes.
-     *
-     * @param id The id of the player whose upvote to remove
-     * @return An Integer if successful, null if not successful
-     */
-    public Integer removeUpvote(String id) {
-        return votes.remove(id);
-    }
-
-    /**
-     * Returns whether the given user has upvoted the caption.
-     *
-     * @param id The of the player to check
-     * @return true if the user has upvoted the caption, false otherwise
-     */
-    public boolean hasUpvoted(String id) {
-        if (votes == null) {
-            return false;
-        }
-        return votes.containsKey(id);
-    }
-
-    public int retrieveNumVotes() {
-        if (votes == null) {
-            return 0;
-        } else {
-            return votes.size();
-        }
-    }
-
     public SpannableStringBuilder retrieveCaptionText() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         if(card == null) {
