@@ -47,11 +47,12 @@
     <string name="logout_failure">Failed to log out</string>
     <string name="empty_friends">You don\'t have any friends yet!\n\nClick on the button below to find someone you know.</string>
     <string name="invite_fb_friends">Facebook Invite</string>
-
     <string name="send_invites">Invite more friends!</string>
     <string name="join_snaption_subject">Join me in Snaption!</string>
-    <string name="join_snaption_email_body">Come play Snaption with me! Click here to download: %s</string>
+    <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
+    <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
     <string name="no_internet">You do not appear to be connected to the Internet</string>
+    <string name="game_invite">Invite Friends</string>
     <string name="upvote_error">There was an error in registering your vote</string>
 
 
