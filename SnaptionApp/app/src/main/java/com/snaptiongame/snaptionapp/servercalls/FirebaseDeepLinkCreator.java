@@ -213,7 +213,7 @@ public class FirebaseDeepLinkCreator {
                 toStart.setType(INTENT_IMAGE_TYPE);
                 toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
                 toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
-                        .getString(R.string.join_snaption_email_body),
+                        .getString(R.string.join_game_email_body),
                         sampleCaption, shortLink));
                 FileOutputStream out = null;
                 // If there is actually an image, do the converting stuff

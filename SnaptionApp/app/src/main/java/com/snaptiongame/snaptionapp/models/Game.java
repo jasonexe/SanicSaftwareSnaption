@@ -317,7 +317,7 @@ public class Game implements Serializable {
             // Find caption with the highest number of votes
             for (Caption caption : allCaptions) {
                 if (caption.retrieveNumVotes() >= highestUpvoteNum) {
-                    highestUpvoteNum = caption.getVotes().size();
+                    highestUpvoteNum = caption.retrieveNumVotes();
                     toReturn = caption;
                 }
             }
