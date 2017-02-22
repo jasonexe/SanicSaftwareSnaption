@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.snaptiongame.snaptionapp.CreateGameActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -37,28 +38,24 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private static final String UPVOTES_PATH = "games/%s/captions/%s/votes";
-    FirebaseResourceManager firebaseResourceManager;
-    FirebaseUploader firebaseUploader;
 
     private class UpvoteClickListener implements View.OnClickListener {
         Caption caption;
+        boolean hasUpvoted;
 
-        public UpvoteClickListener(Caption caption) {
+        public UpvoteClickListener(Caption caption, boolean hasUpvoted) {
             this.caption = caption;
+            this.hasUpvoted = hasUpvoted;
         }
 
         @Override
         public void onClick(View upvote) {
-            handleClickUpvote((ImageView) upvote, caption);
+            handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
         }
     }
 
-    private ResourceListener upvoteListener;
-
     public GameCaptionViewAdapter(List<Caption> items) {
         this.items = new ArrayList<>(items);
-        firebaseResourceManager = new FirebaseResourceManager();
-        firebaseUploader = new FirebaseUploader();
     }
 
     /**
@@ -69,7 +66,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      */
     @Override
     public void onBindViewHolder(final CaptionViewHolder holder, int position) {
-        Caption caption = items.get(position);
+        final Caption caption = items.get(position);
+        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
 
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
@@ -88,35 +86,46 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         });
 
-        upvoteListener = new ResourceListener<List<Map<String, Integer>>>() {
+        // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
+        // and modifies the click handler
+        ResourceListener upvoteListener = new ResourceListener<Map<String, Integer>>() {
             @Override
-            public void onData(List<Map<String, Integer>> upvotes) {
+            public void onData(Map<String, Integer> upvotes) {
                 if (upvotes != null) {
                     // Set upvotes to be the list of upvotes;
-                    holder.numberUpvotes.setText(String.format(Locale.getDefault(),
+                    holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
                             "%d", upvotes.size()));
-                    System.out.println("onData ran " + upvotes.size());
-                    //TODO find out how to get the data back
+                    // Sets the click listener, which changes implementation depending on upvote status
+                    holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
+                            upvotes.containsKey(FirebaseResourceManager.getUserId())));
+                    // Sets the icon depending on whether it has been upvoted
+                    setUpvoteIcon(holder.upvoteIcon,
+                            upvotes.containsKey(FirebaseResourceManager.getUserId()));
+                }
+                else {
+                    holder.numberUpvotesText.setText("0");
+                    holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
+                    setUpvoteIcon(holder.upvoteIcon, false);
                 }
             }
 
             @Override
             public Class getDataType() {
-                return List.class;
+                return Map.class;
             }
         };
 
-        firebaseResourceManager.retrieveAllWithUpdates(String.format(UPVOTES_PATH, caption.getGameId(), caption.getId()), upvoteListener);
-        //TODO find out how to get the upvotes to start
+        holder.numberUpvotesText.setText(String.format(Locale.getDefault(), "%d",
+                caption.getVotes() == null ? 0 : caption.getVotes().size()));
+        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
+        setUpvoteIcon(holder.upvoteIcon, false);
+
+        //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
+        firebaseResourceManager.retrieveMapWithUpdates(String.format(UPVOTES_PATH,
+                caption.getGameId(), caption.getId()), upvoteListener, Integer.class);
 
         holder.captionText.setText(caption.retrieveCaptionText());
 
-        holder.numberUpvotes.setText(String.format(Locale.getDefault(),
-                "%d", caption.retrieveNumVotes()));
-        holder.upvote.setOnClickListener(new UpvoteClickListener(caption));
-        if (caption.hasUpvoted(FirebaseResourceManager.getUserId())) {
-            holder.upvote.setImageDrawable(holder.upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-        }
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }
 
@@ -134,26 +143,40 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         return items.size();
     }
 
-    private void handleClickUpvote(final ImageView upvote, Caption caption) {
+    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption, boolean hasUpvoted) {
         //Using the deprecated method because the current version isn't compatible with our min API
         //TODO check if the user has upvoted the caption already
-        if (caption.hasUpvoted(FirebaseResourceManager.getUserId())) {
-            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_blank));
-            caption.removeUpvote(FirebaseResourceManager.getUserId());
+        Uploader uploader = new FirebaseUploader();
+
+        if (hasUpvoted) {
+            Toast.makeText(upvoteIcon.getContext(), "This will remove the upvote", Toast.LENGTH_SHORT).show();
         }
         else {
-            upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-            caption.addUpvote(FirebaseResourceManager.getUserId());
-            firebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(), caption.getUserId(), caption.getGameId(), new Uploader.UploadListener() {
-                @Override
-                public void onComplete() {}
+            if (caption != null) {
+                caption.addUpvote(FirebaseResourceManager.getUserId());
+                uploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
+                    caption.getUserId(), caption.getGameId(), new Uploader.UploadListener() {
+                    @Override
+                    public void onComplete() {
+                    }
 
-                @Override
-                public void onError(String errorMessage) {
-                    upvote.setImageDrawable(upvote.getResources().getDrawable(R.drawable.thumbs_up_filled));
-                    //TODO do something with toast that says the upvote didn't go through
-                }
-            });
+                    @Override
+                    public void onError(String errorMessage) {
+                        Toast.makeText(upvoteIcon.getContext(), "There was an error in registering " +
+                                "your vote.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        }
+    }
+
+    private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
+        if (hasUpvoted) {
+            //Using the deprecated method because the current version isn't compatible with our min API
+            upvoteIcon.setImageDrawable(upvoteIcon.getResources().getDrawable(R.drawable.thumbs_up_filled));
+        }
+        else {
+            upvoteIcon.setImageDrawable(upvoteIcon.getResources().getDrawable(R.drawable.thumbs_up_blank));
         }
     }
 

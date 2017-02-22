@@ -97,6 +97,53 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
+    /**
+     * Notifies the given ResourceListener of when elements in the table of the given path is
+     * changed.
+     *
+     * @param path The table path name
+     * @param listener A ResourceListener for a Map of the resource class type associated with the
+     *                 table elements
+     * @param valueClass The class of the value objects in the key value pairs of the map being
+     *                   retrieved
+     */
+    public void retrieveMapWithUpdates(String path, final ResourceListener listener,
+                                       final Class valueClass) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Conditional to determine what kind of map will be used
+                if (String.class.equals(valueClass)) {
+                    GenericTypeIndicator<Map<String, String>> genericTypeIndicator = new GenericTypeIndicator<Map<String, String>>() {};
+                    Map<String, String> data = dataSnapshot.getValue(genericTypeIndicator);
+
+                    // Notify the ResourceListener that data was received
+                    listener.onData(data);
+                }
+                else {
+                    GenericTypeIndicator<Map<String, Integer>> genericTypeIndicator = new GenericTypeIndicator<Map<String, Integer>>() {};
+                    Map<String, Integer> data = dataSnapshot.getValue(genericTypeIndicator);
+
+                    // Notify the ResourceListener that data was received
+                    listener.onData(data);
+                }
+                //Add more classes if necessary
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
     public void addChildListener(String path, final ResourceListener listener) {
         removeListener();
         databaseReference = database.getReference(path);
