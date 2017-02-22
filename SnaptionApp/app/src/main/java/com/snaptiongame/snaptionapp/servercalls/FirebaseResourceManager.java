@@ -104,11 +104,8 @@ public class FirebaseResourceManager {
      * @param path The table path name
      * @param listener A ResourceListener for a Map of the resource class type associated with the
      *                 table elements
-     * @param valueClass The class of the value objects in the key value pairs of the map being
-     *                   retrieved
      */
-    public void retrieveMapWithUpdates(String path, final ResourceListener listener,
-                                       final Class valueClass) {
+    public void retrieveMapWithUpdates(String path, final ResourceListener listener) {
         // if the FirebaseResourceManager is already being used to listen to the db, remove the
         // previous listener
         removeListener();
@@ -118,14 +115,13 @@ public class FirebaseResourceManager {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Conditional to determine what kind of map will be used
-                if (Integer.class.equals(valueClass)) {
+                if (Integer.class.equals(listener.getDataType())) {
                     GenericTypeIndicator<Map<String, Integer>> genericTypeIndicator = new GenericTypeIndicator<Map<String, Integer>>() {};
                     Map<String, Integer> data = dataSnapshot.getValue(genericTypeIndicator);
                     // Notify the ResourceListener that data was received
                     listener.onData(data);
                 }
                 else {
-
                     GenericTypeIndicator<Map<String, String>> genericTypeIndicator = new GenericTypeIndicator<Map<String, String>>() {};
                     Map<String, String> data = dataSnapshot.getValue(genericTypeIndicator);
                     // Notify the ResourceListener that data was received

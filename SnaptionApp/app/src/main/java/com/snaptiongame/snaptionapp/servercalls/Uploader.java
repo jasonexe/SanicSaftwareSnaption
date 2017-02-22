@@ -72,13 +72,6 @@ public interface Uploader {
      */
     public void addUser(User user, byte[] photo, ResourceListener<User> listener);
 
-
-    /**
-     * Create a new key from backend to use as an Upvote's identity
-     * @return a string representing a key so that it can be found later
-     */
-    public String getNewUpvoteKey();
-
     /**
      * Responsbile for:
      *  adds to a map in users table, increment upvote in the caption in game and user table

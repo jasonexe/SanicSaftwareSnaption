@@ -50,6 +50,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         @Override
         public void onClick(View upvote) {
+            //TODO make a check for logged in status
             handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
         }
     }
@@ -114,7 +115,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
             @Override
             public Class getDataType() {
-                return Map.class;
+                return Integer.class;
             }
         };
 
@@ -122,7 +123,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
         firebaseResourceManager.retrieveMapWithUpdates(String.format(UPVOTES_PATH,
-                caption.getGameId(), caption.getId()), upvoteListener, Integer.class);
+                caption.getGameId(), caption.getId()), upvoteListener);
 
         holder.captionText.setText(caption.retrieveCaptionText());
 
