@@ -56,7 +56,7 @@ import butterknife.OnClick;
  */
 
 public class CreateGameActivity extends AppCompatActivity {
-
+    // TODO display friends to invite
     private static final String MATURE = "mature";
     private static final String PG = "PG";
     private static final int FRIENDS_LIST_MIN_HEIGHT = 0;
@@ -114,6 +114,9 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.friends_list)
     protected RecyclerView friendsList;
+
+    @BindView(R.id.no_friends)
+    protected TextView noFriendsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -283,7 +286,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         });
                     }
                     else {
-                        // TODO show message saying you have no friends
+                        showNoFriends();
                     }
                 }
 
@@ -298,6 +301,11 @@ public class CreateGameActivity extends AppCompatActivity {
     private void showFriends() {
         friendProgressBar.setVisibility(View.GONE);
         friendsList.setVisibility(View.VISIBLE);
+    }
+
+    private void showNoFriends() {
+        friendProgressBar.setVisibility(View.GONE);
+        noFriendsView.setVisibility(View.VISIBLE);
     }
 
     class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
