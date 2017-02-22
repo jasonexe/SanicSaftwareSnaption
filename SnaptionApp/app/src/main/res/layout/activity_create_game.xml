@@ -117,7 +117,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:textColor="@color/colorAccent"
             android:layout_gravity="center_horizontal"
-            android:text="+ add friends"/>
+            android:text="@string/add_friends"/>
 
         <FrameLayout
             android:id="@+id/add_friends_view"
