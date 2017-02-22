@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -85,6 +84,39 @@ public class FirebaseResourceManager {
                     data.add(snapshot.getValue(listener.getDataType()));
                 }
                 // Notify the ResourceListener that data was received
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    /**
+     * Notifies the given ResourceListener of when elements in the table of the given path is
+     * changed.
+     *
+     * @param path The table path name
+     * @param listener A ResourceListener for a Map of the resource class type associated with the
+     *                 table elements
+     */
+    public void retrieveMapWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Tells firebase what type of object to return
+                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                        new GenericTypeIndicator<Map<String, Object>>() {};
+                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
                 listener.onData(data);
             }
 
