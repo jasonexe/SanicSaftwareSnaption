@@ -288,7 +288,6 @@ public class FirebaseResourceManager {
      */
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
-
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
         String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
                 + "/" + packName;
@@ -309,10 +308,6 @@ public class FirebaseResourceManager {
                 System.err.println(databaseError.getMessage());
             }
         });
-
-
-
-
     }
 
     /**
