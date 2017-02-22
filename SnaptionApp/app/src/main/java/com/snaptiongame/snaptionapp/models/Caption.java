@@ -1,16 +1,12 @@
 package com.snaptiongame.snaptionapp.models;
 
-import android.graphics.Typeface;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +49,7 @@ public class Caption implements Serializable {
         this.userInput = new ArrayList<>(userInput);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null) {
+        if (user != null) {
             //If they're signed in, get their uid
             userId = user.getUid();
         } else {
@@ -82,14 +78,6 @@ public class Caption implements Serializable {
 
     public String getUserId() {
         return userId;
-    }
-
-    public int retrieveNumVotes() {
-        if(votes == null) {
-            return 0;
-        } else {
-            return votes.size();
-        }
     }
 
     public SpannableStringBuilder retrieveCaptionText() {
