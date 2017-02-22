@@ -55,6 +55,7 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:9.8.0'
     compile 'com.google.firebase:firebase-messaging:9.8.0'
     compile 'com.google.firebase:firebase-invites:9.8.0'
+    compile 'com.google.firebase:firebase-crash:9.8.0'
     compile 'com.firebaseui:firebase-ui-storage:0.6.0'
     compile 'com.google.android.gms:play-services-auth:9.8.0'
     // Butterknife - view binding
@@ -75,6 +76,8 @@ dependencies {
     testCompile "org.powermock:powermock-module-junit4-rule:1.6.5"
     testCompile "org.powermock:powermock-api-mockito:1.6.5"
     testCompile "org.powermock:powermock-classloading-xstream:1.6.5"
+    // Retrofit - POST requests to firebase for deep links
+    compile 'com.squareup.retrofit:retrofit:1.9.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
