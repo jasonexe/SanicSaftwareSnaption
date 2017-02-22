@@ -25,10 +25,11 @@ import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
  */
 
 public class DeepLinkGetter {
+    private static final int DEEP_LINK_GOOGLE_ID = 1;
 
     public static void checkIfDeepLink(final FragmentActivity activity) {
         GoogleApiClient deepLinkReceiver = new GoogleApiClient.Builder(activity)
-                .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                .enableAutoManage(activity, DEEP_LINK_GOOGLE_ID, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                         Snackbar.make(activity.getCurrentFocus(),
