@@ -57,10 +57,9 @@ public class LoginManager {
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
     private static final String FB_EMAIL_PERMISSION = "email";
     private static final String FB_PROFILE_PERMISSION = "public_profile";
-
-    private final String photosFolder = "ProfilePictures/";
-    private final String photoExtension = ".jpg";
-    private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
+    private static final String PHOTOS_FOLDER = "ProfilePictures/";
+    private static final String PHOTO_EXTENSION = ".jpg";
+    private static final String FACEBOOK_IMAGE_URL = "https://graph.facebook.com/%s/picture?type=large";
 
     private FirebaseAuth auth;
     private Uploader uploader;
@@ -110,13 +109,6 @@ public class LoginManager {
         auth.signOut();
         //tell the view to update
         listener.onLoginComplete();
-    }
-
-    public void resetGoogleApi() {
-        if (googleApiClient != null) {
-            googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
-        }
     }
 
     public void loginWithGoogle() {
@@ -208,13 +200,20 @@ public class LoginManager {
         });
     }
 
+    private void resetGoogleApi() {
+        if (googleApiClient != null) {
+            googleApiClient.stopAutoManage(activity);
+            googleApiClient.disconnect();
+        }
+    }
+
     private void uploadUser(final String facebookId) {
         FirebaseUser fbUser = auth.getCurrentUser();
         //make sure user is signed in before sending
         if (fbUser != null) {
             //establish fields needed for constructor
             final String id = fbUser.getUid();
-            String imagePath = photosFolder + id + photoExtension;
+            String imagePath = PHOTOS_FOLDER + id + PHOTO_EXTENSION;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             //TODO: fill this fields once we reach notifications and friends
@@ -222,7 +221,7 @@ public class LoginManager {
 
             //getting facebook photo
             if (facebookId != null) {
-                downloadPhoto(String.format(facebookImageUrl, facebookId));
+                downloadPhoto(String.format(FACEBOOK_IMAGE_URL, facebookId));
             }
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
