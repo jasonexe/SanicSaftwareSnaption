@@ -21,10 +21,10 @@ public class CaptionViewHolder extends RecyclerView.ViewHolder {
     protected ImageView captionerPhoto;
     @BindView(R.id.captioner_name)
     protected TextView captionerName;
-    @BindView(R.id.upvote)
-    protected ImageView upvote;
-    @BindView(R.id.number_upvotes)
-    protected TextView numberUpvotes;
+    @BindView(R.id.upvote_icon)
+    protected ImageView upvoteIcon;
+    @BindView(R.id.number_upvotes_text)
+    protected TextView numberUpvotesText;
     @BindView(R.id.caption_text)
     protected TextView captionText;
 

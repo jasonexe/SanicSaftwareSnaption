@@ -52,14 +52,14 @@ import java.util.Observable;
  */
 public class LoginManager {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
+    private static final int LOGIN_GOOGLE_ID = 0;
     private static final String TAG = LoginManager.class.getSimpleName();
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
     private static final String FB_EMAIL_PERMISSION = "email";
     private static final String FB_PROFILE_PERMISSION = "public_profile";
-
-    private final String photosFolder = "ProfilePictures/";
-    private final String photoExtension = ".jpg";
-    private final String facebookImageUrl = "https://graph.facebook.com/%s/picture?type=large";
+    private static final String PHOTOS_FOLDER = "ProfilePictures/";
+    private static final String PHOTO_EXTENSION = ".jpg";
+    private static final String FACEBOOK_IMAGE_URL = "https://graph.facebook.com/%s/picture?type=large";
 
     private FirebaseAuth auth;
     private Uploader uploader;
@@ -112,10 +112,7 @@ public class LoginManager {
     }
 
     public void loginWithGoogle() {
-        if (googleApiClient != null) {
-            googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
-        }
+        resetGoogleApi();
         try {
             // Configure sign-in to request the user's ID, email address, and basic
             // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -126,7 +123,7 @@ public class LoginManager {
             // Build a GoogleApiClient with access to the Google Sign-In API and the
             // options specified by gso.
             googleApiClient = new GoogleApiClient.Builder(activity)
-                    .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                    .enableAutoManage(activity, LOGIN_GOOGLE_ID, new GoogleApiClient.OnConnectionFailedListener() {
                         @Override
                         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                             loginAuthCallback.onError();
@@ -139,6 +136,7 @@ public class LoginManager {
             activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
         }
         catch (Exception err) {
+            FirebaseReporter.reportException(err, "Google login error");
             Log.d(TAG, "loginWithGoogle:" + err.getStackTrace().toString());
             loginAuthCallback.onError();
         }
@@ -175,8 +173,7 @@ public class LoginManager {
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
-            googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
+            resetGoogleApi();
         }
     }
 
@@ -203,13 +200,20 @@ public class LoginManager {
         });
     }
 
+    private void resetGoogleApi() {
+        if (googleApiClient != null) {
+            googleApiClient.stopAutoManage(activity);
+            googleApiClient.disconnect();
+        }
+    }
+
     private void uploadUser(final String facebookId) {
         FirebaseUser fbUser = auth.getCurrentUser();
         //make sure user is signed in before sending
         if (fbUser != null) {
             //establish fields needed for constructor
             final String id = fbUser.getUid();
-            String imagePath = photosFolder + id + photoExtension;
+            String imagePath = PHOTOS_FOLDER + id + PHOTO_EXTENSION;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             //TODO: fill this fields once we reach notifications and friends
@@ -217,7 +221,7 @@ public class LoginManager {
 
             //getting facebook photo
             if (facebookId != null) {
-                downloadPhoto(String.format(facebookImageUrl, facebookId));
+                downloadPhoto(String.format(FACEBOOK_IMAGE_URL, facebookId));
             }
             //create and upload User to Firebase
             User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
@@ -245,6 +249,7 @@ public class LoginManager {
                     profilePhoto = IOUtils.toByteArray(inputStream);
                 }
                 catch (Exception err) {
+                    FirebaseReporter.reportException(err, "Loading profile picture failed");
                     Log.d("TAG", "Loading Picture FAILED");
                     err.printStackTrace();
                 }

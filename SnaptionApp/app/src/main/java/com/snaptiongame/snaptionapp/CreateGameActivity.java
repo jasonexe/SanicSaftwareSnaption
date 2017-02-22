@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -52,7 +53,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private static final String MATURE = "mature";
     private static final String PG = "PG";
     private static final int DEFAULT_DAYS_AHEAD = 5;
-    private static final int MILISECONDS_IN_DAY = 86400000;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -120,6 +120,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
         uploader = new FirebaseUploader();
         calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, DEFAULT_DAYS_AHEAD);
 
         year = calendar.get(Calendar.YEAR);
         month = calendar.get(Calendar.MONTH);
@@ -268,6 +269,7 @@ public class CreateGameActivity extends AppCompatActivity {
             imageUri = data.getData();
             setImageFromUrl(imageUri);
         } catch (Exception e) {
+            FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
         }
     }
@@ -298,6 +300,7 @@ public class CreateGameActivity extends AppCompatActivity {
             baos.close();
         }
         catch (IOException e) {
+            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
             e.printStackTrace();
         }
         return data;
@@ -337,19 +340,22 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * Displays the datepicker dialog to allow the user to input the date.
+     */
     public void setDate() {
         new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DATE)).show();
     }
-
+    
+    /**
+     * Displays the date in the textview.
+     *
+     * @param calendar The calendar to take the date from
+     */
     private void showDate(Calendar calendar) {
-        calendar.setTime(getDefaultDate());
-        //TODO have configurable for spanish dates
+        //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
     }
 
-    private Date getDefaultDate() {
-        Date date = new Date(new Date().getTime() + MILISECONDS_IN_DAY * DEFAULT_DAYS_AHEAD);
-        return date;
-    }
 }
