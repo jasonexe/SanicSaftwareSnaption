@@ -91,6 +91,9 @@ public interface Uploader {
     void addUpvote(String captionId, String upvoterId, String captionerId, String gameId,
                    UploadListener listener);
 
+    void removeUpvote(String captionId, String upvoterId, String captionerId, String gameId,
+                      UploadListener listener);
+
     /**
      * Responsible for adding the friend to the user's friends list and adding the user to the
      * friend's friends list

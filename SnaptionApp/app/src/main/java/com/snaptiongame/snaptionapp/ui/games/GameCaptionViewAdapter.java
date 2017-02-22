@@ -54,6 +54,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         }
     }
 
+    /**
+     * Creates an instance of this GameCaptionViewAdapter.
+     *
+     * @param items The list of Captions to build the views from
+     */
     public GameCaptionViewAdapter(List<Caption> items) {
         this.items = new ArrayList<>(items);
     }
@@ -103,9 +108,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                             upvotes.containsKey(FirebaseResourceManager.getUserId()));
                 }
                 else {
-                    holder.numberUpvotesText.setText("0");
-                    holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
-                    setUpvoteIcon(holder.upvoteIcon, false);
+                    setDefaultUpvoteView(holder, caption);
                 }
             }
 
@@ -115,10 +118,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         };
 
-        holder.numberUpvotesText.setText(String.format(Locale.getDefault(), "%d",
-                caption.getVotes() == null ? 0 : caption.getVotes().size()));
-        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
-        setUpvoteIcon(holder.upvoteIcon, false);
+        setDefaultUpvoteView(holder, caption);
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
         firebaseResourceManager.retrieveMapWithUpdates(String.format(UPVOTES_PATH,
@@ -127,6 +127,21 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         //TODO change the default drawable for upvote based on whether the user has upvoted the caption
+    }
+
+    /**
+     * Sets the initial/default view for the upvote icon and upvote number, and sets the click
+     * listener for the upvote icon.
+     *
+     * @param holder The holder for the view
+     * @param caption The caption being affected
+     */
+    private void setDefaultUpvoteView(CaptionViewHolder holder, Caption caption) {
+        // Using 0 because it will be replaced immediately and using the local variable results in
+        // some bugs
+        holder.numberUpvotesText.setText(String.format(Locale.getDefault(), "%d", 0));
+        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
+        setUpvoteIcon(holder.upvoteIcon, false);
     }
 
     @Override
@@ -143,33 +158,51 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         return items.size();
     }
 
-    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption, boolean hasUpvoted) {
-        //Using the deprecated method because the current version isn't compatible with our min API
-        //TODO check if the user has upvoted the caption already
+    /**
+     * Called when an upvote is clicked. Adds/removes the upvote to/from firebase depending on
+     * whether hasUpvoted is true or false.
+     *
+     * @param upvoteIcon The view being clicked
+     * @param caption The caption object being affected
+     * @param hasUpvoted Whether the user has previously upvoted this caption
+     */
+    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
+                                   boolean hasUpvoted) {
+        // Using the deprecated method because the current version isn't compatible with our min API
         Uploader uploader = new FirebaseUploader();
+        // Listens to see if anything went wrong
+        Uploader.UploadListener listener = new Uploader.UploadListener() {
+            @Override
+            public void onComplete() {}
 
-        if (hasUpvoted) {
-            Toast.makeText(upvoteIcon.getContext(), "This will remove the upvote", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            if (caption != null) {
-                caption.addUpvote(FirebaseResourceManager.getUserId());
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(upvoteIcon.getContext(), "There was an error in " +
+                        "registering your vote.", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        if (caption != null) {
+            // Remove the upvote if the user has upvoted
+            if (hasUpvoted) {
+                uploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
+                        caption.getUserId(), caption.getGameId(), listener);
+            }
+            // Add the upvote if the user hasn't upvoted
+            else {
                 uploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                    caption.getUserId(), caption.getGameId(), new Uploader.UploadListener() {
-                    @Override
-                    public void onComplete() {
-                    }
-
-                    @Override
-                    public void onError(String errorMessage) {
-                        Toast.makeText(upvoteIcon.getContext(), "There was an error in registering " +
-                                "your vote.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        caption.getUserId(), caption.getGameId(), listener);
             }
         }
     }
 
+    /**
+     * Sets the upvote icon to be either filled or empty depending on whether the user has upvoted
+     * the caption.
+     *
+     * @param upvoteIcon The view being affected
+     * @param hasUpvoted Whether the user has upvoted the caption
+     */
     private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
         if (hasUpvoted) {
             //Using the deprecated method because the current version isn't compatible with our min API

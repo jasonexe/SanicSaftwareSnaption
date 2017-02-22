@@ -236,6 +236,35 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
+
+    @Override
+    public void removeUpvote(final String captionId, final String upvoterId, final String captionerId, String gameId,
+                             final UploadListener listener) {
+        // add the upvote to the game's caption's upvote list
+        removeUpvoteFromHashMapGame(captionId, upvoterId, gameId, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    removeUpvoteFromHashMapUser(captionId, upvoterId, captionerId, new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                            if (databaseError == null) {
+                                listener.onComplete();
+                            }
+                            else {
+                                // this is a problem if one upvote was added but the other was not
+                                listener.onError(getErrorMessage(databaseError));
+                            }
+                        }
+                    });
+                }
+                else {
+                    listener.onError(getErrorMessage(databaseError));
+                }
+            }
+        });
+    }
+
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
         // add the friend to the user's friends list
         addFriendToHashMap(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
@@ -319,4 +348,34 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference upvoteRef = userCaptionsRef.child(upvoterId);
         upvoteRef.setValue(1, listener);
     }
+
+    /**
+     * Removes the upvoterId from the upvotes hash map of Caption associated with the captionId in the Game associated with gameId
+     *
+     * @param captionId
+     * @param upvoterId
+     * @param gameId
+     * @param listener
+     */
+    private void removeUpvoteFromHashMapGame(String captionId, String upvoterId, String gameId,
+                                             DatabaseReference.CompletionListener listener) {
+        DatabaseReference gameCaptionsRef = database.getReference().child(String.format(GAME_CAPTIONS_UPVOTES_PATH, gameId, captionId));
+        DatabaseReference upvoteRef = gameCaptionsRef.child(upvoterId);
+        upvoteRef.removeValue(listener);
+    }
+
+    /**
+     * Removes the upvoterId from the upvotes hash map of Caption associated with the captionId in the User associated with userId
+     * @param captionId
+     * @param upvoterId
+     * @param captionerId
+     * @param listener
+     */
+    private void removeUpvoteFromHashMapUser(String captionId, String upvoterId, String captionerId,
+                                             DatabaseReference.CompletionListener listener) {
+        DatabaseReference userCaptionsRef = database.getReference().child(String.format(USER_CAPTIONS_UPVOTES_PATH, captionerId, captionId));
+        DatabaseReference upvoteRef = userCaptionsRef.child(upvoterId);
+        upvoteRef.removeValue(listener);
+    }
+
 }
