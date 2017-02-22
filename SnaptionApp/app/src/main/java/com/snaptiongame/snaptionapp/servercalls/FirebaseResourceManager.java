@@ -113,22 +113,11 @@ public class FirebaseResourceManager {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //Conditional to determine what kind of map will be used
-                if (Integer.class.equals(listener.getDataType())) {
-                    GenericTypeIndicator<Map<String, Integer>> genericTypeIndicator =
-                            new GenericTypeIndicator<Map<String, Integer>>() {};
-                    Map<String, Integer> data = dataSnapshot.getValue(genericTypeIndicator);
-                    // Notify the ResourceListener that data was received
-                    listener.onData(data);
-                }
-                else {
-                    GenericTypeIndicator<Map<String, String>> genericTypeIndicator =
-                            new GenericTypeIndicator<Map<String, String>>() {};
-                    Map<String, String> data = dataSnapshot.getValue(genericTypeIndicator);
-                    // Notify the ResourceListener that data was received
-                    listener.onData(data);
-                }
-                //Add more classes if necessary
+                // Tells firebase what type of object to return
+                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                        new GenericTypeIndicator<Map<String, Object>>() {};
+                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
+                listener.onData(data);
             }
 
             @Override
