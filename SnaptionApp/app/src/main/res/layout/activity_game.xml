@@ -107,7 +107,8 @@
             android:textColor="@color/colorAccent"
             android:layout_gravity="center_horizontal"
             android:layout_toStartOf="@id/number_captions"
-            android:paddingEnd="10dp"
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
             android:text="@string/game_invite"/>
 
     </RelativeLayout>

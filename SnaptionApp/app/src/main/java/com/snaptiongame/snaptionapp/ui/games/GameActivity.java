@@ -126,6 +126,9 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    @BindView(R.id.invite_friends)
+    public Button inviteFriendsButton;
+
     @BindView(R.id.intent_load_progress)
     public View progressSpinner;
 
@@ -183,11 +186,29 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        determineButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
         setupPickerName(game);
         setupCaptionCardView();
         startCommentManager(game);
+    }
+
+    private void determineButtonDisplay(Game game) {
+        // If this is a public game, anyone can send an invite to it
+        if(game.getIsPublic()) {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+        } else {
+            String pickerId = game.getPicker();
+            String thisUser = FirebaseResourceManager.getUserId();
+            // If it's a public game and the picker is logged in, they can invite people
+            if(pickerId.equals(thisUser)) {
+                inviteFriendsButton.setVisibility(View.VISIBLE);
+            } else {
+                // If user logged in isn't the picker, no inviting for them!
+                inviteFriendsButton.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void setupCaptionList(Game game) {

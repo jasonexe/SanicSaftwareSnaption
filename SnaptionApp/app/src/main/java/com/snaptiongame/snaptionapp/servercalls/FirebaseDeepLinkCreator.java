@@ -64,10 +64,17 @@ public class FirebaseDeepLinkCreator {
     static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyAa9WDzfmNN5j3i8jn0smpHkZypMmxFCMI";
     static final String LINK_KEY = "longDynamicLink";
 
+    // Our app's firebase dynamic link domain
     private static final String DYNAMIC_LINK_DOMAIN = "https://ba63n.app.goo.gl/";
+    // The name of the file that holds the game preview to send in the intent
+    private static final String FILE_NAME = "gamePreview.jpg";
+    // URL to firebase's dynamic shortlink generator
     private static final String SHORT_LINK_GENERATOR_URL = "https://firebasedynamiclinks.googleapis.com";
+    // Our app's default android package
     private static final String ANDROID_PACKAGE = "com.snaptiongame.snaptionapp";
+    // The iOS app's default package. Taken from firebase
     private static final String IOS_PACKAGE = "edu.calpoly.csc.2168.snapsquad.verticalprototype";
+    // The key for the shortlink to send in the intent if needed
     private static final String SHORTLINK_KEY = "shortLink";
     private static final String INTENT_IMAGE_TYPE = "image/jpeg";
     private static RestAdapter adapter = new RestAdapter.Builder()
@@ -196,7 +203,7 @@ public class FirebaseDeepLinkCreator {
         getDeepLink(linkDestination, new ResourceListener<String>() {
             @Override
             public void onData(String shortLink) {
-                File file = new File(activity.getExternalCacheDir(), "gamePreview.jpg");
+                File file = new File(activity.getExternalCacheDir(), FILE_NAME);
                 Intent toStart = new Intent(Intent.ACTION_SEND);
                 // Put in stuff we're guaranteed to have in the intent, the message and title
                 toStart.setType(INTENT_IMAGE_TYPE);

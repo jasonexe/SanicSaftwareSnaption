@@ -50,7 +50,7 @@
     <string name="join_snaption_subject">Join me in Snaption!</string>
     <string name="join_snaption_email_body">Come play Snaption with me! Click here to download: %s</string>
     <string name="no_internet">You do not appear to be connected to the Internet</string>
-    <string name="game_invite">Send Game invite</string>
+    <string name="game_invite">Invite Friends</string>
 
 
     <!--Accessibility strings-->
