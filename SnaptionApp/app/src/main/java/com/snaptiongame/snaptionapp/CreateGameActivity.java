@@ -347,8 +347,7 @@ public class CreateGameActivity extends AppCompatActivity {
         new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DATE)).show();
     }
-
-
+    
     /**
      * Displays the date in the textview.
      *
