@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -30,6 +31,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -38,6 +40,7 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +53,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -123,6 +127,12 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    @BindView(R.id.invite_friends)
+    public Button inviteFriendsButton;
+
+    @BindView(R.id.intent_load_progress)
+    public View progressSpinner;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -174,14 +184,33 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void setupGameElements(Game game) {
+        this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
         initLoginManager();
+        determineButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
         setupPickerName(game);
         setupCaptionCardView();
         startCommentManager(game);
+    }
+
+    private void determineButtonDisplay(Game game) {
+        // If this is a public game, anyone can send an invite to it
+        if(game.getIsPublic()) {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+        } else {
+            String pickerId = game.getPicker();
+            String thisUser = FirebaseResourceManager.getUserId();
+            // If it's a public game and the picker is logged in, they can invite people
+            if(pickerId.equals(thisUser)) {
+                inviteFriendsButton.setVisibility(View.VISIBLE);
+            } else {
+                // If user logged in isn't the picker, no inviting for them!
+                inviteFriendsButton.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void setupCaptionList(Game game) {
@@ -348,6 +377,23 @@ public class GameActivity extends HomeAppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
+    }
+
+    @OnClick(R.id.invite_friends)
+    public void createGameInvite() {
+        Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
+        String sampleCaption = getSampleCaption();
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
+    }
+
+    private String getSampleCaption() {
+        Caption toReturn = game.getTopCaption();
+        if(toReturn != null) {
+            return toReturn.retrieveCaptionText().toString();
+        } else {
+            Random rand = new Random();
+            return allCards.get(rand.nextInt(allCards.size() - 1)).getCardText().replace("%s", "____");
+        }
     }
 
     private void toggleVisibility(View view) {
