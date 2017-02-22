@@ -4,12 +4,9 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -19,11 +16,13 @@ import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Created by jason_000 on 1/21/2017.
+ * FirebaseUploader is used for uploading data to Firebase and updating values.
+ *
+ * @author Jason Krein, Cameron Geehr
  */
 
 public class FirebaseUploader implements Uploader {
@@ -34,6 +33,8 @@ public class FirebaseUploader implements Uploader {
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
+    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
+    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -107,12 +108,6 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference captionFolderRef = database.getReference(GAMES_PATH + "/" + gameId + "/" +
                 CAPTION_PATH);
         return captionFolderRef.push().getKey();
-    }
-
-    @Override
-    public String getNewUpvoteKey() {
-        //TODO implement this
-        return null;
     }
 
     private void addGameToUserTable(Game game) {
@@ -195,9 +190,73 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    @Override
-    public void addUpvote(String captionId, String upvoterId, String captionerId, String gameId) {
+    /**
+     * Adds the upvote to the caption in the user object and in the game object.
+     *
+     * @param captionId The ID of the caption
+     * @param upvoterId The ID of the player upvoting the caption
+     * @param captionerId The ID of the player who created the caption
+     * @param gameId The ID of the game that the caption is in
+     */
+    public static void addUpvote(final String captionId, final String upvoterId,
+                                 final String captionerId, String gameId,
+                                 final UploadListener listener) {
+        updateUpvote(captionId, upvoterId, captionerId, gameId, listener, true);
+    }
 
+    /**
+     * Removes the upvote from the caption in the user object and in the game object.
+     *
+     * @param captionId The ID of the caption
+     * @param upvoterId The ID of the player un-upvoting the caption
+     * @param captionerId The ID of the player who created the caption
+     * @param gameId The ID of the game that the caption is in
+     */
+    public static void removeUpvote(final String captionId, final String upvoterId,
+                                    final String captionerId, String gameId,
+                                    final UploadListener listener) {
+        updateUpvote(captionId, upvoterId, captionerId, gameId, listener, false);
+    }
+
+    /**
+     * Updates the value for the upvote. If isAdd is true, it will be added with a value of 1, if
+     * isAdd is false, it will be removed by setting its value to null.
+     *
+     * @param captionId
+     * @param upvoterId
+     * @param captionerId
+     * @param gameId
+     * @param listener
+     * @param isAdd
+     */
+    private static void updateUpvote(final String captionId, final String upvoterId,
+                                     final String captionerId, String gameId,
+                                     final UploadListener listener, boolean isAdd) {
+        // Checks if the upvote is being added or removed
+        Integer value = isAdd ? 1 : null;
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        // Updates for the game caption
+        childUpdates.put(String.format(GAME_CAPTIONS_UPVOTES_PATH, gameId, captionId) + "/" +
+                upvoterId, value);
+        // Updates for the user caption
+        childUpdates.put(String.format(USER_CAPTIONS_UPVOTES_PATH, captionerId, captionId) + "/" +
+                upvoterId, value);
+        // Updates the values in the database
+        database.getReference().updateChildren(childUpdates,
+                new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError,
+                                   DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    listener.onComplete();
+                }
+                else {
+                    listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
+                            ? ITEM_ALREADY_EXISTS_ERROR : "");
+                };
+            }
+        });
     }
 
     public void addFriend(final User user, final Friend friend, final UploadListener listener) {
@@ -253,4 +312,5 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference friendRef = userFriendsRef.child(friendId);
         friendRef.setValue(1, listener);
     }
+
 }
