@@ -52,6 +52,7 @@ import java.util.Observable;
  */
 public class LoginManager {
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
+    private static final int LOGIN_GOOGLE_ID = 0;
     private static final String TAG = LoginManager.class.getSimpleName();
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
     private static final String FB_EMAIL_PERMISSION = "email";
@@ -111,11 +112,15 @@ public class LoginManager {
         listener.onLoginComplete();
     }
 
-    public void loginWithGoogle() {
+    public void resetGoogleApi() {
         if (googleApiClient != null) {
             googleApiClient.stopAutoManage(activity);
             googleApiClient.disconnect();
         }
+    }
+
+    public void loginWithGoogle() {
+        resetGoogleApi();
         try {
             // Configure sign-in to request the user's ID, email address, and basic
             // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -126,7 +131,7 @@ public class LoginManager {
             // Build a GoogleApiClient with access to the Google Sign-In API and the
             // options specified by gso.
             googleApiClient = new GoogleApiClient.Builder(activity)
-                    .enableAutoManage(activity, new GoogleApiClient.OnConnectionFailedListener() {
+                    .enableAutoManage(activity, LOGIN_GOOGLE_ID, new GoogleApiClient.OnConnectionFailedListener() {
                         @Override
                         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                             loginAuthCallback.onError();
@@ -176,8 +181,7 @@ public class LoginManager {
             GoogleSignInAccount acct = result.getSignInAccount();
             loginToFirebase(acct);
         } else {
-            googleApiClient.stopAutoManage(activity);
-            googleApiClient.disconnect();
+            resetGoogleApi();
         }
     }
 
