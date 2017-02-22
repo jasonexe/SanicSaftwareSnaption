@@ -50,8 +50,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected DrawerLayout drawerLayout;
     @BindView(R.id.navigation_view)
     protected NavigationView navigationView;
-    @BindView(R.id.fab)
-    protected FloatingActionButton fab;
+
     protected ImageView navDrawerPhoto;
     protected TextView navDrawerName;
     protected TextView navDrawerEmail;
@@ -72,17 +71,14 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     case R.id.wall_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
-                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.profile_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
-                        fab.setVisibility(View.INVISIBLE);
                         break;
                     case R.id.friends_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new FriendsFragment()).commit();
-                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.log_option:
                         //check if we are logging in or out based on item text
@@ -236,7 +232,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
     }
 
-    @OnClick(R.id.fab)
+    /*@OnClick(R.id.fab)
     public void onClickFab(View view) {
         if (currentFragmentMenuItemId == R.id.wall_item) {
             if (FirebaseResourceManager.getUserId() != null) {
@@ -252,7 +248,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
         }
-    }
+    }*/
 
     @Override
     protected void onResume() {

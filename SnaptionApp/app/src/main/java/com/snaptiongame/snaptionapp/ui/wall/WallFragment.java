@@ -1,7 +1,9 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -10,18 +12,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.snaptiongame.snaptionapp.CreateGameActivity;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -30,6 +36,7 @@ import butterknife.Unbinder;
 
 public class WallFragment extends Fragment {
     private static final int NUM_COLUMNS = 2;
+    private static final int HIDE_THRESHOLD = 5;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
@@ -50,6 +57,11 @@ public class WallFragment extends Fragment {
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
 
+    @BindView(R.id.fab)
+    protected FloatingActionButton fab;
+
+    private ScrollViewHider scrollFabHider;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -62,6 +74,8 @@ public class WallFragment extends Fragment {
 
         wallAdapter = new WallViewAdapter(new ArrayList<Game>(), (MainSnaptionActivity)getActivity());
         wallListView.setAdapter(wallAdapter);
+        scrollFabHider = new ScrollViewHider(fab, ScrollViewHider.HALF_HIDE_THRESHOLD);
+        wallListView.addOnScrollListener(scrollFabHider);
 
         wallListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -81,6 +95,19 @@ public class WallFragment extends Fragment {
         loadMoreGames();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
+    }
+
+    @OnClick(R.id.fab)
+    public void onFabClick(View view) {
+        if (FirebaseResourceManager.getUserId() != null) {
+            Intent intent = new Intent(getActivity(), CreateGameActivity.class);
+            startActivity(intent);
+        }
+        else {
+            if (getActivity() instanceof  MainSnaptionActivity) {
+                ((MainSnaptionActivity)getActivity()).loginDialog.show();
+            }
+        }
     }
 
     private void loadMoreGames() {

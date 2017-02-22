@@ -1,7 +1,9 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,6 +18,7 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -36,6 +40,10 @@ public class FriendsFragment extends Fragment {
     public TextView friendNotice;
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
+    @BindView(R.id.fab)
+    protected FloatingActionButton fab;
+
+    private ScrollViewHider scrollFabHider;
 
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
@@ -48,11 +56,18 @@ public class FriendsFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
         LinearLayoutManager friendsViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false);
         friendsListView.setLayoutManager(friendsViewManager);
-
+        scrollFabHider = new ScrollViewHider(fab, ScrollViewHider.HALF_HIDE_THRESHOLD);
+        friendsListView.addOnScrollListener(scrollFabHider);
         populateFriends();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.friends));
 
         return view;
+    }
+
+    @OnClick(R.id.fab)
+    public void onFabClick(View view) {
+        Intent intent = new Intent(getActivity(), AddInviteFriendsActivity.class);
+        startActivity(intent);
     }
 
     @Override

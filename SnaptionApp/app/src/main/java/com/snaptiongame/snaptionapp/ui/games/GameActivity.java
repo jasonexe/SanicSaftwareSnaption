@@ -36,6 +36,7 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
@@ -68,6 +69,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private final static String EMPTY_SIZE = "0";
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
+    private final static int HIDE_THRESHOLD = 10;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
@@ -121,6 +123,8 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    private ScrollViewHider scrollFabHider;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -136,6 +140,9 @@ public class GameActivity extends HomeAppCompatActivity {
             return Caption.class;
         }
     };
+
+    //hides and shows the fab on scroll
+    //private ScrollViewHider scrollFabHider = new ScrollViewHider(fab);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,11 +172,12 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
+        scrollFabHider = new ScrollViewHider(fab, HIDE_THRESHOLD);
         captionListView.addOnScrollListener(scrollFabHider);
     }
 
     // Scroll listener that hides the fab during scrolling down, shows it when going up
-    private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
+    /*private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
         private int scrolledDistance = 0;
         private final static int HIDE_THRESHOLD = 10;
         private boolean fabVisible = true; // This is used because the animations take too long
@@ -201,7 +209,7 @@ public class GameActivity extends HomeAppCompatActivity {
         private boolean isFabVisible() {
             return fabVisible;
         }
-    };
+    };*/
 
     // Displays the date that the game will end underneath the picture
     private void setupEndDate() {
