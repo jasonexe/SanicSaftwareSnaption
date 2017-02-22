@@ -194,7 +194,11 @@ public class FirebaseDeepLinkCreator {
      * @param progressView The progress bar to be displayed while loading the image (optional)
      * @param image Bitmap containing the image to send in the intent
      */
-    public static void createGameInviteIntent(final FragmentActivity activity, final Game game, final View progressView, final Bitmap image) {
+    public static void createGameInviteIntent(final FragmentActivity activity,
+                                              final Game game,
+                                              final View progressView,
+                                              final Bitmap image,
+                                              final String sampleCaption) {
         if(progressView != null) {
             progressView.setVisibility(View.VISIBLE);
         }
@@ -209,7 +213,8 @@ public class FirebaseDeepLinkCreator {
                 toStart.setType(INTENT_IMAGE_TYPE);
                 toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
                 toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
-                        .getString(R.string.join_snaption_email_body), shortLink));
+                        .getString(R.string.join_snaption_email_body),
+                        sampleCaption, shortLink));
                 FileOutputStream out = null;
                 // If there is actually an image, do the converting stuff
                 if(image != null) {

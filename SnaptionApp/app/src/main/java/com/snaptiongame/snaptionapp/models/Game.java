@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -305,8 +306,29 @@ public class Game implements Serializable {
      * @return The top caption.
      */
     public Caption getTopCaption() {
-        // TODO correctly implement this!
-        //currently returns the first caption in the captions list
-        return captions != null && captions.size() > 0 ? captions.values().iterator().next() : null;
+        // If no captions are made, return null
+        if (captions == null) {
+            return null;
+        }
+        if (getIsOpen()) {
+            Collection<Caption> allCaptions = captions.values();
+            int highestUpvoteNum = 0;
+            Caption toReturn = null;
+            // Find caption with the highest number of votes
+            for (Caption caption : allCaptions) {
+                if (caption.getVotes() != null && caption.getVotes().size() > highestUpvoteNum) {
+                    highestUpvoteNum = caption.getVotes().size();
+                    toReturn = caption;
+                }
+            }
+            // If no captions have any votes, but there are captions, return first one in list
+            if(allCaptions.size() != 0 && toReturn == null) {
+                return allCaptions.iterator().next();
+            }
+            return toReturn;
+        } else {
+            // Otherwise, return what's in winner
+            return captions.get(getWinner());
+        }
     }
 }

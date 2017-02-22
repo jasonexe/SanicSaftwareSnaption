@@ -371,7 +371,18 @@ public class GameActivity extends HomeAppCompatActivity {
     @OnClick(R.id.invite_friends)
     public void createGameInvite() {
         Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
-        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp);
+        String sampleCaption = getSampleCaption();
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
+    }
+
+    private String getSampleCaption() {
+        Caption toReturn = game.getTopCaption();
+        if(toReturn != null) {
+            return toReturn.retrieveCaptionText().toString();
+        } else {
+            Random rand = new Random();
+            return allCards.get(rand.nextInt(allCards.size() - 1)).getCardText().replace("%s", "____");
+        }
     }
 
     private void toggleVisibility(View view) {
