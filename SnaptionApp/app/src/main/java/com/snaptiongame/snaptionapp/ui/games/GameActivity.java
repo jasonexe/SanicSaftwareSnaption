@@ -84,6 +84,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private FirebaseResourceManager commentManager;
 
     private LoginManager loginManager;
+    private LoginDialog loginDialog;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -186,6 +187,7 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        initLoginManager();
         determineButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
@@ -216,10 +218,10 @@ public class GameActivity extends HomeAppCompatActivity {
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()), loginDialog);
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(), loginDialog);
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -331,41 +333,50 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         else { //if they are logged out
             //display the loginDialog
-            final LoginDialog dialog = new LoginDialog(this);
-            //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
-            //these callbacks every time we need to add in a login prompt in a new Activity
-            loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
-                @Override
-                public void onLoginComplete() {
-                    //probably do not need to do anything here
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //login was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_success));
-                }
-                @Override
-                public void onError() {
-                    //login was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_failure));
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //logout was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_success));
-                }
-
-                @Override
-                public void onError() {
-                    //logout was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
-                }
-            });
-            dialog.setLoginManager(loginManager);
-            dialog.show();
+            displayLoginDialog();
         }
+    }
+
+    public void displayLoginDialog() {
+        loginDialog.show();
+    }
+
+    private void initLoginManager() {
+        loginDialog = new LoginDialog(this);
+        //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
+        //these callbacks every time we need to add in a login prompt in a new Activity
+        loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
+            @Override
+            public void onLoginComplete() {
+                //probably do not need to do anything here
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //login was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                setupGameElements(game);
+            }
+            @Override
+            public void onError() {
+                //login was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //logout was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                setupGameElements(game);
+            }
+
+            @Override
+            public void onError() {
+                //logout was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+            }
+        });
+        loginDialog.setLoginManager(loginManager);
     }
 
     @OnClick(R.id.invite_friends)
