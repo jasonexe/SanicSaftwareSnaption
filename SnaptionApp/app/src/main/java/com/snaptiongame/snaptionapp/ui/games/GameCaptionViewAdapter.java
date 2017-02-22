@@ -14,6 +14,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHolder> {
 
     private List<Caption> items;
+    private LoginDialog loginDialog;
     private static final String UPVOTES_PATH = "games/%s/captions/%s/votes";
 
     private class UpvoteClickListener implements View.OnClickListener {
@@ -42,8 +44,13 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         @Override
         public void onClick(View upvote) {
-            //TODO make a check for logged in status
-            handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
+            // Check if user is logged in before letting them upvote. If not logged in, display
+            // login dialog.
+            if(FirebaseResourceManager.getUserId() == null) {
+                loginDialog.show();
+            } else {
+                handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
+            }
         }
     }
 
@@ -52,8 +59,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      *
      * @param items The list of Captions to build the views from
      */
-    public GameCaptionViewAdapter(List<Caption> items) {
+    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog) {
         this.items = new ArrayList<>(items);
+        this.loginDialog = loginDialog;
     }
 
     /**
