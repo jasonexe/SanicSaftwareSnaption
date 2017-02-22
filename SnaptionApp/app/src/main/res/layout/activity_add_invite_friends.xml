@@ -24,7 +24,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:layout_gravity="end"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/invite_fb_friends"
         android:backgroundTint="@color/com_facebook_blue"
         android:textColor="@android:color/white"
