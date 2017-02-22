@@ -326,6 +326,7 @@ public class GameActivity extends HomeAppCompatActivity {
             public void onSuccess() {
                 //login was a success
                 loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                setupGameElements(game);
             }
             @Override
             public void onError() {
@@ -337,6 +338,7 @@ public class GameActivity extends HomeAppCompatActivity {
             public void onSuccess() {
                 //logout was a success
                 loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                setupGameElements(game);
             }
 
             @Override
