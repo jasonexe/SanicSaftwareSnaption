@@ -73,21 +73,6 @@ public interface Uploader {
     public void addUser(User user, byte[] photo, ResourceListener<User> listener);
 
     /**
-     * Responsbile for:
-     *  adds to a map in users table, increment upvote in the caption in game and user table
-     * @param captionId
-     * @param upvoterId
-     * @param captionerId
-     * @param gameId
-     * @param listener
-     */
-    void addUpvote(String captionId, String upvoterId, String captionerId, String gameId,
-                   UploadListener listener);
-
-    void removeUpvote(String captionId, String upvoterId, String captionerId, String gameId,
-                      UploadListener listener);
-
-    /**
      * Responsible for adding the friend to the user's friends list and adding the user to the
      * friend's friends list
      *

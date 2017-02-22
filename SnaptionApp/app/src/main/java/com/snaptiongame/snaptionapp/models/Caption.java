@@ -1,16 +1,12 @@
 package com.snaptiongame.snaptionapp.models;
 
-import android.graphics.Typeface;
 import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;

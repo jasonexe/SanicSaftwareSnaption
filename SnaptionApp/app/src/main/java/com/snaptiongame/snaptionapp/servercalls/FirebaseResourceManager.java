@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -82,7 +81,7 @@ public class FirebaseResourceManager {
                 List data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 for (DataSnapshot snapshot : snapshots) {
-                    data.add(snapshot.getValue(listener.getDataType())); //TODO something with generictypeindicator
+                    data.add(snapshot.getValue(listener.getDataType()));
                 }
                 // Notify the ResourceListener that data was received
                 listener.onData(data);
@@ -116,13 +115,15 @@ public class FirebaseResourceManager {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //Conditional to determine what kind of map will be used
                 if (Integer.class.equals(listener.getDataType())) {
-                    GenericTypeIndicator<Map<String, Integer>> genericTypeIndicator = new GenericTypeIndicator<Map<String, Integer>>() {};
+                    GenericTypeIndicator<Map<String, Integer>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Integer>>() {};
                     Map<String, Integer> data = dataSnapshot.getValue(genericTypeIndicator);
                     // Notify the ResourceListener that data was received
                     listener.onData(data);
                 }
                 else {
-                    GenericTypeIndicator<Map<String, String>> genericTypeIndicator = new GenericTypeIndicator<Map<String, String>>() {};
+                    GenericTypeIndicator<Map<String, String>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, String>>() {};
                     Map<String, String> data = dataSnapshot.getValue(genericTypeIndicator);
                     // Notify the ResourceListener that data was received
                     listener.onData(data);

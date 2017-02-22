@@ -1,19 +1,14 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
-import android.graphics.drawable.Drawable;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.snaptiongame.snaptionapp.CreateGameActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
-import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
@@ -21,12 +16,9 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import butterknife.OnClick;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -82,7 +74,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             public void onData(User user) {
                 if (user != null) {
                     holder.captionerName.setText(user.getDisplayName());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionerPhoto);
+                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(),
+                            holder.captionerPhoto);
                 }
             }
 
@@ -120,14 +113,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         };
 
         setDefaultUpvoteView(holder, caption);
+        holder.captionText.setText(caption.retrieveCaptionText());
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
         firebaseResourceManager.retrieveMapWithUpdates(String.format(UPVOTES_PATH,
                 caption.getGameId(), caption.getId()), upvoteListener);
-
-        holder.captionText.setText(caption.retrieveCaptionText());
-
-        //TODO change the default drawable for upvote based on whether the user has upvoted the caption
     }
 
     /**
@@ -147,7 +137,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     @Override
     public CaptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_caption_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_caption_item,
+                parent, false);
         return new CaptionViewHolder(view);
     }
 
@@ -169,8 +160,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      */
     private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
                                    boolean hasUpvoted) {
-        // Using the deprecated method because the current version isn't compatible with our min API
-        Uploader uploader = new FirebaseUploader();
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
             @Override
@@ -178,20 +167,21 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(upvoteIcon.getContext(), "There was an error in " +
-                        "registering your vote.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(upvoteIcon.getContext(),
+                        upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
+                        Toast.LENGTH_SHORT).show();
             }
         };
 
         if (caption != null) {
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                uploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
+                FirebaseUploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
                         caption.getUserId(), caption.getGameId(), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                uploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
+                FirebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
                         caption.getUserId(), caption.getGameId(), listener);
             }
         }
@@ -207,10 +197,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
         if (hasUpvoted) {
             //Using the deprecated method because the current version isn't compatible with our min API
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources().getDrawable(R.drawable.thumbs_up_filled));
+            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
+                    .getDrawable(R.drawable.thumbs_up_filled));
         }
         else {
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources().getDrawable(R.drawable.thumbs_up_blank));
+            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
+                    .getDrawable(R.drawable.thumbs_up_blank));
         }
     }
 
