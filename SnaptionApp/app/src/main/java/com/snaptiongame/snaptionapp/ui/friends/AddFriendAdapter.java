@@ -35,7 +35,7 @@ public class AddFriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
 
     @Override
     public FriendViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        FriendViewHolder viewHolder =  FriendViewHolder.newInstance(parent);
+        FriendViewHolder viewHolder = FriendViewHolder.newInstance(parent);
         if (callback != null) {
             viewHolder.addInviteButton.setVisibility(View.VISIBLE);
         }

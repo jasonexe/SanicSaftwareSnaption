@@ -10,6 +10,8 @@ import android.view.ViewGroup;
  */
 
 public class Utilities {
+    private static float COLLAPSE_ALPHA = 0.0f;
+    private static float EXPAND_ALPHA = 1.0f;
     /**
      * Expands or collapses the given view by increasing/reducing height of the view and fading
      * in/out the view.
@@ -32,14 +34,14 @@ public class Utilities {
         final int endHeight;
 
         if (expand) {
-            startAlpha = 0.0f;
-            endAlpha = 1.0f;
+            startAlpha = COLLAPSE_ALPHA;
+            endAlpha = EXPAND_ALPHA;
             endHeight = (int) maxHeightPx;
             view.setVisibility(View.VISIBLE);
         }
         else {
-            startAlpha = 1.0f;
-            endAlpha = 0.0f;
+            startAlpha = EXPAND_ALPHA;
+            endAlpha = COLLAPSE_ALPHA;
             endHeight = (int) minHeightPx;
         }
         view.setAlpha(startAlpha);
