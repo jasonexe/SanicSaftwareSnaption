@@ -1,7 +1,9 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -24,9 +26,17 @@ public class FriendViewHolder extends RecyclerView.ViewHolder {
     ImageView friendPhoto;
     @BindView(R.id.add_invite_button)
     Button addInviteButton;
+    @BindView(R.id.friend_email)
+    TextView friendEmail;
+
+    public static FriendViewHolder newInstance(ViewGroup parent) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_friend_item,
+                parent, false);
+        return new FriendViewHolder(view);
+    }
 
 
-    public FriendViewHolder(View itemView) {
+    private FriendViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
     }

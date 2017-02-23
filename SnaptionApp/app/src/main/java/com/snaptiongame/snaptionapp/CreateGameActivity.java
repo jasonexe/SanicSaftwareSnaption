@@ -9,12 +9,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -22,10 +26,14 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.ui.Utilities;
+import com.snaptiongame.snaptionapp.ui.friends.FriendsListAdapter;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -35,7 +43,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -49,9 +56,12 @@ import butterknife.OnClick;
  */
 
 public class CreateGameActivity extends AppCompatActivity {
-
+    // TODO display friends to invite
     private static final String MATURE = "mature";
     private static final String PG = "PG";
+    private static final int FRIENDS_LIST_MIN_HEIGHT = 0;
+    private static final int FRIENDS_LIST_MAX_HEIGHT = 250;
+    private static final long FRIENDS_ANIMATION_DURATION = 400;
     private static final int DEFAULT_DAYS_AHEAD = 5;
 
     // Create a storage reference from our app
@@ -67,6 +77,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private boolean alreadyExisting; //True if user is creating this from an exisitng game
     private String existingPhotoPath;
+    private FriendsListAdapter friendsListAdapter;
 
     @BindView(R.id.add_photo_layout)
     protected RelativeLayout addPhotoLayout;
@@ -94,6 +105,18 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.text_date)
     protected TextView dateView;
+
+    @BindView(R.id.add_friends_view)
+    protected FrameLayout addFriendsView;
+
+    @BindView(R.id.friends_loading)
+    protected ProgressBar friendProgressBar;
+
+    @BindView(R.id.friends_list)
+    protected RecyclerView friendsList;
+
+    @BindView(R.id.no_friends)
+    protected TextView noFriendsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -200,6 +223,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 maturityRating = MATURE;
             }
         });
+        setupFriendsViews();
     }
 
     @OnClick(R.id.add_photo_layout)
@@ -213,6 +237,75 @@ public class CreateGameActivity extends AppCompatActivity {
     @OnClick(R.id.text_date)
     public void onClickEndDate() {
         setDate();
+    }
+
+    @OnClick(R.id.add_friends)
+    public void onClickAddFriends() {
+        Utilities.expandCollapseView(addFriendsView, FRIENDS_LIST_MIN_HEIGHT,
+                FRIENDS_LIST_MAX_HEIGHT, FRIENDS_ANIMATION_DURATION);
+        displayFriends();
+    }
+
+    private void setupFriendsViews() {
+        friendsList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        friendsList.setNestedScrollingEnabled(true);
+        // TODO create a new adapter used for both adding and inviting to the game
+        friendsListAdapter = new FriendsListAdapter(new ArrayList<User>());
+        friendsList.setAdapter(friendsListAdapter);
+    }
+
+    private void displayFriends() {
+        if (friendsListAdapter.getItemCount() == 0) {
+            loadFriends();
+        }
+    }
+
+    private void loadFriends() {
+        String userPath = FirebaseResourceManager.getUserPath();
+        if (userPath != null) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    if (user != null && user.getFriends() != null) {
+                        // load each friend
+                        FirebaseResourceManager.loadUsers(user.getFriends(), new ResourceListener<User>() {
+                            @Override
+                            public void onData(User user) {
+                                if (user != null) {
+                                    if (friendsListAdapter.getItemCount() == 0) {
+                                        showFriends();
+                                    }
+                                    friendsListAdapter.addSingleItem(user);
+                                }
+                            }
+
+                            @Override
+                            public Class getDataType() {
+                                return User.class;
+                            }
+                        });
+                    }
+                    else {
+                        showNoFriends();
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
+    }
+
+    private void showFriends() {
+        friendProgressBar.setVisibility(View.GONE);
+        friendsList.setVisibility(View.VISIBLE);
+    }
+
+    private void showNoFriends() {
+        friendProgressBar.setVisibility(View.GONE);
+        noFriendsView.setVisibility(View.VISIBLE);
     }
 
     class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {

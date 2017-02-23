@@ -9,14 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,28 +89,18 @@ public class FriendsFragment extends Fragment {
     }
 
     private void loadUsers(Map<String, Integer> uids) {
-        for (String uid : uids.keySet()) {
-            // to avoid making another constant variable
-            String friend = WallViewAdapter.USER_PATH + uid;
-
-            // TODO change where the validFirebasePath method is called from
-            // ensure the user id is a valid one to avoid errors
-            if (WallViewAdapter.validFirebasePath(friend)) {
-                // display the name and profile picture if a valid user is obtained from the user id
-                FirebaseResourceManager.retrieveSingleNoUpdates(friend, new ResourceListener<User>() {
-                    @Override
-                    public void onData(User user) {
-                        if (user != null) {
-                            friendsListAdapter.addSingleItem(user);
-                        }
-                    }
-
-                    @Override
-                    public Class getDataType() {
-                        return User.class;
-                    }
-                });
+        FirebaseResourceManager.loadUsers(uids, new ResourceListener<User>() {
+            @Override
+            public void onData(User user) {
+                if (user != null) {
+                    friendsListAdapter.addSingleItem(user);
+                }
             }
-        }
+
+            @Override
+            public Class getDataType() {
+                return User.class;
+            }
+        });
     }
 }
