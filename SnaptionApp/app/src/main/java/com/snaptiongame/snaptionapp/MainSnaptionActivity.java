@@ -179,15 +179,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         DeepLinkGetter.checkIfDeepLink(this);
     }
 
-
-
-
-
-    public void showPostLogDialog(String text) {
-        loginDialog.dismiss();
-        Snackbar.make(getCurrentFocus(), text, Snackbar.LENGTH_LONG).show();
-    }
-
     private void setupNavigationView() {
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup

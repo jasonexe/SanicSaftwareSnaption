@@ -440,7 +440,7 @@ public class CreateGameActivity extends AppCompatActivity {
         new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DATE)).show();
     }
-
+    
     /**
      * Displays the date in the textview.
      *
@@ -450,4 +450,5 @@ public class CreateGameActivity extends AppCompatActivity {
         //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
     }
+
 }

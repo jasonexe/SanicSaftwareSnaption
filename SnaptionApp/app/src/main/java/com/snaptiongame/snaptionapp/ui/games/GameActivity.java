@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -30,6 +31,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -38,6 +40,7 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +53,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -80,6 +84,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private FirebaseResourceManager commentManager;
 
     private LoginManager loginManager;
+    private LoginDialog loginDialog;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -121,6 +126,12 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
+
+    @BindView(R.id.invite_friends)
+    public Button inviteFriendsButton;
+
+    @BindView(R.id.intent_load_progress)
+    public View progressSpinner;
 
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
@@ -173,8 +184,11 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void setupGameElements(Game game) {
+        this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        initLoginManager();
+        determineButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
         setupPickerName(game);
@@ -182,15 +196,32 @@ public class GameActivity extends HomeAppCompatActivity {
         startCommentManager(game);
     }
 
+    private void determineButtonDisplay(Game game) {
+        // If this is a public game, anyone can send an invite to it
+        if(game.getIsPublic()) {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+        } else {
+            String pickerId = game.getPicker();
+            String thisUser = FirebaseResourceManager.getUserId();
+            // If it's a public game and the picker is logged in, they can invite people
+            if(pickerId.equals(thisUser)) {
+                inviteFriendsButton.setVisibility(View.VISIBLE);
+            } else {
+                // If user logged in isn't the picker, no inviting for them!
+                inviteFriendsButton.setVisibility(View.GONE);
+            }
+        }
+    }
+
     private void setupCaptionList(Game game) {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()), loginDialog);
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(), loginDialog);
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -302,40 +333,66 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         else { //if they are logged out
             //display the loginDialog
-            final LoginDialog dialog = new LoginDialog(this);
-            //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
-            //these callbacks every time we need to add in a login prompt in a new Activity
-            loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
-                @Override
-                public void onLoginComplete() {
-                    //probably do not need to do anything here
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //login was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_success));
-                }
-                @Override
-                public void onError() {
-                    //login was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_failure));
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //logout was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_success));
-                }
+            displayLoginDialog();
+        }
+    }
 
-                @Override
-                public void onError() {
-                    //logout was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
-                }
-            });
-            dialog.setLoginManager(loginManager);
-            dialog.show();
+    public void displayLoginDialog() {
+        loginDialog.show();
+    }
+
+    private void initLoginManager() {
+        loginDialog = new LoginDialog(this);
+        //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
+        //these callbacks every time we need to add in a login prompt in a new Activity
+        loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
+            @Override
+            public void onLoginComplete() {
+                //probably do not need to do anything here
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //login was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                setupGameElements(game);
+            }
+            @Override
+            public void onError() {
+                //login was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //logout was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                setupGameElements(game);
+            }
+
+            @Override
+            public void onError() {
+                //logout was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+            }
+        });
+        loginDialog.setLoginManager(loginManager);
+    }
+
+    @OnClick(R.id.invite_friends)
+    public void createGameInvite() {
+        Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
+        String sampleCaption = getSampleCaption();
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
+    }
+
+    private String getSampleCaption() {
+        Caption toReturn = game.getTopCaption();
+        if(toReturn != null) {
+            return toReturn.retrieveCaptionText().toString();
+        } else {
+            Random rand = new Random();
+            return allCards.get(rand.nextInt(allCards.size() - 1)).getCardText().replace("%s", "____");
         }
     }
 

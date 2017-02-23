@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.profile;
 
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -11,10 +12,13 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileGameViewHolder;
+import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.List;
 
+import static android.R.attr.data;
 import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.CLIP_TO_OUTLINE_MIN_SDK;
 
 /**
@@ -37,13 +41,21 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
     @Override
     public void onBindViewHolder(final ProfileGameViewHolder holder, int position) {
         //get last item and show it first
-        Game game = games.get(games.size() - 1 - position);
+        final Game game = games.get(games.size() - 1 - position);
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
 
         if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
+                gamePageIntent.putExtra(WallViewAdapter.GAME, game);
+                view.getContext().startActivity(gamePageIntent);
+            }
+        });
     }
 
     @Override

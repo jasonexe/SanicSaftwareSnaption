@@ -99,6 +99,18 @@
             android:id="@+id/number_captions"
             android:layout_toStartOf="@id/captions_icon"/>
 
+        <Button
+            android:id="@+id/invite_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:textColor="@color/colorAccent"
+            android:layout_gravity="center_horizontal"
+            android:layout_toStartOf="@id/number_captions"
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
+            android:text="@string/game_invite"/>
+
     </RelativeLayout>
 
     <View
@@ -128,6 +140,15 @@
         android:layout_below="@id/black_line2">
 
     </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/intent_load_progress"
+        android:layout_width="wrap_content"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="match_parent"
