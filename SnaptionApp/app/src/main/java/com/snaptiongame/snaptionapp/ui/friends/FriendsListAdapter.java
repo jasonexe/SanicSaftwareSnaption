@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author Hristo Stoytchev
  */
-public class FriendsListAdapter extends RecyclerView.Adapter<FriendViewHolder> {
+public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<User> friends;
 
     public FriendsListAdapter(List<User> friends) {
@@ -21,17 +21,17 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendViewHolder> {
     }
 
     @Override
-    public FriendViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-       return FriendViewHolder.newInstance(parent);
+    public PersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+       return PersonViewHolder.newInstance(parent);
     }
 
     @Override
-    public void onBindViewHolder(final FriendViewHolder holder, int position) {
+    public void onBindViewHolder(final PersonViewHolder holder, int position) {
         User friend = friends.get(position);
-        holder.friendName.setText(friend.getDisplayName());
-        holder.friendEmail.setText(friend.getEmail());
-        holder.friendEmail.setVisibility(TextUtils.isEmpty(friend.getEmail()) ? View.GONE : View.VISIBLE);
-        FirebaseResourceManager.loadImageIntoView(friends.get(position).getImagePath(), holder.friendPhoto);
+        holder.name.setText(friend.getDisplayName());
+        holder.email.setText(friend.getEmail());
+        holder.email.setVisibility(TextUtils.isEmpty(friend.getEmail()) ? View.GONE : View.VISIBLE);
+        FirebaseResourceManager.loadImageIntoView(friends.get(position).getImagePath(), holder.photo);
     }
 
     @Override
