@@ -70,9 +70,23 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
-        holder.captionText.setText(game.getTopCaption() != null ?
-                game.getTopCaption().retrieveCaptionText() :
-                holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
+        // display the Picker of the game, the one who created it
+        displayUser(holder.pickerName, holder.pickerPhoto, USER_PATH + game.getPicker());
+
+        // ensure the game has a top caption before displaying the caption and the captioner
+        if (game.getTopCaption() != null) {
+            holder.captionerText.setVisibility(TextView.VISIBLE);
+            holder.captionPhoto.setVisibility(ImageView.VISIBLE);
+            holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
+            displayUser(holder.captionerText, holder.captionPhoto, USER_PATH + game.getTopCaption().getUserId());
+        }
+        else {
+            // display a request to participate over the caption's view if a caption does not exist
+            holder.captionText.setText(R.string.caption_filler);
+            holder.captionerText.setVisibility(TextView.INVISIBLE);
+            holder.captionPhoto.setVisibility(ImageView.INVISIBLE);
+        }
+
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
         holder.photo.setOnClickListener(new PhotoClickListener(game));
 
@@ -119,14 +133,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 }
             }
         });
-
-        displayUser(holder.pickerName, holder.pickerPhoto, USER_PATH + game.getPicker());
-        if (game.getTopCaption() != null) {
-            displayUser(holder.captionerText, holder.captionPhoto, USER_PATH + game.getTopCaption().getUserId());
-        }
-        else {
-            displayUser(holder.captionerText, holder.captionPhoto, ".");
-        }
 
     }
 
