@@ -1,11 +1,9 @@
 package com.snaptiongame.snaptionapp.models;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +24,7 @@ public class Game implements Serializable {
     private long creationDate; //When the game was created
     private int judgerRating; //The rating that judgers have given the game
     private String maturityRating; //The maturity rating of the game
-    private List<String> categories; //The list of categories
+    private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
     private String peoplesChoice; //The id of the caption selected by the players
 
@@ -41,21 +39,21 @@ public class Game implements Serializable {
      * @param id The unique ID of the game
      * @param picker The player ID of the picker
      * @param imagePath The path of the image on Firebase
-     * @param playerList The list of players in the game
+     * @param players The list of players in the game
      * @param categories The list of categories that the game belongs to
      * @param isPublic Whether the game is available to the public
      * @param endDate The time when the game ends
      * @param creationDate The time when the game was started
      * @param maturityRating The maturity rating of the card
      */
-    public Game(String id, String picker, String imagePath, Map<String, Integer> playerList,
-                List<String> categories, boolean isPublic, long endDate, long creationDate,
+    public Game(String id, String picker, String imagePath, Map<String, Integer> players,
+                Map<String, Integer> categories, boolean isPublic, long endDate, long creationDate,
                 String maturityRating) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.players = new HashMap<>(playerList);
-        this.categories = new ArrayList<>(categories);
+        this.players = new HashMap<>(players);
+        this.categories = new HashMap<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
@@ -74,19 +72,19 @@ public class Game implements Serializable {
      * @param id The unique ID of the game
      * @param picker The player ID of the picker
      * @param imagePath The path of the image on Firebase
-     * @param playerList The list of players in the game
+     * @param players The list of players in the game
      * @param categories The list of categories that the game belongs to
      * @param isPublic Whether the game is available to the public
      * @param endDate The time when the game ends
      * @param maturityRating The maturity rating of the card
      */
-    public Game(String id, String picker, String imagePath, Map<String, Integer> playerList,
-                List<String> categories, boolean isPublic, long endDate, String maturityRating) {
+    public Game(String id, String picker, String imagePath, Map<String, Integer> players,
+                Map<String, Integer> categories, boolean isPublic, long endDate, String maturityRating) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
-        this.players = new HashMap<>(playerList);
-        this.categories = new ArrayList<>(categories);
+        this.players = new HashMap<>(players);
+        this.categories = new HashMap<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.maturityRating = maturityRating;
@@ -196,7 +194,7 @@ public class Game implements Serializable {
         if (captions == null) {
             return null;
         }
-        return new HashMap(captions);
+        return new HashMap<>(captions);
     }
 
     public void setImagePath(String imagePath) {
@@ -220,11 +218,11 @@ public class Game implements Serializable {
      *
      * @return The list of categories
      */
-    public List getCategories() {
+    public Map getCategories() {
         if (categories == null) {
             return null;
         }
-        return new ArrayList<>(categories);
+        return new HashMap<>(categories);
     }
 
     /**

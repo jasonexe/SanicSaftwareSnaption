@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -41,10 +42,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -68,7 +68,7 @@ public class CreateGameActivity extends AppCompatActivity {
     private Uploader uploader;
 
     private Uri imageUri;
-    private ArrayList<String> categories;
+    private Map<String, Integer> categories;
     private String maturityRating;
     private boolean isPublic;
     private long endDate;
@@ -405,17 +405,17 @@ public class CreateGameActivity extends AppCompatActivity {
      * @param text - The text to parse with comma delimiters
      * @return A list of strings not containing repeats or empty strings
      */
-    private ArrayList<String> getCategoriesFromText(String text) {
+    private Map<String, Integer> getCategoriesFromText(String text) {
+        Map<String, Integer> categories = new HashMap<>();
         text = text.toLowerCase();
-
         String[] list = text.split(",");
-        for (int i = 0; i < list.length; i++) {
-            list[i] = list[i].trim();
-        }
-        //Converts the array to a set and removes duplicate elements and converts back to a list
-        ArrayList<String> categories = new ArrayList(new HashSet(Arrays.asList(list)));
-        categories.remove("");
 
+        for (String input : list) {
+            String potentialCategory = input.trim();
+            if (!TextUtils.isEmpty(potentialCategory)) {
+                categories.put(potentialCategory, 1);
+            }
+        }
         return categories;
     }
 

@@ -6,20 +6,17 @@ package com.snaptiongame.snaptionapp;
  */
 
 import com.snaptiongame.snaptionapp.models.Caption;
-import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.testobjects.TestCaption;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class GameTest {
 
@@ -28,9 +25,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, "G");
@@ -51,7 +48,7 @@ public class GameTest {
         for(String key : players.keySet()) {
             assertTrue(game.getPlayers().containsKey(key));
         }
-        assertTrue(game.getCategories().containsAll(categories));
+        assertTrue(game.getCategories().equals(categories));
         assertTrue(game.getIsPublic());
     }
 
@@ -60,9 +57,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -82,9 +79,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -101,9 +98,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -117,9 +114,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -133,9 +130,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
@@ -149,9 +146,9 @@ public class GameTest {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
-        List<String> categories = new ArrayList<>();
-        categories.add("lol");
-        categories.add("kitten");
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
