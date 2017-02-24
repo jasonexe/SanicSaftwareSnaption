@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.CreateGameActivity;
@@ -118,9 +120,14 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             }
         });
 
-        // TODO add the actual captioner name and photo instead of picker's
-        // game.getTopCaption().getUserId() instead of game.getPicker()
-        displayUser(holder, USER_PATH + game.getPicker());
+        displayUser(holder.pickerName, holder.pickerPhoto, USER_PATH + game.getPicker());
+        if (game.getTopCaption() != null) {
+            displayUser(holder.captionerText, holder.captionPhoto, USER_PATH + game.getTopCaption().getUserId());
+        }
+        else {
+            displayUser(holder.captionerText, holder.captionPhoto, ".");
+        }
+
     }
 
     @Override
@@ -130,13 +137,14 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     /**
      * Displays the profile picture and username of a valid User. Shows the default if invalid
-     * @param holder The view that needs to be set with the User's name and avatar
+     * @param username the TextView from the holder, for either the Picker or Captioner's name
+     * @param photo the ImageView from the holder, for either the Picker or Captioner's photo
      * @param userPath The path to the desired User
      */
-    private void displayUser(final WallViewHolder holder, String userPath) {
+    private void displayUser(final TextView username, final ImageView photo, String userPath) {
         // remove this portion if firebase is guaranteed to not have invalid users
-        holder.captionerText.setText(" ");
-        Glide.with(holder.captionPhoto.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(holder.captionPhoto);
+        username.setText(" ");
+        Glide.with(photo.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(photo);
 
         // ensure the user id is a valid one to avoid errors
         if(validFirebasePath(userPath)) {
@@ -146,8 +154,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 public void onData(User user) {
                     // replace default is the User is valid
                     if (user != null) {
-                        holder.captionerText.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionPhoto);
+                        username.setText(user.getDisplayName());
+                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
                     }
                 }
 
