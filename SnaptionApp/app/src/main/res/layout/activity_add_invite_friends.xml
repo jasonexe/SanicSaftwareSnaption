@@ -15,5 +15,37 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/login_provider_friends"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/black_line2"
+        android:background="@color/colorBlack"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/email_invite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_alignParentStart="true"
+            android:text="@string/send_invites"/>
+
+        <Button
+            android:id="@+id/invite_friends_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignRight="@+id/email_invite"
+            android:text="@string/invite_fb_friends"
+            android:backgroundTint="@color/com_facebook_blue"
+            android:textColor="@android:color/white"
+            android:visibility="invisible"/>
+    </RelativeLayout>
+
 </LinearLayout>

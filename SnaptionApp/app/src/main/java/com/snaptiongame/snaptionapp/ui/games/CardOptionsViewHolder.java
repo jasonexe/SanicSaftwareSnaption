@@ -2,6 +2,7 @@ package com.snaptiongame.snaptionapp.ui.games;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
@@ -17,6 +18,8 @@ import butterknife.ButterKnife;
 public class CardOptionsViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.possible_caption_card_text)
     TextView possibleCardView;
+    @BindView(R.id.refresh_icon)
+    ImageView refreshIcon;
 
     public CardOptionsViewHolder(View itemView) {
         super(itemView);

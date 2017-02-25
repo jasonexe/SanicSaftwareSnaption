@@ -21,7 +21,8 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
-import java.util.regex.Pattern;
+
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.validFirebasePath;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
@@ -156,18 +157,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 }
             });
         }
-    }
-
-    /**
-     * Checks if a String is valid for a Firebase path by making sure it does not contain
-     * any of the following characters: '.', '#', '$', '[', or ']'
-     *
-     * @param path The path to be checked
-     * @return True if the path does not contain any of the characters, false otherwise.
-     */
-    public static boolean validFirebasePath(String path) {
-        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
-        return !pattern.matcher(path).find();
     }
 
     /**

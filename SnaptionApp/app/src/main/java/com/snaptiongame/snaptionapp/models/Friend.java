@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp.models;
 
+import android.text.TextUtils;
+
 /**
  * A Friend represents a potential of actual friend of the current user.
  */
@@ -7,6 +9,7 @@ public class Friend {
     public final String snaptionId;
     public final String displayName;
     public final String facebookId;
+    public final String email;
 
     /**
      * Constructor used to create an actual or potential friend from Facebook
@@ -15,9 +18,10 @@ public class Friend {
      * @param displayName String Snaption name
      * @param facebookId String unique Facebook id
      */
-    public Friend(String snaptionId, String displayName, String facebookId) {
+    public Friend(String snaptionId, String displayName, String email, String facebookId) {
         this.snaptionId = snaptionId;
         this.displayName = displayName;
+        this.email = email;
         this.facebookId = facebookId;
     }
 
@@ -25,8 +29,10 @@ public class Friend {
     public boolean equals(Object obj) {
         if (getClass() == obj.getClass()) {
             Friend other = (Friend) obj;
-            return snaptionId.equals(other.snaptionId) && displayName.equals(other.displayName) &&
-                    facebookId.equals(other.facebookId);
+            return TextUtils.equals(snaptionId, other.snaptionId) &&
+                    TextUtils.equals(displayName, other.displayName) &&
+                    TextUtils.equals(facebookId, other.facebookId) &&
+                    TextUtils.equals(email, other.email);
         }
         return false;
     }

@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -30,6 +31,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
@@ -39,6 +41,7 @@ import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
+import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +54,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -62,6 +66,7 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
  * @Author Jason Krein, Cameron Geehr
  */
 public class GameActivity extends HomeAppCompatActivity {
+    public static final String USE_GAME_ID = "useGameId";
     public static final String REFRESH_STRING = "refresh";
     private final static String DEFAULT_PACK = "InitialPack";
     private final static String GAME_DIRECTORY = "games";
@@ -81,6 +86,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private FirebaseResourceManager commentManager;
 
     private LoginManager loginManager;
+    private LoginDialog loginDialog;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -125,6 +131,12 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private ScrollViewHider scrollFabHider;
 
+    @BindView(R.id.invite_friends)
+    public Button inviteFriendsButton;
+
+    @BindView(R.id.intent_load_progress)
+    public View progressSpinner;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -150,25 +162,73 @@ public class GameActivity extends HomeAppCompatActivity {
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
 
-        game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
-        photoPath = game.getImagePath();
-        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
-        setupCaptionList();
-        setupEndDate();
-        setupPickerName();
-        setupCaptionCardView();
-        startCommentManager();
+        Intent startedIntent = getIntent();
+        // If started from the wall, we'll have been sent the Game object, so can use that for stuff
+        if(startedIntent.hasExtra(WallViewAdapter.GAME)) {
+            game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
+            setupGameElements(game);
+        } else if(startedIntent.hasExtra(USE_GAME_ID)) {
+            // If we were started via deep link, we'll only have the game ID. Have to pull
+            // from firebase
+            String gameId = startedIntent.getStringExtra(USE_GAME_ID);
+            FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId,
+                    new ResourceListener<Game>() {
+                        @Override
+                        public void onData(Game data) {
+                            if(data != null) {
+                                setupGameElements(data);
+                            } else {
+                                System.err.println("Game activity was passed an incorrect gameId");
+                            }
+                        }
+
+                        @Override
+                        public Class getDataType() {
+                            return Game.class;
+                        }
+                    });
+        }
     }
 
-    private void setupCaptionList() {
+    private void setupGameElements(Game game) {
+        this.game = game;
+        photoPath = game.getImagePath();
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        initLoginManager();
+        determineButtonDisplay(game);
+        setupCaptionList(game);
+        setupEndDate(game);
+        setupPickerName(game);
+        setupCaptionCardView();
+        startCommentManager(game);
+    }
+
+    private void determineButtonDisplay(Game game) {
+        // If this is a public game, anyone can send an invite to it
+        if(game.getIsPublic()) {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+        } else {
+            String pickerId = game.getPicker();
+            String thisUser = FirebaseResourceManager.getUserId();
+            // If it's a public game and the picker is logged in, they can invite people
+            if(pickerId.equals(thisUser)) {
+                inviteFriendsButton.setVisibility(View.VISIBLE);
+            } else {
+                // If user logged in isn't the picker, no inviting for them!
+                inviteFriendsButton.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void setupCaptionList(Game game) {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()));
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()), loginDialog);
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>());
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(), loginDialog);
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -212,7 +272,7 @@ public class GameActivity extends HomeAppCompatActivity {
     };*/
 
     // Displays the date that the game will end underneath the picture
-    private void setupEndDate() {
+    private void setupEndDate(Game game) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(game.getEndDate());
         endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
@@ -221,7 +281,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName() {
+    private void setupPickerName(Game game) {
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
@@ -254,7 +314,7 @@ public class GameActivity extends HomeAppCompatActivity {
         populateCards(DEFAULT_PACK);
     }
 
-    private void startCommentManager() {
+    private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
         commentManager.addChildListener(GAME_DIRECTORY + "/" + game.getId() + "/" + CAPTION_DIRECTORY,
                 captionListener);
@@ -281,40 +341,66 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         else { //if they are logged out
             //display the loginDialog
-            final LoginDialog dialog = new LoginDialog(this);
-            //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
-            //these callbacks every time we need to add in a login prompt in a new Activity
-            loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
-                @Override
-                public void onLoginComplete() {
-                    //probably do not need to do anything here
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //login was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_success));
-                }
-                @Override
-                public void onError() {
-                    //login was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.login_failure));
-                }
-            }, new LoginManager.AuthCallback() {
-                @Override
-                public void onSuccess() {
-                    //logout was a success
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_success));
-                }
+            displayLoginDialog();
+        }
+    }
 
-                @Override
-                public void onError() {
-                    //logout was a failure
-                    dialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
-                }
-            });
-            dialog.setLoginManager(loginManager);
-            dialog.show();
+    public void displayLoginDialog() {
+        loginDialog.show();
+    }
+
+    private void initLoginManager() {
+        loginDialog = new LoginDialog(this);
+        //TODO: wrap the AuthCallbacks in a listener class so that we do not have to recreate
+        //these callbacks every time we need to add in a login prompt in a new Activity
+        loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
+            @Override
+            public void onLoginComplete() {
+                //probably do not need to do anything here
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //login was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                setupGameElements(game);
+            }
+            @Override
+            public void onError() {
+                //login was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+            }
+        }, new LoginManager.AuthCallback() {
+            @Override
+            public void onSuccess() {
+                //logout was a success
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                setupGameElements(game);
+            }
+
+            @Override
+            public void onError() {
+                //logout was a failure
+                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+            }
+        });
+        loginDialog.setLoginManager(loginManager);
+    }
+
+    @OnClick(R.id.invite_friends)
+    public void createGameInvite() {
+        Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
+        String sampleCaption = getSampleCaption();
+        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
+    }
+
+    private String getSampleCaption() {
+        Caption toReturn = game.getTopCaption();
+        if(toReturn != null) {
+            return toReturn.retrieveCaptionText().toString();
+        } else {
+            Random rand = new Random();
+            return allCards.get(rand.nextInt(allCards.size() - 1)).getCardText().replace("%s", "____");
         }
     }
 

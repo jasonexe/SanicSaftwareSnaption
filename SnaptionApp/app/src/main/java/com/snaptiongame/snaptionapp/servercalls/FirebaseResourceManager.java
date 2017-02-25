@@ -6,7 +6,6 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -41,6 +40,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.google.android.gms.internal.zzs.TAG;
 
@@ -85,6 +85,39 @@ public class FirebaseResourceManager {
                     data.add(snapshot.getValue(listener.getDataType()));
                 }
                 // Notify the ResourceListener that data was received
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    /**
+     * Notifies the given ResourceListener of when elements in the table of the given path is
+     * changed.
+     *
+     * @param path The table path name
+     * @param listener A ResourceListener for a Map of the resource class type associated with the
+     *                 table elements
+     */
+    public void retrieveMapWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Tells firebase what type of object to return
+                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                        new GenericTypeIndicator<Map<String, Object>>() {};
+                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
                 listener.onData(data);
             }
 
@@ -288,7 +321,6 @@ public class FirebaseResourceManager {
      */
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
-
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
         String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
                 + "/" + packName;
@@ -309,10 +341,6 @@ public class FirebaseResourceManager {
                 System.err.println(databaseError.getMessage());
             }
         });
-
-
-
-
     }
 
     /**
@@ -432,7 +460,7 @@ public class FirebaseResourceManager {
                         public void onData(User user) {
                             if (user != null) {
                                 friendListener.onData(new Friend(user.getId(),
-                                        user.getDisplayName(), friendFacebookId));
+                                        user.getDisplayName(), user.getEmail(), friendFacebookId));
                             }
                         }
 
@@ -502,5 +530,33 @@ public class FirebaseResourceManager {
     public static void loadSmallFbPhotoIntoImageView(String facebookId, ImageView imageView) {
         Glide.with(imageView.getContext()).load(String.format(SMALL_FB_PHOTO_REQUEST,
                 facebookId)).into(imageView);
+    }
+
+    /**
+     * Checks if a String is valid for a Firebase path by making sure it does not contain
+     * any of the following characters: '.', '#', '$', '[', or ']'
+     *
+     * @param path The path to be checked
+     * @return True if the path does not contain any of the characters, false otherwise.
+     */
+    public static boolean validFirebasePath(String path) {
+        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
+        return !pattern.matcher(path).find();
+    }
+
+    /**
+     * Loads a map of users. This will most often be used to retrieve the friends of a user
+     *
+     * @param uids Map of user ids
+     * @param listener ResourceListener the users are returned to
+     */
+    public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
+        for (String uid : uids.keySet()) {
+            String friend = USER_DIRECTORY + uid;
+            // ensure the user id is a valid one to avoid errors
+            if (validFirebasePath(friend)) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.snaptiongame.snaptionapp.ui.friends;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.View;
 
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
@@ -10,8 +11,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.FRIENDS_PATH;
@@ -91,5 +90,9 @@ public class FriendsViewModel {
                 TextUtils.isEmpty(errorMessage) || !errorMessage.equals(ITEM_ALREADY_EXISTS_ERROR) ?
                         String.format(appContext.getString(R.string.problem_adding_friend), friendName) :
                         String.format(appContext.getString(R.string.already_friend), friendName) ;
+    }
+
+    public int getFacebookButtonVisibility() {
+        return user.getFacebookId() != null ? View.VISIBLE : View.INVISIBLE;
     }
 }

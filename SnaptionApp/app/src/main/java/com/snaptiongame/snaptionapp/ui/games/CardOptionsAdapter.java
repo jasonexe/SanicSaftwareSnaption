@@ -1,5 +1,7 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +13,8 @@ import com.snaptiongame.snaptionapp.models.Card;
 import java.util.List;
 
 /**
- * Created by jason_000 on 2/6/2017.
+ * Adapter that puts cards in their spots in the recycler view
+ * Created by Jason Krein on 2/6/2017.
  */
 
 public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHolder> {
@@ -25,15 +28,30 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
     }
 
     @Override
-    public void onBindViewHolder(CardOptionsViewHolder holder, final int position) {
-        holder.possibleCardView.setText(getCardAtPos(position)
+    public void onBindViewHolder(CardOptionsViewHolder holder, int position) {
+        final Card cardAtPos = getCardAtPos(position);
+        holder.possibleCardView.setText(cardAtPos
                 .getCardText().replace("%s", "_____"));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                converter.convertCard(getCardAtPos(position));
+                converter.convertCard(cardAtPos);
             }
         });
+        if(cardAtPos.getId().equals(GameActivity.REFRESH_STRING)) {
+            holder.itemView.getBackground().setColorFilter(holder.possibleCardView.getResources()
+                    .getColor(R.color.greenBackground),
+                    PorterDuff.Mode.DARKEN);
+            holder.possibleCardView.setTextColor(0xFFFFFFFF);
+            holder.refreshIcon.setVisibility(View.VISIBLE);
+        } else {
+            holder.itemView.getBackground().setColorFilter(holder.possibleCardView.getResources()
+                    .getColor(android.R.color.white),
+                    PorterDuff.Mode.DARKEN);
+            holder.possibleCardView.setTextColor(holder.possibleCardView.getResources()
+                    .getColor(R.color.colorText));
+            holder.refreshIcon.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -48,11 +66,11 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
         return options.size();
     }
 
-    public Card getCardAtPos(int position) {
+    private Card getCardAtPos(int position) {
         return options.get(position);
     }
 
-    public void replaceOptions(List<Card> cards) {
+    void replaceOptions(List<Card> cards) {
         options.clear();
         this.notifyItemRangeRemoved(0, cards.size());
         options.addAll(cards);
