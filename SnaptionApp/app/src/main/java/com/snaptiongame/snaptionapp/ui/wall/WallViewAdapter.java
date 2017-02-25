@@ -76,15 +76,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // ensure the game has a top caption before displaying the caption and the captioner
         if (game.getTopCaption() != null) {
             holder.captionerText.setVisibility(TextView.VISIBLE);
-            holder.captionPhoto.setVisibility(ImageView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerText, holder.captionPhoto, USER_PATH + game.getTopCaption().getUserId());
+            displayUser(holder.captionerText, null, USER_PATH + game.getTopCaption().getUserId());
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
             holder.captionText.setText(R.string.caption_filler);
-            holder.captionerText.setVisibility(TextView.INVISIBLE);
-            holder.captionPhoto.setVisibility(ImageView.INVISIBLE);
+            holder.captionerText.setVisibility(TextView.GONE);
         }
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
@@ -150,7 +148,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private void displayUser(final TextView username, final ImageView photo, String userPath) {
         // remove this portion if firebase is guaranteed to not have invalid users
         username.setText(" ");
-        Glide.with(photo.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(photo);
+        if (photo != null) {
+            Glide.with(photo.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(photo);
+        }
 
         // ensure the user id is a valid one to avoid errors
         if(validFirebasePath(userPath)) {
@@ -160,8 +160,15 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 public void onData(User user) {
                     // replace default is the User is valid
                     if (user != null) {
-                        username.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
+                        // if there is no photo path, don't display it, use a - instead
+                        if (photo != null) {
+                            username.setText(user.getDisplayName());
+                            FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
+                        }
+                        else {
+                            username.setText(activity.getResources().getString(R.string.captioner_name, user.getDisplayName()));
+                        }
+
                     }
                 }
 
