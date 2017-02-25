@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -109,6 +110,39 @@
                 android:text="@string/game_adult"/>
         </RadioGroup>
 
+        <Button
+            android:id="@+id/add_friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:textColor="@color/colorAccent"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/add_friends"/>
+
+        <FrameLayout
+            android:id="@+id/add_friends_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/friends_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
+            <ProgressBar
+                android:id="@+id/friends_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"/>
+            <TextView
+                android:id="@+id/no_friends"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:visibility="gone"
+                android:text="@string/no_friends_add_invite"/>
+        </FrameLayout>
+
         <TextView
             android:id="@+id/category_text"
             android:layout_width="wrap_content"
@@ -134,4 +168,4 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="24dp"/>
     </LinearLayout>
-</ScrollView>
+</android.support.v4.widget.NestedScrollView>

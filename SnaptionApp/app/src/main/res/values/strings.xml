@@ -55,6 +55,8 @@
     <string name="game_invite">Invite Friends</string>
     <string name="upvote_error">There was an error in registering your vote</string>
 
+    <string name="add_friends">+ add friends</string>
+    <string name="no_friends_add_invite">You don\'t have any friends to add or invite.</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
