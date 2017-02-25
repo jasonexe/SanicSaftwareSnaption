@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -82,6 +83,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private String photoPath;
     private GameCaptionViewAdapter captionAdapter;
     private FirebaseResourceManager commentManager;
+    private FirebaseResourceManager joinedGameManager;
 
     private LoginManager loginManager;
     private LoginDialog loginDialog;
@@ -129,6 +131,9 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.invite_friends)
     public Button inviteFriendsButton;
+
+    @BindView(R.id.join_game_button)
+    public Button joinGameButton;
 
     @BindView(R.id.intent_load_progress)
     public View progressSpinner;
@@ -188,7 +193,7 @@ public class GameActivity extends HomeAppCompatActivity {
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
         initLoginManager();
-        determineButtonDisplay(game);
+        setupButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
         setupPickerName(game);
@@ -196,20 +201,75 @@ public class GameActivity extends HomeAppCompatActivity {
         startCommentManager(game);
     }
 
-    private void determineButtonDisplay(Game game) {
-        // If this is a public game, anyone can send an invite to it
+    private void setupButtonDisplay(Game game) {
+        // When this is initially called, setup the button with current data
+        final String pickerId = game.getPicker();
+        determineButtonDisplay(pickerId, game.getPlayers());
+        joinedGameManager = new FirebaseResourceManager();
+        // setup a listener for when player joins the game
+        joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
+                game.getId()), new ResourceListener() {
+            @Override
+            public void onData(Object data) {
+                // retrieveMapWithUpdates guaranteed to return a map from string to object
+                if(data != null) {
+                    Map<String, Object> mapData = (Map<String, Object>) data;
+                    determineButtonDisplay(pickerId, mapData);
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        });
+    }
+
+    private void determineButtonDisplay(String pickerId, Map<String, Object> players) {
+        String thisUser = FirebaseResourceManager.getUserId();
+        // If they're not logged in, just show join game
+        if(thisUser == null) {
+            setJoinGameIsVisible(true);
+            return;
+        }
+        boolean thisPlayerInGame = false;
+        if(players != null && players.containsKey(thisUser)) {
+            thisPlayerInGame = true;
+        }
+        // If this is a public game, anyone can send an invite to it if they've joined
         if(game.getIsPublic()) {
-            inviteFriendsButton.setVisibility(View.VISIBLE);
-        } else {
-            String pickerId = game.getPicker();
-            String thisUser = FirebaseResourceManager.getUserId();
-            // If it's a public game and the picker is logged in, they can invite people
-            if(pickerId.equals(thisUser)) {
-                inviteFriendsButton.setVisibility(View.VISIBLE);
+            // If they're in the list of players, they can invite
+            if(thisPlayerInGame) {
+                setJoinGameIsVisible(false);
             } else {
+                // If they're not, show them the join button
+                setJoinGameIsVisible(true);
+            }
+        } else {
+            // If it's a private game and the picker is logged in, they can invite people
+            if(pickerId.equals(thisUser)) {
+                setJoinGameIsVisible(false);
+            } else {
+                if(thisPlayerInGame) {
+                    // If they're already in the game, don't need to display the button
+                    setJoinGameIsVisible(false);
+                } else {
+                    // If they aren't in the game, give them ability to join it
+                    setJoinGameIsVisible(true);
+                }
                 // If user logged in isn't the picker, no inviting for them!
                 inviteFriendsButton.setVisibility(View.GONE);
             }
+        }
+    }
+
+    private void setJoinGameIsVisible(boolean isVisible) {
+        if(isVisible) {
+            inviteFriendsButton.setVisibility(View.GONE);
+            joinGameButton.setVisibility(View.VISIBLE);
+        } else {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+            joinGameButton.setVisibility(View.GONE);
         }
     }
 
@@ -316,6 +376,7 @@ public class GameActivity extends HomeAppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         commentManager.removeListener();
+        joinedGameManager.removeListener();
     }
 
     @OnClick(R.id.fab)
@@ -335,6 +396,25 @@ public class GameActivity extends HomeAppCompatActivity {
             //display the loginDialog
             displayLoginDialog();
         }
+    }
+
+    @OnClick(R.id.join_game_button)
+    public void joinGame() {
+        if(FirebaseResourceManager.getUserId() == null) {
+            loginDialog.show();
+            return;
+        }
+        FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
+            @Override
+            public void onData(Exception data) {
+                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public Class getDataType() {
+                return Exception.class;
+            }
+        });
     }
 
     public void displayLoginDialog() {

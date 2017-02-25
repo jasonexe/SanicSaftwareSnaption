@@ -51,8 +51,9 @@
     <string name="join_snaption_subject">Join me in Snaption!</string>
     <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
     <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
-    <string name="no_internet">You do not appear to be connected to the Internet</string>
+    <string name="no_internet">There was an error, you may not be connected to the Internet</string>
     <string name="game_invite">Invite Friends</string>
+    <string name="join_game">Join Game</string>
     <string name="upvote_error">There was an error in registering your vote</string>
 
     <string name="add_friends">+ add friends</string>

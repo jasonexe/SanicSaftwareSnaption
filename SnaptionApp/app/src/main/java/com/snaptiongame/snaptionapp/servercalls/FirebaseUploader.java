@@ -27,6 +27,7 @@ import java.util.Map;
 
 public class FirebaseUploader implements Uploader {
 
+    public static final String GAME_PLAYERS_PATH = "games/%s/players";
     private static final String USERS_PATH = "users";
     private static final String USERS_CREATED_GAMES =  "createdGames";
     private static final String CAPTION_PATH = "captions";
@@ -35,6 +36,8 @@ public class FirebaseUploader implements Uploader {
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
+    private static final String PLAYER_PRIVATE_GAME_PATH = "users/%s/privateGames";
+
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -255,6 +258,22 @@ public class FirebaseUploader implements Uploader {
                     listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
                             ? ITEM_ALREADY_EXISTS_ERROR : "");
                 };
+            }
+        });
+    }
+
+    public static void addCurrentUserToGame(Game game, final ResourceListener<Exception> errorDisplayer) {
+        // TODO check that joined games should actually go in private in the user
+        Map<String, Object> childUpdates = new HashMap<>();
+        String gameId = game.getId();
+        String userId = FirebaseResourceManager.getUserId();
+
+        childUpdates.put(String.format(GAME_PLAYERS_PATH, gameId) + "/" + userId, 1);
+        childUpdates.put(String.format(PLAYER_PRIVATE_GAME_PATH, userId) + "/" + gameId, 1);
+        database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                errorDisplayer.onData(e);
             }
         });
     }

@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp.ui;
+package com.snaptiongame.snaptionapp.utilities;
 
 import android.animation.ValueAnimator;
 import android.util.TypedValue;
@@ -9,7 +9,7 @@ import android.view.ViewGroup;
  * Created by brittanyberlanga on 2/19/17.
  */
 
-public class Utilities {
+public class ViewUtilities {
     private static float COLLAPSE_ALPHA = 0.0f;
     private static float EXPAND_ALPHA = 1.0f;
     /**
