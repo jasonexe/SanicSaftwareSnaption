@@ -1,14 +1,13 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -354,24 +353,33 @@ public class FirebaseResourceManager {
         Glide.with(imageView.getContext())
                 .using(new FirebaseImageLoader())
                 .load(ref).fitCenter()
-                .listener(new RequestListener<StorageReference, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, StorageReference model,
-                                               Target<GlideDrawable> target,
-                                               boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource,
-                                                   StorageReference model,
-                                                   Target<GlideDrawable> target,
-                                                   boolean isFromMemoryCache,
-                                                   boolean isFirstResource) {
-                        return false;
-                    }
-                })
                 .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+    }
+
+
+    /**
+     * Loads an image from Firebase into a given ImageView.
+     *
+     * @param imagePath The image file path name
+     * @param imageView The ImageView in which the image should be loaded
+     * @param listener ResourceListener that notifies when the image has been loaded
+     */
+    public static void loadImageIntoView(String imagePath, final ImageView imageView,
+                                         final ResourceListener<Boolean> listener) {
+        StorageReference ref = storage.child(imagePath);
+        Glide.with(imageView.getContext())
+                .using(new FirebaseImageLoader())
+                .load(ref).fitCenter()
+                .placeholder(android.R.drawable.progress_horizontal).into(
+                new GlideDrawableImageViewTarget(imageView) {
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
+                        super.onLoadCleared(placeholder);
+                        if (listener != null) {
+                            listener.onData(true);
+                        }
+                    }
+                });
     }
 
     public static void getImageURI(String imagePath, final ResourceListener<Uri> pathListener) {
