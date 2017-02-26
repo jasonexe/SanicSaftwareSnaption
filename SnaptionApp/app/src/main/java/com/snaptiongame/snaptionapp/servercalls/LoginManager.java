@@ -58,7 +58,6 @@ public class LoginManager {
     private static final String FB_EMAIL_PERMISSION = "email";
     private static final String FB_PROFILE_PERMISSION = "public_profile";
     private static final String PHOTOS_FOLDER = "ProfilePictures/";
-    private static final String PHOTO_EXTENSION = ".jpg";
     private static final String FACEBOOK_IMAGE_URL = "https://graph.facebook.com/%s/picture?type=large";
 
     private FirebaseAuth auth;
