@@ -30,7 +30,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
@@ -55,7 +54,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected DrawerLayout drawerLayout;
     @BindView(R.id.navigation_view)
     protected NavigationView navigationView;
-
+    @BindView(R.id.fab)
+    protected FloatingActionButton fab;
     protected ImageView navDrawerPhoto;
     protected TextView navDrawerName;
     protected TextView navDrawerEmail;
@@ -76,14 +76,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     case R.id.wall_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
+                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.profile_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
+                        fab.setVisibility(View.INVISIBLE);
                         break;
                     case R.id.friends_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new FriendsFragment()).commit();
+                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.log_option:
                         //check if we are logging in or out based on item text
