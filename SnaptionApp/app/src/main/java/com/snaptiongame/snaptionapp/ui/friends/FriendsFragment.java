@@ -18,7 +18,6 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +25,6 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -39,10 +37,6 @@ public class FriendsFragment extends Fragment {
     public TextView friendNotice;
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
-    @BindView(R.id.fab)
-    protected FloatingActionButton fab;
-
-    private ScrollViewHider scrollFabHider;
 
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
@@ -55,18 +49,15 @@ public class FriendsFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
         LinearLayoutManager friendsViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false);
         friendsListView.setLayoutManager(friendsViewManager);
-        scrollFabHider = new ScrollViewHider(fab, ScrollViewHider.HALF_HIDE_THRESHOLD);
-        friendsListView.addOnScrollListener(scrollFabHider);
+        //set up fab scroll listener
+        FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
+        ScrollViewHider scrollViewHider = new ScrollViewHider(fab, ScrollViewHider.BIG_HIDE_THRESHOLD);
+        friendsListView.addOnScrollListener(scrollViewHider);
+
         populateFriends();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.friends));
 
         return view;
-    }
-
-    @OnClick(R.id.fab)
-    public void onFabClick(View view) {
-        Intent intent = new Intent(getActivity(), AddInviteFriendsActivity.class);
-        startActivity(intent);
     }
 
     @Override

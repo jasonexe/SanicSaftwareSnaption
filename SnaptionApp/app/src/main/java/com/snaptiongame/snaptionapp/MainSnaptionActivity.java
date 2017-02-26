@@ -30,6 +30,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
@@ -233,7 +234,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
     }
 
-    /*@OnClick(R.id.fab)
+    @OnClick(R.id.fab)
     public void onClickFab(View view) {
         if (currentFragmentMenuItemId == R.id.wall_item) {
             if (FirebaseResourceManager.getUserId() != null) {
@@ -249,7 +250,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
         }
-    }*/
+    }
 
     @Override
     protected void onResume() {
