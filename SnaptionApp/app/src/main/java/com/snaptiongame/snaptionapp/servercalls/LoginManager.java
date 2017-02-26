@@ -213,7 +213,7 @@ public class LoginManager {
         if (fbUser != null) {
             //establish fields needed for constructor
             final String id = fbUser.getUid();
-            String imagePath = PHOTOS_FOLDER + id + PHOTO_EXTENSION;
+            String imagePath = PHOTOS_FOLDER + id;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             //TODO: fill this fields once we reach notifications and friends
