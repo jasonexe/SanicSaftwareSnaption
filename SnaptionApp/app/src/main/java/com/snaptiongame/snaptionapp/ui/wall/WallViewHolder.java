@@ -22,8 +22,10 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public ImageView photo;
     @BindView(R.id.caption_text)
     public TextView captionText;
-    @BindView(R.id.caption_photo)
-    public ImageView captionPhoto;
+    @BindView(R.id.picker_name)
+    public TextView pickerName;
+    @BindView(R.id.picker_photo)
+    public ImageView pickerPhoto;
     @BindView(R.id.create_from_existing_button)
     public FloatingActionButton createFromExisting;
 

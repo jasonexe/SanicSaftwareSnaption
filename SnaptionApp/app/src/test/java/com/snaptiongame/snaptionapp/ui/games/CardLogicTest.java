@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,7 +27,7 @@ public class CardLogicTest {
 
     @Test
     public void testAddCaption() {
-        List<String> empty = new ArrayList<>();
+        Map<String, Integer> empty = new HashMap<>();
         Map<String, Integer> emptyMap = new HashMap<>();
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String captionId = "testCapId";
@@ -53,7 +52,7 @@ public class CardLogicTest {
     @Test
     public void testAddCaptionNoCard() {
         Uploader mockedUploader = mock(Uploader.class);
-        List<String> empty = new ArrayList<>();
+        Map<String, Integer> empty = new HashMap<>();
         Map<String, Integer> emptyMap = new HashMap<>();
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
