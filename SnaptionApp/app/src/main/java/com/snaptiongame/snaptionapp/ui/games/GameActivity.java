@@ -239,24 +239,15 @@ public class GameActivity extends HomeAppCompatActivity {
         // If this is a public game, anyone can send an invite to it if they've joined
         if(game.getIsPublic()) {
             // If they're in the list of players, they can invite
-            if(thisPlayerInGame) {
-                setJoinGameIsVisible(false);
-            } else {
-                // If they're not, show them the join button
-                setJoinGameIsVisible(true);
-            }
+            // If they're not, show them the join button
+            setJoinGameIsVisible(!thisPlayerInGame);
         } else {
             // If it's a private game and the picker is logged in, they can invite people
             if(pickerId.equals(thisUser)) {
                 setJoinGameIsVisible(false);
             } else {
-                if(thisPlayerInGame) {
-                    // If they're already in the game, don't need to display the button
-                    setJoinGameIsVisible(false);
-                } else {
-                    // If they aren't in the game, give them ability to join it
-                    setJoinGameIsVisible(true);
-                }
+                // If they're not in the game, set join to visible. Otherwise, not visible
+                setJoinGameIsVisible(!thisPlayerInGame);
                 // If user logged in isn't the picker, no inviting for them!
                 inviteFriendsButton.setVisibility(View.GONE);
             }
