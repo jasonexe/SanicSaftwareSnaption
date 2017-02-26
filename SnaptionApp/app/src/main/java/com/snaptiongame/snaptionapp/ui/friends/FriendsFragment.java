@@ -1,6 +1,5 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -17,7 +16,7 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
+import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +50,8 @@ public class FriendsFragment extends Fragment {
         friendsListView.setLayoutManager(friendsViewManager);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
-        ScrollViewHider scrollViewHider = new ScrollViewHider(fab, ScrollViewHider.BIG_HIDE_THRESHOLD);
-        friendsListView.addOnScrollListener(scrollViewHider);
+        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+        friendsListView.addOnScrollListener(scrollFabHider);
 
         populateFriends();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.friends));

@@ -17,7 +17,7 @@ import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
-import com.snaptiongame.snaptionapp.ui.ScrollViewHider;
+import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +66,8 @@ public class WallFragment extends Fragment {
         wallListView.setAdapter(wallAdapter);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
-        ScrollViewHider scrollViewHider = new ScrollViewHider(fab, ScrollViewHider.BIG_HIDE_THRESHOLD);
-        wallListView.addOnScrollListener(scrollViewHider);
+        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+        wallListView.addOnScrollListener(scrollFabHider);
 
         wallListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

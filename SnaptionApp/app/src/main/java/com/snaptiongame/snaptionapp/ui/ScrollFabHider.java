@@ -7,17 +7,15 @@ import android.view.View;
 /**
  * Created by austinrobarts on 2/21/17.
  */
-
-public class ScrollViewHider extends RecyclerView.OnScrollListener {
+public class ScrollFabHider extends RecyclerView.OnScrollListener {
     public final static int BIG_HIDE_THRESHOLD = 10;
-    public final static int HALF_HIDE_THRESHOLD = 5;
     private int scrolledDistance;
     private boolean fabVisible; // This is used because the animations take too long
     private FloatingActionButton fab;
     private int hide_threshold;
 
-    public ScrollViewHider(FloatingActionButton view, int hide_threshold) {
-        this.fab = view;
+    public ScrollFabHider(FloatingActionButton fab, int hide_threshold) {
+        this.fab = fab;
         this.hide_threshold = hide_threshold;
         scrolledDistance = 0;
         fabVisible = true;
@@ -50,6 +48,4 @@ public class ScrollViewHider extends RecyclerView.OnScrollListener {
     private boolean isFabVisible() {
         return fabVisible;
     }
-
-
 }
