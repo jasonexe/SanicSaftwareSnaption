@@ -58,7 +58,6 @@ public class LoginManager {
     private static final String FB_EMAIL_PERMISSION = "email";
     private static final String FB_PROFILE_PERMISSION = "public_profile";
     private static final String PHOTOS_FOLDER = "ProfilePictures/";
-    private static final String PHOTO_EXTENSION = ".jpg";
     private static final String FACEBOOK_IMAGE_URL = "https://graph.facebook.com/%s/picture?type=large";
 
     private FirebaseAuth auth;
@@ -213,7 +212,7 @@ public class LoginManager {
         if (fbUser != null) {
             //establish fields needed for constructor
             final String id = fbUser.getUid();
-            String imagePath = PHOTOS_FOLDER + id + PHOTO_EXTENSION;
+            String imagePath = PHOTOS_FOLDER + id;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             //TODO: fill this fields once we reach notifications and friends
