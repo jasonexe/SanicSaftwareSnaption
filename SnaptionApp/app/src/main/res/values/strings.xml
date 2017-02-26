@@ -54,6 +54,7 @@
     <string name="no_internet">You do not appear to be connected to the Internet</string>
     <string name="game_invite">Invite Friends</string>
     <string name="upvote_error">There was an error in registering your vote</string>
+    <string name="captioner_name">- %s</string>
 
     <string name="add_friends">+ add friends</string>
     <string name="no_friends_add_invite">You don\'t have any friends to add or invite.</string>
