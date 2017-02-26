@@ -20,7 +20,9 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.validFirebasePath;
 
@@ -38,6 +40,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private List<Game> items;
     private MainSnaptionActivity activity;
+    private Map<String, Integer> imageHeights = new HashMap<>();
 
     public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
         this.items = items;
@@ -67,11 +70,34 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
-        Game game = items.get(position);
+        final Game game = items.get(position);
         holder.captionText.setText(game.getTopCaption() != null ?
                 game.getTopCaption().retrieveCaptionText() :
                 holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
-        FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
+
+        // if the height of the game image has been recorded, set the height of the imageview
+        Integer height = imageHeights.get(game.getId());
+        if (height != null) {
+            ViewGroup.LayoutParams lp = holder.photo.getLayoutParams();
+            lp.height = height;
+            holder.photo.setLayoutParams(lp);
+        }
+        // load the game image
+        FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo,
+                new ResourceListener<Boolean>() {
+            @Override
+            public void onData(Boolean data) {
+                // if the game image was loaded, record the height of the imageview
+                if (data) {
+                    imageHeights.put(game.getId(), holder.photo.getHeight());
+                }
+            }
+            @Override
+            public Class getDataType() {
+                return Boolean.class;
+            }
+        });
+
         holder.photo.setOnClickListener(new PhotoClickListener(game));
 
         // distinguish between complete and incomplete games
