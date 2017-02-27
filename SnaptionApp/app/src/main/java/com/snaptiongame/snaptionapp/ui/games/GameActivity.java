@@ -208,13 +208,12 @@ public class GameActivity extends HomeAppCompatActivity {
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
         joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
-                game.getId()), new ResourceListener() {
+                game.getId()), new ResourceListener<Map<String, Object>>() {
             @Override
-            public void onData(Object data) {
+            public void onData(Map<String, Object> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
                 if(data != null) {
-                    Map<String, Object> mapData = (Map<String, Object>) data;
-                    determineButtonDisplay(pickerId, mapData);
+                    determineButtonDisplay(pickerId, data);
                 }
             }
 
