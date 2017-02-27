@@ -96,7 +96,7 @@ public class FirebaseUploader implements Uploader {
         gamesRef.setValue(game);
         // Add gameId to user's createdGames map
         addGameToUserCreatedGames(game);
-        // Add gameId to all players privateGames map
+        // Add gameId to all players' privateGames map
         addGameToPlayerPrivateGames(game);
     }
 
