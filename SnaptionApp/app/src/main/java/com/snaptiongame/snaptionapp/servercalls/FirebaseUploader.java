@@ -18,6 +18,7 @@ import com.snaptiongame.snaptionapp.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * FirebaseUploader is used for uploading data to Firebase and updating values.
@@ -36,8 +37,7 @@ public class FirebaseUploader implements Uploader {
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
-    private static final String PLAYER_PRIVATE_GAME_PATH = "users/%s/privateGames";
-
+    private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -91,12 +91,14 @@ public class FirebaseUploader implements Uploader {
     }
 
     private void addCompletedGameObj(Game game) {
-        // Add gameId to user's gamesList
-        addGameToUserTable(game);
         // Add game object to games table
         String gameId = game.getId();
         DatabaseReference gamesRef = database.getReference(GAMES_PATH + "/" + gameId);
         gamesRef.setValue(game);
+        // Add gameId to user's createdGames map
+        addGameToUserCreatedGames(game);
+        // Add gameId to all players' privateGames map
+        addGameToPlayerPrivateGames(game);
     }
 
     @Override
@@ -113,12 +115,24 @@ public class FirebaseUploader implements Uploader {
         return captionFolderRef.push().getKey();
     }
 
-    private void addGameToUserTable(Game game) {
+    private void addGameToUserCreatedGames(Game game) {
         final String gameId = game.getId();
         String userId = game.getPicker();
         DatabaseReference userRef = database.getReference(USERS_PATH + "/" + userId);
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
         userRef.child(USERS_CREATED_GAMES).child(gameId).setValue(1);
+    }
+
+    private void addGameToPlayerPrivateGames(Game game) {
+        String gameId = game.getId();
+        Set<String> ids = game.getPlayers().keySet();
+        // add the game to the picker's private games map
+        database.getReference(String.format(USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
+                .setValue(1);
+        // add the game to each of the player's private games map
+        for (String id : ids) {
+            database.getReference(String.format(USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
+        }
     }
 
     private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
@@ -269,7 +283,7 @@ public class FirebaseUploader implements Uploader {
         String userId = FirebaseResourceManager.getUserId();
 
         childUpdates.put(String.format(GAME_PLAYERS_PATH, gameId) + "/" + userId, 1);
-        childUpdates.put(String.format(PLAYER_PRIVATE_GAME_PATH, userId) + "/" + gameId, 1);
+        childUpdates.put(String.format(USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

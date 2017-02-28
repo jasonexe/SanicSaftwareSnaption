@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -204,7 +205,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setupButtonDisplay(Game game) {
         // When this is initially called, setup the button with current data
         final String pickerId = game.getPicker();
-        determineButtonDisplay(pickerId, game.getPlayers());
+        determineButtonDisplay(pickerId, game.getPlayers().keySet());
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
         joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
@@ -213,7 +214,7 @@ public class GameActivity extends HomeAppCompatActivity {
             public void onData(Map<String, Object> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
                 if(data != null) {
-                    determineButtonDisplay(pickerId, data);
+                    determineButtonDisplay(pickerId, data.keySet());
                 }
             }
 
@@ -224,7 +225,7 @@ public class GameActivity extends HomeAppCompatActivity {
         });
     }
 
-    private void determineButtonDisplay(String pickerId, Map<String, Object> players) {
+    private void determineButtonDisplay(String pickerId, Set<String> players) {
         String thisUser = FirebaseResourceManager.getUserId();
         // If they're not logged in, just show join game
         if(thisUser == null) {
@@ -232,7 +233,7 @@ public class GameActivity extends HomeAppCompatActivity {
             return;
         }
         boolean thisPlayerInGame = false;
-        if(players != null && players.containsKey(thisUser)) {
+        if(players != null && players.contains(thisUser)) {
             thisPlayerInGame = true;
         }
         // If this is a public game, anyone can send an invite to it if they've joined

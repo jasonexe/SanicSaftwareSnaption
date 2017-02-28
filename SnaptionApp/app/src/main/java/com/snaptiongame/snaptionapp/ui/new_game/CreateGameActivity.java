@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.new_game;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -26,7 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.Person;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
@@ -44,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -77,7 +79,15 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private boolean alreadyExisting; //True if user is creating this from an exisitng game
     private String existingPhotoPath;
-    private FriendsListAdapter friendsListAdapter;
+    private PersonAdapter friendsListAdapter;
+    private AddedPersonAdapter gameFriendsAdapter;
+    private PersonAdapter.AddListener addListener = new PersonAdapter.AddListener() {
+        @Override
+        public void onPersonSelected(Person person) {
+            // when a person is selected, add them to the gameFriendsAdapter
+            gameFriendsAdapter.addItem(person);
+        }
+    };
 
     @BindView(R.id.add_photo_layout)
     protected RelativeLayout addPhotoLayout;
@@ -117,6 +127,9 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.no_friends)
     protected TextView noFriendsView;
+
+    @BindView(R.id.game_friends)
+    protected RecyclerView gameFriendsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +188,13 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
+                    Map<String, Integer> friends = new HashMap<>();
+                    List<Person> addedFriends =  gameFriendsAdapter.getPersons();
+                    for (Person friend : addedFriends) {
+                        // TODO if/when inviting is also supported, handle when a Friend is added
+                        friends.put(friend.getId(), 1);
+                    }
+                    friends.put(FirebaseResourceManager.getUserId(), 1);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
@@ -183,12 +203,12 @@ public class CreateGameActivity extends AppCompatActivity {
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
+                                friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
+                                friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
                         backToMain();
                     }
@@ -247,11 +267,12 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     private void setupFriendsViews() {
-        friendsList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         friendsList.setNestedScrollingEnabled(true);
-        // TODO create a new adapter used for both adding and inviting to the game
-        friendsListAdapter = new FriendsListAdapter(new ArrayList<User>());
+        // TODO support both adding and inviting to the game
+        friendsListAdapter = new PersonAdapter(new ArrayList<Person>(), addListener);
         friendsList.setAdapter(friendsListAdapter);
+        gameFriendsAdapter = new AddedPersonAdapter(new ArrayList<Person>());
+        gameFriendsView.setAdapter(gameFriendsAdapter);
     }
 
     private void displayFriends() {
