@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground">
+    <ImageView
+        android:id="@+id/photo"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:layout_centerVertical="true"/>
+    <LinearLayout
+        android:id="@+id/info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_toEndOf="@+id/photo"
+        android:layout_toStartOf="@+id/add_invite_button"
+        android:layout_centerVertical="true">
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="12sp"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/add_invite_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:text="@string/add"/>
+</RelativeLayout>

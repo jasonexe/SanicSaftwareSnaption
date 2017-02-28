@@ -1,22 +1,21 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 
 import java.util.List;
 
 /**
- * FriendAdapter is a RecyclerView.Adapter used for FriendViewHolder
+ * AddFriendAdapter is a RecyclerView.Adapter used for PersonViewHolder
  *
  * @author Brittany Berlanga
  */
-public class FriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
+public class AddFriendAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<Friend> friends;
     private AddInviteFriendCallback callback;
 
@@ -24,7 +23,7 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
         public void addInviteClicked(Friend friend);
     }
 
-    public FriendAdapter(List<Friend> friends, AddInviteFriendCallback callback) {
+    public AddFriendAdapter(List<Friend> friends, AddInviteFriendCallback callback) {
         this.friends = friends;
         this.callback = callback;
     }
@@ -35,22 +34,29 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
     }
 
     @Override
-    public FriendViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new FriendViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.view_friend_item, parent, false));
+    public PersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        PersonViewHolder viewHolder = PersonViewHolder.newInstance(parent);
+        if (callback != null) {
+            viewHolder.addInviteButton.setVisibility(View.VISIBLE);
+        }
+        return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(FriendViewHolder holder, int position) {
+    public void onBindViewHolder(PersonViewHolder holder, int position) {
         final Friend friend = friends.get(position);
-        holder.friendName.setText(friend.displayName);
-        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.friendPhoto);
-        holder.addInviteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callback.addInviteClicked(friend);
-            }
-        });
+        holder.name.setText(friend.displayName);
+        holder.email.setText(friend.email);
+        holder.email.setVisibility(TextUtils.isEmpty(friend.email) ? View.GONE : View.VISIBLE);
+        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.photo);
+        if (callback != null) {
+            holder.addInviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callback.addInviteClicked(friend);
+                }
+            });
+        }
     }
 
     /**

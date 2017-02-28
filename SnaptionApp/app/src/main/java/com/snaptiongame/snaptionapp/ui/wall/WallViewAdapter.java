@@ -9,9 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.snaptiongame.snaptionapp.CreateGameActivity;
+import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -21,7 +23,8 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
-import java.util.regex.Pattern;
+
+import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.validFirebasePath;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
@@ -67,9 +70,21 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
-        holder.captionText.setText(game.getTopCaption() != null ?
-                game.getTopCaption().retrieveCaptionText() :
-                holder.captionerText.getContext().getResources().getString(R.string.caption_filler));
+        // display the Picker of the game, the one who created it
+        displayUser(holder.pickerName, holder.pickerPhoto, USER_PATH + game.getPicker());
+
+        // ensure the game has a top caption before displaying the caption and the captioner
+        if (game.getTopCaption() != null) {
+            holder.captionerText.setVisibility(TextView.VISIBLE);
+            holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
+            displayUser(holder.captionerText, null, USER_PATH + game.getTopCaption().getUserId());
+        }
+        else {
+            // display a request to participate over the caption's view if a caption does not exist
+            holder.captionText.setText(R.string.caption_filler);
+            holder.captionerText.setVisibility(TextView.GONE);
+        }
+
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
         holder.photo.setOnClickListener(new PhotoClickListener(game));
 
@@ -117,9 +132,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             }
         });
 
-        // TODO add the actual captioner name and photo instead of picker's
-        // game.getTopCaption().getUserId() instead of game.getPicker()
-        displayUser(holder, USER_PATH + game.getPicker());
     }
 
     @Override
@@ -129,13 +141,16 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     /**
      * Displays the profile picture and username of a valid User. Shows the default if invalid
-     * @param holder The view that needs to be set with the User's name and avatar
+     * @param username the TextView from the holder, for either the Picker or Captioner's name
+     * @param photo the ImageView from the holder, for either the Picker or Captioner's photo
      * @param userPath The path to the desired User
      */
-    private void displayUser(final WallViewHolder holder, String userPath) {
+    private void displayUser(final TextView username, final ImageView photo, String userPath) {
         // remove this portion if firebase is guaranteed to not have invalid users
-        holder.captionerText.setText(" ");
-        Glide.with(holder.captionPhoto.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(holder.captionPhoto);
+        username.setText(" ");
+        if (photo != null) {
+            Glide.with(photo.getContext()).load(R.drawable.com_facebook_profile_picture_blank_square).into(photo);
+        }
 
         // ensure the user id is a valid one to avoid errors
         if(validFirebasePath(userPath)) {
@@ -145,8 +160,15 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 public void onData(User user) {
                     // replace default is the User is valid
                     if (user != null) {
-                        holder.captionerText.setText(user.getDisplayName());
-                        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), holder.captionPhoto);
+                        // if there is no photo path, don't display it, use a - instead
+                        if (photo != null) {
+                            username.setText(user.getDisplayName());
+                            FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
+                        }
+                        else {
+                            username.setText(activity.getResources().getString(R.string.captioner_name, user.getDisplayName()));
+                        }
+
                     }
                 }
 
@@ -156,18 +178,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 }
             });
         }
-    }
-
-    /**
-     * Checks if a String is valid for a Firebase path by making sure it does not contain
-     * any of the following characters: '.', '#', '$', '[', or ']'
-     *
-     * @param path The path to be checked
-     * @return True if the path does not contain any of the characters, false otherwise.
-     */
-    public static boolean validFirebasePath(String path) {
-        Pattern pattern = Pattern.compile("[.#$\\[\\]]");
-        return !pattern.matcher(path).find();
     }
 
     /**

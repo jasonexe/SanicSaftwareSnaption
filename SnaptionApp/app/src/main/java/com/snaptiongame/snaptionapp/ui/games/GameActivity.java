@@ -2,42 +2,38 @@ package com.snaptiongame.snaptionapp.ui.games;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.view.ActionProvider;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.MenuInflater;
+import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
@@ -47,13 +43,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -82,9 +79,13 @@ public class GameActivity extends HomeAppCompatActivity {
     private String photoPath;
     private GameCaptionViewAdapter captionAdapter;
     private FirebaseResourceManager commentManager;
+    private FirebaseResourceManager joinedGameManager;
 
     private LoginManager loginManager;
     private LoginDialog loginDialog;
+
+    @BindView(R.id.toolbar)
+    protected Toolbar toolbar;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -127,8 +128,13 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
 
+    private ScrollFabHider scrollFabHider;
+
     @BindView(R.id.invite_friends)
     public Button inviteFriendsButton;
+
+    @BindView(R.id.join_game_button)
+    public Button joinGameButton;
 
     @BindView(R.id.intent_load_progress)
     public View progressSpinner;
@@ -154,6 +160,7 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
+        setupToolbar(toolbar);
 
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
@@ -188,7 +195,7 @@ public class GameActivity extends HomeAppCompatActivity {
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
         initLoginManager();
-        determineButtonDisplay(game);
+        setupButtonDisplay(game);
         setupCaptionList(game);
         setupEndDate(game);
         setupPickerName(game);
@@ -196,20 +203,65 @@ public class GameActivity extends HomeAppCompatActivity {
         startCommentManager(game);
     }
 
-    private void determineButtonDisplay(Game game) {
-        // If this is a public game, anyone can send an invite to it
+    private void setupButtonDisplay(Game game) {
+        // When this is initially called, setup the button with current data
+        final String pickerId = game.getPicker();
+        determineButtonDisplay(pickerId, game.getPlayers().keySet());
+        joinedGameManager = new FirebaseResourceManager();
+        // setup a listener for when player joins the game
+        joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
+                game.getId()), new ResourceListener<Map<String, Object>>() {
+            @Override
+            public void onData(Map<String, Object> data) {
+                // retrieveMapWithUpdates guaranteed to return a map from string to object
+                if(data != null) {
+                    determineButtonDisplay(pickerId, data.keySet());
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        });
+    }
+
+    private void determineButtonDisplay(String pickerId, Set<String> players) {
+        String thisUser = FirebaseResourceManager.getUserId();
+        // If they're not logged in, just show join game
+        if(thisUser == null) {
+            setJoinGameIsVisible(true);
+            return;
+        }
+        boolean thisPlayerInGame = false;
+        if(players != null && players.contains(thisUser)) {
+            thisPlayerInGame = true;
+        }
+        // If this is a public game, anyone can send an invite to it if they've joined
         if(game.getIsPublic()) {
-            inviteFriendsButton.setVisibility(View.VISIBLE);
+            // If they're in the list of players, they can invite
+            // If they're not, show them the join button
+            setJoinGameIsVisible(!thisPlayerInGame);
         } else {
-            String pickerId = game.getPicker();
-            String thisUser = FirebaseResourceManager.getUserId();
-            // If it's a public game and the picker is logged in, they can invite people
+            // If it's a private game and the picker is logged in, they can invite people
             if(pickerId.equals(thisUser)) {
-                inviteFriendsButton.setVisibility(View.VISIBLE);
+                setJoinGameIsVisible(false);
             } else {
+                // If they're not in the game, set join to visible. Otherwise, not visible
+                setJoinGameIsVisible(!thisPlayerInGame);
                 // If user logged in isn't the picker, no inviting for them!
                 inviteFriendsButton.setVisibility(View.GONE);
             }
+        }
+    }
+
+    private void setJoinGameIsVisible(boolean isVisible) {
+        if(isVisible) {
+            inviteFriendsButton.setVisibility(View.GONE);
+            joinGameButton.setVisibility(View.VISIBLE);
+        } else {
+            inviteFriendsButton.setVisibility(View.VISIBLE);
+            joinGameButton.setVisibility(View.GONE);
         }
     }
 
@@ -225,43 +277,9 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
+        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
         captionListView.addOnScrollListener(scrollFabHider);
     }
-
-    // Scroll listener that hides the fab during scrolling down, shows it when going up
-    private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
-        private int scrolledDistance = 0;
-        private final static int HIDE_THRESHOLD = 10;
-        private boolean fabVisible = true; // This is used because the animations take too long
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            // If they've scrolled more than HIDE_THRESHOLD units, and fab is visible, hide it
-            // If they've scrolled less than the units (means they goin up)
-            // and fab isn't visible, show it
-            if (scrolledDistance > HIDE_THRESHOLD && isFabVisible()) {
-                fabVisible = false;
-                fab.hide();
-            } else if (scrolledDistance < -HIDE_THRESHOLD && !isFabVisible()) {
-                fabVisible = true;
-                fab.show();
-            }
-
-            // If the user scrolls in a direction that would change the fab visibility, increment
-            // the distance. If they've already hidden the fab and are still scrolling down,
-            // for example, don't increment the distance. But if they are scrolling down while
-            // fab is showing, increment it.
-            if((isFabVisible() && dy > 0) || !isFabVisible() && dy < 0 || isFabVisible() && dx > 0
-                    || !isFabVisible() && dx < 0){
-                scrolledDistance += dy + dx;
-            }
-        }
-
-        private boolean isFabVisible() {
-            return fabVisible;
-        }
-    };
 
     // Displays the date that the game will end underneath the picture
     private void setupEndDate(Game game) {
@@ -316,6 +334,7 @@ public class GameActivity extends HomeAppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         commentManager.removeListener();
+        joinedGameManager.removeListener();
     }
 
     @OnClick(R.id.fab)
@@ -335,6 +354,25 @@ public class GameActivity extends HomeAppCompatActivity {
             //display the loginDialog
             displayLoginDialog();
         }
+    }
+
+    @OnClick(R.id.join_game_button)
+    public void joinGame() {
+        if(FirebaseResourceManager.getUserId() == null) {
+            loginDialog.show();
+            return;
+        }
+        FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
+            @Override
+            public void onData(Exception data) {
+                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public Class getDataType() {
+                return Exception.class;
+            }
+        });
     }
 
     public void displayLoginDialog() {

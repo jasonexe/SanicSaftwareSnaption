@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.ui.new_game;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -9,23 +9,33 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.Person;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.utilities.ViewUtilities;
+import com.snaptiongame.snaptionapp.ui.friends.FriendsListAdapter;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -33,11 +43,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,16 +58,19 @@ import butterknife.OnClick;
  */
 
 public class CreateGameActivity extends AppCompatActivity {
-
+    // TODO display friends to invite
     private static final String MATURE = "mature";
     private static final String PG = "PG";
+    private static final int FRIENDS_LIST_MIN_HEIGHT = 0;
+    private static final int FRIENDS_LIST_MAX_HEIGHT = 250;
+    private static final long FRIENDS_ANIMATION_DURATION = 400;
     private static final int DEFAULT_DAYS_AHEAD = 5;
 
     // Create a storage reference from our app
     private Uploader uploader;
 
     private Uri imageUri;
-    private ArrayList<String> categories;
+    private Map<String, Integer> categories;
     private String maturityRating;
     private boolean isPublic;
     private long endDate;
@@ -67,6 +79,15 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private boolean alreadyExisting; //True if user is creating this from an exisitng game
     private String existingPhotoPath;
+    private PersonAdapter friendsListAdapter;
+    private AddedPersonAdapter gameFriendsAdapter;
+    private PersonAdapter.AddListener addListener = new PersonAdapter.AddListener() {
+        @Override
+        public void onPersonSelected(Person person) {
+            // when a person is selected, add them to the gameFriendsAdapter
+            gameFriendsAdapter.addItem(person);
+        }
+    };
 
     @BindView(R.id.add_photo_layout)
     protected RelativeLayout addPhotoLayout;
@@ -94,6 +115,21 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.text_date)
     protected TextView dateView;
+
+    @BindView(R.id.add_friends_view)
+    protected FrameLayout addFriendsView;
+
+    @BindView(R.id.friends_loading)
+    protected ProgressBar friendProgressBar;
+
+    @BindView(R.id.friends_list)
+    protected RecyclerView friendsList;
+
+    @BindView(R.id.no_friends)
+    protected TextView noFriendsView;
+
+    @BindView(R.id.game_friends)
+    protected RecyclerView gameFriendsView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +188,13 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
+                    Map<String, Integer> friends = new HashMap<>();
+                    List<Person> addedFriends =  gameFriendsAdapter.getPersons();
+                    for (Person friend : addedFriends) {
+                        // TODO if/when inviting is also supported, handle when a Friend is added
+                        friends.put(friend.getId(), 1);
+                    }
+                    friends.put(FirebaseResourceManager.getUserId(), 1);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
@@ -160,12 +203,12 @@ public class CreateGameActivity extends AppCompatActivity {
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
+                                friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                new HashMap<String, Integer>(), categories, isPublic, endDate, maturityRating);
+                                friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
                         backToMain();
                     }
@@ -200,6 +243,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 maturityRating = MATURE;
             }
         });
+        setupFriendsViews();
     }
 
     @OnClick(R.id.add_photo_layout)
@@ -213,6 +257,76 @@ public class CreateGameActivity extends AppCompatActivity {
     @OnClick(R.id.text_date)
     public void onClickEndDate() {
         setDate();
+    }
+
+    @OnClick(R.id.add_friends)
+    public void onClickAddFriends() {
+        ViewUtilities.expandCollapseView(addFriendsView, FRIENDS_LIST_MIN_HEIGHT,
+                FRIENDS_LIST_MAX_HEIGHT, FRIENDS_ANIMATION_DURATION);
+        displayFriends();
+    }
+
+    private void setupFriendsViews() {
+        friendsList.setNestedScrollingEnabled(true);
+        // TODO support both adding and inviting to the game
+        friendsListAdapter = new PersonAdapter(new ArrayList<Person>(), addListener);
+        friendsList.setAdapter(friendsListAdapter);
+        gameFriendsAdapter = new AddedPersonAdapter(new ArrayList<Person>());
+        gameFriendsView.setAdapter(gameFriendsAdapter);
+    }
+
+    private void displayFriends() {
+        if (friendsListAdapter.getItemCount() == 0) {
+            loadFriends();
+        }
+    }
+
+    private void loadFriends() {
+        String userPath = FirebaseResourceManager.getUserPath();
+        if (userPath != null) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    if (user != null && user.getFriends() != null) {
+                        // load each friend
+                        FirebaseResourceManager.loadUsers(user.getFriends(), new ResourceListener<User>() {
+                            @Override
+                            public void onData(User user) {
+                                if (user != null) {
+                                    if (friendsListAdapter.getItemCount() == 0) {
+                                        showFriends();
+                                    }
+                                    friendsListAdapter.addSingleItem(user);
+                                }
+                            }
+
+                            @Override
+                            public Class getDataType() {
+                                return User.class;
+                            }
+                        });
+                    }
+                    else {
+                        showNoFriends();
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
+    }
+
+    private void showFriends() {
+        friendProgressBar.setVisibility(View.GONE);
+        friendsList.setVisibility(View.VISIBLE);
+    }
+
+    private void showNoFriends() {
+        friendProgressBar.setVisibility(View.GONE);
+        noFriendsView.setVisibility(View.VISIBLE);
     }
 
     class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
@@ -312,17 +426,17 @@ public class CreateGameActivity extends AppCompatActivity {
      * @param text - The text to parse with comma delimiters
      * @return A list of strings not containing repeats or empty strings
      */
-    private ArrayList<String> getCategoriesFromText(String text) {
+    private Map<String, Integer> getCategoriesFromText(String text) {
+        Map<String, Integer> categories = new HashMap<>();
         text = text.toLowerCase();
-
         String[] list = text.split(",");
-        for (int i = 0; i < list.length; i++) {
-            list[i] = list[i].trim();
-        }
-        //Converts the array to a set and removes duplicate elements and converts back to a list
-        ArrayList<String> categories = new ArrayList(new HashSet(Arrays.asList(list)));
-        categories.remove("");
 
+        for (String input : list) {
+            String potentialCategory = input.trim();
+            if (!TextUtils.isEmpty(potentialCategory)) {
+                categories.put(potentialCategory, 1);
+            }
+        }
         return categories;
     }
 
