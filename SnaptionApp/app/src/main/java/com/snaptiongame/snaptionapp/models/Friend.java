@@ -5,7 +5,7 @@ import android.text.TextUtils;
 /**
  * A Friend represents a potential of actual friend of the current user.
  */
-public class Friend {
+public class Friend implements Person {
     public final String snaptionId;
     public final String displayName;
     public final String facebookId;
@@ -23,6 +23,31 @@ public class Friend {
         this.displayName = displayName;
         this.email = email;
         this.facebookId = facebookId;
+    }
+
+    @Override
+    public String getId() {
+        return snaptionId;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    @Override
+    public String getImagePath() {
+        return null;
     }
 
     @Override

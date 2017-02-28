@@ -1,15 +1,12 @@
 package com.snaptiongame.snaptionapp.models;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by austinrobarts on 1/21/17.
  */
 
-public class User {
+public class User implements Person {
 
     private String id;
     private String email;
@@ -161,6 +158,11 @@ public class User {
             gameCount = createdGames.size();
         }
         return gameCount;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other.getClass() == getClass() && ((User) other).id.equals(id);
     }
 }
 

@@ -11,11 +11,11 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import java.util.List;
 
 /**
- * AddFriendAdapter is a RecyclerView.Adapter used for FriendViewHolder
+ * AddFriendAdapter is a RecyclerView.Adapter used for PersonViewHolder
  *
  * @author Brittany Berlanga
  */
-public class AddFriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
+public class AddFriendAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<Friend> friends;
     private AddInviteFriendCallback callback;
 
@@ -34,8 +34,8 @@ public class AddFriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
     }
 
     @Override
-    public FriendViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        FriendViewHolder viewHolder = FriendViewHolder.newInstance(parent);
+    public PersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        PersonViewHolder viewHolder = PersonViewHolder.newInstance(parent);
         if (callback != null) {
             viewHolder.addInviteButton.setVisibility(View.VISIBLE);
         }
@@ -43,12 +43,12 @@ public class AddFriendAdapter extends RecyclerView.Adapter<FriendViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(FriendViewHolder holder, int position) {
+    public void onBindViewHolder(PersonViewHolder holder, int position) {
         final Friend friend = friends.get(position);
-        holder.friendName.setText(friend.displayName);
-        holder.friendEmail.setText(friend.email);
-        holder.friendEmail.setVisibility(TextUtils.isEmpty(friend.email) ? View.GONE : View.VISIBLE);
-        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.friendPhoto);
+        holder.name.setText(friend.displayName);
+        holder.email.setText(friend.email);
+        holder.email.setVisibility(TextUtils.isEmpty(friend.email) ? View.GONE : View.VISIBLE);
+        FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.photo);
         if (callback != null) {
             holder.addInviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -190,7 +190,7 @@ public class Game implements Serializable {
      *
      * @return The list of captions in the game
      */
-    public Map getCaptions() {
+    public Map<String, Caption> getCaptions() {
         if (captions == null) {
             return null;
         }
@@ -206,7 +206,7 @@ public class Game implements Serializable {
      *
      * @return The list of players
      */
-    public Map getPlayers() {
+    public Map<String, Integer> getPlayers() {
         if (players == null) {
             return null;
         }
@@ -218,7 +218,7 @@ public class Game implements Serializable {
      *
      * @return The list of categories
      */
-    public Map getCategories() {
+    public Map<String, Integer> getCategories() {
         if (categories == null) {
             return null;
         }
