@@ -5,6 +5,7 @@ import android.content.Context;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.design.widget.Snackbar;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
