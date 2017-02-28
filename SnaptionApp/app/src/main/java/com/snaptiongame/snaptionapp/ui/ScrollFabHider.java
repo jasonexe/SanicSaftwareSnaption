@@ -27,10 +27,10 @@ public class ScrollFabHider extends RecyclerView.OnScrollListener {
         // If they've scrolled more than HIDE_THRESHOLD units, and fab is visible, hide it
         // If they've scrolled less than the units (means they goin up)
         // and fab isn't visible, show it
-        if (scrolledDistance > hide_threshold && isFabVisible()) {
+        if (scrolledDistance > hide_threshold && fabVisible) {
             fabVisible = false;
             fab.hide();
-        } else if (scrolledDistance < -hide_threshold && !isFabVisible()) {
+        } else if (scrolledDistance < -hide_threshold && !fabVisible) {
             fabVisible = true;
             fab.show();
         }
@@ -39,13 +39,9 @@ public class ScrollFabHider extends RecyclerView.OnScrollListener {
         // the distance. If they've already hidden the fab and are still scrolling down,
         // for example, don't increment the distance. But if they are scrolling down while
         // fab is showing, increment it.
-        if((isFabVisible() && dy > 0) || !isFabVisible() && dy < 0 || isFabVisible() && dx > 0
-                || !isFabVisible() && dx < 0){
+        if((fabVisible && dy > 0) || !fabVisible && dy < 0 || fabVisible && dx > 0
+                || !fabVisible && dx < 0){
             scrolledDistance += dy + dx;
         }
-    }
-
-    private boolean isFabVisible() {
-        return fabVisible;
     }
 }
