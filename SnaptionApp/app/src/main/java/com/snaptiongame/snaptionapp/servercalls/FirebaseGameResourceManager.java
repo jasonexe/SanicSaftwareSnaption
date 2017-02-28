@@ -26,6 +26,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private int limit;
     private boolean retrievedOnce = false;
     private String lastRetrievedKey;
+    private Object lastRetrievedPriority;
     private Long lastRetrievedDate;
 
     /**
@@ -40,9 +41,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     public void retrieveGamesByCreationDate() {
-        Query query = database.getReference(GAME_TABLE).orderByChild(CREATION_DATE_CHILD);
+//        Query query = database.getReference(GAME_TABLE).orderByChild(CREATION_DATE_CHILD);
+        Query query = database.getReference(GAME_TABLE).orderByPriority();
         if (retrievedOnce) {
-            query = query.limitToFirst(limit + 1).startAt(lastRetrievedDate, lastRetrievedKey);
+            if(lastRetrievedPriority instanceof Double) {
+                query = query.limitToFirst(limit + 1).startAt((double) lastRetrievedPriority);
+                System.out.println("Priority limit worked");
+            } else {
+                System.out.println("Priority isn't double??");
+            }
         }
         else {
             query = query.limitToFirst(limit);
@@ -54,6 +61,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
+                        lastRetrievedPriority = snapshot.getPriority();
                         lastRetrievedKey = snapshot.getKey();
                         lastRetrievedDate = (Long) snapshot.child(CREATION_DATE_CHILD).getValue();
                         data.add((Game) snapshot.getValue(listener.getDataType()));
