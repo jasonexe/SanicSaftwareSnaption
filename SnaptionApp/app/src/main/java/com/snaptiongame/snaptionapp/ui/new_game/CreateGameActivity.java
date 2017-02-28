@@ -34,7 +34,8 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
-import com.snaptiongame.snaptionapp.ui.Utilities;
+import com.snaptiongame.snaptionapp.utilities.ViewUtilities;
+import com.snaptiongame.snaptionapp.ui.friends.FriendsListAdapter;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.io.ByteArrayOutputStream;
@@ -193,6 +194,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         // TODO if/when inviting is also supported, handle when a Friend is added
                         friends.put(friend.getId(), 1);
                     }
+                    friends.put(FirebaseResourceManager.getUserId(), 1);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
@@ -259,7 +261,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @OnClick(R.id.add_friends)
     public void onClickAddFriends() {
-        Utilities.expandCollapseView(addFriendsView, FRIENDS_LIST_MIN_HEIGHT,
+        ViewUtilities.expandCollapseView(addFriendsView, FRIENDS_LIST_MIN_HEIGHT,
                 FRIENDS_LIST_MAX_HEIGHT, FRIENDS_ANIMATION_DURATION);
         displayFriends();
     }
