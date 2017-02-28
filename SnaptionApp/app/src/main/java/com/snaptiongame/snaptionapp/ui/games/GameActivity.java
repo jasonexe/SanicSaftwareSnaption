@@ -5,18 +5,13 @@ import android.content.Context;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.view.ActionProvider;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,7 +20,6 @@ import android.widget.EditText;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
@@ -38,6 +32,7 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
@@ -53,7 +48,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator.createGameInviteIntent;
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -126,6 +120,8 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.possible_caption_cards_list)
     public RecyclerView captionCardsList;
+
+    private ScrollFabHider scrollFabHider;
 
     @BindView(R.id.invite_friends)
     public Button inviteFriendsButton;
@@ -225,43 +221,9 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
+        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
         captionListView.addOnScrollListener(scrollFabHider);
     }
-
-    // Scroll listener that hides the fab during scrolling down, shows it when going up
-    private RecyclerView.OnScrollListener scrollFabHider = new RecyclerView.OnScrollListener() {
-        private int scrolledDistance = 0;
-        private final static int HIDE_THRESHOLD = 10;
-        private boolean fabVisible = true; // This is used because the animations take too long
-
-        @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            // If they've scrolled more than HIDE_THRESHOLD units, and fab is visible, hide it
-            // If they've scrolled less than the units (means they goin up)
-            // and fab isn't visible, show it
-            if (scrolledDistance > HIDE_THRESHOLD && isFabVisible()) {
-                fabVisible = false;
-                fab.hide();
-            } else if (scrolledDistance < -HIDE_THRESHOLD && !isFabVisible()) {
-                fabVisible = true;
-                fab.show();
-            }
-
-            // If the user scrolls in a direction that would change the fab visibility, increment
-            // the distance. If they've already hidden the fab and are still scrolling down,
-            // for example, don't increment the distance. But if they are scrolling down while
-            // fab is showing, increment it.
-            if((isFabVisible() && dy > 0) || !isFabVisible() && dy < 0 || isFabVisible() && dx > 0
-                    || !isFabVisible() && dx < 0){
-                scrolledDistance += dy + dx;
-            }
-        }
-
-        private boolean isFabVisible() {
-            return fabVisible;
-        }
-    };
 
     // Displays the date that the game will end underneath the picture
     private void setupEndDate(Game game) {
