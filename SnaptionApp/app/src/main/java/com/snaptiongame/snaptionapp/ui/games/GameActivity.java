@@ -206,7 +206,11 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setupButtonDisplay(Game game) {
         // When this is initially called, setup the button with current data
         final String pickerId = game.getPicker();
-        determineButtonDisplay(pickerId, game.getPlayers().keySet());
+        if(game.getPlayers() == null) {
+            determineButtonDisplay(pickerId, null);
+        } else {
+            determineButtonDisplay(pickerId, game.getPlayers().keySet());
+        }
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
         joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
