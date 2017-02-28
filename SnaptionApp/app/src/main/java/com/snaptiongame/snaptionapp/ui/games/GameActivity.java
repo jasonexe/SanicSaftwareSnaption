@@ -2,22 +2,22 @@ package com.snaptiongame.snaptionapp.ui.games;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.design.widget.Snackbar;
-import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -27,11 +27,11 @@ import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseDeepLinkCreator;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
@@ -83,6 +83,9 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private LoginManager loginManager;
     private LoginDialog loginDialog;
+
+    @BindView(R.id.toolbar)
+    protected Toolbar toolbar;
 
     @BindView(R.id.image_view)
     protected ImageView imageView;
@@ -157,6 +160,7 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
+        setupToolbar(toolbar);
 
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
