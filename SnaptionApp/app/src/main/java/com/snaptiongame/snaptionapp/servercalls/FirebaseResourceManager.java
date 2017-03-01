@@ -46,8 +46,9 @@ import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
     public static final String FRIENDS_PATH = "users/%s/friends";
+    public static final String USER_PRIVATE_GAMES = "users/%s/privateGames";
     private static final String USER_DIRECTORY = "users/";
-    public static final String CARDS_DIRECTORY = "cards";
+    private static final String CARDS_DIRECTORY = "cards";
     public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";

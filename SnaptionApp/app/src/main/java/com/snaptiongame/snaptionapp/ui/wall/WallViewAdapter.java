@@ -89,7 +89,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         holder.photo.setOnClickListener(new PhotoClickListener(game));
 
         // distinguish between complete and incomplete games
-        if (game.getIsOpen()) {
+        if (game.getIsOpen() && game.getIsPublic()) {
             holder.captionText.setTypeface(Typeface.create(holder.captionText.getTypeface(),
                     Typeface.NORMAL), Typeface.NORMAL);
         }

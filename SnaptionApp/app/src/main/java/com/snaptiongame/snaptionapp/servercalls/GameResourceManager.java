@@ -6,4 +6,6 @@ package com.snaptiongame.snaptionapp.servercalls;
 
 public interface GameResourceManager {
     void retrievePublicGamesByPriority();
+    void retrieveUserPrivateGames();
+    void retrieveGames();
 }

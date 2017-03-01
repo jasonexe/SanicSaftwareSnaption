@@ -47,7 +47,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, listener);
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 5, listener);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -91,7 +91,7 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
-        resourceManager.retrievePublicGamesByPriority();
+        resourceManager.retrieveGames();
     }
 
     @Override
