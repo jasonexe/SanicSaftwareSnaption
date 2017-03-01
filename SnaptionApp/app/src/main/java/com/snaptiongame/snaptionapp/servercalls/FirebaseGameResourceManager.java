@@ -113,7 +113,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     public void retrievePublicGamesByPriority() {
-        System.out.println("Getting public games");
         Query query = database.getReference(GAME_TABLE).orderByPriority();
         if (retrievedPublicOnce) {
             if(lastRetrievedPublicPriority instanceof Double) {
@@ -154,7 +153,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     public void retrieveUserPrivateGames() {
-        System.out.println("Getting private games");
         String privatePath = String.format(USER_PRIVATE_GAMES, userId);
         Query query = database.getReference(privatePath).orderByPriority();
 
@@ -184,7 +182,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 else {
                     retrievedPrivateOnce = true;
                 }
-                System.out.println("Game ids len:" + gameIds.size());
                 convertIdsToGames(gameIds);
             }
 
@@ -205,9 +202,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     privateGames.add(dataSnapshot.getValue(Game.class));
                     if(dataSnapshot.getKey().equals(gameIds.get(gameIds.size() - 1))) {
                         listener.onData(privateGames);
-                        System.out.println("Got last key");
                     } else {
-                        System.out.println("not at last");
                     }
                 }
 
