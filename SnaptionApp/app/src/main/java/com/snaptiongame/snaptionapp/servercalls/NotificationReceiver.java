@@ -85,11 +85,11 @@ public class NotificationReceiver extends FirebaseMessagingService {
                 .setContentTitle("FCM Message")
                 .setContentText("You have been invited to this game! Yahooo")
                 .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
-        NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(game.getPicker());
-        notificationBuilder.setStyle(messagingStyle);
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 

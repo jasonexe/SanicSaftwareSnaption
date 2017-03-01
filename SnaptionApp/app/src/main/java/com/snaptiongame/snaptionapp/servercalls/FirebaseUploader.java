@@ -207,6 +207,11 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
+    public static void updateUserNotificationToken(String userId, final String token) {
+        String userPath = USERS_PATH + "/" + userId;
+        uploadObject(userPath + "/" + "notificationId", token);
+    }
+
     /**
      * Adds the upvote to the caption in the user object and in the game object.
      *
