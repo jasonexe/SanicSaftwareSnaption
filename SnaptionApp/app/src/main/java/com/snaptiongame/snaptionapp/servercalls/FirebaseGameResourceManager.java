@@ -39,10 +39,12 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private String lastRetrievedPrivateKey;
     private Object lastRetrievedPrivatePriority;
 
+    private GameType gameType;
+
     private ResourceListener<List<Game>> privateGameGetter;
-    private GameResourceManager privateGameManager;
+    private FirebaseGameResourceManager privateGameManager;
     private ResourceListener<List<Game>> publicGameGetter;
-    private GameResourceManager publicGameManager;
+    private FirebaseGameResourceManager publicGameManager;
 
 
     /**
@@ -53,16 +55,17 @@ public class FirebaseGameResourceManager implements GameResourceManager {
      * @param publicLimit The number of public games to be retrieved
      * @param privateLimit The number of private games to be retrieved
      * @param listener A ResourceListener for retrieving a List of games
-     * @param getMixed Boolean determining if you want mixed public and subscribed content, or just 1
+     * @param gameType Enum describing if you want mixed games, only private, or only public
      */
-    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<Game>> listener, boolean getMixed) {
+    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<Game>> listener, GameType gameType) {
         this.publicLimit = publicLimit;
         this.privateLimit = privateLimit;
         this.listener = listener;
+        this.gameType = gameType;
         userId = FirebaseResourceManager.getUserId();
         mixedGames = new ArrayList<>();
 
-        if(getMixed) {
+        if(gameType == GameType.MIXED_GAMES) {
             initManagerAndGetters();
         }
     }
@@ -84,13 +87,13 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             }
         };
         privateGameManager = new FirebaseGameResourceManager(0,
-                privateLimit, privateGameGetter, false);
+                privateLimit, privateGameGetter, GameType.PRIVATE_GAMES);
 
         publicGameGetter = new ResourceListener<List<Game>>() {
             @Override
             public void onData(List<Game> data) {
                 mixedGames.addAll(data);
-                privateGameManager.retrieveUserPrivateGames();
+                privateGameManager.retrieveGames();
             }
 
             @Override
@@ -99,7 +102,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             }
         };
         publicGameManager = new FirebaseGameResourceManager(publicLimit,
-                0, publicGameGetter, false);
+                0, publicGameGetter, GameType.PUBLIC_GAMES);
     }
 
 
@@ -109,10 +112,17 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             System.err.println("Call initManagerAndGetters() before retrieveGames()");
         }
         mixedGames.clear();
-        publicGameManager.retrievePublicGamesByPriority();
+        if(gameType == GameType.MIXED_GAMES) {
+            publicGameManager.retrievePublicGamesByPriority();
+        } else if (gameType == GameType.PUBLIC_GAMES) {
+            retrievePublicGamesByPriority();
+        } else if (gameType == GameType.PRIVATE_GAMES) {
+            retrieveUserPrivateGames();
+        }
+
     }
 
-    public void retrievePublicGamesByPriority() {
+    private void retrievePublicGamesByPriority() {
         Query query = database.getReference(GAME_TABLE).orderByPriority();
         if (retrievedPublicOnce) {
             if(lastRetrievedPublicPriority instanceof Double) {
@@ -152,7 +162,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         });
     }
 
-    public void retrieveUserPrivateGames() {
+    private void retrieveUserPrivateGames() {
         String privatePath = String.format(USER_PRIVATE_GAMES, userId);
         Query query = database.getReference(privatePath).orderByPriority();
 
@@ -202,7 +212,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     privateGames.add(dataSnapshot.getValue(Game.class));
                     if(dataSnapshot.getKey().equals(gameIds.get(gameIds.size() - 1))) {
                         listener.onData(privateGames);
-                    } else {
                     }
                 }
 
