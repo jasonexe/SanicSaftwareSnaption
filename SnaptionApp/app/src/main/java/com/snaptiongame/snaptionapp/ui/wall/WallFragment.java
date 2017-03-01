@@ -47,7 +47,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 5, listener);
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 5, listener, true);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -59,6 +59,7 @@ public class WallFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
         final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL);
+
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
