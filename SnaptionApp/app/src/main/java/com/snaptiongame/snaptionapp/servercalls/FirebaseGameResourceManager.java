@@ -30,20 +30,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private int publicLimit;
     private int privateLimit;
 
-    private boolean retrievedPublicOnce = false;
-    private String lastRetrievedPublicKey;
+    private boolean retrievedOnce = false;
+    private String lastRetrievedKey;
+    private Object lastRetrievedPriority;
     private String userId;
-    private Object lastRetrievedPublicPriority;
-    // Since we can pull public or private from this file, they need their own tracking variables
-    private boolean retrievedPrivateOnce = false;
-    private String lastRetrievedPrivateKey;
-    private Object lastRetrievedPrivatePriority;
 
     private GameType gameType;
 
     private ResourceListener<List<Game>> privateGameGetter;
     private FirebaseGameResourceManager privateGameManager;
-    private ResourceListener<List<Game>> publicGameGetter;
     private FirebaseGameResourceManager publicGameManager;
 
 
@@ -89,7 +84,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         privateGameManager = new FirebaseGameResourceManager(0,
                 privateLimit, privateGameGetter, GameType.PRIVATE_GAMES);
 
-        publicGameGetter = new ResourceListener<List<Game>>() {
+        ResourceListener<List<Game>> publicGameGetter = new ResourceListener<List<Game>>() {
             @Override
             public void onData(List<Game> data) {
                 mixedGames.addAll(data);
@@ -108,11 +103,11 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
 
     public void retrieveGames() {
-        if(privateGameGetter == null) {
-            System.err.println("Call initManagerAndGetters() before retrieveGames()");
-        }
         mixedGames.clear();
         if(gameType == GameType.MIXED_GAMES) {
+            if(privateGameGetter == null) {
+                System.err.println("Call initManagerAndGetters() before retrieveGames()");
+            }
             publicGameManager.retrievePublicGamesByPriority();
         } else if (gameType == GameType.PUBLIC_GAMES) {
             retrievePublicGamesByPriority();
@@ -124,11 +119,11 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
     private void retrievePublicGamesByPriority() {
         Query query = database.getReference(GAME_TABLE).orderByPriority();
-        if (retrievedPublicOnce) {
-            if(lastRetrievedPublicPriority instanceof Double) {
+        if (retrievedOnce) {
+            if(lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
                 query = query.limitToFirst(publicLimit + 1)
-                        .startAt((double) lastRetrievedPublicPriority, lastRetrievedPublicKey).endAt(0);
+                        .startAt((double) lastRetrievedPriority, lastRetrievedKey).endAt(0);
             }
         }
         else {
@@ -141,15 +136,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
-                        lastRetrievedPublicPriority = snapshot.getPriority();
-                        lastRetrievedPublicKey = snapshot.getKey();
+                        lastRetrievedPriority = snapshot.getPriority();
+                        lastRetrievedKey = snapshot.getKey();
                         data.add((Game) snapshot.getValue(listener.getDataType()));
                     }
-                    if (retrievedPublicOnce) {
+                    if (retrievedOnce) {
                         data.remove(0);
                     }
                     else {
-                        retrievedPublicOnce = true;
+                        retrievedOnce = true;
                     }
                 }
                 listener.onData(data);
@@ -166,10 +161,10 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         String privatePath = String.format(USER_PRIVATE_GAMES, userId);
         Query query = database.getReference(privatePath).orderByPriority();
 
-        if (retrievedPrivateOnce) {
-            if(lastRetrievedPrivatePriority instanceof Double) {
+        if (retrievedOnce) {
+            if(lastRetrievedPriority instanceof Double) {
                 query = query.limitToFirst(privateLimit + 1)
-                        .startAt((double) lastRetrievedPrivatePriority, lastRetrievedPrivateKey);
+                        .startAt((double) lastRetrievedPriority, lastRetrievedKey);
             }
         }
         else {
@@ -182,15 +177,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 List<String> gameIds = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 for (DataSnapshot snapshot : snapshots) {
-                    lastRetrievedPrivatePriority = snapshot.getPriority();
-                    lastRetrievedPrivateKey = snapshot.getKey();
-                    gameIds.add(lastRetrievedPrivateKey);
+                    lastRetrievedPriority = snapshot.getPriority();
+                    lastRetrievedKey = snapshot.getKey();
+                    gameIds.add(lastRetrievedKey);
                 }
-                if (retrievedPrivateOnce) {
+                if (retrievedOnce) {
                     gameIds.remove(0);
                 }
                 else {
-                    retrievedPrivateOnce = true;
+                    retrievedOnce = true;
                 }
                 convertIdsToGames(gameIds);
             }
