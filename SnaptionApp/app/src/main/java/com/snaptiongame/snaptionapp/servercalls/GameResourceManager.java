@@ -5,5 +5,5 @@ package com.snaptiongame.snaptionapp.servercalls;
  */
 
 public interface GameResourceManager {
-    void retrieveGamesByCreationDate();
+    void retrievePublicGamesByPriority();
 }

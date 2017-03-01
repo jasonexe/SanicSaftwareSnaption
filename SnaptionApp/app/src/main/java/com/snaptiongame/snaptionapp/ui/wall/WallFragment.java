@@ -91,7 +91,7 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
-        resourceManager.retrieveGamesByCreationDate();
+        resourceManager.retrievePublicGamesByPriority();
     }
 
     @Override

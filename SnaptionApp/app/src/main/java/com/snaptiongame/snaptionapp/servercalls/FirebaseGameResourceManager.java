@@ -40,15 +40,14 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.listener = listener;
     }
 
-    public void retrieveGamesByCreationDate() {
+    public void retrievePublicGamesByPriority() {
 //        Query query = database.getReference(GAME_TABLE).orderByChild(CREATION_DATE_CHILD);
         Query query = database.getReference(GAME_TABLE).orderByPriority();
         if (retrievedOnce) {
             if(lastRetrievedPriority instanceof Double) {
-                query = query.limitToFirst(limit + 1).startAt((double) lastRetrievedPriority);
-                System.out.println("Priority limit worked");
-            } else {
-                System.out.println("Priority isn't double??");
+                // endAt 0, any priority > 0 will be a private game, we don't want those per se.
+                query = query.limitToFirst(limit + 1)
+                        .startAt((double) lastRetrievedPriority, lastRetrievedKey).endAt(0);
             }
         }
         else {
@@ -78,7 +77,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveGamesByCreationDate - " + databaseError.toString());
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePublicGamesByPriority - " + databaseError.toString());
             }
         });
     }
