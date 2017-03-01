@@ -72,7 +72,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 mixedGames.addAll(data);
                 // Since the limits will normally be relatively small, we can shuffle them
                 // to give a little bit of a different order every time
-                Collections.shuffle(mixedGames);
+                // comment out for now to demonstrate ordering in app
+//                Collections.shuffle(mixedGames);
                 listener.onData(new ArrayList<>(mixedGames));
             }
 
