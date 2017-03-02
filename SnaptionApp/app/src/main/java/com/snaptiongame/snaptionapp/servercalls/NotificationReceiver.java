@@ -10,6 +10,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
+import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
@@ -36,17 +37,21 @@ import java.util.Map;
 public class NotificationReceiver extends FirebaseMessagingService {
 
     private static final String gameIdKey = "gameId";
+    private static final String userIdKey = "userId";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         //message received in foreground
         Map<String, String> data = remoteMessage.getData();
         String gameId = null;
+        String senderUserId = null;
 
         //if a data message was received
         if (data != null && data.size() > 0) {
             //create intent to open up game from remoteMessage info
             gameId = data.get(gameIdKey);
+            senderUserId = data.get(userIdKey);
+            createNotification(gameId, senderUserId);
         }
 
         //if a notification was received
@@ -54,25 +59,37 @@ public class NotificationReceiver extends FirebaseMessagingService {
             //not sure if needed yet
         }
 
-        if (gameId != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseGameResourceManager.GAME_TABLE + "/" + gameId, new ResourceListener<Game>() {
-                @Override
-                public void onData(Game game) {
-                    createNotification(game);
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Game.class;
-                }
-            });
-        }
-
-
-
     }
 
-    private void createNotification(Game game) {
+    private void createNotification(String gameId, final String senderUserId) {
+        ResourceListener<Game> game = new ResourceListener<Game>() {
+            @Override
+            public void onData(final Game data) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.USER_DIRECTORY + senderUserId, new ResourceListener<User>() {
+                    @Override
+                    public void onData(User user) {
+                        sendNotification(data, user);
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return User.class;
+                    }
+                });
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        };
+
+        if (gameId != null && senderUserId != null) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseGameResourceManager.GAME_TABLE + "/", game);
+        }
+    }
+
+    private void sendNotification(Game game, User user) {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -82,8 +99,8 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.flag)
-                .setContentTitle("FCM Message")
-                .setContentText("You have been invited to this game! Yahooo")
+                .setContentTitle("Snaption Game Invite")
+                .setContentText(user.getDisplayName() + " has invited you to a game!")
                 .setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent)
