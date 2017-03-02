@@ -56,12 +56,30 @@
 
         <activity android:name=".ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"
-            android:label="@string/friends"/>
+            android:label="@string/friends">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
 
         <activity android:name=".ui.games.GameActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/captions"/>
+
+        <activity android:name=".ui.friends.SearchActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/title_activity_search" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+                android:value=".SearchResultsActivity"/>
+        </activity>
 
     </application>
 

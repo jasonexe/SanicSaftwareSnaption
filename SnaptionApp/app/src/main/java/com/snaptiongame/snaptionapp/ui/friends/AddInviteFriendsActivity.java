@@ -1,9 +1,16 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -174,5 +181,20 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     private void setLoginProviderFriendsLabel() {
         loginProviderFriendsLabel.setText(viewModel.getLoginProviderLabel(getApplicationContext()));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
+
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+
+        return true;
     }
 }
