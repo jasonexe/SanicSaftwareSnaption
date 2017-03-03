@@ -39,6 +39,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     // BEGIN PRIVATE CLASSES //
 
+    /**
+     * The click listener for the upvote button.
+     */
     private class UpvoteClickListener implements View.OnClickListener {
         Caption caption;
         boolean hasUpvoted;
@@ -60,9 +63,14 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         }
     }
 
+    /**
+     * A listener for updating captions.
+     *
+     * @param <T> It's Caption. Don't use something else.
+     */
     private class CaptionListener<T> implements ResourceListener<T> {
         public Class getDataType() {
-            return Map.class;
+            return Caption.class;
         }
 
         public void onData(T data) {
@@ -92,7 +100,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             if (bVotes != null) {
                 bVotesSize = bVotes.size();
             }
-            return bVotesSize - aVotesSize;
+            // If there's a tie in the vote count it will sort based on date
+            return bVotesSize == aVotesSize ? ((Caption)b).getId().compareTo(((Caption)b).getId()) :
+                    bVotesSize - aVotesSize;
         }
     }
 
@@ -103,17 +113,18 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     /**
      * Creates an instance of this GameCaptionViewAdapter.
      *
-     * @param items The list of Captions to build the views from
+     * @param gameId The game to pull captions from
+     * @param loginDialog The dialog to display if the user isn't logged in
      */
-    public GameCaptionViewAdapter(String gameId, List<Caption> items, LoginDialog loginDialog) {
+    public GameCaptionViewAdapter(String gameId, LoginDialog loginDialog) {
         this.items = new ArrayList<>();
         //Collections.sort(this.items, new CaptionComparator<Caption>());
         this.loginDialog = loginDialog;
         firebaseResourceManager = new FirebaseResourceManager();
 
-        CaptionListener<Map<String, Caption>> captionListener = new CaptionListener<>();
+        CaptionListener<Caption> captionListener = new CaptionListener<>();
         //Gets the map of captions and configures it to call the caption listener whenever it is modified
-        firebaseResourceManager.retrieveCaptionMapWithUpdates(String.format(CAPTIONS_PATH,
+        firebaseResourceManager.retrieveMapWithUpdates(String.format(CAPTIONS_PATH,
                 gameId), captionListener);
     }
 
@@ -161,6 +172,13 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
     }
 
+    /**
+     * Creates the caption view holder.
+     *
+     * @param parent The parent to display it in
+     * @param viewType
+     * @return the caption view holder
+     */
     @Override
     public CaptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_caption_item,
@@ -168,6 +186,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         return new CaptionViewHolder(view);
     }
 
+    /**
+     * Gets the number of items in the list.
+     *
+     * @return the number of items
+     */
     @Override
     public int getItemCount() {
         if (items == null) {
@@ -248,6 +271,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         }
     }
 
+    /**
+     * Re-sorts the list and updates the view.
+     */
     private void refreshView() {
         Collections.sort(items, new CaptionComparator<Caption>());
         notifyDataSetChanged();

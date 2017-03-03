@@ -58,10 +58,6 @@ public class Caption implements Serializable {
         votes = new HashMap<>();
     }
 
-    public void setVotes(Map<String, Integer> votes) {
-        this.votes = votes;
-    }
-
     public Card getCard() {
         return card;
     }

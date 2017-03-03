@@ -115,36 +115,22 @@ public class FirebaseResourceManager {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Tells firebase what type of object to return
-                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
-                        new GenericTypeIndicator<Map<String, Object>>() {};
-                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
-                listener.onData(data);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        };
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    public void retrieveCaptionMapWithUpdates(String path, final ResourceListener listener) {
-        // if the FirebaseResourceManager is already being used to listen to the db, remove the
-        // previous listener
-        removeListener();
-
-        databaseReference = database.getReference(path);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Tells firebase what type of object to return
-                GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
-                        new GenericTypeIndicator<Map<String, Caption>>() {};
-                Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
-                listener.onData(data);
+                // Needs to check for the specific object, else Object will set it as a map or array
+                // If you need this method for another data type, add in more if statements
+                if (listener.getDataType() == Caption.class) {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Caption>>() {};
+                    Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
+                else {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Object>>() {};
+                    Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
             }
 
             @Override
