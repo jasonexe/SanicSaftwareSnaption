@@ -11,6 +11,7 @@ public class User implements Person {
     private String id;
     private String email;
     private String displayName;
+    private String lowercaseDisplayName;
     private Map<String, Integer> friends;
     private Map<String, Integer> createdGames;
     private Map<String, Caption> captions;
@@ -27,6 +28,7 @@ public class User implements Person {
         this.id = id;
         this.email = email;
         this.displayName = displayName;
+        lowercaseDisplayName = displayName.toLowerCase();
         this.notificationId = notificationId;
         this.facebookId = facebookId;
         this.imagePath = imagePath;
@@ -42,13 +44,7 @@ public class User implements Person {
                 String facebookId, String imagePath, Map<String, Integer> friends,
                 Map<String, Integer> games, Map<String, Caption> captions,
                 Map<String, Integer> blockedUsers, Map<String, Integer> privateGames) {
-        this.id = id;
-        this.email = email;
-        this.displayName = displayName;
-        this.notificationId = notificationId;
-        this.facebookId = facebookId;
-        this.imagePath = imagePath;
-
+        this(id, email, displayName, notificationId, facebookId, imagePath);
         this.friends = friends;
         this.createdGames = games;
         this.captions = captions;
@@ -80,6 +76,8 @@ public class User implements Person {
         return displayName;
     }
 
+    public String getLowercaseDisplayName() { return lowercaseDisplayName; }
+
     public String getEmail() {
         return email;
     }
@@ -110,6 +108,7 @@ public class User implements Person {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+        this.lowercaseDisplayName = displayName.toLowerCase();
     }
 
     public void setFriends(Map<String, Integer> friends) {

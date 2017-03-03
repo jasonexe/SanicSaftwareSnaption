@@ -216,7 +216,6 @@ public class LoginManager {
             String imagePath = PHOTOS_FOLDER + id;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
-            String lowercaseDisplayName = displayName.toLowerCase();
             String notificationId = FirebaseInstanceId.getInstance().getToken();
 
             //getting facebook photo
