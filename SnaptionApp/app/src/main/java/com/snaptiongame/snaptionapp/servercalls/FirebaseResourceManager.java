@@ -351,27 +351,32 @@ public class FirebaseResourceManager {
      */
     public static void loadImageIntoView(String imagePath, final ImageView imageView) {
         StorageReference ref = storage.child(imagePath);
-        Glide.with(imageView.getContext())
-                .using(new FirebaseImageLoader())
-                .load(ref).fitCenter()
-                .listener(new RequestListener<StorageReference, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, StorageReference model,
-                                               Target<GlideDrawable> target,
-                                               boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource,
-                                                   StorageReference model,
+        try {
+            Glide.with(imageView.getContext())
+                    .using(new FirebaseImageLoader())
+                    .load(ref).fitCenter()
+                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, StorageReference model,
                                                    Target<GlideDrawable> target,
-                                                   boolean isFromMemoryCache,
                                                    boolean isFirstResource) {
-                        return false;
-                    }
-                })
-                .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource,
+                                                       StorageReference model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFromMemoryCache,
+                                                       boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            FirebaseReporter.reportException(e, "Glide image load failed");
+        }
     }
 
     public static void getImageURI(String imagePath, final ResourceListener<Uri> pathListener) {
