@@ -274,10 +274,10 @@ public class GameActivity extends HomeAppCompatActivity {
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(game.getId(), new ArrayList<>(game.getCaptions().values()), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(game.getId(), loginDialog);
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(game.getId(), new ArrayList<Caption>(), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(game.getId(), loginDialog);
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
