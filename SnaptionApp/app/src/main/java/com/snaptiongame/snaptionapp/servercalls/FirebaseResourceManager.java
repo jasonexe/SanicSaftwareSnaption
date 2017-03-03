@@ -28,6 +28,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
@@ -118,6 +119,31 @@ public class FirebaseResourceManager {
                 GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
                         new GenericTypeIndicator<Map<String, Object>>() {};
                 Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w(TAG, "Failed to read value.", error.toException());
+            }
+        };
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    public void retrieveCaptionMapWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Tells firebase what type of object to return
+                GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
+                        new GenericTypeIndicator<Map<String, Caption>>() {};
+                Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
                 listener.onData(data);
             }
 

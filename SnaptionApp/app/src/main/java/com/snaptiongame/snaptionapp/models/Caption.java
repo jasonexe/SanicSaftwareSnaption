@@ -58,6 +58,10 @@ public class Caption implements Serializable {
         votes = new HashMap<>();
     }
 
+    public void setVotes(Map<String, Integer> votes) {
+        this.votes = votes;
+    }
+
     public Card getCard() {
         return card;
     }
@@ -81,7 +85,7 @@ public class Caption implements Serializable {
     }
 
     public int retrieveNumVotes() {
-        if(votes == null) {
+        if (votes == null) {
             return 0;
         } else {
             return votes.size();
