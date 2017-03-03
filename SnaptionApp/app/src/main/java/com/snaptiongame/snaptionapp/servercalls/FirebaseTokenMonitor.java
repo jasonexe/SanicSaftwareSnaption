@@ -27,8 +27,6 @@ public class FirebaseTokenMonitor extends FirebaseInstanceIdService {
         String token = FirebaseInstanceId.getInstance().getToken();
         //replace token in firebase with this token
         String userId = FirebaseResourceManager.getUserId();
-        String userPath = FirebaseResourceManager.USER_DIRECTORY + userId;
-        FirebaseUploader uploader = new FirebaseUploader();
-        uploader.uploadObject(userPath + "/" + "notificationId", token);
+        FirebaseUploader.updateUserNotificationToken(userId, token);
     }
 }

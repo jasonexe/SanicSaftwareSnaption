@@ -38,6 +38,7 @@ public class FirebaseUploader implements Uploader {
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
     private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
+    private static final String NOTIFICATION_ID = "notificationId";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -209,7 +210,7 @@ public class FirebaseUploader implements Uploader {
 
     public static void updateUserNotificationToken(String userId, final String token) {
         String userPath = USERS_PATH + "/" + userId;
-        uploadObject(userPath + "/" + "notificationId", token);
+        uploadObject(userPath + "/" + NOTIFICATION_ID, token);
     }
 
     /**

@@ -58,7 +58,6 @@ public class NotificationReceiver extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             //not sure if needed yet
         }
-
     }
 
     private void createNotification(String gameId, final String senderUserId) {
