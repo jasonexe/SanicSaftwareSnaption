@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Jason Krein
  */
 
-public class Caption implements Serializable {
+public class Caption implements Serializable, Comparable<Caption> {
     public String id;       // The id of the caption
     public String userId;   // The person who created the caption
     public String gameId;   // The game the caption was made on
@@ -131,5 +131,28 @@ public class Caption implements Serializable {
 
     public String toString() {
         return this.getId();
+    }
+
+    /**
+     * Compares two Captions for value.
+     *
+     * @param a the caption to compare value to
+     * @return a comparison value
+     */
+    public int compareTo(Caption a) {
+        Map<String, Integer> aVotes = a.getVotes();
+        Map<String, Integer> bVotes = this.getVotes();
+        int aVotesSize = 0;
+        int bVotesSize = 0;
+
+        if (aVotes != null) {
+            aVotesSize = aVotes.size();
+        }
+        if (bVotes != null) {
+            bVotesSize = bVotes.size();
+        }
+        // If there's a tie in the vote count it will sort based on date
+        return bVotesSize == aVotesSize ? this.getId().compareTo(a.getId()) :
+                aVotesSize - bVotesSize;
     }
 }
