@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -344,12 +346,15 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Loads an image from Firebase into a given ImageView.
+     * Loads an image from Firebase into a given ImageView and notifies the given listener when the
+     * inmage has been loaded into the ImageView.
      *
-     * @param imagePath The image file path name
-     * @param imageView The ImageView in which the image should be loaded
+     * @param imagePath Image file path name
+     * @param imageView ImageView in which the image should be loaded
+     * @param listener ResourceListener to be notified when the image has been loaded
      */
-    public static void loadImageIntoView(String imagePath, final ImageView imageView) {
+    public static void loadImageIntoView(final String imagePath, final ImageView imageView,
+                                         final ResourceListener<Boolean> listener) {
         StorageReference ref = storage.child(imagePath);
         Glide.with(imageView.getContext())
                 .using(new FirebaseImageLoader())
@@ -363,14 +368,29 @@ public class FirebaseResourceManager {
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource,
-                                                   StorageReference model,
+                    public boolean onResourceReady(GlideDrawable resource, StorageReference model,
                                                    Target<GlideDrawable> target,
                                                    boolean isFromMemoryCache,
                                                    boolean isFirstResource) {
+                        if (listener != null) {
+                            listener.onData(true);
+                        }
                         return false;
                     }
-                })
+                }).into(imageView);
+    }
+
+    /**
+     * Loads an image from Firebase into a given ImageView.
+     *
+     * @param imagePath The image file path name
+     * @param imageView The ImageView in which the image should be loaded
+     */
+    public static void loadImageIntoView(String imagePath, final ImageView imageView) {
+        StorageReference ref = storage.child(imagePath);
+        Glide.with(imageView.getContext())
+                .using(new FirebaseImageLoader())
+                .load(ref).fitCenter()
                 .placeholder(android.R.drawable.progress_horizontal).into(imageView);
     }
 
@@ -399,7 +419,7 @@ public class FirebaseResourceManager {
      * @param friendListener ResourceListener the list of Friends is returned to
      */
     private static void getFacebookFriends(final User user,
-                                          final ResourceListener<Friend> friendListener) {
+                                           final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
             public void onCompleted(GraphResponse response) {
@@ -515,7 +535,7 @@ public class FirebaseResourceManager {
      * @param facebookId String unique Facebook id of a Facebook user
      */
     public static void makeFacebookFriendsRequest(GraphRequest.Callback friendsCallback,
-                                                   String facebookId) {
+                                                  String facebookId) {
         new GraphRequest(AccessToken.getCurrentAccessToken(), String.format(FB_FRIENDS_REQUEST,
                 facebookId), null, HttpMethod.GET, friendsCallback).executeAsync();
     }
