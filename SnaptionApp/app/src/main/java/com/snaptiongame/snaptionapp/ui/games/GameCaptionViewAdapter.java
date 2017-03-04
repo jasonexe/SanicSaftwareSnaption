@@ -16,12 +16,9 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -210,9 +207,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
             @Override
-            public void onComplete() {
-
-            }
+            public void onComplete() {}
 
             @Override
             public void onError(String errorMessage) {
