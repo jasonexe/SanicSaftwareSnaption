@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -16,7 +17,16 @@ import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +48,9 @@ public class FirebaseUploader implements Uploader {
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
     private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
+    private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
+    private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
+    private static final String POST = "POST";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -90,7 +103,7 @@ public class FirebaseUploader implements Uploader {
         addCompletedGameObj(game);
     }
 
-    private void addCompletedGameObj(Game game) {
+    private void addCompletedGameObj(final Game game) {
         // Add game object to games table
         String gameId = game.getId();
         DatabaseReference gamesRef = database.getReference(GAMES_PATH + "/" + gameId);
@@ -99,6 +112,81 @@ public class FirebaseUploader implements Uploader {
         addGameToUserCreatedGames(game);
         // Add gameId to all players' privateGames map
         addGameToPlayerPrivateGames(game);
+        //notify players if there are any
+        if (game.getPlayers() != null) {
+            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
+        }
+    }
+
+    private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
+
+        //listener once you get a user to send notification
+        final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
+            @Override
+            public void onData(User user) {
+                JSONObject json = createJson(gameId, user);
+                sendNotification(json);
+            }
+
+            @Override
+            public Class getDataType() {
+                return User.class;
+            }
+        };
+
+        //for each player invited to the game, send notification
+        for (String playerId : players) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
+                    notifyPlayerListener);
+        }
+    }
+
+    private JSONObject createJson(String gameId, User user) {
+        try {
+            JSONObject json = new JSONObject();
+            //json to : notId, priority : high, badge : enabled, data : data
+            json.put("to", user.getNotificationId());
+            JSONObject data = new JSONObject();
+            data.put("gameId", gameId);
+            data.put("userId", user.getId());
+            json.put("data", data);
+            return json;
+        } catch (JSONException err) {
+            err.printStackTrace();
+            Log.d("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
+        }
+        return null;
+    }
+
+    private void sendNotification(final JSONObject json) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL firebaseMessageUrl = new URL(FIREBASE_MESSAGE_URL);
+                    final HttpURLConnection connection =(HttpURLConnection)firebaseMessageUrl.openConnection();
+                    connection.setRequestMethod(POST);
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setRequestProperty("Authorization",  "key=" + FIREBASE_SERVER_KEY);
+                    final DataOutputStream write = new DataOutputStream(connection.getOutputStream());
+                    write.writeBytes(json.toString());
+                    write.flush();
+                    write.close();
+                    connection.connect();
+                }
+                catch (MalformedURLException err) {
+                    err.printStackTrace();
+                    Log.d("FIREBASE_UPLOADER", "Failed to create URL " + err.getMessage());
+                }
+                catch (IOException err) {
+                    err.printStackTrace();
+                    Log.d("FIREBASE_UPLOADER", "Failed to write JSON to firebase " + err.getMessage());
+                }
+            }
+        }).start();
+
     }
 
     @Override
@@ -262,18 +350,18 @@ public class FirebaseUploader implements Uploader {
         // Updates the values in the database
         database.getReference().updateChildren(childUpdates,
                 new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError,
-                                   DatabaseReference databaseReference) {
-                if (databaseError == null) {
-                    listener.onComplete();
-                }
-                else {
-                    listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
-                            ? ITEM_ALREADY_EXISTS_ERROR : "");
-                };
-            }
-        });
+                    @Override
+                    public void onComplete(DatabaseError databaseError,
+                                           DatabaseReference databaseReference) {
+                        if (databaseError == null) {
+                            listener.onComplete();
+                        }
+                        else {
+                            listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
+                                    ? ITEM_ALREADY_EXISTS_ERROR : "");
+                        };
+                    }
+                });
     }
 
     public static void addCurrentUserToGame(Game game, final ResourceListener<Exception> errorDisplayer) {
