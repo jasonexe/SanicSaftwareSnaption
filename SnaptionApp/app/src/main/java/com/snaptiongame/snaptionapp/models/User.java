@@ -6,7 +6,7 @@ import java.util.Map;
  * Created by austinrobarts on 1/21/17.
  */
 
-public class User implements Person {
+public class User implements Person, Comparable<User> {
 
     private String id;
     private String email;
@@ -162,7 +162,19 @@ public class User implements Person {
 
     @Override
     public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
         return other.getClass() == getClass() && ((User) other).id.equals(id);
+    }
+
+    @Override
+    public int compareTo(User other) {
+        int result = displayName.toLowerCase().compareTo(other.getDisplayName().toLowerCase());
+        if (result == 0) {
+            result = email.compareTo(other.getEmail());
+        }
+        return result;
     }
 }
 

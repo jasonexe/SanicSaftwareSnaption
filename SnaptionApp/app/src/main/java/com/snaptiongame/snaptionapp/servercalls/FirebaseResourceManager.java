@@ -47,7 +47,6 @@ import static com.google.android.gms.internal.zzs.TAG;
 public class FirebaseResourceManager {
     public static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USER_DIRECTORY = "users/";
-    private static final String USER_NAME = "displayName";
     public static final String CARDS_DIRECTORY = "cards";
     public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
@@ -567,9 +566,8 @@ public class FirebaseResourceManager {
      * @param begin the name/e-mail to be searched for
      * @param listener ResourceListener the users are returned to
      */
-    public static void retrieveUsersByName(String begin, final ResourceListener<List<User>> listener) {
-        Query query = database.getReference(USER_DIRECTORY).orderByChild(USER_NAME).startAt(begin).endAt(begin + "~");
-
+    public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
+        Query query = database.getReference(USER_DIRECTORY).orderByChild(path).startAt(begin).endAt(begin + "~");
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

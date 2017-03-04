@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -27,6 +28,10 @@ public class UserTest {
     User user1;
     User user2;
     User user3;
+    User user4;
+    User user5;
+    User user6;
+    User user7;
 
     @Before
     public void setup() {
@@ -53,6 +58,14 @@ public class UserTest {
         user3 = new User("id", "email", "displayName",
                 "notificationId", "facebookId", "imagePath",
                 friends, games, captions, blockedUsers, privateGames);
+        user4 = new User("id2", "email", "displayName",
+                "notificationId", "facebookId", "imagePath");
+        user5 = new User("id2", "email", "displayName",
+                "notificationId", "facebookId", "imagePath");
+        user6 = new User("id2", "email", "displayName2",
+                "notificationId", "facebookId", "imagePath");
+        user7 = new User("id2", "email2", "displayName",
+                "notificationId", "facebookId", "imagePath");
     }
 
     @Test
@@ -174,5 +187,22 @@ public class UserTest {
         games.put("game3", 1);
         user3.setCreatedGames(games);
         assertEquals(3, user3.retrieveCreatedGameCount());
+    }
+
+    @Test
+    public void testEquals() {
+        assertEquals(user4, user5);
+        assertFalse(user2.equals(user4));
+        assertFalse(user4.equals(null));
+        assertFalse(user4.equals(new Object()));
+    }
+
+    @Test
+    public void testCompareTo() {
+        assertEquals(0, user4.compareTo(user5));
+        assertEquals(-1, user4.compareTo(user6));
+        assertEquals(-1, user4.compareTo(user7));
+        assertEquals(-1, user7.compareTo(user6));
+        assertEquals(1, user7.compareTo(user4));
     }
 }

@@ -4,13 +4,10 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.ListViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
@@ -18,8 +15,10 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.TreeSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,7 +29,10 @@ import butterknife.ButterKnife;
 
 public class SearchActivity extends Activity {
 
-    private List<User> users;
+    private static final String USER_NAME = "displayName";
+    private static final String EMAIL = "email";
+
+    private List<User> users = new ArrayList<User>();
     private FriendsListAdapter userListAdapter;
 
     @BindView(R.id.search_list)
@@ -40,19 +42,15 @@ public class SearchActivity extends Activity {
     protected TextView searchNotice;
 
     private Context context = this;
+    private int count = 0;
 
     private ResourceListener<List<User>> listener = new ResourceListener<List<User>>() {
         @Override
         public void onData(List<User> userList) {
-            users = userList;
-
-            if (users != null) {
-                searchNotice.setVisibility(View.GONE);
-                userListAdapter = new FriendsListAdapter(users);
-                userViewList.setAdapter(userListAdapter);
-            }
-            else {
-                searchNotice.setVisibility(View.VISIBLE);
+            users.addAll(userList);
+            count++;
+            if (count > 1) {
+                displayUsers();
             }
         }
 
@@ -82,8 +80,22 @@ public class SearchActivity extends Activity {
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            FirebaseResourceManager.retrieveUsersByName(query, listener);
+            FirebaseResourceManager.retrieveUsersByName(query, USER_NAME, listener);
+            FirebaseResourceManager.retrieveUsersByName(query, EMAIL, listener);
+        }
 
+    }
+
+    private void displayUsers() {
+        if (users.size() > 0) {
+            Set<User> set = new TreeSet<>(users);
+            searchNotice.setVisibility(View.GONE);
+            userListAdapter = new FriendsListAdapter(new ArrayList<>(set));
+            userViewList.setAdapter(userListAdapter);
+        }
+        else {
+            searchNotice.setVisibility(View.VISIBLE);
+            searchNotice.setText("Nothing Found");
         }
     }
 
