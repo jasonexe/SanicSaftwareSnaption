@@ -58,6 +58,8 @@
     <string name="captioner_name">- %s</string>
     <string name="search_text">Search for Snaption users</string>
     <string name="title_activity_search">Search</string>
+    <string name="game_invite_notification_text">%s has invited you to a game!</string>
+    <string name="game_invite_notification_title">Snaption Game Invitation</string>
 
     <string name="add_friends">+ add friends</string>
     <string name="no_friends_add_invite">You don\'t have any friends to add or invite.</string>

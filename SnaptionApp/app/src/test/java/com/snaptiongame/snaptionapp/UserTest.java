@@ -190,6 +190,15 @@ public class UserTest {
     }
 
     @Test
+    public void testLowercase() {
+        assertEquals(null, user1.getLowercaseDisplayName());
+        assertEquals("displayname", user2.getLowercaseDisplayName());
+        assertEquals("displayname", user3.getLowercaseDisplayName());
+        user2.setDisplayName("HELLO MOTO");
+        assertEquals("hello moto", user2.getLowercaseDisplayName());
+    }
+
+    @Test
     public void testEquals() {
         assertEquals(user4, user5);
         assertFalse(user2.equals(user4));
