@@ -51,6 +51,7 @@ public class FirebaseUploader implements Uploader {
     private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
     private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
     private static final String POST = "POST";
+    private static final String NOTIFICATION_ID = "notificationId";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -293,6 +294,11 @@ public class FirebaseUploader implements Uploader {
                 return User.class;
             }
         });
+    }
+
+    public static void updateUserNotificationToken(String userId, final String token) {
+        String userPath = USERS_PATH + "/" + userId;
+        uploadObject(userPath + "/" + NOTIFICATION_ID, token);
     }
 
     /**
