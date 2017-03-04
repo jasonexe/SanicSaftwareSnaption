@@ -74,7 +74,13 @@ public class User implements Person {
         return displayName;
     }
 
-    public String getLowercaseDisplayName() { return displayName.toLowerCase(); }
+    public String getLowercaseDisplayName() {
+        String lowerName = null;
+        if (displayName != null) {
+            lowerName = displayName.toLowerCase();
+        }
+        return lowerName;
+    }
 
     public String getEmail() {
         return email;
