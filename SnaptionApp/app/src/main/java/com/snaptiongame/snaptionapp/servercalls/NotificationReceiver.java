@@ -102,9 +102,10 @@ public class NotificationReceiver extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.flag)
-                .setContentTitle("Snaption Game Invite")
-                .setContentText(user.getDisplayName() + " has invited you to a game!")
+                .setSmallIcon(R.drawable.ic_snaption)
+                .setContentTitle(getResources().getString(R.string.game_invite_notification_title))
+                .setContentText(String.format(getResources().getString(R.string.game_invite_notification_text),
+                        user.getDisplayName()))
                 .setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent)
