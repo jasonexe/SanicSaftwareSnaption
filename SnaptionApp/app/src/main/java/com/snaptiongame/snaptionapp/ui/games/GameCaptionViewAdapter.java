@@ -34,7 +34,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private List<Caption> items;
     private LoginDialog loginDialog;
     private FirebaseResourceManager firebaseResourceManager;
-    private static final String CAPTIONS_PATH = "games/%s/captions";
     private static final String CAPTION_PATH = "games/%s/captions/%s";
 
     // BEGIN PRIVATE CLASSES //
@@ -55,29 +54,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         public void onClick(View upvote) {
             // Check if user is logged in before letting them upvote. If not logged in, display
             // login dialog.
-            if(FirebaseResourceManager.getUserId() == null) {
+            if (FirebaseResourceManager.getUserId() == null) {
                 loginDialog.show();
-            } else {
-                handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
             }
-        }
-    }
-
-    /**
-     * A listener for updating captions.
-     *
-     * @param <T> It's Caption. Don't use something else.
-     */
-    private class CaptionListener<T> implements ResourceListener<T> {
-        public Class getDataType() {
-            return Caption.class;
-        }
-
-        public void onData(T data) {
-            if (data != null) {
-                HashMap<String, Caption> captionMap = (HashMap<String, Caption>) data;
-                items = new ArrayList<>(captionMap.values());
-                refreshView();
+            else {
+                handleClickUpvote((ImageView) upvote, caption, hasUpvoted);
             }
         }
     }
@@ -131,28 +112,30 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         ResourceListener upvoteListener = new ResourceListener<Caption>() {
             @Override
             public void onData(Caption updatedCaption) {
+                // Check to make sure caption exists
                 if (updatedCaption != null) {
+                    int oldIndex = items.indexOf(caption);
+                    items.remove(caption);
+                    items.add(updatedCaption);
+                    Collections.sort(items);
+                    int newIndex = items.indexOf(updatedCaption);
+                    // Check to see if the caption has moved, and if it has then animate its change
+                    if (oldIndex != newIndex) {
+                        notifyItemMoved(oldIndex, newIndex);
+                    }
+                    // Set the display to reflect the status of the caption
                     if (updatedCaption.votes != null) {
-                        int oldIndex = items.indexOf(caption);
-                        items.remove(caption);
-                        items.add(updatedCaption);
-                        Collections.sort(items);
-                        int newIndex = items.indexOf(updatedCaption);
-                        if (oldIndex != newIndex) {
-                            notifyItemMoved(oldIndex, newIndex);
-                        }
-                        else {
-                            // Set upvotes to be the list of upvotes;
-                            holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
-                                    "%d", updatedCaption.votes.size()));
-                            // Sets the click listener, which changes implementation depending on upvote status
-                            holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
-                                    updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId())));
-                            // Sets the icon depending on whether it has been upvoted
-                            setUpvoteIcon(holder.upvoteIcon,
-                                    updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId()));
-                        }
-                    } else {
+                        // Set upvotes to be the list of upvotes;
+                        holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
+                                "%d", updatedCaption.votes.size()));
+                        // Sets the click listener, which changes implementation depending on upvote status
+                        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
+                                updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId())));
+                        // Sets the icon depending on whether it has been upvoted
+                        setUpvoteIcon(holder.upvoteIcon,
+                                updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId()));
+                    }
+                    else {
                         setDefaultUpvoteView(holder, updatedCaption);
                     }
                 }
@@ -164,7 +147,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         };
 
-        setDefaultUpvoteView(holder, caption);
         holder.captionText.setText(caption.retrieveCaptionText());
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
@@ -271,14 +253,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             upvoteIcon.setImageDrawable(upvoteIcon.getResources()
                     .getDrawable(R.drawable.thumbs_up_blank));
         }
-    }
-
-    /**
-     * Re-sorts the list and updates the view.
-     */
-    private void refreshView() {
-        Collections.sort(items);
-        notifyDataSetChanged();
     }
 
     /**
