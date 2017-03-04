@@ -32,6 +32,7 @@ import butterknife.Unbinder;
 
 public class WallFragment extends Fragment {
     private static final int NUM_COLUMNS = 2;
+    private static final int SCROLL_DOWN_CONST = 1;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
@@ -73,12 +74,7 @@ public class WallFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                int totalChildren = manager.getItemCount();
-                int totalChildrenVisible = manager.getChildCount();
-                int[] firstVisibleChildren = null;
-                firstVisibleChildren = manager.findFirstVisibleItemPositions(firstVisibleChildren);
-                if (!isLoading && firstVisibleChildren != null && firstVisibleChildren.length > 0 &&
-                        firstVisibleChildren[0] + totalChildrenVisible > totalChildren) {
+                if(!isLoading && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
                     loadMoreGames();
                 }
             }
