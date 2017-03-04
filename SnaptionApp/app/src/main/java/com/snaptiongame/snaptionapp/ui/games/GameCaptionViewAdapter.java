@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -34,6 +35,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private LoginDialog loginDialog;
     private FirebaseResourceManager firebaseResourceManager;
     private static final String CAPTIONS_PATH = "games/%s/captions";
+    private static final String CAPTION_PATH = "games/%s/captions/%s";
 
     // BEGIN PRIVATE CLASSES //
 
@@ -87,19 +89,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     /**
      * Creates an instance of this GameCaptionViewAdapter.
      *
-     * @param gameId The game to pull captions from
-     * @param loginDialog The dialog to display if the user isn't logged in
+     * @param items The list of Captions to build the views from
      */
-    public GameCaptionViewAdapter(String gameId, LoginDialog loginDialog) {
-        this.items = new ArrayList<>();
-        //Collections.sort(this.items, new CaptionComparator<Caption>());
+    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog) {
+        this.items = items;
+        Collections.sort(this.items);
         this.loginDialog = loginDialog;
-        firebaseResourceManager = new FirebaseResourceManager();
-
-        CaptionListener<Caption> captionListener = new CaptionListener<>();
-        //Gets the map of captions and configures it to call the caption listener whenever it is modified
-        firebaseResourceManager.retrieveMapWithUpdates(String.format(CAPTIONS_PATH,
-                gameId), captionListener);
     }
 
     /**
@@ -109,8 +104,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param position The position in the list of Captions
      */
     @Override
-    public void onBindViewHolder(final CaptionViewHolder holder, final int position) {
+    public void onBindViewHolder(final CaptionViewHolder holder, int position) {
         final Caption caption = items.get(position);
+        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
 
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
@@ -130,20 +126,50 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         });
 
-        if (caption.getVotes() == null) {
-            setDefaultUpvoteView(holder, caption);
-        }
-        else {
-            holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
-                    "%d", caption.getVotes().size()));
-            // Sets the click listener, which changes implementation depending on upvote status
-            holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
-                    caption.getVotes().containsKey(FirebaseResourceManager.getUserId())));
-            // Sets the icon depending on whether it has been upvoted
-            setUpvoteIcon(holder.upvoteIcon,
-                    caption.getVotes().containsKey(FirebaseResourceManager.getUserId()));
-        }
+        // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
+        // and modifies the click handler
+        ResourceListener upvoteListener = new ResourceListener<Caption>() {
+            @Override
+            public void onData(Caption updatedCaption) {
+                if (updatedCaption != null) {
+                    if (updatedCaption.votes != null) {
+                        int oldIndex = items.indexOf(caption);
+                        items.remove(caption);
+                        items.add(updatedCaption);
+                        Collections.sort(items);
+                        int newIndex = items.indexOf(updatedCaption);
+                        if (oldIndex != newIndex) {
+                            notifyItemMoved(oldIndex, newIndex);
+                        }
+                        else {
+                            // Set upvotes to be the list of upvotes;
+                            holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
+                                    "%d", updatedCaption.votes.size()));
+                            // Sets the click listener, which changes implementation depending on upvote status
+                            holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
+                                    updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId())));
+                            // Sets the icon depending on whether it has been upvoted
+                            setUpvoteIcon(holder.upvoteIcon,
+                                    updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId()));
+                        }
+                    } else {
+                        setDefaultUpvoteView(holder, updatedCaption);
+                    }
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return Caption.class;
+            }
+        };
+
+        setDefaultUpvoteView(holder, caption);
         holder.captionText.setText(caption.retrieveCaptionText());
+
+        //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
+        firebaseResourceManager.retrieveSingleWithUpdates(String.format(CAPTION_PATH,
+                caption.getGameId(), caption.getId()), upvoteListener);
     }
 
     /**
@@ -197,12 +223,14 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param caption The caption object being affected
      * @param hasUpvoted Whether the user has previously upvoted this caption
      */
-    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
+    private void handleClickUpvote(final ImageView upvoteIcon, final Caption caption,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
             @Override
-            public void onComplete() {}
+            public void onComplete() {
+
+            }
 
             @Override
             public void onError(String errorMessage) {
