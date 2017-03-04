@@ -18,11 +18,9 @@ import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -81,30 +79,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             }
         }
     }
-
-    /**
-     * Compares two caption objects for order based on the number of votes. Used for ordering.
-     *
-     * @param <T> It's Caption. Don't use something other than Caption.
-     *
-    private class CaptionComparator<T> implements Comparator<T> {
-        public int compare(T a, T b) {
-            Map<String, Integer> aVotes = ((Caption)a).getVotes();
-            Map<String, Integer> bVotes = ((Caption)b).getVotes();
-            int aVotesSize = 0;
-            int bVotesSize = 0;
-
-            if (aVotes != null) {
-                aVotesSize = aVotes.size();
-            }
-            if (bVotes != null) {
-                bVotesSize = bVotes.size();
-            }
-            // If there's a tie in the vote count it will sort based on date
-            return bVotesSize == aVotesSize ? ((Caption)b).getId().compareTo(((Caption)b).getId()) :
-                    bVotesSize - aVotesSize;
-        }
-    }*/
 
     // END PRIVATE CLASSES //
 
