@@ -27,6 +27,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private ResourceListener<List<Game>> listener;
     private List<Game> mixedGames;
+    private List<Game> privateGames;
     private int publicLimit;
     private int privateLimit;
 
@@ -106,9 +107,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     public void retrieveGames() {
         mixedGames.clear();
         if(gameType == GameType.MIXED_GAMES) {
-            if(privateGameGetter == null) {
-                System.err.println("Call initManagerAndGetters() before retrieveGames()");
-            }
             publicGameManager.retrievePublicGamesByPriority();
         } else if (gameType == GameType.PUBLIC_GAMES) {
             retrievePublicGamesByPriority();
@@ -198,17 +196,23 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         });
     }
 
-    private void convertIdsToGames(final List<String> gameIds) {
-        final List<Game> privateGames = new ArrayList<>();
-        for(final String gameId : gameIds) {
-            DatabaseReference gameRef = database.getReference(GAME_TABLE + "/" + gameId);
+    private void convertIdsToGames(List<String> gameIds) {
+        privateGames = new ArrayList<>();
+        convertIdsToGamesHelper(gameIds);
+    }
+
+    private void convertIdsToGamesHelper(final List<String> gameIds) {
+        // If this is last game, don't recursive
+        if(gameIds.size() == 0) {
+            listener.onData(privateGames);
+        } else {
+            DatabaseReference gameRef = database.getReference(GAME_TABLE + "/" + gameIds.get(0));
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     privateGames.add(dataSnapshot.getValue(Game.class));
-                    if(dataSnapshot.getKey().equals(gameIds.get(gameIds.size() - 1))) {
-                        listener.onData(privateGames);
-                    }
+                    gameIds.remove(0);
+                    convertIdsToGamesHelper(gameIds);
                 }
 
                 @Override
@@ -216,9 +220,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
                 }
             });
-        }
-        if(gameIds.size() == 0) {
-            listener.onData(privateGames);
         }
     }
 }

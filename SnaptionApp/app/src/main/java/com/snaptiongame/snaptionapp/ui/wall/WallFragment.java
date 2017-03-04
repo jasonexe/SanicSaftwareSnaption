@@ -48,7 +48,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.MIXED_GAMES);
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.PRIVATE_GAMES);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
