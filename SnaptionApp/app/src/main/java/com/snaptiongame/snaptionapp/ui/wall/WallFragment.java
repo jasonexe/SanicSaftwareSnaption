@@ -19,6 +19,7 @@ import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +32,14 @@ import butterknife.Unbinder;
  */
 
 public class WallFragment extends Fragment {
+    private static final String GAME_TYPE_EXCEPTION_MSG = "Unset game type. Make sure to call " +
+            "newInstance rather than the constructor directly";
+    private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
+    private GameType gameType;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
@@ -47,10 +52,23 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, listener);
+    private GameResourceManager resourceManager;
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
+
+    // TODO replace this with Jason's actual GameType enum
+    public enum GameType implements Serializable {
+        MIXED, PUBLIC, PRIVATE
+    }
+
+    public static WallFragment newInstance(GameType gameType) {
+        WallFragment fragment = new WallFragment();
+        Bundle arguments = new Bundle();
+        arguments.putSerializable(GAME_TYPE, gameType);
+        fragment.setArguments(arguments);
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -58,7 +76,19 @@ public class WallFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
-        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL);
+
+        Bundle args = getArguments();
+        if (args != null && args.getSerializable(GAME_TYPE) != null) {
+            gameType = (GameType) args.getSerializable(GAME_TYPE);
+            // TODO add game type
+            resourceManager = new FirebaseGameResourceManager(10, listener);
+        }
+        else {
+            throw new RuntimeException(GAME_TYPE_EXCEPTION_MSG);
+        }
+
+        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
+                StaggeredGridLayoutManager.VERTICAL);
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
@@ -91,6 +121,7 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
+        // TODO change to retrieveGames
         resourceManager.retrieveGamesByCreationDate();
     }
 

@@ -97,18 +97,28 @@ public class MainSnaptionActivity extends AppCompatActivity {
             Fragment newFragment = null;
             switch (selectedItemId) {
                 case R.id.wall_item:
-                    newFragment = new WallFragment();
+                    MenuItem bottomNavMenuItem;
+                    if (FirebaseResourceManager.getUserId() != null) {
+                        bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
+                    }
+                    else {
+                        bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
+                    }
                     currentNavDrawerMenuId = selectedItemId;
+                    bottomNavMenuItem.setChecked(true);
+                    bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
                     fabVisible = bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
+                    currentBottomNavMenuId = 0;
                     break;
                 case R.id.friends_item:
                     newFragment = new FriendsFragment();
                     bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
+                    currentBottomNavMenuId = 0;
                     break;
                 case R.id.log_option:
                     //check if we are logging in or out based on item text
@@ -133,17 +143,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     break;
                 case R.id.my_feed_item:
                     fadeAnim = true;
-                    newFragment = new WallFragment();
+                    newFragment = WallFragment.newInstance(WallFragment.GameType.PRIVATE);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
                     fadeAnim = true;
-                    newFragment = new WallFragment();
+                    newFragment =  WallFragment.newInstance(WallFragment.GameType.MIXED);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
                     fadeAnim = true;
-                    newFragment = new WallFragment();
+                    newFragment =  WallFragment.newInstance(WallFragment.GameType.PUBLIC);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
@@ -169,9 +179,10 @@ public class MainSnaptionActivity extends AppCompatActivity {
         // change the margin of the fab depending on if the bottom navigation view is shown
         Resources res = getResources();
         int fabEndMargin = res.getDimensionPixelSize(R.dimen.fab_margin);
-        int fabBottomNavBottomMargin = res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
+        int fabBottomNavBottomMargin = fabEndMargin +
+                res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
         ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setMargins(0, 0, fabEndMargin,
-                bottomNavVisible ? fabEndMargin + fabBottomNavBottomMargin : 0);
+                bottomNavVisible ? fabBottomNavBottomMargin : 0);
     }
 
     @Override
@@ -193,9 +204,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         setupNavigationViews();
 
         // wall fragment instantiation
-        currentNavDrawerMenuId = R.id.wall_item;
-        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
-                new WallFragment()).commit();
+        mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         //create loginDialog and LoginManager to manager user
         loginDialog = new LoginDialog(this);
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
