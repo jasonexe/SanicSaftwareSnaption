@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.wall;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +40,9 @@ public class WallFragment extends Fragment {
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
+            if(games == null) {
+                Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
+            }
             wallAdapter.addItems(games);
             isLoading = false;
         }

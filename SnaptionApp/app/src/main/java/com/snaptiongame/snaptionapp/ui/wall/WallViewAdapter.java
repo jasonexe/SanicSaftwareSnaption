@@ -89,10 +89,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         holder.photo.setOnClickListener(new PhotoClickListener(game));
 
         // distinguish between complete and incomplete games, and public/private
-        if(!game.getIsPublic() && !game.getIsOpen()) {
+        if (!game.getIsPublic() && !game.getIsOpen()) {
             // If private and closed, bold italic
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.BOLD_ITALIC);
-        }else if (game.getIsOpen() && game.getIsPublic()) {
+        } else if (game.getIsOpen() && game.getIsPublic()) {
             // If open and public, normal
             holder.captionText.setTypeface(Typeface.create(holder.captionText.getTypeface(),
                     Typeface.NORMAL), Typeface.NORMAL);

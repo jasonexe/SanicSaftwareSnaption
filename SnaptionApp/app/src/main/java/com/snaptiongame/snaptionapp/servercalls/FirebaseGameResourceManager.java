@@ -106,7 +106,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
     public void retrieveGames() {
         mixedGames.clear();
-        if(gameType == GameType.MIXED_GAMES) {
+        if (gameType == GameType.MIXED_GAMES) {
             publicGameManager.retrievePublicGamesByPriority();
         } else if (gameType == GameType.PUBLIC_GAMES) {
             retrievePublicGamesByPriority();
@@ -119,7 +119,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private void retrievePublicGamesByPriority() {
         Query query = database.getReference(GAME_TABLE).orderByPriority();
         if (retrievedOnce) {
-            if(lastRetrievedPriority instanceof Double) {
+            if (lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
                 query = query.limitToFirst(publicLimit + 1)
                         .startAt((double) lastRetrievedPriority, lastRetrievedKey).endAt(0);
@@ -161,7 +161,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         Query query = database.getReference(privatePath).orderByPriority();
 
         if (retrievedOnce) {
-            if(lastRetrievedPriority instanceof Double) {
+            if (lastRetrievedPriority instanceof Double) {
                 query = query.limitToFirst(privateLimit + 1)
                         .startAt((double) lastRetrievedPriority, lastRetrievedKey);
             }
@@ -191,7 +191,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePrivateGamesByPriority - " + databaseError.toString());
+                FirebaseReporter.reportException(null, "Error getting private database info");
+                listener.onData(null);
             }
         });
     }
@@ -203,7 +205,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
     private void convertIdsToGamesHelper(final List<String> gameIds) {
         // If this is last game, don't recursive
-        if(gameIds.size() == 0) {
+        if (gameIds.size() == 0) {
             listener.onData(privateGames);
         } else {
             DatabaseReference gameRef = database.getReference(GAME_TABLE + "/" + gameIds.get(0));
