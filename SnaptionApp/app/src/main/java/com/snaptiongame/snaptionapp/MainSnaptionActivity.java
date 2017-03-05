@@ -3,11 +3,16 @@ package com.snaptiongame.snaptionapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -51,6 +56,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected DrawerLayout drawerLayout;
     @BindView(R.id.navigation_view)
     protected NavigationView navigationView;
+    @BindView(R.id.bottom_nav)
+    protected BottomNavigationView bottomNavigationView;
     @BindView(R.id.fab)
     protected FloatingActionButton fab;
     protected ImageView navDrawerPhoto;
@@ -58,7 +65,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected TextView navDrawerEmail;
 
 
-    private int currentFragmentMenuItemId;
+    private int currentNavDrawerMenuId;
+    private int currentBottomNavMenuId;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -66,56 +74,105 @@ public class MainSnaptionActivity extends AppCompatActivity {
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-            int selectedItemId = item.getItemId();
-            // if the selected item is different than the currently selected item, replace the fragment
-            if (selectedItemId != currentFragmentMenuItemId) {
-                switch (selectedItemId) {
-                    case R.id.wall_item:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                new WallFragment()).commit();
-                        fab.setVisibility(View.VISIBLE);
-                        break;
-                    case R.id.profile_item:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                new ProfileFragment()).commit();
-                        fab.setVisibility(View.INVISIBLE);
-                        break;
-                    case R.id.friends_item:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                new FriendsFragment()).commit();
-                        fab.setVisibility(View.VISIBLE);
-                        break;
-                    case R.id.log_option:
-                        //check if we are logging in or out based on item text
-                        if (item.getTitle().equals(getResources().getString(R.string.login))) {
-                            //display dialog
-                            loginDialog.show();
-                        }
-                        else {
-                            new AlertDialog.Builder(MainSnaptionActivity.this, 0)
-                                    .setMessage(getResources().getString(R.string.logout_prompt))
-                                    .setPositiveButton(getResources().getString(R.string.yes),
-                                            new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            loginManager.logOut();
-                                            item.setTitle(getResources().getString(R.string.login));
-                                        }
-                                    }).setNegativeButton(getResources().getString(R.string.no),
-                                            null).create().show();
-
-                        }
-                        //because this is not a fragment we cannot set currentFragment to it so we reset it to last fragment
-                        selectedItemId = currentFragmentMenuItemId;
-                        break;
-
-                }
-                currentFragmentMenuItemId = selectedItemId;
-            }
-            drawerLayout.closeDrawers();
-            return true;
+            return switchFragments(item);
         }
     };
+    private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+        @Override
+        // onNavigationItemSelected gets called when an item in the bottom navigation bar is selected
+        // any replacing of fragments should be handled here
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            return switchFragments(item);
+        }
+    };
+
+    private boolean switchFragments(final MenuItem item) {
+        int selectedItemId = item.getItemId();
+        // if the selected item is different than the currently selected item, replace the fragment
+        if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
+            boolean fabVisible = true;
+            boolean bottomNavVisible = true;
+            boolean fadeAnim = false;
+            Fragment newFragment = null;
+            switch (selectedItemId) {
+                case R.id.wall_item:
+                    newFragment = new WallFragment();
+                    currentNavDrawerMenuId = selectedItemId;
+                    break;
+                case R.id.profile_item:
+                    newFragment = new ProfileFragment();
+                    fabVisible = bottomNavVisible = false;
+                    currentNavDrawerMenuId = selectedItemId;
+                    break;
+                case R.id.friends_item:
+                    newFragment = new FriendsFragment();
+                    bottomNavVisible = false;
+                    currentNavDrawerMenuId = selectedItemId;
+                    break;
+                case R.id.log_option:
+                    //check if we are logging in or out based on item text
+                    if (item.getTitle().equals(getResources().getString(R.string.login))) {
+                        //display dialog
+                        loginDialog.show();
+                    }
+                    else {
+                        new AlertDialog.Builder(MainSnaptionActivity.this, 0)
+                                .setMessage(getResources().getString(R.string.logout_prompt))
+                                .setPositiveButton(getResources().getString(R.string.yes),
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                loginManager.logOut();
+                                                item.setTitle(getResources().getString(R.string.login));
+                                            }
+                                        }).setNegativeButton(getResources().getString(R.string.no),
+                                null).create().show();
+
+                    }
+                    break;
+                case R.id.my_feed_item:
+                    fadeAnim = true;
+                    newFragment = new WallFragment();
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+                case R.id.discover_item:
+                    fadeAnim = true;
+                    newFragment = new WallFragment();
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+                case R.id.popular_item:
+                    fadeAnim = true;
+                    newFragment = new WallFragment();
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+            }
+            if (newFragment != null) {
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                if (fadeAnim) {
+                    ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
+                }
+                ft.replace(R.id.fragment_container, newFragment);
+                ft.commit();
+                updateFragmentViews(fabVisible, bottomNavVisible);
+            }
+        }
+        drawerLayout.closeDrawers();
+        return true;
+    }
+
+    private void updateFragmentViews(boolean fabVisible, boolean bottomNavVisible) {
+        // hide or show the fab
+        fab.setVisibility(fabVisible ? View.VISIBLE : View.GONE);
+        // hide or show the bottom navigation view
+        bottomNavigationView.setVisibility(bottomNavVisible ? View.VISIBLE : View.GONE);
+        // change the margin of the fab depending on if the bottom navigation view is shown
+        Resources res = getResources();
+        int fabEndMargin = res.getDimensionPixelSize(R.dimen.fab_margin);
+        int fabBottomNavBottomMargin = res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
+        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setMargins(0, 0, fabEndMargin,
+                bottomNavVisible ? fabEndMargin + fabBottomNavBottomMargin : 0);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,11 +190,10 @@ public class MainSnaptionActivity extends AppCompatActivity {
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
         drawerLayout.addDrawerListener(mDrawerToggle);
-        navigationView.setNavigationItemSelectedListener(mNavListener);
-        setupNavigationView();
+        setupNavigationViews();
 
         // wall fragment instantiation
-        currentFragmentMenuItemId = R.id.wall_item;
+        currentNavDrawerMenuId = R.id.wall_item;
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
                 new WallFragment()).commit();
         //create loginDialog and LoginManager to manager user
@@ -145,7 +201,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
             @Override
             public void onLoginComplete() {
-                setupNavigationView();
+                setupNavigationViews();
             }
         }, new LoginManager.AuthCallback() {
             @Override
@@ -176,7 +232,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
         DeepLinkGetter.checkIfDeepLink(this);
     }
 
-    private void setupNavigationView() {
+    private void setupNavigationViews() {
+        navigationView.setNavigationItemSelectedListener(mNavListener);
+        bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
@@ -186,7 +244,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
+                    new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     if (user != null) {
@@ -236,7 +295,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
-        if (currentFragmentMenuItemId == R.id.wall_item) {
+        if (currentNavDrawerMenuId == R.id.wall_item) {
             if (FirebaseResourceManager.getUserId() != null) {
                 Intent intent = new Intent(this, CreateGameActivity.class);
                 startActivity(intent);
@@ -246,7 +305,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             }
 
         }
-        else if (currentFragmentMenuItemId == R.id.friends_item) {
+        else if (currentNavDrawerMenuId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
         }
@@ -255,7 +314,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setupNavigationView();
+        setupNavigationViews();
     }
 
     @Override
