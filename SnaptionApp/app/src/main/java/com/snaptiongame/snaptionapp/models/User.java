@@ -42,13 +42,7 @@ public class User implements Person {
                 String facebookId, String imagePath, Map<String, Integer> friends,
                 Map<String, Integer> games, Map<String, Caption> captions,
                 Map<String, Integer> blockedUsers, Map<String, Integer> privateGames) {
-        this.id = id;
-        this.email = email;
-        this.displayName = displayName;
-        this.notificationId = notificationId;
-        this.facebookId = facebookId;
-        this.imagePath = imagePath;
-
+        this(id, email, displayName, notificationId, facebookId, imagePath);
         this.friends = friends;
         this.createdGames = games;
         this.captions = captions;
@@ -78,6 +72,14 @@ public class User implements Person {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getLowercaseDisplayName() {
+        String lowerName = null;
+        if (displayName != null) {
+            lowerName = displayName.toLowerCase();
+        }
+        return lowerName;
     }
 
     public String getEmail() {
