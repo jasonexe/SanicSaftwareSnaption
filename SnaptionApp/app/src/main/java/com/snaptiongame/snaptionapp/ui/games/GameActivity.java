@@ -20,7 +20,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -88,7 +87,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private LoginManager loginManager;
     private LoginDialog loginDialog;
 
-    private MinimizeImageBehavior minimizeImageBehavior;
+    private MinimizeViewBehavior minimizeImageBehavior;
 
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
@@ -150,6 +149,8 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.game_content)
     public LinearLayout gameContentLayout;
+    @BindView(R.id.image_progress_bar)
+    protected FrameLayout imageProgressBar;
 
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
@@ -201,8 +202,8 @@ public class GameActivity extends HomeAppCompatActivity {
                     });
         }
         // initialize minimize image behavior
-        minimizeImageBehavior = new MinimizeImageBehavior(gameContentLayout);
-        ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams()).setBehavior(minimizeImageBehavior);
+        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+        ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(minimizeImageBehavior);
     }
 
     private void setupGameElements(Game game) {
@@ -212,8 +213,13 @@ public class GameActivity extends HomeAppCompatActivity {
             @Override
             public void onData(Boolean data) {
                 if (data) {
-                    gameContentLayout.setPadding(0, 0, 0, 0);
-                    minimizeImageBehavior.updateImageMaxHeight(imageView.getHeight());
+                    // hide the progress bar and remove its behavior
+                    imageProgressBar.setVisibility(View.GONE);
+                    ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(null);
+                    // add a new behavior to the image view
+                    minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                    ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams()).setBehavior(minimizeImageBehavior);
+                    minimizeImageBehavior.updateViewMaxHeight(imageView.getHeight());
                 }
             }
             @Override
