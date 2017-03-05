@@ -124,6 +124,19 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    public void displayEditViews() {
+        editDisplayName();
+        editProfilePic();
+    }
+
+    private void editDisplayName() {
+
+    }
+
+    private void editProfilePic() {
+
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

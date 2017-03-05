@@ -78,7 +78,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     case R.id.profile_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
-                        fab.setVisibility(View.INVISIBLE);
+                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.friends_item:
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
@@ -249,6 +249,10 @@ public class MainSnaptionActivity extends AppCompatActivity {
         else if (currentFragmentMenuItemId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
+        }
+        else if (currentFragmentMenuItemId == R.id.profile_item) {
+            ProfileFragment fragment = (ProfileFragment) getSupportFragmentManager().findFragmentById(R.id.profile_item);
+            fragment.displayEditViews();
         }
     }
 

@@ -48,6 +48,18 @@
             android:padding="10dp"
             android:layout_toRightOf="@id/view2"/>
 
+        <EditText
+            android:text="edit_username"
+            android:inputType="text"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_name_editable"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:padding="10dp"
+            android:layout_toEndOf="@id/view2"/>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
