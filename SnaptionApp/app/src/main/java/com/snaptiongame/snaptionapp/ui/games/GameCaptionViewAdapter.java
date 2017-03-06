@@ -25,7 +25,6 @@ import java.util.Locale;
  *
  * @author Cameron Geehr
  */
-
 public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHolder> {
 
     private List<Caption> items;
