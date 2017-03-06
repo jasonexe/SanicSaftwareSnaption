@@ -38,6 +38,8 @@ public class FirebaseUploader implements Uploader {
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
     private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
+    private static final String USERNAME_PATH = "users/%s/displayName";
+    private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -193,8 +195,7 @@ public class FirebaseUploader implements Uploader {
                     //upload user
                     uploadObject(USERS_PATH + "/" + user.getId(), user);
                     //upload user photo
-                    StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
-                    ref.putBytes(photo);
+                    uploadUserPhoto(user, photo);
                 }
                 //notify user has been added or found
                 listener.onData(data);
@@ -205,6 +206,11 @@ public class FirebaseUploader implements Uploader {
                 return User.class;
             }
         });
+    }
+
+    public static void uploadUserPhoto(User user, byte[] photo) {
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+        ref.putBytes(photo);
     }
 
     /**
@@ -317,6 +323,10 @@ public class FirebaseUploader implements Uploader {
                 }
             }
         });
+    }
+
+    public static void updateDisplayName(String newName, String userId) {
+        uploadObject(String.format(USERNAME_PATH, userId), newName);
     }
 
     /**
