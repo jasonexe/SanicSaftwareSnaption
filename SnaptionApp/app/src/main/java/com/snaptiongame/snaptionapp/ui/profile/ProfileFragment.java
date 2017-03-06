@@ -120,7 +120,6 @@ public class ProfileFragment extends Fragment {
                 public void onData(User user) {
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
                     userName.setText(user.getDisplayName());
-                    System.out.println("loading " + user.getImagePath());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
                     gamesCreated.setText(Integer.toString(user.retrieveCreatedGameCount()));
                     captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
@@ -269,8 +268,6 @@ public class ProfileFragment extends Fragment {
         Glide.get(getApplicationContext()).clearMemory();
     }
 
-
-
     private void editDisplayName() {
         userName.setVisibility(View.INVISIBLE);
         profileEditName.setOnEditorActionListener(enterListener);
@@ -303,31 +300,11 @@ public class ProfileFragment extends Fragment {
         try {
             Uri imageUri = data.getData();
             Glide.with(ProfileFragment.this).load(imageUri).into(profile);
-            newPhoto = getImageFromUri(imageUri);
+            newPhoto = BitmapConverter.getImageFromUri(imageUri, getActivity());
         } catch (Exception e) {
             FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
         }
-    }
-
-    private byte[] getImageFromUri(Uri imageUri) {
-        byte[] data = null;
-
-        try {
-            InputStream stream = getActivity().getContentResolver().openInputStream(imageUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-            baos.close();
-        }
-        catch (IOException e) {
-            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
-            e.printStackTrace();
-        }
-        return data;
     }
 
     @Override

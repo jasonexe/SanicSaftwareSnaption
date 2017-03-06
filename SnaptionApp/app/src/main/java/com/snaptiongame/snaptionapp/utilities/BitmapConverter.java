@@ -1,9 +1,18 @@
 package com.snaptiongame.snaptionapp.utilities;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+
+import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by jason_000 on 2/21/2017.
@@ -31,5 +40,25 @@ public class BitmapConverter {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    public static byte[] getImageFromUri(Uri imageUri, Activity activity) {
+        byte[] data = null;
+
+        try {
+            InputStream stream = activity.getContentResolver().openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            stream.close();
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            data = baos.toByteArray();
+            baos.close();
+        }
+        catch (IOException e) {
+            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
+            e.printStackTrace();
+        }
+        return data;
     }
 }

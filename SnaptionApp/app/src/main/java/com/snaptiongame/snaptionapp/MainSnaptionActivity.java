@@ -211,13 +211,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onContentChanged() {
-        super.onContentChanged();
-    }
-
-
-
     private void addUserInfoToNavDrawer(User user) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
