@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -43,6 +44,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static java.lang.Boolean.TRUE;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -74,18 +76,21 @@ public class MainSnaptionActivity extends AppCompatActivity {
             if (selectedItemId != currentFragmentMenuItemId) {
                 switch (selectedItemId) {
                     case R.id.wall_item:
+                        setToolbarCollapsible(TRUE);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
                         fab.setImageResource(R.drawable.ic_add_white_24dp);
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.profile_item:
+                        setToolbarCollapsible(false);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
                         fab.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.friends_item:
+                        setToolbarCollapsible(TRUE);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new FriendsFragment()).commit();
                         fab.setImageResource(R.drawable.ic_add_white_24dp);
@@ -122,6 +127,18 @@ public class MainSnaptionActivity extends AppCompatActivity {
             return true;
         }
     };
+
+    private void setToolbarCollapsible(boolean collapsible) {
+        AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        if(collapsible) {
+            params.setScrollFlags(
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+        } else {
+            params.setScrollFlags(0);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
