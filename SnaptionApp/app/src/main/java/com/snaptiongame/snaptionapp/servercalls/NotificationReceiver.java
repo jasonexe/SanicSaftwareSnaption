@@ -36,8 +36,8 @@ import java.util.Map;
 
 public class NotificationReceiver extends FirebaseMessagingService {
 
-    private static final String gameIdKey = "gameId";
-    private static final String userIdKey = "userId";
+    public static final String GAME_ID_KEY = "gameId";
+    public static final String USER_ID_KEY = "userId";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -49,8 +49,8 @@ public class NotificationReceiver extends FirebaseMessagingService {
         //if a data message was received
         if (data != null && data.size() > 0) {
             //create intent to open up game from remoteMessage info
-            gameId = data.get(gameIdKey);
-            senderUserId = data.get(userIdKey);
+            gameId = data.get(GAME_ID_KEY);
+            senderUserId = data.get(USER_ID_KEY);
             createNotification(gameId, senderUserId);
         }
 

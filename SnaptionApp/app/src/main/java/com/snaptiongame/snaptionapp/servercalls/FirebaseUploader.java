@@ -26,7 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +50,13 @@ public class FirebaseUploader implements Uploader {
     private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
     private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
     private static final String POST = "POST";
+    private static final String JSON_TO = "to";
+    private static final String JSON_DATA = "data";
+    private static final String JSON_AUTH = "Authorization";
+    private static final String JSON_AUTH_KEY = "key=";
+    private static final String JSON_CONTENT_TYPE = "Content-Type";
+    private static final String JSON_CONTENT_VAL = "application/json";
+
     private static final String NOTIFICATION_ID = "notificationId";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -126,6 +132,7 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onData(User user) {
                 JSONObject json = createJson(gameId, user);
+                Log.e("NOTIFICATION", json.toString());
                 sendNotification(json);
             }
 
@@ -137,24 +144,26 @@ public class FirebaseUploader implements Uploader {
 
         //for each player invited to the game, send notification
         for (String playerId : players) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
-                    notifyPlayerListener);
+            if (playerId != FirebaseResourceManager.getUserId()) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
+                        notifyPlayerListener);
+            }
         }
     }
 
     private JSONObject createJson(String gameId, User user) {
         try {
             JSONObject json = new JSONObject();
-            //json to : notId, priority : high, badge : enabled, data : data
-            json.put("to", user.getNotificationId());
+            //json to : notificationId of receiver, data : data
+            json.put(JSON_TO, user.getNotificationId());
             JSONObject data = new JSONObject();
-            data.put("gameId", gameId);
-            data.put("userId", user.getId());
-            json.put("data", data);
+            data.put(NotificationReceiver.GAME_ID_KEY, gameId);
+            data.put(NotificationReceiver.USER_ID_KEY, user.getId());
+            json.put(JSON_DATA, data);
             return json;
         } catch (JSONException err) {
             err.printStackTrace();
-            Log.d("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
+            Log.e("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
         }
         return null;
     }
@@ -169,21 +178,22 @@ public class FirebaseUploader implements Uploader {
                     final HttpURLConnection connection =(HttpURLConnection)firebaseMessageUrl.openConnection();
                     connection.setRequestMethod(POST);
                     connection.setDoOutput(true);
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    connection.setRequestProperty("Authorization",  "key=" + FIREBASE_SERVER_KEY);
+                    connection.setRequestProperty(JSON_CONTENT_TYPE, JSON_CONTENT_VAL);
+                    connection.setRequestProperty(JSON_AUTH,  JSON_AUTH_KEY + FIREBASE_SERVER_KEY);
                     final DataOutputStream write = new DataOutputStream(connection.getOutputStream());
                     write.writeBytes(json.toString());
                     write.flush();
                     write.close();
                     connection.connect();
+                    Log.d("NOTIFICATION","Send message response msg: " + connection.getResponseMessage());
                 }
                 catch (MalformedURLException err) {
                     err.printStackTrace();
-                    Log.d("FIREBASE_UPLOADER", "Failed to create URL " + err.getMessage());
+                    Log.e("NOTIFICATION", "Failed to create URL " + err.getMessage());
                 }
                 catch (IOException err) {
                     err.printStackTrace();
-                    Log.d("FIREBASE_UPLOADER", "Failed to write JSON to firebase " + err.getMessage());
+                    Log.e("NOTIFICATION", "Failed to write JSON to firebase " + err.getMessage());
                 }
             }
         }).start();
@@ -273,12 +283,11 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addUser(final User user, final byte[] photo, final ResourceListener<User> listener) {
         //check if User already exists in Database
-        FirebaseResourceManager manager = new FirebaseResourceManager();
-        manager.retrieveSingleNoUpdates(USERS_PATH + "/" + user.getId(), new ResourceListener<User>() {
+        FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + user.getId(), new ResourceListener<User>() {
             @Override
             public void onData(User data) {
                 //if User does not exist
-                if (data == null || !(data instanceof User)) {
+                if (data == null ) {
                     //upload user
                     uploadObject(USERS_PATH + "/" + user.getId(), user);
                     //upload user photo
