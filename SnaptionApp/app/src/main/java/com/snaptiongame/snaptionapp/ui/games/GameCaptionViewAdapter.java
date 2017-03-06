@@ -30,7 +30,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-    private FirebaseResourceManager firebaseResourceManager;
     private static final String CAPTION_PATH = "games/%s/captions/%s";
 
     // BEGIN PRIVATE CLASSES //
