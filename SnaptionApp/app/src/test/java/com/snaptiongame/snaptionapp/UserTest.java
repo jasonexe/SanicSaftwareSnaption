@@ -175,4 +175,13 @@ public class UserTest {
         user3.setCreatedGames(games);
         assertEquals(3, user3.retrieveCreatedGameCount());
     }
+
+    @Test
+    public void testLowercase() {
+        assertEquals(null, user1.getLowercaseDisplayName());
+        assertEquals("displayname", user2.getLowercaseDisplayName());
+        assertEquals("displayname", user3.getLowercaseDisplayName());
+        user2.setDisplayName("HELLO MOTO");
+        assertEquals("hello moto", user2.getLowercaseDisplayName());
+    }
 }
