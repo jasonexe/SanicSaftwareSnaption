@@ -140,10 +140,11 @@ public class FirebaseUploader implements Uploader {
             }
         };
 
+        String pickerId = FirebaseResourceManager.getUserId();
         //for each player invited to the game, send notification
         for (String playerId : players) {
             //dont send notificaiton to picker
-            if (playerId != FirebaseResourceManager.getUserId()) {
+            if (playerId != pickerId) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
                         notifyPlayerListener);
             }
@@ -291,9 +292,11 @@ public class FirebaseUploader implements Uploader {
                     //upload user photo
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
                     ref.putBytes(photo);
+                } else {
+                    //update notificationId every login
+                    uploadObject(String.format(NOTIFICATION_ID_PATH, user.getId()), user.getNotificationId());
                 }
-                //update notificationId every login
-                uploadObject(String.format(NOTIFICATION_ID_PATH,user.getId()), user.getNotificationId());
+
                 //notify user has been added or found
                 listener.onData(data);
             }
