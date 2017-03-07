@@ -51,13 +51,10 @@ public class BitmapConverter {
 
         try {
             InputStream stream = activity.getContentResolver().openInputStream(imageUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-            baos.close();
+            if(stream != null) {
+                data = IOUtils.toByteArray(stream);
+                stream.close();
+            }
         }
         catch (IOException e) {
             FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
