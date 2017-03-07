@@ -24,6 +24,7 @@ public class Caption implements Serializable, Comparable<Caption> {
     public String id;       // The id of the caption
     public String userId;   // The person who created the caption
     public String gameId;   // The game the caption was made on
+    public User user;       // The user associated with the game
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
     public Map<String, Integer> votes; // List of users who have upvoted this caption

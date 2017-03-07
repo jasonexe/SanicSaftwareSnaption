@@ -16,12 +16,15 @@ import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
+ * Handles Firebase interactions with upvotes and dynamically reloads captions based on changes.
  *
  * @author Cameron Geehr
  */
@@ -29,7 +32,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-    private static final String CAPTION_PATH = "games/%s/captions/%s";
+    private static final String CAPTION_PATH = "games/%s/captions/%s"; // TODO: move to constants
 
     // BEGIN PRIVATE CLASSES //
 
@@ -40,6 +43,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         Caption caption;
         boolean hasUpvoted;
 
+        /**
+         * Constructs the upvote click listener.
+         *
+         * @param caption The caption to listen to
+         * @param hasUpvoted Whether the current user has upvoted the caption
+         */
         public UpvoteClickListener(Caption caption, boolean hasUpvoted) {
             this.caption = caption;
             this.hasUpvoted = hasUpvoted;
@@ -66,6 +75,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * Creates an instance of this GameCaptionViewAdapter.
      *
      * @param items The list of Captions to build the views from
+     * @param loginDialog The dialog to display when the user needs to log in
      */
     public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog) {
         this.items = items;
@@ -74,33 +84,36 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     }
 
     /**
-     * Sets the text, images, and click handlers for the Caption view
+     * Sets the text, images, and click handlers for the Caption view.
      *
      * @param holder The object that contains the views to display
      * @param position The position in the list of Captions
      */
     @Override
-    public void onBindViewHolder(final CaptionViewHolder holder, int position) {
+    public void onBindViewHolder(final CaptionViewHolder holder, final int position) {
         final Caption caption = items.get(position);
+        // TODO: Create a map of FirebaseResourceManagers to add efficiency and get rid of memory leaks
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
 
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
-        firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
-            @Override
-            public void onData(User user) {
-                if (user != null) {
-                    holder.captionerName.setText(user.getDisplayName());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(),
-                            holder.captionerPhoto);
+        if (caption.user == null) {
+            firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+                @Override
+                public void onData(User user) {
+                    caption.user = user;
+                    setCaptionerView(user, holder);
                 }
-            }
 
-            @Override
-            public Class getDataType() {
-                return User.class;
-            }
-        });
+                @Override
+                public Class getDataType() {
+                    return User.class;
+                }
+            });
+        }
+        else {
+            setCaptionerView(caption.user, holder);
+        }
 
         // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
         // and modifies the click handler
@@ -109,29 +122,25 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             public void onData(Caption updatedCaption) {
                 // Check to make sure caption exists
                 if (updatedCaption != null) {
-                    int oldIndex = items.indexOf(caption);
-                    items.remove(caption);
+                    int oldIndex, newIndex;
+                    oldIndex = items.indexOf(caption);
+                    items.remove(position);
+                    // TODO: insert caption at correct index and don't sort
                     items.add(updatedCaption);
                     Collections.sort(items);
-                    int newIndex = items.indexOf(updatedCaption);
+                    newIndex = items.indexOf(updatedCaption);
                     // Check to see if the caption has moved, and if it has then animate its change
                     if (oldIndex != newIndex) {
                         notifyItemMoved(oldIndex, newIndex);
                     }
                     // Set the display to reflect the status of the caption
                     if (updatedCaption.votes != null) {
-                        // Set upvotes to be the list of upvotes;
-                        holder.numberUpvotesText.setText(String.format(Locale.getDefault(),
-                                "%d", updatedCaption.votes.size()));
-                        // Sets the click listener, which changes implementation depending on upvote status
-                        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption,
-                                updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId())));
-                        // Sets the icon depending on whether it has been upvoted
-                        setUpvoteIcon(holder.upvoteIcon,
-                                updatedCaption.votes.containsKey(FirebaseResourceManager.getUserId()));
+                        Map votes = updatedCaption.votes;
+                        setUpvoteView(holder, updatedCaption, votes.size(),
+                                votes.containsKey(FirebaseResourceManager.getUserId()));
                     }
                     else {
-                        setDefaultUpvoteView(holder, updatedCaption);
+                         setUpvoteView(holder, updatedCaption, 0, false);
                     }
                 }
             }
@@ -154,7 +163,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      *
      * @param parent The parent to display it in
      * @param viewType
-     * @return the caption view holder
+     * @return The caption view holder
      */
     @Override
     public CaptionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -182,6 +191,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param newCaption A caption to add to the list
      */
     public void addCaption(Caption newCaption) {
+        // Only add the caption if it isn't already in the list
         if (!items.contains(newCaption)) {
             items.add(newCaption);
             this.notifyItemInserted(items.size() - 1);
@@ -255,12 +265,35 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param holder The holder for the view
      * @param caption The caption being affected
      */
-    private void setDefaultUpvoteView(CaptionViewHolder holder, Caption caption) {
-        // Using 0 because it will be replaced immediately and using the local variable results in
-        // some bugs
-        holder.numberUpvotesText.setText(String.format(Locale.getDefault(), "%d", 0));
-        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, false));
-        setUpvoteIcon(holder.upvoteIcon, false);
+    private void setUpvoteView(CaptionViewHolder holder, Caption caption, int numUpvotes, boolean hasUpvoted) {
+        // Set numberUpvotesText to be the the number of upvotes;
+        holder.numberUpvotesText.setText(NumberFormat.getInstance().format(numUpvotes));
+        // Sets the click listener, which changes implementation depending on upvote status
+        holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, hasUpvoted));
+        // Sets the icon depending on whether it has been upvoted
+        setUpvoteIcon(holder.upvoteIcon, hasUpvoted);
+    }
+
+    /**
+     * Displays the information about the user who made the caption.
+     *
+     * @param captioner The user who made the caption
+     * @param holder The view holder containing the caption information
+     */
+    private void setCaptionerView(User captioner, CaptionViewHolder holder) {
+        // Display the captioner's information
+        if (captioner != null) {
+            holder.captionerName.setText(captioner.getDisplayName());
+            FirebaseResourceManager.loadImageIntoView(captioner.getImagePath(),
+                    holder.captionerPhoto);
+        }
+        // Set the default view for a user
+        else {
+            holder.captionerName.setText(holder.captionerName
+                    .getContext().getResources().getString(R.string.null_user));
+            holder.captionerPhoto.setImageDrawable(holder.captionerPhoto.getContext()
+                    .getResources().getDrawable(R.drawable.com_facebook_profile_picture_blank_square));
+        }
     }
 
 }
