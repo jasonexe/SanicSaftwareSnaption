@@ -56,7 +56,6 @@ public class FirebaseUploader implements Uploader {
     private static final String JSON_AUTH_KEY = "key=";
     private static final String JSON_CONTENT_TYPE = "Content-Type";
     private static final String JSON_CONTENT_VAL = "application/json";
-
     private static final String NOTIFICATION_ID = "notificationId";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -168,7 +167,7 @@ public class FirebaseUploader implements Uploader {
     }
 
     private void sendNotification(final JSONObject json) {
-        //run each notification on separate thread 
+        //run each notification on separate thread
         new Thread(new Runnable() {
             @Override
             public void run() {
