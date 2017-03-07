@@ -32,6 +32,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import java.io.InputStream;
 import java.net.URL;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.models.User;
@@ -215,8 +216,7 @@ public class LoginManager {
             String imagePath = PHOTOS_FOLDER + id;
             String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
-            //TODO: fill this fields once we reach notifications and friends
-            String notificationId = "";
+            String notificationId = FirebaseInstanceId.getInstance().getToken();
 
             //getting facebook photo
             if (facebookId != null) {
