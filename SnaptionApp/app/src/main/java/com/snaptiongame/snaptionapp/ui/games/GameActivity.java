@@ -238,7 +238,8 @@ public class GameActivity extends HomeAppCompatActivity {
             return;
         }
         boolean thisPlayerInGame = false;
-        if(players != null && players.contains(thisUser)) {
+        // If this user is the picker or they're in the players list, they're in the game
+        if(pickerId.equals(thisUser) || (players != null && players.contains(thisUser))) {
             thisPlayerInGame = true;
         }
         // If this is a public game, anyone can send an invite to it if they've joined
