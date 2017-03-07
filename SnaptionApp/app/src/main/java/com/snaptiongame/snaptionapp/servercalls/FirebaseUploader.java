@@ -44,6 +44,7 @@ public class FirebaseUploader implements Uploader {
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
+    private static final String NOTIFICATION_ID_PATH = "users/%s/notificationId";
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
     private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
@@ -291,6 +292,8 @@ public class FirebaseUploader implements Uploader {
                     StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
                     ref.putBytes(photo);
                 }
+                //update notificationId every login
+                uploadObject(String.format(NOTIFICATION_ID_PATH,user.getId()), user.getNotificationId());
                 //notify user has been added or found
                 listener.onData(data);
             }
