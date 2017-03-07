@@ -132,7 +132,6 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onData(User user) {
                 JSONObject json = createJson(gameId, user);
-                Log.e("NOTIFICATION", json.toString());
                 sendNotification(json);
             }
 
