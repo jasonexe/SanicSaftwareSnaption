@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
@@ -32,12 +33,6 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.v
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
-    public static final String EXTRA_MESSAGE = "fromCurrentUri";
-    public static final String PHOTO_PATH = "currentPhotoPath";
-    public static final String GAME = "game";
-    public static final String USER_PATH = "users/";
-    public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
-    private final FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
     private List<Game> items;
     private MainSnaptionActivity activity;
 
@@ -62,7 +57,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         public void onClick(View view) {
             Context imageContext = view.getContext();
             Intent createGameIntent = new Intent(imageContext, GameActivity.class);
-            createGameIntent.putExtra(GAME, game);
+            createGameIntent.putExtra(Constants.GAME, game);
             imageContext.startActivity(createGameIntent);
         }
     }
@@ -71,13 +66,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, holder.pickerPhoto, USER_PATH + game.getPicker());
+        displayUser(holder.pickerName, holder.pickerPhoto, Constants.USER_PATH + game.getPicker());
 
         // ensure the game has a top caption before displaying the caption and the captioner
         if (game.getTopCaption() != null) {
             holder.captionerText.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerText, null, USER_PATH + game.getTopCaption().getUserId());
+            displayUser(holder.captionerText, null, Constants.USER_PATH + game.getTopCaption().getUserId());
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
@@ -103,7 +98,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // If private, italicize
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.ITALIC);
         }
-        if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
+        if (Build.VERSION.SDK_INT >= Constants.CLIP_TO_OUTLINE_MIN_SDK) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
@@ -122,8 +117,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                         public void onData(Uri data) {
                             Context buttonContext = holder.createFromExisting.getContext();
                             Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
-                            createGameIntent.putExtra(EXTRA_MESSAGE, data);
-                            createGameIntent.putExtra(PHOTO_PATH, imagePath);
+                            createGameIntent.putExtra(Constants.EXTRA_MESSAGE, data);
+                            createGameIntent.putExtra(Constants.PHOTO_PATH, imagePath);
                             buttonContext.startActivity(createGameIntent);
                         }
 
@@ -162,7 +157,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // ensure the user id is a valid one to avoid errors
         if(validFirebasePath(userPath)) {
             // display the name and profile picture if a valid user is obtained from the user id
-            firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     // replace default is the User is valid

@@ -13,7 +13,7 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import java.util.Map;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.FRIENDS_PATH;
+import static com.snaptiongame.snaptionapp.Constants.FRIENDS_PATH;
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaptionapp.servercalls.Uploader.UploadListener;
 

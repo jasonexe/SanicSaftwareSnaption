@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.Person;
@@ -35,8 +36,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.utilities.ViewUtilities;
-import com.snaptiongame.snaptionapp.ui.friends.FriendsListAdapter;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -140,10 +139,10 @@ public class CreateGameActivity extends AppCompatActivity {
         alreadyExisting = false;
 
         Intent intent = getIntent();
-        Uri uri = intent.getParcelableExtra(WallViewAdapter.EXTRA_MESSAGE);
+        Uri uri = intent.getParcelableExtra(Constants.EXTRA_MESSAGE);
         if(uri != null) {
             alreadyExisting = true;
-            existingPhotoPath = intent.getStringExtra(WallViewAdapter.PHOTO_PATH);
+            existingPhotoPath = intent.getStringExtra(Constants.PHOTO_PATH);
             imageUri = uri;
             setImageFromUrl(uri);
         }

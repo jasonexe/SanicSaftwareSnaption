@@ -44,9 +44,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     private static final String appLinkUrl = "https://fb.me/1863284123957626";
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
-
-    // Start of any deep link that you create
-    private String deepLink = "https://snaptiongame.com";
     // Pre-generated deep link to the home screen, allows for tracking through firebase console
     private String homescreenDeepLink = "https://ba63n.app.goo.gl/a10w";
 

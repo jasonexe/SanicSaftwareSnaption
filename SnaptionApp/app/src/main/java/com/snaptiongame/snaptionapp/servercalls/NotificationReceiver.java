@@ -8,11 +8,11 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
             @Override
             public void onData(final Game data) {
                 //after getting game, must get user
-                FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.USER_DIRECTORY + senderUserId, new ResourceListener<User>() {
+                FirebaseResourceManager.retrieveSingleNoUpdates(Constants.USER_PATH + senderUserId, new ResourceListener<User>() {
                     @Override
                     public void onData(User user) {
                         //ensure the user and game were found before sending notification
@@ -89,7 +89,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         };
         //checking to make sure this data was in notification
         if (gameId != null && senderUserId != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseGameResourceManager.GAME_TABLE + "/" + gameId, gameListener);
+            FirebaseResourceManager.retrieveSingleNoUpdates(Constants.GAMES_PATH + "/" + gameId, gameListener);
         }
     }
 
@@ -97,7 +97,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(WallViewAdapter.GAME, game);
+        intent.putExtra(Constants.GAME, game);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
