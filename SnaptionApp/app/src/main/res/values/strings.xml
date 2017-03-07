@@ -58,6 +58,7 @@
     <string name="captioner_name">- %s</string>
     <string name="game_invite_notification_text">%s has invited you to a game!</string>
     <string name="game_invite_notification_title">Snaption Game Invitation</string>
+    <string name="private_game_error">There was an error getting your private games</string>
 
     <string name="add_friends">+ add friends</string>
     <string name="no_friends_add_invite">You don\'t have any friends to add or invite.</string>

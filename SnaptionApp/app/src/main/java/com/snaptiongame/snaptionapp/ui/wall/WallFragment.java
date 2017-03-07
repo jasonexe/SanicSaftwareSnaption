@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.wall;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 
@@ -39,6 +41,9 @@ public class WallFragment extends Fragment {
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
+            if(games == null) {
+                Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
+            }
             wallAdapter.addItems(games);
             isLoading = false;
         }
@@ -48,7 +53,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, listener);
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.MIXED_GAMES);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -87,7 +92,7 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
-        resourceManager.retrieveGamesByCreationDate();
+        resourceManager.retrieveGames();
     }
 
     @Override
