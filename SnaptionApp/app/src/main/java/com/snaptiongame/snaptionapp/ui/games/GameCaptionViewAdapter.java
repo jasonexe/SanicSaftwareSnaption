@@ -184,8 +184,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     public void addCaption(Caption newCaption) {
         if (!items.contains(newCaption)) {
             items.add(newCaption);
+            this.notifyItemInserted(items.size() - 1);
         }
-        this.notifyDataSetChanged();
     }
 
     // END PUBLIC METHODS //
