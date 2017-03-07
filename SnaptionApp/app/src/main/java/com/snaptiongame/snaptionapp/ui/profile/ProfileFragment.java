@@ -56,6 +56,7 @@ import static com.google.android.gms.internal.zzams.d;
 public class ProfileFragment extends Fragment {
 
     private static final String GAME_DIRECTORY = "games";
+    private static final int IMAGE_PICK_CODE = 8;
     private boolean isEditing;
 
     @BindView(R.id.profile_picture)
@@ -190,13 +191,12 @@ public class ProfileFragment extends Fragment {
                 cancelSave();
             }
             fab.setImageResource(R.drawable.ic_mode_edit_white_24dp);
-            isEditing = !isEditing;
         } else {
             editDisplayName();
             editProfilePic();
             fab.setImageResource(R.drawable.ic_save_white_24dp);
-            isEditing = !isEditing;
         }
+        isEditing = !isEditing;
     }
 
     private void cancelSave() {
@@ -228,7 +228,7 @@ public class ProfileFragment extends Fragment {
 
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(profileEditName.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+        imm.hideSoftInputFromWindow(profileEditName.getWindowToken(), 0);
     }
 
     // Saves the name to firebase, also updates the name in the profile
@@ -257,14 +257,14 @@ public class ProfileFragment extends Fragment {
     }
 
     private void clearGlideCache() {
-        AsyncTask test = new AsyncTask() {
+        AsyncTask clearGlideCache = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
                 Glide.get(getApplicationContext()).clearDiskCache();
                 return null;
             }
         };
-        test.execute();
+        clearGlideCache.execute();
         Glide.get(getApplicationContext()).clearMemory();
     }
 
@@ -290,21 +290,24 @@ public class ProfileFragment extends Fragment {
         //Gets the content from the imageview
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
+        startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), IMAGE_PICK_CODE);
     }
 
     // Sets the image in the imageview
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        try {
-            Uri imageUri = data.getData();
-            Glide.with(ProfileFragment.this).load(imageUri).into(profile);
-            newPhoto = BitmapConverter.getImageFromUri(imageUri, getActivity());
-        } catch (Exception e) {
-            FirebaseReporter.reportException(e, "Couldn't read user's photo data");
-            e.printStackTrace();
+        if(requestCode == IMAGE_PICK_CODE) {
+            try {
+                Uri imageUri = data.getData();
+                Glide.with(ProfileFragment.this).load(imageUri).into(profile);
+                newPhoto = BitmapConverter.getImageFromUri(imageUri, getActivity());
+            } catch (Exception e) {
+                FirebaseReporter.reportException(e, "Couldn't read user's photo data");
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override

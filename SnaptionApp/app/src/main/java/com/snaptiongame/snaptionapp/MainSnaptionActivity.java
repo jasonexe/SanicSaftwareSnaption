@@ -44,7 +44,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
-import static java.lang.Boolean.TRUE;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -76,7 +75,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             if (selectedItemId != currentFragmentMenuItemId) {
                 switch (selectedItemId) {
                     case R.id.wall_item:
-                        setToolbarCollapsible(TRUE);
+                        setToolbarCollapsible(true);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
                         fab.setImageResource(R.drawable.ic_add_white_24dp);
@@ -90,7 +89,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.friends_item:
-                        setToolbarCollapsible(TRUE);
+                        setToolbarCollapsible(true);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new FriendsFragment()).commit();
                         fab.setImageResource(R.drawable.ic_add_white_24dp);
@@ -200,7 +199,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     private void setupNavigationView() {
-        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
         navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);

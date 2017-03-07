@@ -333,6 +333,7 @@ public class FirebaseUploader implements Uploader {
 
     public static void updateDisplayName(String newName, String userId) {
         uploadObject(String.format(USERNAME_PATH, userId), newName);
+        uploadObject(String.format(LOWERCASE_USERNAME_PATH, userId), newName.toLowerCase());
     }
 
     /**

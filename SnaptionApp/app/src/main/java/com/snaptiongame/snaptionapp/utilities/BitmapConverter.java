@@ -7,12 +7,16 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.util.Log;
 
 import com.snaptiongame.snaptionapp.servercalls.FirebaseReporter;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Created by jason_000 on 2/21/2017.
@@ -42,7 +46,7 @@ public class BitmapConverter {
         return bitmap;
     }
 
-    public static byte[] getImageFromUri(Uri imageUri, Activity activity) {
+    public static byte[] getImageFromUri(final Uri imageUri, final Activity activity) {
         byte[] data = null;
 
         try {
