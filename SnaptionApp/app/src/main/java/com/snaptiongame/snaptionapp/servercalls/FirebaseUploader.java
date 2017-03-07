@@ -110,7 +110,7 @@ public class FirebaseUploader implements Uploader {
         addCompletedGameObj(game);
     }
 
-    private void addCompletedGameObj(final Game game) {
+    private void addCompletedGameObj(Game game) {
         // Add game object to games table
         String gameId = game.getId();
         DatabaseReference gamesRef = database.getReference(GAMES_PATH + "/" + gameId);
@@ -126,7 +126,6 @@ public class FirebaseUploader implements Uploader {
     }
 
     private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
-
         //listener once you get a user to send notification
         final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
             @Override
@@ -143,6 +142,7 @@ public class FirebaseUploader implements Uploader {
 
         //for each player invited to the game, send notification
         for (String playerId : players) {
+            //dont send notificaiton to picker
             if (playerId != FirebaseResourceManager.getUserId()) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
                         notifyPlayerListener);
@@ -151,8 +151,8 @@ public class FirebaseUploader implements Uploader {
     }
 
     private JSONObject createJson(String gameId, User user) {
+        JSONObject json = new JSONObject();
         try {
-            JSONObject json = new JSONObject();
             //json to : notificationId of receiver, data : data
             json.put(JSON_TO, user.getNotificationId());
             JSONObject data = new JSONObject();
@@ -164,11 +164,11 @@ public class FirebaseUploader implements Uploader {
             err.printStackTrace();
             Log.e("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
         }
-        return null;
+        return json;
     }
 
     private void sendNotification(final JSONObject json) {
-
+        //run each notification on separate thread 
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -196,7 +196,6 @@ public class FirebaseUploader implements Uploader {
                 }
             }
         }).start();
-
     }
 
     @Override
