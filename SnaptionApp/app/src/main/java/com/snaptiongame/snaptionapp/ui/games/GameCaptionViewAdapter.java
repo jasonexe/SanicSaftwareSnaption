@@ -19,7 +19,6 @@ import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
