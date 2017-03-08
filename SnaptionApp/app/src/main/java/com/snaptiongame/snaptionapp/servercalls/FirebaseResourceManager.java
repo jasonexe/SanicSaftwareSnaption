@@ -29,14 +29,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-<<<<<<< HEAD
 import com.snaptiongame.snaptionapp.models.Caption;
-=======
-import com.snaptiongame.snaptionapp.Constants;
->>>>>>> 4bd94b01938020d3738e0b8d797a4d31f66f391b
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
