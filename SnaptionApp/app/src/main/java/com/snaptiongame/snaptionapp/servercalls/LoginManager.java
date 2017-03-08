@@ -33,16 +33,11 @@ import java.io.InputStream;
 import java.net.URL;
 
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
 
 import org.apache.commons.io.IOUtils;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Observable;
 
 /**
  * Handles logging in and logging out of Facebook and Google and connecting these services with
@@ -52,7 +47,6 @@ import java.util.Observable;
  * Edited by Austin Robarts
  */
 public class LoginManager {
-    public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
     private static final int LOGIN_GOOGLE_ID = 0;
     private static final String TAG = LoginManager.class.getSimpleName();
     private static final String FB_FRIENDS_PERMISSION = "user_friends";
@@ -133,7 +127,7 @@ public class LoginManager {
                     .build();
             Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
             //This means that the result function will be triggered, override
-            activity.startActivityForResult(signInIntent, GOOGLE_LOGIN_RC);
+            activity.startActivityForResult(signInIntent, Constants.GOOGLE_LOGIN_RC);
         }
         catch (Exception err) {
             FirebaseReporter.reportException(err, "Google login error");

@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
@@ -35,7 +36,6 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
@@ -51,7 +51,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
 
@@ -64,9 +66,6 @@ import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFrom
 public class GameActivity extends HomeAppCompatActivity {
     public static final String USE_GAME_ID = "useGameId";
     public static final String REFRESH_STRING = "refresh";
-    private final static String DEFAULT_PACK = "InitialPack";
-    private final static String GAME_DIRECTORY = "games";
-    private final static String CAPTION_DIRECTORY = "captions";
     private final static String EMPTY_SIZE = "0";
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
@@ -164,14 +163,14 @@ public class GameActivity extends HomeAppCompatActivity {
 
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
-        if(startedIntent.hasExtra(WallViewAdapter.GAME)) {
-            game = (Game)getIntent().getSerializableExtra(WallViewAdapter.GAME); //Obtaining data
+        if(startedIntent.hasExtra(Constants.GAME)) {
+            game = (Game)getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             setupGameElements(game);
         } else if(startedIntent.hasExtra(USE_GAME_ID)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
             String gameId = startedIntent.getStringExtra(USE_GAME_ID);
-            FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId,
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PATH, gameId),
                     new ResourceListener<Game>() {
                         @Override
                         public void onData(Game data) {
@@ -213,7 +212,7 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
-        joinedGameManager.retrieveMapWithUpdates(String.format(FirebaseUploader.GAME_PLAYERS_PATH,
+        joinedGameManager.retrieveMapWithUpdates(String.format(Constants.GAME_PLAYERS_PATH,
                 game.getId()), new ResourceListener<Map<String, Object>>() {
             @Override
             public void onData(Map<String, Object> data) {
@@ -326,12 +325,12 @@ public class GameActivity extends HomeAppCompatActivity {
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
         captionCardsList.addOnScrollListener(scrollFabHider);
-        populateCards(DEFAULT_PACK);
+        populateCards(Constants.DEFAULT_PACK);
     }
 
     private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
-        commentManager.addChildListener(GAME_DIRECTORY + "/" + game.getId() + "/" + CAPTION_DIRECTORY,
+        commentManager.addChildListener(String.format(GAME_CAPTIONS_PATH, game.getId()),
                 captionListener);
     }
 

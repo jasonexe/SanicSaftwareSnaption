@@ -8,13 +8,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Game;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.USER_PRIVATE_GAMES;
+import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
+import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 
 /**
  * FirebaseGameResourceManager is used to retrieve game data from Firebase
@@ -23,7 +24,6 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.U
  */
 
 public class FirebaseGameResourceManager implements GameResourceManager {
-    public static final String GAME_TABLE = "games";
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private ResourceListener<List<Game>> listener;
     private List<Game> mixedGames;
@@ -117,7 +117,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     private void retrievePublicGamesByPriority() {
-        Query query = database.getReference(GAME_TABLE).orderByPriority();
+        Query query = database.getReference(GAMES_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
@@ -208,7 +208,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         if (gameIds.size() == 0) {
             listener.onData(privateGames);
         } else {
-            DatabaseReference gameRef = database.getReference(GAME_TABLE + "/" + gameIds.get(0));
+            DatabaseReference gameRef = database.getReference(String.format(Constants.GAME_PATH, gameIds.get(0)));
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

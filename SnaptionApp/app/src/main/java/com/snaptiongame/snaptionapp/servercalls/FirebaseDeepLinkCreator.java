@@ -59,7 +59,7 @@ interface DeepLink {
 }
 
 public class FirebaseDeepLinkCreator {
-    public static final String LINK_BEGINNING =  "https://snaptiongame.com"; // Use this at beginning of links
+    private static final String LINK_BEGINNING =  "https://snaptiongame.com"; // Use this at beginning of links
 
     static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyAa9WDzfmNN5j3i8jn0smpHkZypMmxFCMI";
     static final String LINK_KEY = "longDynamicLink";

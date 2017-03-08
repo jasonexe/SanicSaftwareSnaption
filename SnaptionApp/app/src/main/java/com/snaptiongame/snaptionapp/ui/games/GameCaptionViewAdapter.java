@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTION_PATH;
+
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
  * Handles Firebase interactions with upvotes and dynamically reloads captions based on changes.
@@ -32,7 +34,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-    private static final String CAPTION_PATH = "games/%s/captions/%s";
 
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
@@ -156,7 +157,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
-        resourceManagerMap.get(caption.getId()).retrieveSingleWithUpdates(String.format(CAPTION_PATH,
+        resourceManagerMap.get(caption.getId()).retrieveSingleWithUpdates(String.format(GAME_CAPTION_PATH,
                 caption.getGameId(), caption.getId()), upvoteListener);
     }
 
