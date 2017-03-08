@@ -51,8 +51,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.Constants.CAPTION_PATH;
-import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaptionapp.ui.games.CardLogic.getRandomCardsFromList;
@@ -170,7 +170,7 @@ public class GameActivity extends HomeAppCompatActivity {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
             String gameId = startedIntent.getStringExtra(USE_GAME_ID);
-            FirebaseResourceManager.retrieveSingleNoUpdates(GAMES_PATH + "/" + gameId,
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PATH, gameId),
                     new ResourceListener<Game>() {
                         @Override
                         public void onData(Game data) {
@@ -330,7 +330,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
-        commentManager.addChildListener(GAMES_PATH + "/" + game.getId() + "/" + CAPTION_PATH,
+        commentManager.addChildListener(String.format(GAME_CAPTIONS_PATH, game.getId()),
                 captionListener);
     }
 

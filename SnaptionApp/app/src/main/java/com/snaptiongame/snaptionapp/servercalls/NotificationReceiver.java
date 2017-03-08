@@ -66,7 +66,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
             @Override
             public void onData(final Game data) {
                 //after getting game, must get user
-                FirebaseResourceManager.retrieveSingleNoUpdates(Constants.USER_PATH + senderUserId, new ResourceListener<User>() {
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, senderUserId), new ResourceListener<User>() {
                     @Override
                     public void onData(User user) {
                         //ensure the user and game were found before sending notification
@@ -89,7 +89,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         };
         //checking to make sure this data was in notification
         if (gameId != null && senderUserId != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(Constants.GAMES_PATH + "/" + gameId, gameListener);
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
         }
     }
 

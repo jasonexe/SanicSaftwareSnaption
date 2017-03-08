@@ -14,6 +14,7 @@ import com.snaptiongame.snaptionapp.models.Game;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 
 /**
@@ -116,7 +117,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     private void retrievePublicGamesByPriority() {
-        Query query = database.getReference(Constants.GAMES_PATH).orderByPriority();
+        Query query = database.getReference(GAMES_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
@@ -207,7 +208,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         if (gameIds.size() == 0) {
             listener.onData(privateGames);
         } else {
-            DatabaseReference gameRef = database.getReference(Constants.GAMES_PATH + "/" + gameIds.get(0));
+            DatabaseReference gameRef = database.getReference(String.format(Constants.GAME_PATH, gameIds.get(0)));
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

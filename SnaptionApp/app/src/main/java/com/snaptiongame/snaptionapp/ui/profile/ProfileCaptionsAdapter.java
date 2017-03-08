@@ -16,8 +16,6 @@ import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
 
-import static com.snaptiongame.snaptionapp.R.string.captions;
-
 /**
  * The adapter for the recycler view that holds the user's captions
  * Created by Jason Krein on 2/12/2017.
@@ -39,7 +37,7 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
             public void onClick(final View view) {
                 String gameId = curCaption.getGameId();
                 FirebaseResourceManager.retrieveSingleNoUpdates(
-                        Constants.GAMES_PATH + "/" + gameId,
+                        String.format(Constants.GAME_PATH, gameId),
                         new ResourceListener<Game>() {
                             @Override
                             public void onData(Game data) {

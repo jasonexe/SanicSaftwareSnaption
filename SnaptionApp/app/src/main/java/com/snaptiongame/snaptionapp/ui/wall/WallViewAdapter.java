@@ -66,13 +66,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, holder.pickerPhoto, Constants.USER_PATH + game.getPicker());
+        displayUser(holder.pickerName, holder.pickerPhoto, String.format(Constants.USER_PATH, game.getPicker()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         if (game.getTopCaption() != null) {
             holder.captionerText.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerText, null, Constants.USER_PATH + game.getTopCaption().getUserId());
+            displayUser(holder.captionerText, null, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist

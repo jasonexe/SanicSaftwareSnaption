@@ -168,7 +168,7 @@ public class FirebaseResourceManager {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
-            userPath = Constants.USER_PATH + user.getUid();
+            userPath = String.format(Constants.USER_PATH, user.getUid());
         return userPath;
     }
 
@@ -178,7 +178,7 @@ public class FirebaseResourceManager {
      * @return a string path from the root node to current user
      */
     public static String getUserPath(String id) {
-        return Constants.USER_PATH + id;
+        return String.format(Constants.USER_PATH, id);
     }
 
     /**
@@ -319,8 +319,7 @@ public class FirebaseResourceManager {
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
-        String directory = Constants.CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
-                + "/" + packName;
+        String directory = String.format(Constants.CARDS_DIRECTORY, Locale.getDefault().getLanguage(), packName);
         DatabaseReference cardsRef = database.getReference(directory);
         // Return all the cards, then we don't have to pull from database to refresh every time
         cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -487,7 +486,7 @@ public class FirebaseResourceManager {
      * @param resourceListener ResourceListener the user is returned to
      */
     public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
-        Query query = database.getReference(Constants.USER_PATH).orderByChild(FB_ID_CHILD)
+        Query query = database.getReference(String.format(Constants.USERS_PATH)).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -554,7 +553,7 @@ public class FirebaseResourceManager {
      */
     public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
         for (String uid : uids.keySet()) {
-            String friend = Constants.USER_PATH + uid;
+            String friend = String.format(Constants.USER_PATH, uid);
             // ensure the user id is a valid one to avoid errors
             if (validFirebasePath(friend)) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
