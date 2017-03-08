@@ -158,7 +158,7 @@ public class FirebaseUploader implements Uploader {
             json.put(JSON_TO, user.getNotificationId());
             JSONObject data = new JSONObject();
             data.put(NotificationReceiver.GAME_ID_KEY, gameId);
-            data.put(NotificationReceiver.USER_ID_KEY, user.getId());
+            data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
             json.put(JSON_DATA, data);
             return json;
         } catch (JSONException err) {
