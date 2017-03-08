@@ -205,7 +205,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setupButtonDisplay(Game game) {
         // When this is initially called, setup the button with current data
         final String pickerId = game.getPicker();
-        if(game.getPlayers() == null) {
+        if (game.getPlayers() == null) {
             determineButtonDisplay(pickerId, null);
         } else {
             determineButtonDisplay(pickerId, game.getPlayers().keySet());
@@ -217,7 +217,7 @@ public class GameActivity extends HomeAppCompatActivity {
             @Override
             public void onData(Map<String, Object> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
-                if(data != null) {
+                if (data != null) {
                     determineButtonDisplay(pickerId, data.keySet());
                 }
             }
@@ -339,6 +339,9 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
+        for (FirebaseResourceManager frm : captionAdapter.resourceManagerMap.values()) {
+            frm.removeListener();
+        }
     }
 
     @OnClick(R.id.fab)

@@ -29,10 +29,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.snaptiongame.snaptionapp.Constants;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -112,11 +113,22 @@ public class FirebaseResourceManager {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Tells firebase what type of object to return
-                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
-                        new GenericTypeIndicator<Map<String, Object>>() {};
-                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
-                listener.onData(data);
+                // Needs to check for the specific object, else Object will set it as a map or array
+                // If you need this method for another data type, add in more if statements
+                if (listener.getDataType() == Caption.class) {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Caption>>() {};
+                    Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
+                else {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Object>>() {};
+                    Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
             }
 
             @Override
