@@ -41,7 +41,6 @@ public class WallFragment extends Fragment {
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
-    private GameType gameType;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
@@ -57,7 +56,7 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.MIXED_GAMES);
+    private GameResourceManager resourceManager;
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
@@ -79,7 +78,7 @@ public class WallFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null && args.getSerializable(GAME_TYPE) != null) {
-            gameType = (GameType) args.getSerializable(GAME_TYPE);
+            GameType gameType = (GameType) args.getSerializable(GAME_TYPE);
             resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
         }
         else {

@@ -3,7 +3,6 @@ package com.snaptiongame.snaptionapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -13,7 +12,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -27,7 +25,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -35,6 +32,7 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.DeepLinkGetter;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
@@ -150,17 +148,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     break;
                 case R.id.my_feed_item:
                     fadeAnim = true;
-                    newFragment = WallFragment.newInstance(WallFragment.GameType.PRIVATE);
+                    newFragment = WallFragment.newInstance(GameType.PRIVATE_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
                     fadeAnim = true;
-                    newFragment =  WallFragment.newInstance(WallFragment.GameType.MIXED);
+                    newFragment =  WallFragment.newInstance(GameType.MIXED_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
                     fadeAnim = true;
-                    newFragment =  WallFragment.newInstance(WallFragment.GameType.PUBLIC);
+                    newFragment =  WallFragment.newInstance(GameType.PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
