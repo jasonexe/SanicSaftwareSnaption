@@ -29,6 +29,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
@@ -46,11 +47,6 @@ import java.util.regex.Pattern;
 import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
-    public static final String FRIENDS_PATH = "users/%s/friends";
-    public static final String USER_PRIVATE_GAMES = "users/%s/privateGames";
-    public static final String USER_DIRECTORY = "users/";
-    public static final String CARDS_DIRECTORY = "cards";
-    public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";
     private static final String FB_REQUEST_DATA = "data";
@@ -173,7 +169,7 @@ public class FirebaseResourceManager {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
-            userPath = USER_DIRECTORY + user.getUid();
+            userPath = String.format(Constants.USER_PATH, user.getUid());
         return userPath;
     }
 
@@ -183,7 +179,7 @@ public class FirebaseResourceManager {
      * @return a string path from the root node to current user
      */
     public static String getUserPath(String id) {
-        return USER_DIRECTORY + id;
+        return String.format(Constants.USER_PATH, id);
     }
 
     /**
@@ -324,8 +320,7 @@ public class FirebaseResourceManager {
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
-        String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
-                + "/" + packName;
+        String directory = String.format(Constants.CARDS_DIRECTORY, Locale.getDefault().getLanguage(), packName);
         DatabaseReference cardsRef = database.getReference(directory);
         // Return all the cards, then we don't have to pull from database to refresh every time
         cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -495,7 +490,7 @@ public class FirebaseResourceManager {
      * @param resourceListener ResourceListener the user is returned to
      */
     public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
-        Query query = database.getReference(USER_DIRECTORY).orderByChild(FB_ID_CHILD)
+        Query query = database.getReference(String.format(Constants.USERS_PATH)).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -562,7 +557,7 @@ public class FirebaseResourceManager {
      */
     public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
         for (String uid : uids.keySet()) {
-            String friend = USER_DIRECTORY + uid;
+            String friend = String.format(Constants.USER_PATH, uid);
             // ensure the user id is a valid one to avoid errors
             if (validFirebasePath(friend)) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);

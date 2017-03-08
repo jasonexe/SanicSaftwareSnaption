@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_UPVOTES_PATH;
+
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
  *
@@ -31,7 +33,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-    private static final String UPVOTES_PATH = "games/%s/captions/%s/votes";
 
     private class UpvoteClickListener implements View.OnClickListener {
         Caption caption;
@@ -124,7 +125,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
-        firebaseResourceManager.retrieveMapWithUpdates(String.format(UPVOTES_PATH,
+        firebaseResourceManager.retrieveMapWithUpdates(String.format(GAME_CAPTIONS_UPVOTES_PATH,
                 caption.getGameId(), caption.getId()), upvoteListener);
     }
 

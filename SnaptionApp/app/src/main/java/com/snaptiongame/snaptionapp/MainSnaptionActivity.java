@@ -43,7 +43,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.Constants.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;

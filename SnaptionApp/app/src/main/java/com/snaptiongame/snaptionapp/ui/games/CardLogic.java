@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.NUM_CARDS_IN_HAND;
+import static com.snaptiongame.snaptionapp.Constants.NUM_CARDS_IN_HAND;
 
 /**
  * Does any card logic needed, used by GameActivity
