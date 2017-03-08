@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -47,6 +48,7 @@ import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
     public static final String FRIENDS_PATH = "users/%s/friends";
+    public static final String USER_PRIVATE_GAMES = "users/%s/privateGames";
     public static final String USER_DIRECTORY = "users/";
     public static final String CARDS_DIRECTORY = "cards";
     public static final int NUM_CARDS_IN_HAND = 10;
@@ -366,7 +368,10 @@ public class FirebaseResourceManager {
         try {
             Glide.with(imageView.getContext())
                     .using(new FirebaseImageLoader())
-                    .load(ref).fitCenter()
+                    .load(ref)
+                    .fitCenter()
+                    // Update signature every hour for profile picture changes.
+                    .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,

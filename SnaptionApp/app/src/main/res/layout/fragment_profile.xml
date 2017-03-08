@@ -32,9 +32,18 @@
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:id="@+id/profile_picture"
+                android:clickable="false"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true">
             </ImageView>
+
+            <ImageView
+                android:id="@+id/edit_photo_overlay"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_photo_camera_white_48dp"
+                android:layout_gravity="center"/>
 
         </android.support.v7.widget.CardView>
 
@@ -46,14 +55,35 @@
             android:textSize="24sp"
             android:textAlignment="center"
             android:padding="10dp"
-            android:layout_toRightOf="@id/view2"/>
+            android:layout_toEndOf="@id/view2"/>
+
+        <EditText
+            android:text=""
+            android:inputType="text"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.AutoCompleteTextView"
+            android:id="@+id/profile_name_editable"
+            android:textSize="24sp"
+            android:textAlignment="center"
+            android:padding="10dp"
+            android:layout_toEndOf="@id/view2"/>
+
+        <ImageButton
+            android:visibility="gone"
+            android:id="@+id/stop_name_change"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_close_white_24dp"
+            android:layout_alignEnd="@+id/profile_name_editable" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:id="@+id/profile_games_created"
             android:layout_below="@+id/profile_name"
-            android:layout_toRightOf="@+id/view2"
+            android:layout_toEndOf="@+id/view2"
             android:padding="10dp">
 
             <TextView
