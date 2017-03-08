@@ -17,6 +17,8 @@ import butterknife.ButterKnife;
  */
 
 public class CaptionViewHolder extends RecyclerView.ViewHolder {
+    @BindView(R.id.caption_display_item)
+    protected View captionBackground;
     @BindView(R.id.captioner_photo)
     protected ImageView captionerPhoto;
     @BindView(R.id.captioner_name)

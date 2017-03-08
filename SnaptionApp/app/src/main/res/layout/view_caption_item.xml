@@ -1,24 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/caption_display_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp">
+    android:paddingStart="5dp"
+    android:paddingEnd="5dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
-    <ImageView
-        android:id="@+id/captioner_photo"
+    <android.support.v7.widget.CardView
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginEnd="8dp"
-        android:layout_alignParentStart="true"/>
+        android:elevation="12dp"
+        android:id="@+id/captioner_photo_view"
+        app:cardCornerRadius="15dp"
+        android:layout_centerHorizontal="true"
+        android:innerRadius="0dp"
+        android:shape="ring"
+        android:thicknessRatio="1.9"
+        android:layout_alignParentStart="true"
+        android:layout_margin="2dp">
+
+        <ImageView
+            android:layout_height="30dp"
+            android:layout_width="match_parent"
+            android:id="@+id/captioner_photo"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+        </ImageView>
+    </android.support.v7.widget.CardView>
 
     <TextView
         android:id="@+id/captioner_name"
         android:layout_width="wrap_content"
         android:layout_height="30dp"
-        android:layout_toEndOf="@id/captioner_photo"
+        android:textSize="12sp"
+        android:layout_toEndOf="@id/captioner_photo_view"
         android:gravity="center_vertical" />
 
     <ImageView
@@ -40,15 +58,9 @@
         android:id="@+id/caption_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/captioner_photo"
+        android:textSize="14sp"
+        android:layout_below="@id/captioner_photo_view"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/caption_text"
-        android:id="@+id/black_line"
-        android:background="@color/colorBlack"/>
 
 </RelativeLayout>
