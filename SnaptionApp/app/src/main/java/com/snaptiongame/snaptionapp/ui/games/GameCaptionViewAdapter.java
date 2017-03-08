@@ -32,8 +32,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
+    private static final String CAPTION_PATH = "games/%s/captions/%s";
+
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
-    private static final String CAPTION_PATH = "games/%s/captions/%s"; // TODO: move to constants
 
     // BEGIN PRIVATE CLASSES //
 
@@ -94,7 +95,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     @Override
     public void onBindViewHolder(final CaptionViewHolder holder, final int position) {
         final Caption caption = items.get(position);
-        // TODO: Create a map of FirebaseResourceManagers to add efficiency and get rid of memory leaks
+        // Adds the firebaseresourcemanager to the map if it is not already in it
         if (!resourceManagerMap.containsKey(caption.getId())) {
             resourceManagerMap.put(caption.getId(), new FirebaseResourceManager());
         }
