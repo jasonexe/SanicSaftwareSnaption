@@ -84,13 +84,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         final Caption caption = items.get(position);
         FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
 
-        //if odd spot make grey
-        if (position % 2 != 0) {
-            holder.captionBackground.setBackgroundResource(R.color.lightGrey);
-        } else {
-            holder.captionBackground.setBackgroundResource(R.color.white);
-        }
-
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
         firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {

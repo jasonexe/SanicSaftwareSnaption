@@ -4,8 +4,8 @@
     android:id="@+id/caption_display_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="5dp"
-    android:paddingEnd="5dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
 
@@ -37,21 +37,25 @@
         android:layout_height="30dp"
         android:textSize="12sp"
         android:layout_toEndOf="@id/captioner_photo_view"
-        android:gravity="center_vertical" />
+        android:gravity="center_vertical"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"/>
 
     <ImageView
         android:id="@+id/upvote_icon"
         android:src="@drawable/thumbs_up_blank"
         android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
         android:layout_marginStart="10dp"
         android:layout_alignParentEnd="true"/>
 
     <TextView
         android:id="@+id/number_upvotes_text"
         android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_height="match_parent"
         android:gravity="center_vertical"
+        android:layout_centerVertical="true"
         android:layout_toStartOf="@id/upvote_icon"/>
 
     <TextView
@@ -62,5 +66,12 @@
         android:layout_below="@id/captioner_photo_view"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/caption_text"
+        android:id="@+id/black_line"
+        android:background="@android:color/darker_gray"/>
 
 </RelativeLayout>
