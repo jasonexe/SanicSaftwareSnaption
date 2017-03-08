@@ -58,6 +58,8 @@ public class FirebaseUploader implements Uploader {
     private static final String JSON_CONTENT_TYPE = "Content-Type";
     private static final String JSON_CONTENT_VAL = "application/json";
     private static final String NOTIFICATION_ID = "notificationId";
+    private static final String USERNAME_PATH = "users/%s/displayName";
+    private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -290,13 +292,11 @@ public class FirebaseUploader implements Uploader {
                     //upload user
                     uploadObject(USERS_PATH + "/" + user.getId(), user);
                     //upload user photo
-                    StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
-                    ref.putBytes(photo);
+                    uploadUserPhoto(user, photo);
                 } else {
                     //update notificationId every login
                     uploadObject(String.format(NOTIFICATION_ID_PATH, user.getId()), user.getNotificationId());
                 }
-
                 //notify user has been added or found
                 listener.onData(data);
             }
@@ -306,6 +306,11 @@ public class FirebaseUploader implements Uploader {
                 return User.class;
             }
         });
+    }
+
+    public static void uploadUserPhoto(User user, byte[] photo) {
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+        ref.putBytes(photo);
     }
 
     public static void updateUserNotificationToken(String userId, final String token) {
@@ -368,18 +373,18 @@ public class FirebaseUploader implements Uploader {
         // Updates the values in the database
         database.getReference().updateChildren(childUpdates,
                 new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError,
-                                           DatabaseReference databaseReference) {
-                        if (databaseError == null) {
-                            listener.onComplete();
-                        }
-                        else {
-                            listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
-                                    ? ITEM_ALREADY_EXISTS_ERROR : "");
-                        };
-                    }
-                });
+            @Override
+            public void onComplete(DatabaseError databaseError,
+                                   DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    listener.onComplete();
+                }
+                else {
+                    listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
+                            ? ITEM_ALREADY_EXISTS_ERROR : "");
+                };
+            }
+        });
     }
 
     public static void addCurrentUserToGame(Game game, final ResourceListener<Exception> errorDisplayer) {
@@ -423,6 +428,11 @@ public class FirebaseUploader implements Uploader {
                 }
             }
         });
+    }
+
+    public static void updateDisplayName(String newName, String userId) {
+        uploadObject(String.format(USERNAME_PATH, userId), newName);
+        uploadObject(String.format(LOWERCASE_USERNAME_PATH, userId), newName.toLowerCase());
     }
 
     /**

@@ -194,7 +194,6 @@ public class CreateGameActivity extends AppCompatActivity {
                         // TODO if/when inviting is also supported, handle when a Friend is added
                         friends.put(friend.getId(), 1);
                     }
-                    friends.put(FirebaseResourceManager.getUserId(), 1);
                     categories = getCategoriesFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis();
                     //Generate unique key for Games
@@ -329,7 +328,7 @@ public class CreateGameActivity extends AppCompatActivity {
         noFriendsView.setVisibility(View.VISIBLE);
     }
 
-    class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
+    private class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
         int progressDivisor = 1000; // This converts from bytes to whatever units you want.
         // IE 1000 = display with kilobytes
 
