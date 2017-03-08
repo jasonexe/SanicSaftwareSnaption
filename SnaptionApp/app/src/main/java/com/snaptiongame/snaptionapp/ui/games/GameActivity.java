@@ -339,6 +339,9 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
+        for (FirebaseResourceManager frm : captionAdapter.resourceManagerMap.values()) {
+            frm.removeListener();
+        }
     }
 
     @OnClick(R.id.fab)

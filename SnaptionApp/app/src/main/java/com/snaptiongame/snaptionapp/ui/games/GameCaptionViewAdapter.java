@@ -18,6 +18,7 @@ import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
+    protected Map<String, FirebaseResourceManager> resourceManagerMap;
     private static final String CAPTION_PATH = "games/%s/captions/%s"; // TODO: move to constants
 
     // BEGIN PRIVATE CLASSES //
@@ -80,6 +82,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         this.items = items;
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
+        resourceManagerMap = new HashMap<>(items.size());
     }
 
     /**
@@ -92,12 +95,14 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     public void onBindViewHolder(final CaptionViewHolder holder, final int position) {
         final Caption caption = items.get(position);
         // TODO: Create a map of FirebaseResourceManagers to add efficiency and get rid of memory leaks
-        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
+        if (!resourceManagerMap.containsKey(caption.getId())) {
+            resourceManagerMap.put(caption.getId(), new FirebaseResourceManager());
+        }
 
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
         if (caption.retrieveUser() == null) {
-            firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     caption.assignUser(user);
@@ -150,7 +155,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         holder.captionText.setText(caption.retrieveCaptionText());
 
         //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
-        firebaseResourceManager.retrieveSingleWithUpdates(String.format(CAPTION_PATH,
+        resourceManagerMap.get(caption.getId()).retrieveSingleWithUpdates(String.format(CAPTION_PATH,
                 caption.getGameId(), caption.getId()), upvoteListener);
     }
 
