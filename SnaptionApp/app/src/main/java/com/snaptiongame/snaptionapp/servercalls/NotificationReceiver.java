@@ -5,9 +5,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
@@ -36,8 +38,8 @@ import java.util.Map;
 
 public class NotificationReceiver extends FirebaseMessagingService {
 
-    private static final String gameIdKey = "gameId";
-    private static final String userIdKey = "userId";
+    public static final String GAME_ID_KEY = "gameId";
+    public static final String USER_ID_KEY = "userId";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -49,8 +51,8 @@ public class NotificationReceiver extends FirebaseMessagingService {
         //if a data message was received
         if (data != null && data.size() > 0) {
             //create intent to open up game from remoteMessage info
-            gameId = data.get(gameIdKey);
-            senderUserId = data.get(userIdKey);
+            gameId = data.get(GAME_ID_KEY);
+            senderUserId = data.get(USER_ID_KEY);
             createNotification(gameId, senderUserId);
         }
 
@@ -98,8 +100,11 @@ public class NotificationReceiver extends FirebaseMessagingService {
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(WallViewAdapter.GAME, game);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_ONE_SHOT);
+        //create fake history so back button goes to Wall
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+        stackBuilder.addParentStack(GameActivity.class);
+        stackBuilder.addNextIntent(intent);
+        PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_snaption)
