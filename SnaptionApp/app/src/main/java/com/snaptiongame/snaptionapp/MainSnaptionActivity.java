@@ -3,14 +3,17 @@ package com.snaptiongame.snaptionapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
@@ -24,6 +27,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -44,7 +48,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaptionapp.servercalls.LoginManager.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaptionapp.Constants.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends AppCompatActivity {
     private LoginManager loginManager;
@@ -106,6 +110,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     }
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
+                    setToolbarCollapsible(true);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
@@ -113,12 +118,14 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     fabVisible = bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
+                    setToolbarCollapsible(false);
                     break;
                 case R.id.friends_item:
                     newFragment = new FriendsFragment();
                     bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
+                    setToolbarCollapsible(true);
                     break;
                 case R.id.log_option:
                     //check if we are logging in or out based on item text
@@ -183,6 +190,18 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
         ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setMargins(0, 0, fabEndMargin,
                 bottomNavVisible ? fabBottomNavBottomMargin : 0);
+    }
+
+    private void setToolbarCollapsible(boolean collapsible) {
+        AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        if(collapsible) {
+            params.setScrollFlags(
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+        } else {
+            params.setScrollFlags(0);
+        }
     }
 
     @Override
@@ -317,6 +336,10 @@ public class MainSnaptionActivity extends AppCompatActivity {
         else if (currentNavDrawerMenuId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
+        }
+        else if (currentNavDrawerMenuId == R.id.profile_item) {
+            ProfileFragment fragment = (ProfileFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            fragment.fabClicked(fab, true);
         }
     }
 

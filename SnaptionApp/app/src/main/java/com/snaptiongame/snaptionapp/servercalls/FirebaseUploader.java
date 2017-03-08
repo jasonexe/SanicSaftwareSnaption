@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -11,14 +12,33 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static com.snaptiongame.snaptionapp.Constants.FRIENDS_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTION_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
+import static com.snaptiongame.snaptionapp.Constants.GAME_PATH;
+import static com.snaptiongame.snaptionapp.Constants.USER_CAPTION_PATH;
+import static com.snaptiongame.snaptionapp.Constants.USER_CREATED_GAME_PATH;
+import static com.snaptiongame.snaptionapp.Constants.USER_NOTIFICATION_PATH;
+import static com.snaptiongame.snaptionapp.Constants.USER_PATH;
 
 /**
  * FirebaseUploader is used for uploading data to Firebase and updating values.
@@ -35,9 +55,22 @@ public class FirebaseUploader implements Uploader {
     private static final String GAMES_PATH = "games";
     private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
+    private static final String NOTIFICATION_ID_PATH = "users/%s/notificationId";
     private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
     private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
     private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
+    private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
+    private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
+    private static final String POST = "POST";
+    private static final String JSON_TO = "to";
+    private static final String JSON_DATA = "data";
+    private static final String JSON_AUTH = "Authorization";
+    private static final String JSON_AUTH_KEY = "key=";
+    private static final String JSON_CONTENT_TYPE = "Content-Type";
+    private static final String JSON_CONTENT_VAL = "application/json";
+    private static final String NOTIFICATION_ID = "notificationId";
+    private static final String USERNAME_PATH = "users/%s/displayName";
+    private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -74,7 +107,7 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
         //TODO notify invited players
-        game.setImagePath(IMAGE_PATH + "/" + game.getId());
+        game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
     }
@@ -93,45 +126,121 @@ public class FirebaseUploader implements Uploader {
     private void addCompletedGameObj(Game game) {
         // Add game object to games table
         String gameId = game.getId();
-        DatabaseReference gamesRef = database.getReference(GAMES_PATH + "/" + gameId);
+        DatabaseReference gamesRef = database.getReference(String.format(GAME_PATH, gameId));
         gamesRef.setValue(game);
         // Add gameId to user's createdGames map
         addGameToUserCreatedGames(game);
         // Add gameId to all players' privateGames map
         addGameToPlayerPrivateGames(game);
+        //notify players if there are any
+        if (game.getPlayers() != null) {
+            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
+        }
+    }
+
+    private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
+        //listener once you get a user to send notification
+        final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
+            @Override
+            public void onData(User user) {
+                JSONObject json = createJson(gameId, user);
+                sendNotification(json);
+            }
+
+            @Override
+            public Class getDataType() {
+                return User.class;
+            }
+        };
+
+        String pickerId = FirebaseResourceManager.getUserId();
+        //for each player invited to the game, send notification
+        for (String playerId : players) {
+            //dont send notificaiton to picker
+            if (playerId != pickerId) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
+                        notifyPlayerListener);
+            }
+        }
+    }
+
+    private JSONObject createJson(String gameId, User user) {
+        JSONObject json = new JSONObject();
+        try {
+            //json to : notificationId of receiver, data : data
+            json.put(JSON_TO, user.getNotificationId());
+            JSONObject data = new JSONObject();
+            data.put(NotificationReceiver.GAME_ID_KEY, gameId);
+            data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
+            json.put(JSON_DATA, data);
+            return json;
+        } catch (JSONException err) {
+            err.printStackTrace();
+            Log.e("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
+        }
+        return json;
+    }
+
+    private void sendNotification(final JSONObject json) {
+        //run each notification on separate thread
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL firebaseMessageUrl = new URL(FIREBASE_MESSAGE_URL);
+                    final HttpURLConnection connection =(HttpURLConnection)firebaseMessageUrl.openConnection();
+                    connection.setRequestMethod(POST);
+                    connection.setDoOutput(true);
+                    connection.setRequestProperty(JSON_CONTENT_TYPE, JSON_CONTENT_VAL);
+                    connection.setRequestProperty(JSON_AUTH,  JSON_AUTH_KEY + FIREBASE_SERVER_KEY);
+                    final DataOutputStream write = new DataOutputStream(connection.getOutputStream());
+                    write.writeBytes(json.toString());
+                    write.flush();
+                    write.close();
+                    connection.connect();
+                    Log.d("NOTIFICATION","Send message response msg: " + connection.getResponseMessage());
+                }
+                catch (MalformedURLException err) {
+                    err.printStackTrace();
+                    Log.e("NOTIFICATION", "Failed to create URL " + err.getMessage());
+                }
+                catch (IOException err) {
+                    err.printStackTrace();
+                    Log.e("NOTIFICATION", "Failed to write JSON to firebase " + err.getMessage());
+                }
+            }
+        }).start();
     }
 
     @Override
     public String getNewGameKey() {
         DatabaseReference gamesFolderRef = database.getReference(GAMES_PATH);
-        String key = gamesFolderRef.push().getKey();
-        return key;
+        return gamesFolderRef.push().getKey();
     }
 
     @Override
     public String getNewCaptionKey(String gameId) {
-        DatabaseReference captionFolderRef = database.getReference(GAMES_PATH + "/" + gameId + "/" +
-                CAPTION_PATH);
+        DatabaseReference captionFolderRef = database.getReference(String.format(GAME_CAPTIONS_PATH, gameId));
         return captionFolderRef.push().getKey();
     }
 
     private void addGameToUserCreatedGames(Game game) {
         final String gameId = game.getId();
         String userId = game.getPicker();
-        DatabaseReference userRef = database.getReference(USERS_PATH + "/" + userId);
+        DatabaseReference userRef = database.getReference(String.format(USER_CREATED_GAME_PATH, userId, gameId));
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
-        userRef.child(USERS_CREATED_GAMES).child(gameId).setValue(1);
+        userRef.setValue(1);
     }
 
     private void addGameToPlayerPrivateGames(Game game) {
         String gameId = game.getId();
         Set<String> ids = game.getPlayers().keySet();
         // add the game to the picker's private games map
-        database.getReference(String.format(USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
+        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
                 .setValue(1);
         // add the game to each of the player's private games map
         for (String id : ids) {
-            database.getReference(String.format(USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
+            database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
         }
     }
 
@@ -175,26 +284,27 @@ public class FirebaseUploader implements Uploader {
         String gameId = caption.getGameId();
         String userId = caption.getUserId();
         String captId = caption.getId();
-        String gameCaptionPath = GAMES_PATH + "/" + gameId + "/" + CAPTION_PATH + "/" + captId;
+        String gameCaptionPath = String.format(GAME_CAPTION_PATH, gameId, captId);
         uploadObject(gameCaptionPath, caption);
-        String userCaptionPath = USERS_PATH + "/" + userId + "/" + CAPTION_PATH + "/" + captId;
+        String userCaptionPath = String.format(USER_CAPTION_PATH, userId, captId);
         uploadObject(userCaptionPath, caption);
     }
 
     @Override
     public void addUser(final User user, final byte[] photo, final ResourceListener<User> listener) {
         //check if User already exists in Database
-        FirebaseResourceManager manager = new FirebaseResourceManager();
-        manager.retrieveSingleNoUpdates(USERS_PATH + "/" + user.getId(), new ResourceListener<User>() {
+        FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, user.getId()), new ResourceListener<User>() {
             @Override
             public void onData(User data) {
                 //if User does not exist
-                if (data == null || !(data instanceof User)) {
+                if (data == null) {
                     //upload user
-                    uploadObject(USERS_PATH + "/" + user.getId(), user);
+                    uploadObject(String.format(USER_PATH, user.getId()), user);
                     //upload user photo
-                    StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
-                    ref.putBytes(photo);
+                    uploadUserPhoto(user, photo);
+                } else {
+                    //update notificationId every login
+                    uploadObject(String.format(NOTIFICATION_ID_PATH, user.getId()), user.getNotificationId());
                 }
                 //notify user has been added or found
                 listener.onData(data);
@@ -205,6 +315,15 @@ public class FirebaseUploader implements Uploader {
                 return User.class;
             }
         });
+    }
+
+    public static void uploadUserPhoto(User user, byte[] photo) {
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+        ref.putBytes(photo);
+    }
+
+    public static void updateUserNotificationToken(String userId, final String token) {
+        uploadObject(String.format(USER_NOTIFICATION_PATH, userId), token);
     }
 
     /**
@@ -254,11 +373,9 @@ public class FirebaseUploader implements Uploader {
 
         Map<String, Object> childUpdates = new HashMap<>();
         // Updates for the game caption
-        childUpdates.put(String.format(GAME_CAPTIONS_UPVOTES_PATH, gameId, captionId) + "/" +
-                upvoterId, value);
+        childUpdates.put(String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, gameId, captionId, upvoterId), value);
         // Updates for the user caption
-        childUpdates.put(String.format(USER_CAPTIONS_UPVOTES_PATH, captionerId, captionId) + "/" +
-                upvoterId, value);
+        childUpdates.put(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, captionerId, captionId, upvoterId), value);
         // Updates the values in the database
         database.getReference().updateChildren(childUpdates,
                 new DatabaseReference.CompletionListener() {
@@ -282,8 +399,8 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         String userId = FirebaseResourceManager.getUserId();
 
-        childUpdates.put(String.format(GAME_PLAYERS_PATH, gameId) + "/" + userId, 1);
-        childUpdates.put(String.format(USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
+        childUpdates.put(String.format(Constants.GAME_PLAYERS_PATH, gameId) + "/" + userId, 1);
+        childUpdates.put(String.format(Constants.USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -317,6 +434,11 @@ public class FirebaseUploader implements Uploader {
                 }
             }
         });
+    }
+
+    public static void updateDisplayName(String newName, String userId) {
+        uploadObject(String.format(USERNAME_PATH, userId), newName);
+        uploadObject(String.format(LOWERCASE_USERNAME_PATH, userId), newName.toLowerCase());
     }
 
     /**

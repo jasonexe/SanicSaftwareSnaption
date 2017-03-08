@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -28,9 +29,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,10 +48,6 @@ import java.util.regex.Pattern;
 import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
-    public static final String FRIENDS_PATH = "users/%s/friends";
-    private static final String USER_DIRECTORY = "users/";
-    public static final String CARDS_DIRECTORY = "cards";
-    public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";
     private static final String FB_REQUEST_DATA = "data";
@@ -114,11 +113,22 @@ public class FirebaseResourceManager {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // Tells firebase what type of object to return
-                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
-                        new GenericTypeIndicator<Map<String, Object>>() {};
-                Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
-                listener.onData(data);
+                // Needs to check for the specific object, else Object will set it as a map or array
+                // If you need this method for another data type, add in more if statements
+                if (listener.getDataType() == Caption.class) {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Caption>>() {};
+                    Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
+                else {
+                    // Tells firebase what type of object to return
+                    GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                            new GenericTypeIndicator<Map<String, Object>>() {};
+                    Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
+                    listener.onData(data);
+                }
             }
 
             @Override
@@ -171,7 +181,7 @@ public class FirebaseResourceManager {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
-            userPath = USER_DIRECTORY + user.getUid();
+            userPath = String.format(Constants.USER_PATH, user.getUid());
         return userPath;
     }
 
@@ -181,7 +191,7 @@ public class FirebaseResourceManager {
      * @return a string path from the root node to current user
      */
     public static String getUserPath(String id) {
-        return USER_DIRECTORY + id;
+        return String.format(Constants.USER_PATH, id);
     }
 
     /**
@@ -322,8 +332,7 @@ public class FirebaseResourceManager {
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
-        String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
-                + "/" + packName;
+        String directory = String.format(Constants.CARDS_DIRECTORY, Locale.getDefault().getLanguage(), packName);
         DatabaseReference cardsRef = database.getReference(directory);
         // Return all the cards, then we don't have to pull from database to refresh every time
         cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -351,27 +360,35 @@ public class FirebaseResourceManager {
      */
     public static void loadImageIntoView(String imagePath, final ImageView imageView) {
         StorageReference ref = storage.child(imagePath);
-        Glide.with(imageView.getContext())
-                .using(new FirebaseImageLoader())
-                .load(ref).fitCenter()
-                .listener(new RequestListener<StorageReference, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, StorageReference model,
-                                               Target<GlideDrawable> target,
-                                               boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource,
-                                                   StorageReference model,
+        try {
+            Glide.with(imageView.getContext())
+                    .using(new FirebaseImageLoader())
+                    .load(ref)
+                    .fitCenter()
+                    // Update signature every hour for profile picture changes.
+                    .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
+                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, StorageReference model,
                                                    Target<GlideDrawable> target,
-                                                   boolean isFromMemoryCache,
                                                    boolean isFirstResource) {
-                        return false;
-                    }
-                })
-                .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource,
+                                                       StorageReference model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFromMemoryCache,
+                                                       boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .placeholder(android.R.drawable.progress_horizontal).into(imageView);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            FirebaseReporter.reportException(e, "Glide image load failed");
+        }
     }
 
     public static void getImageURI(String imagePath, final ResourceListener<Uri> pathListener) {
@@ -485,7 +502,7 @@ public class FirebaseResourceManager {
      * @param resourceListener ResourceListener the user is returned to
      */
     public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
-        Query query = database.getReference(USER_DIRECTORY).orderByChild(FB_ID_CHILD)
+        Query query = database.getReference(String.format(Constants.USERS_PATH)).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -552,7 +569,7 @@ public class FirebaseResourceManager {
      */
     public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
         for (String uid : uids.keySet()) {
-            String friend = USER_DIRECTORY + uid;
+            String friend = String.format(Constants.USER_PATH, uid);
             // ensure the user id is a valid one to avoid errors
             if (validFirebasePath(friend)) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);

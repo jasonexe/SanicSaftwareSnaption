@@ -3,6 +3,7 @@ package com.snaptiongame.snaptionapp.ui.wall;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -16,10 +17,10 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class WallFragment extends Fragment {
             "newInstance rather than the constructor directly";
     private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
+    private static final int SCROLL_DOWN_CONST = 1;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
@@ -43,6 +45,9 @@ public class WallFragment extends Fragment {
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
+            if(games == null) {
+                Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
+            }
             wallAdapter.addItems(games);
             isLoading = false;
         }
@@ -52,15 +57,10 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager;
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.MIXED_GAMES);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
-
-    // TODO replace this with Jason's actual GameType enum
-    public enum GameType implements Serializable {
-        MIXED, PUBLIC, PRIVATE
-    }
 
     public static WallFragment newInstance(GameType gameType) {
         WallFragment fragment = new WallFragment();
@@ -80,8 +80,7 @@ public class WallFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null && args.getSerializable(GAME_TYPE) != null) {
             gameType = (GameType) args.getSerializable(GAME_TYPE);
-            // TODO add game type
-            resourceManager = new FirebaseGameResourceManager(10, listener);
+            resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
         }
         else {
             throw new RuntimeException(GAME_TYPE_EXCEPTION_MSG);
@@ -103,12 +102,7 @@ public class WallFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                int totalChildren = manager.getItemCount();
-                int totalChildrenVisible = manager.getChildCount();
-                int[] firstVisibleChildren = null;
-                firstVisibleChildren = manager.findFirstVisibleItemPositions(firstVisibleChildren);
-                if (!isLoading && firstVisibleChildren != null && firstVisibleChildren.length > 0 &&
-                        firstVisibleChildren[0] + totalChildrenVisible > totalChildren) {
+                if(!isLoading && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
                     loadMoreGames();
                 }
             }
@@ -121,8 +115,7 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
-        // TODO change to retrieveGames
-        resourceManager.retrieveGamesByCreationDate();
+        resourceManager.retrieveGames();
     }
 
     @Override
