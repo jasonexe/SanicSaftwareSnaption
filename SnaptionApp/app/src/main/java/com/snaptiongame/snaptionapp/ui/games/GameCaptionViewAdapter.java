@@ -96,11 +96,11 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
         String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
         // Get information about the captioner to display it
-        if (caption.user == null) {
+        if (caption.retrieveUser() == null) {
             firebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    caption.user = user;
+                    caption.assignUser(user);
                     setCaptionerView(user, holder);
                 }
 
@@ -111,7 +111,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             });
         }
         else {
-            setCaptionerView(caption.user, holder);
+            setCaptionerView(caption.retrieveUser(), holder);
         }
 
         // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
@@ -123,11 +123,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 if (updatedCaption != null) {
                     int oldIndex, newIndex;
                     oldIndex = items.indexOf(caption);
-                    items.remove(position);
-                    // TODO: insert caption at correct index and don't sort
-                    items.add(updatedCaption);
-                    Collections.sort(items);
-                    newIndex = items.indexOf(updatedCaption);
+                    items.remove(oldIndex);
+                    newIndex = insertCaption(updatedCaption);
                     // Check to see if the caption has moved, and if it has then animate its change
                     if (oldIndex != newIndex) {
                         notifyItemMoved(oldIndex, newIndex);
@@ -209,7 +206,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param caption The caption object being affected
      * @param hasUpvoted Whether the user has previously upvoted this caption
      */
-    private void handleClickUpvote(final ImageView upvoteIcon, final Caption caption,
+    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
@@ -264,7 +261,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param holder The holder for the view
      * @param caption The caption being affected
      */
-    private void setUpvoteView(CaptionViewHolder holder, Caption caption, int numUpvotes, boolean hasUpvoted) {
+    private void setUpvoteView(CaptionViewHolder holder, Caption caption, int numUpvotes,
+                               boolean hasUpvoted) {
         // Set numberUpvotesText to be the the number of upvotes;
         holder.numberUpvotesText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
@@ -293,6 +291,30 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             holder.captionerPhoto.setImageDrawable(holder.captionerPhoto.getContext()
                     .getResources().getDrawable(R.drawable.com_facebook_profile_picture_blank_square));
         }
+    }
+
+    /**
+     * Inserts the caption into the items list in the proper order.
+     *
+     * @param caption The caption to insert
+     */
+    private int insertCaption(Caption caption) {
+        int index = 0;
+        boolean added = false;
+
+        while (index < items.size() && !added) {
+            if (caption.compareTo(items.get(index)) < 0) {
+                items.add(index, caption);
+                added = true;
+            }
+            else {
+                index++;
+            }
+        }
+        if (!added) {
+            items.add(caption);
+        }
+        return index;
     }
 
 }
