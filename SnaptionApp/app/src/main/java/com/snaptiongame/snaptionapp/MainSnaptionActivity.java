@@ -3,11 +3,14 @@ package com.snaptiongame.snaptionapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -71,18 +75,24 @@ public class MainSnaptionActivity extends AppCompatActivity {
             if (selectedItemId != currentFragmentMenuItemId) {
                 switch (selectedItemId) {
                     case R.id.wall_item:
+                        setToolbarCollapsible(true);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new WallFragment()).commit();
+                        fab.setImageResource(R.drawable.ic_add_white_24dp);
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.profile_item:
+                        setToolbarCollapsible(false);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new ProfileFragment()).commit();
-                        fab.setVisibility(View.INVISIBLE);
+                        fab.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                        fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.friends_item:
+                        setToolbarCollapsible(true);
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                 new FriendsFragment()).commit();
+                        fab.setImageResource(R.drawable.ic_add_white_24dp);
                         fab.setVisibility(View.VISIBLE);
                         break;
                     case R.id.log_option:
@@ -116,6 +126,18 @@ public class MainSnaptionActivity extends AppCompatActivity {
             return true;
         }
     };
+
+    private void setToolbarCollapsible(boolean collapsible) {
+        AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        if(collapsible) {
+            params.setScrollFlags(
+                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+        } else {
+            params.setScrollFlags(0);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,7 +199,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     private void setupNavigationView() {
-        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
         navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
@@ -186,7 +207,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
         if (FirebaseResourceManager.getUserPath() != null) {
             //retrieve information from User table
-            firebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     if (user != null) {
@@ -249,6 +270,10 @@ public class MainSnaptionActivity extends AppCompatActivity {
         else if (currentFragmentMenuItemId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
             startActivity(intent);
+        }
+        else if (currentFragmentMenuItemId == R.id.profile_item) {
+            ProfileFragment fragment = (ProfileFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            fragment.fabClicked(fab, true);
         }
     }
 
