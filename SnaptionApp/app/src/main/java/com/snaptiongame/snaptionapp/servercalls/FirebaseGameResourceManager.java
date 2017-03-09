@@ -140,7 +140,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         data.add((Game) snapshot.getValue(listener.getDataType()));
                     }
                     if (retrievedOnce) {
-                        data.remove(0);
+                        if (data.size() > 0) {
+                            data.remove(0);
+                        }
                     }
                     else {
                         retrievedOnce = true;
@@ -181,7 +183,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     gameIds.add(lastRetrievedKey);
                 }
                 if (retrievedOnce) {
-                    gameIds.remove(0);
+                    if (gameIds.size() > 0) {
+                        gameIds.remove(0);
+                    }
                 }
                 else {
                     retrievedOnce = true;
