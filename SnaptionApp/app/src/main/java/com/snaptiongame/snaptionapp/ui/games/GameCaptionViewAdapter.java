@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.User;
@@ -34,7 +35,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-
+    // Holds the firebaseresourcemanagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     // BEGIN PRIVATE CLASSES //
@@ -231,13 +232,17 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         if (caption != null) {
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, caption.getGameId(), caption.getId(), caption.getUserId()),
+                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(), caption.getId(), caption.getUserId()),
+                        listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.addUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, caption.getGameId(), caption.getId(), caption.getUserId()),
+                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(), caption.getId(), caption.getUserId()),
+                        listener);
             }
         }
     }

@@ -11,9 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.Constants;
+import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
@@ -23,7 +27,9 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.validFirebasePath;
 
@@ -35,10 +41,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     private List<Game> items;
     private MainSnaptionActivity activity;
+    // Holds the firebaseresourcemanagers to prevent them from having to be re-created and prevents memory leaks
+    protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
         this.items = items;
         this.activity = activity;
+        resourceManagerMap = new HashMap<>();
     }
 
     @Override
@@ -62,9 +71,45 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
     }
 
+    /**
+     * The click listener for the upvote button.
+     */
+    private class UpvoteClickListener implements View.OnClickListener {
+        Game game;
+        boolean hasUpvoted;
+
+        /**
+         * Constructs the upvote click listener.
+         *
+         * @param game The game to listen to
+         * @param hasUpvoted Whether the current user has upvoted the caption
+         */
+        public UpvoteClickListener(Game game, boolean hasUpvoted) {
+            this.game = game;
+            this.hasUpvoted = hasUpvoted;
+        }
+
+        @Override
+        public void onClick(View upvote) {
+            // Check if user is logged in before letting them upvote. If not logged in, display
+            // login dialog.
+            if (FirebaseResourceManager.getUserId() == null) {
+                activity.loginDialog.show();
+            }
+            else {
+                handleClickUpvote((ImageView) upvote, game, hasUpvoted);
+            }
+        }
+    }
+
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
+
+        // Adds the firebaseresourcemanager to the map if it is not already in it
+        if (!resourceManagerMap.containsKey(game.getId())) {
+            resourceManagerMap.put(game.getId(), new FirebaseResourceManager());
+        }
         // display the Picker of the game, the one who created it
         displayUser(holder.pickerName, holder.pickerPhoto, String.format(Constants.USER_PATH, game.getPicker()));
 
@@ -191,5 +236,45 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         int startPos = items.size();
         items.addAll(newGames);
         this.notifyItemRangeChanged(startPos, newGames.size());
+    }
+
+    /**
+     * Called when an upvote is clicked. Adds/removes the upvote to/from firebase depending on
+     * whether hasUpvoted is true or false.
+     *
+     * @param upvoteIcon The view being clicked
+     * @param game The game object being affected
+     * @param hasUpvoted Whether the user has previously upvoted this caption
+     */
+    private void handleClickUpvote(final ImageView upvoteIcon, Game game,
+                                   boolean hasUpvoted) {
+        // Listens to see if anything went wrong
+        Uploader.UploadListener listener = new Uploader.UploadListener() {
+            @Override
+            public void onComplete() {}
+
+            @Override
+            public void onError(String errorMessage) {
+                Toast.makeText(activity, activity.getResources().getString(R.string.upvote_error),
+                        Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        if (game != null) {
+            // Remove the upvote if the user has upvoted
+            if (hasUpvoted) {
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.GAME_PATH, game.getId()),
+                        String.format(Constants.USER_CREATED_GAME_PATH, game.getPicker(), game.getId()),
+                        listener);
+            }
+            // Add the upvote if the user hasn't upvoted
+            else {
+                FirebaseUploader.addUpvote(
+                        String.format(Constants.GAME_PATH, game.getId()),
+                        String.format(Constants.USER_CREATED_GAME_PATH, game.getPicker(), game.getId()),
+                        listener);
+            }
+        }
     }
 }

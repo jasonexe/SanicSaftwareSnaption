@@ -327,55 +327,46 @@ public class FirebaseUploader implements Uploader {
     }
 
     /**
-     * Adds the upvote to the caption in the user object and in the game object.
+     * Adds the upvote to the object in the user object and in the game object.
      *
-     * @param captionId The ID of the caption
-     * @param upvoterId The ID of the player upvoting the caption
-     * @param captionerId The ID of the player who created the caption
-     * @param gameId The ID of the game that the caption is in
+     * @param objectPath The path to the object
+     * @param userPath The path to the object in the user
+     * @param listener The listener to send callbacks to
      */
-    public static void addUpvote(final String captionId, final String upvoterId,
-                                 final String captionerId, String gameId,
-                                 final UploadListener listener) {
-        updateUpvote(captionId, upvoterId, captionerId, gameId, listener, true);
+    public static void addUpvote(String objectPath, String userPath, final UploadListener listener) {
+        updateUpvote(objectPath, userPath, listener, true);
     }
 
     /**
-     * Removes the upvote from the caption in the user object and in the game object.
+     * Removes the upvote from the object and in the user object.
      *
-     * @param captionId The ID of the caption
-     * @param upvoterId The ID of the player un-upvoting the caption
-     * @param captionerId The ID of the player who created the caption
-     * @param gameId The ID of the game that the caption is in
+     * @param objectPath The path to the object
+     * @param userPath The path to the object in the user
+     * @param listener The listener to send callbacks to
      */
-    public static void removeUpvote(final String captionId, final String upvoterId,
-                                    final String captionerId, String gameId,
-                                    final UploadListener listener) {
-        updateUpvote(captionId, upvoterId, captionerId, gameId, listener, false);
+    public static void removeUpvote(String objectPath, String userPath, final UploadListener listener) {
+        updateUpvote(objectPath, userPath, listener, false);
     }
 
     /**
      * Updates the value for the upvote. If isAdd is true, it will be added with a value of 1, if
      * isAdd is false, it will be removed by setting its value to null.
      *
-     * @param captionId
-     * @param upvoterId
-     * @param captionerId
-     * @param gameId
+     * @param objectPath
+     * @param userPath
      * @param listener
      * @param isAdd
      */
-    private static void updateUpvote(final String captionId, final String upvoterId,
-                                     final String captionerId, String gameId,
+    private static void updateUpvote(String objectPath, String userPath,
                                      final UploadListener listener, boolean isAdd) {
         // Checks if the upvote is being added or removed
         Integer value = isAdd ? 1 : null;
 
         Map<String, Object> childUpdates = new HashMap<>();
-        // Updates for the game caption
-        childUpdates.put(String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, gameId, captionId, upvoterId), value);
-        // Updates for the user caption
-        childUpdates.put(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, captionerId, captionId, upvoterId), value);
+        // Updates for the object
+        childUpdates.put(objectPath, value);
+        // Updates for the user
+        childUpdates.put(userPath, value);
         // Updates the values in the database
         database.getReference().updateChildren(childUpdates,
                 new DatabaseReference.CompletionListener() {
