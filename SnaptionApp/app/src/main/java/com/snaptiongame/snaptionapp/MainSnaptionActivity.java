@@ -115,7 +115,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
                     bottomNavVisible = false;
-                    fabVisible = true;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
                     setToolbarCollapsible(false);

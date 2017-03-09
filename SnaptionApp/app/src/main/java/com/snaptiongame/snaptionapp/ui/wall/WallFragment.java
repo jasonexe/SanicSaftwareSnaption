@@ -97,7 +97,7 @@ public class WallFragment extends Fragment {
         wallListView.setAdapter(wallAdapter);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
-        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, 0);
         wallListView.addOnScrollListener(scrollFabHider);
 
         wallListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
