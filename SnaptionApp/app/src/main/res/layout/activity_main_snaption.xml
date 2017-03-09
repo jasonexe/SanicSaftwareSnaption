@@ -42,12 +42,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginBottom="72dp"
             app:fabSize="normal"
             app:layout_anchor="@id/bottom_nav"
-            app:layout_anchorGravity="end|top"
+            app:layout_anchorGravity="end|bottom"
             app:elevation="6dp"
-            app:srcCompat="@drawable/ic_add_white_24dp" />
+            app:srcCompat="@drawable/ic_add_white_24dp"/>
     </android.support.design.widget.CoordinatorLayout>
 
     <!-- The navigation drawer -->

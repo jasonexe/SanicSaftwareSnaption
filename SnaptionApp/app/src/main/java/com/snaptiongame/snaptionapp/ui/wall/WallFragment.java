@@ -54,7 +54,9 @@ public class WallFragment extends Fragment {
             }
             wallAdapter.addItems(games);
             isLoading = false;
-            refreshLayout.setRefreshing(false);
+            if (refreshLayout != null) {
+                refreshLayout.setRefreshing(false);
+            }
         }
 
         @Override

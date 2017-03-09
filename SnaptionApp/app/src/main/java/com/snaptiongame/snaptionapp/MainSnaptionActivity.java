@@ -3,7 +3,6 @@ package com.snaptiongame.snaptionapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -40,6 +39,7 @@ import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
+import com.snaptiongame.snaptionapp.ui.MainFabBehavior;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import butterknife.BindView;
@@ -184,13 +184,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         fab.setVisibility(fabVisible ? View.VISIBLE : View.GONE);
         // hide or show the bottom navigation view
         bottomNavigationView.setVisibility(bottomNavVisible ? View.VISIBLE : View.GONE);
-        // change the margin of the fab depending on if the bottom navigation view is shown
-        Resources res = getResources();
-        int fabEndMargin = res.getDimensionPixelSize(R.dimen.fab_margin);
-        int fabBottomNavBottomMargin = fabEndMargin +
-                res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
-        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setMargins(0, 0, fabEndMargin,
-                bottomNavVisible ? fabBottomNavBottomMargin : 0);
     }
 
     private void setToolbarCollapsible(boolean collapsible) {
@@ -256,6 +249,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
+        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setBehavior(new MainFabBehavior());
 
         DeepLinkGetter.checkIfDeepLink(this);
     }
