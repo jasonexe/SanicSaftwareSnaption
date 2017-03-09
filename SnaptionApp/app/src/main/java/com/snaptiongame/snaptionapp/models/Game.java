@@ -2,7 +2,7 @@ package com.snaptiongame.snaptionapp.models;
 
 import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,11 +22,10 @@ public class Game implements Serializable {
     private Map<String, Integer> players; //The list of players in the private game
     private long endDate; //When the game ends
     private long creationDate; //When the game was created
-    private int judgerRating; //The rating that judgers have given the game
     private String maturityRating; //The maturity rating of the game
     private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
-    private String peoplesChoice; //The id of the caption selected by the players
+    private Map<String, Integer> votes;
 
     /**
      * Default constructor.
@@ -60,10 +59,9 @@ public class Game implements Serializable {
         this.maturityRating = maturityRating;
 
         captions = new HashMap<>();
+        votes = new HashMap<>();
         isOpen = true;
-        judgerRating = 0;
         winner = "";
-        peoplesChoice = "";
     }
 
     /**
@@ -90,11 +88,10 @@ public class Game implements Serializable {
         this.maturityRating = maturityRating;
 
         captions = new HashMap<>();
+        votes = new HashMap<>();
         isOpen = true;
-        judgerRating = 0;
         creationDate = Calendar.getInstance().getTimeInMillis();
         winner = "";
-        peoplesChoice = "";
     }
 
     /**
@@ -126,34 +123,10 @@ public class Game implements Serializable {
     }
 
     /**
-     * Sets the winner of the people's choice.
-     *
-     * @param captionId The caption that the players selected as a winner
-     */
-    public void setPeoplesChoice(String captionId) {
-        peoplesChoice = captionId;
-    }
-
-    /**
      * Sets the game as over.
      */
     public void closeGame() {
         isOpen = false;
-    }
-
-    /**
-     * Upvotes the game.
-     */
-    public void upvote() {
-        judgerRating++;
-    }
-
-    /**
-     * Downvotes the game.
-     */
-    public void downvote() {
-        if (judgerRating > 0)
-            judgerRating--;
     }
 
     /** Accessor Methods **/
@@ -195,6 +168,22 @@ public class Game implements Serializable {
             return null;
         }
         return new HashMap<>(captions);
+    }
+
+    /**
+     * Returns the caption list.
+     *
+     * @return The list of captions in the game
+     */
+    public Map<String, Integer> getVotes() {
+        if (votes == null) {
+            return null;
+        }
+        return new HashMap<>(votes);
+    }
+
+    public void setVotes(Map<String, Integer> votes) {
+        this.votes = votes;
     }
 
     public void setImagePath(String imagePath) {
@@ -262,15 +251,6 @@ public class Game implements Serializable {
     }
 
     /**
-     * Returns the rating that judgers have given the game.
-     *
-     * @return The rating that judgers have given the game
-     */
-    public int getJudgerRating() {
-        return judgerRating;
-    }
-
-    /**
      * Returns the maturity rating for the game.
      *
      * @return The maturity rating for the game
@@ -289,40 +269,24 @@ public class Game implements Serializable {
     }
 
     /**
-     * Returns the ID of the caption that stickers have given the most votes to.
-     *
-     * @return The ID of the people's choice caption
-     */
-    public String getPeoplesChoice() {
-        return peoplesChoice;
-    }
-
-    /**
      * Returns the top caption. If the game is open, the top caption should be the caption with the
      * most votes. If the game is closed, the top caption should be the winning caption.
      *
-     * @return The top caption.
+     * @return The top caption
      */
     public Caption getTopCaption() {
+        Caption topCaption = null;
         // If no captions are made, return null
-        if (captions == null) {
-            return null;
-        }
-        if (getIsOpen()) {
-            Collection<Caption> allCaptions = captions.values();
-            int highestUpvoteNum = 0;
-            Caption toReturn = null;
-            // Find caption with the highest number of votes
-            for (Caption caption : allCaptions) {
-                if (caption.retrieveNumVotes() >= highestUpvoteNum) {
-                    highestUpvoteNum = caption.retrieveNumVotes();
-                    toReturn = caption;
-                }
+        if (captions != null && captions.size() > 0) {
+            if (isOpen) {
+                // Gets the min because captions are in reverse order
+                topCaption = Collections.min(captions.values());
             }
-            return toReturn;
-        } else {
-            // Otherwise, return what's in winner
-            return captions.get(getWinner());
+            else {
+                // Otherwise, return what's in winner
+                return captions.get(getWinner());
+            }
         }
+        return topCaption;
     }
 }

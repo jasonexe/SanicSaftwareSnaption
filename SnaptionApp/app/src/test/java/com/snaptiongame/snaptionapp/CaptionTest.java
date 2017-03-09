@@ -23,6 +23,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+
+/**
+ * Tests the Caption class.
+ *
+ * @author Cameron Geehr
+ */
 public class CaptionTest {
 
     @Test

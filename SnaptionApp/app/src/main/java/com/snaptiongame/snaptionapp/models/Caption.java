@@ -91,16 +91,16 @@ public class Caption implements Serializable, Comparable<Caption> {
 
     public SpannableStringBuilder retrieveCaptionText() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
-        if(card == null) {
+        if (card == null) {
             return builder;
         }
         String finalString = card.getCardText();
-        if(!finalString.contains("%s")) {
+        if (!finalString.contains("%s")) {
             return builder.append(finalString);
         }
         int firstModifier = 0;
         int lastModifier = 0;
-        for(String userText : userInput) {
+        for (String userText : userInput) {
             firstModifier = finalString.indexOf("%s");
             builder.append(finalString.substring(lastModifier, firstModifier));
             // See where start of user text will be

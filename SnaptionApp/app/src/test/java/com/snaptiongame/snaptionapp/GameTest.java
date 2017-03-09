@@ -6,16 +6,20 @@ package com.snaptiongame.snaptionapp;
  */
 
 import com.snaptiongame.snaptionapp.models.Caption;
+import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.testobjects.TestCaption;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GameTest {
@@ -41,7 +45,6 @@ public class GameTest {
         assertEquals(end, game.getEndDate());
         assertEquals(start, game1.getCreationDate());
         assertEquals("G", game.getMaturityRating());
-        assertEquals(0, game.getJudgerRating());
 
         assertTrue(game.getCaptions().isEmpty());
         assertTrue(game.getIsOpen());
@@ -110,7 +113,7 @@ public class GameTest {
     }
 
     @Test
-    public void verifyPeoplesChoice() {
+    public void verifySetImagePath() {
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
@@ -121,8 +124,28 @@ public class GameTest {
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
 
-        game.setPeoplesChoice("winner");
-        assertEquals("winner", game.getPeoplesChoice());
+        game.setImagePath("image");
+        assertEquals("image", game.getImagePath());
+    }
+
+    @Test
+    public void verifySetVotes() {
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
+        long end = 1000;
+        long start = 500;
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
+
+        Map<String, Integer> votes1 = new HashMap<>();
+        votes1.put("1", 1);
+        votes1.put("2", 1);
+
+        game.setVotes(votes1);
+        assertEquals(votes1, game.getVotes());
     }
 
     @Test
@@ -142,7 +165,15 @@ public class GameTest {
     }
 
     @Test
-    public void verifyUpvote() {
+    public void verifyGetTopCaption() {
+        List<String> userInput1 = new ArrayList<>();
+        Card testCard1 = new Card("text");
+        testCard1.setId("0");
+        userInput1.add("4");
+        userInput1.add("5");
+        Caption caption1 = new Caption("1", "2", "3", testCard1, userInput1);
+        Caption caption2 = new Caption("2", "3", "4", testCard1, userInput1);
+
         Map<String, Integer> players = new HashMap<>();
         players.put("player1", 1);
         players.put("player2", 1);
@@ -153,10 +184,29 @@ public class GameTest {
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
 
-        game.upvote();
-        assertEquals(1, game.getJudgerRating());
-        game.upvote();
-        assertEquals(2, game.getJudgerRating());
+        //test empty caption list
+        assertNull(game.getTopCaption());
+
+        //test same amount of upvotes
+        game.addCaption(caption1.getId(), caption1);
+        game.addCaption(caption2.getId(), caption2);
+        assertEquals(caption1, game.getTopCaption());
+
+        //test different amount of upvotes
+        Map<String, Integer> votes1 = new HashMap<>();
+        Map<String, Integer> votes2 = new HashMap<>();
+        votes1.put("1", 1);
+        votes1.put("2", 1);
+        votes2.put("1", 1);
+        caption2.votes = votes1;
+        caption1.votes = votes2;
+        assertEquals(caption2, game.getTopCaption());
+
+        //test winner selected
+        caption1.votes = votes1;
+        game.closeGame();
+        game.setWinner(caption1.getId());
+        assertEquals(caption1, game.getTopCaption());
     }
 
 }
