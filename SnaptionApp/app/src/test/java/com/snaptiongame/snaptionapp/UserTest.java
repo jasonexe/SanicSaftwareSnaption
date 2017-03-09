@@ -184,4 +184,13 @@ public class UserTest {
         user2.setDisplayName("HELLO MOTO");
         assertEquals("hello moto", user2.getLowercaseDisplayName());
     }
+
+    @Test
+    public void testIsAndroid() {
+        assertEquals(false, user1.getIsAndroid());
+        assertEquals(true, user2.getIsAndroid());
+        assertEquals(true, user3.getIsAndroid());
+        user3.setIsAndroid(false);
+        assertEquals(false, user3.getIsAndroid());
+    }
 }

@@ -108,7 +108,7 @@ public class User implements Person {
         return isAndroid;
     }
 
-    public void setAndroid(boolean android) {
+    public void setIsAndroid(boolean android) {
         isAndroid = android;
     }
 
