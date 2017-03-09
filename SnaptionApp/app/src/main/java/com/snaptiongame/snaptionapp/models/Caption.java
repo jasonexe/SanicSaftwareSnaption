@@ -119,7 +119,7 @@ public class Caption implements Serializable, Comparable<Caption> {
     }
 
     public boolean equals(Object other) {
-        if(other.getClass() == this.getClass()) {
+        if (other != null && other.getClass() == this.getClass()) {
             Caption otherCap = (Caption) other;
             return this.getId().equals(otherCap.getId())
                     && this.getGameId().equals(otherCap.getGameId())
