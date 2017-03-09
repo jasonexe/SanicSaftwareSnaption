@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +17,9 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -83,6 +86,8 @@ public class GameActivity extends HomeAppCompatActivity {
     private LoginManager loginManager;
     private LoginDialog loginDialog;
 
+    private MinimizeViewBehavior minimizeImageBehavior;
+
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
 
@@ -138,6 +143,14 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.intent_load_progress)
     public View progressSpinner;
 
+    @BindView(R.id.coord_layout)
+    protected  CoordinatorLayout coordinatorLayout;
+
+    @BindView(R.id.game_content)
+    public LinearLayout gameContentLayout;
+    @BindView(R.id.image_progress_bar)
+    protected FrameLayout imageProgressBar;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -187,12 +200,32 @@ public class GameActivity extends HomeAppCompatActivity {
                         }
                     });
         }
+        // initialize minimize image behavior
+        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+        ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(minimizeImageBehavior);
     }
 
     private void setupGameElements(Game game) {
         this.game = game;
         photoPath = game.getImagePath();
-        FirebaseResourceManager.loadImageIntoView(photoPath, imageView);
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView, new ResourceListener<Boolean>() {
+            @Override
+            public void onData(Boolean data) {
+                if (data) {
+                    // hide the progress bar and remove its behavior
+                    imageProgressBar.setVisibility(View.GONE);
+                    ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(null);
+                    // add a new behavior to the image view
+                    minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                    ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams()).setBehavior(minimizeImageBehavior);
+                    minimizeImageBehavior.updateViewMaxHeight(imageView.getHeight());
+                }
+            }
+            @Override
+            public Class getDataType() {
+                return Boolean.class;
+            }
+        });
         initLoginManager();
         setupButtonDisplay(game);
         setupCaptionList(game);
@@ -540,18 +573,18 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void populateCards(String packName) {
         FirebaseResourceManager.loadCardsFromPack(packName,
-                new ResourceListener<List<Card>>() {
-            @Override
-            public void onData(List<Card> data) {
-                allCards = data;
-                refreshCards();
-            }
+            new ResourceListener<List<Card>>() {
+                @Override
+                public void onData(List<Card> data) {
+                    allCards = data;
+                    refreshCards();
+                }
 
-            @Override
-            public Class getDataType() {
-                return null; // Not used.
-            }
-        });
+                @Override
+                public Class getDataType() {
+                    return null; // Not used.
+                }
+            });
     }
 
     /**
