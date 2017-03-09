@@ -34,12 +34,12 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.MainFabBehavior;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
-import com.snaptiongame.snaptionapp.ui.MainFabBehavior;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
 import butterknife.BindView;
@@ -362,13 +362,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main_snaption, menu);
-        return true;
-    }
-
-    @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
@@ -383,12 +376,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
         return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
