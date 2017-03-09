@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
@@ -36,10 +37,6 @@ import butterknife.ButterKnife;
  * @author Hristo Stoytchev
  */
 public class SearchActivity extends HomeAppCompatActivity {
-
-    private static final String USER_NAME = "lowercaseDisplayName";
-    private static final String EMAIL = "email";
-
     private List<User> users = new ArrayList<User>();
     private FriendsListAdapter userListAdapter;
     private FriendsViewModel viewModel;
@@ -58,7 +55,7 @@ public class SearchActivity extends HomeAppCompatActivity {
         public void onData(List<User> userList) {
             users.addAll(userList);
             // query Firebase for Users based on e-mail only after this query is finished
-            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), EMAIL, emailListener);
+            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), Constants.EMAIL, emailListener);
         }
 
         @Override
@@ -108,7 +105,7 @@ public class SearchActivity extends HomeAppCompatActivity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             query = intent.getStringExtra(SearchManager.QUERY);
             // query firebase for Users based on displayname
-            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), USER_NAME, nameListener);
+            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), Constants.USER_NAME, nameListener);
         }
 
     }

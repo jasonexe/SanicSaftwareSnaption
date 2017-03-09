@@ -585,7 +585,7 @@ public class FirebaseResourceManager {
      * @param listener ResourceListener the users are returned to
      */
     public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
-        Query query = database.getReference(USER_DIRECTORY).orderByChild(path).startAt(begin).endAt(begin + "~");
+        Query query = database.getReference(Constants.USERS_PATH).orderByChild(path).startAt(begin).endAt(begin + "~");
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
