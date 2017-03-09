@@ -33,6 +33,9 @@ import butterknife.Unbinder;
  */
 
 public class WallFragment extends Fragment {
+    public static final String PRIVATE_GAME_FRAG = "private_game_fragment";
+    public static final String PUBLIC_GAME_FRAG = "public_game_fragment";
+    public static final String MIXED_GAME_FRAG = "mixed_game_fragment";
     private static final String GAME_TYPE_EXCEPTION_MSG = "Unset game type. Make sure to call " +
             "newInstance rather than the constructor directly";
     private static final String GAME_TYPE = "game_type";

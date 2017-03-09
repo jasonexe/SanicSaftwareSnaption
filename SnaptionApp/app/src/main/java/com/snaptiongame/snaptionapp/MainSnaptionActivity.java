@@ -109,14 +109,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
                     setToolbarCollapsible(true);
+                    fab.setImageResource(R.drawable.ic_add_white_24dp);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
-                    fabVisible = bottomNavVisible = false;
+                    bottomNavVisible = false;
+                    fabVisible = true;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
                     setToolbarCollapsible(false);
+                    fab.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                     break;
                 case R.id.friends_item:
                     newFragment = new FriendsFragment();
@@ -124,6 +127,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
                     setToolbarCollapsible(true);
+                    fab.setImageResource(R.drawable.ic_add_white_24dp);
                     break;
                 case R.id.log_option:
                     //check if we are logging in or out based on item text
@@ -302,6 +306,12 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //set logged in only options to visible
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+        MenuItem myFeedItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
+        if (myFeedItem == null) {
+            myFeedItem = bottomNavigationView.getMenu().add(Menu.NONE, R.id.my_feed_item, 0,
+                    getResources().getString(R.string.my_feed));
+            myFeedItem.setIcon(R.drawable.ic_person_pin_color_24dp);
+        }
         //set drawer item to say log out
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
 
@@ -315,6 +325,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //set logged in only options to hidden
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+        bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
         //set drawer item to say login
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
     }

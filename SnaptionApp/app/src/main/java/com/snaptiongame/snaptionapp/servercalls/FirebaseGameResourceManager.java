@@ -181,7 +181,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     gameIds.add(lastRetrievedKey);
                 }
                 if (retrievedOnce) {
-                    gameIds.remove(0);
+                    if (gameIds.size() > 0) {
+                        gameIds.remove(0);
+                    }
                 }
                 else {
                     retrievedOnce = true;
