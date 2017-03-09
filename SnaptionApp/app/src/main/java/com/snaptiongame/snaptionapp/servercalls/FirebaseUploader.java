@@ -329,57 +329,53 @@ public class FirebaseUploader implements Uploader {
     /**
      * Adds the upvote to the object in the user object and in the game object.
      *
-     * @param objectPath The path to the object
-     * @param userPath The path to the object in the user
+     * @param path The path to the object
      * @param listener The listener to send callbacks to
      */
-    public static void addUpvote(String objectPath, String userPath, final UploadListener listener) {
-        updateUpvote(objectPath, userPath, listener, true);
+    public static void addUpvote(String path, final UploadListener listener) {
+        updateUpvote(path, listener, true);
     }
 
     /**
      * Removes the upvote from the object and in the user object.
      *
-     * @param objectPath The path to the object
-     * @param userPath The path to the object in the user
+     * @param path The path to the object
      * @param listener The listener to send callbacks to
      */
-    public static void removeUpvote(String objectPath, String userPath, final UploadListener listener) {
-        updateUpvote(objectPath, userPath, listener, false);
+    public static void removeUpvote(String path, final UploadListener listener) {
+        updateUpvote(path, listener, false);
     }
 
     /**
      * Updates the value for the upvote. If isAdd is true, it will be added with a value of 1, if
      * isAdd is false, it will be removed by setting its value to null.
      *
-     * @param objectPath
-     * @param userPath
+     * @param path
      * @param listener
      * @param isAdd
      */
-    private static void updateUpvote(String objectPath, String userPath,
-                                     final UploadListener listener, boolean isAdd) {
+    private static void updateUpvote(String path, final UploadListener listener, boolean isAdd) {
         // Checks if the upvote is being added or removed
         Integer value = isAdd ? 1 : null;
 
         Map<String, Object> childUpdates = new HashMap<>();
         // Updates for the object
-        childUpdates.put(objectPath, value);
-        // Updates for the user
-        childUpdates.put(userPath, value);
+        childUpdates.put(path, value);
         // Updates the values in the database
         database.getReference().updateChildren(childUpdates,
                 new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError,
                                    DatabaseReference databaseReference) {
-                if (databaseError == null) {
-                    listener.onComplete();
+                if (listener != null) {
+                    if (databaseError == null) {
+                        listener.onComplete();
+                    }
+                    else {
+                        listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
+                                ? ITEM_ALREADY_EXISTS_ERROR : "");
+                    }
                 }
-                else {
-                    listener.onError(databaseError.getMessage().contains(ITEM_ALREADY_EXISTS_ERROR)
-                            ? ITEM_ALREADY_EXISTS_ERROR : "");
-                };
             }
         });
     }

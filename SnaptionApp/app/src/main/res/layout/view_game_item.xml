@@ -54,7 +54,7 @@
         android:layout_alignParentStart="true"
         android:layout_marginBottom="2dp"
         android:layout_marginTop="-20dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="16dp"
         android:src="@drawable/thumbs_up_blank"
         app:backgroundTint="@android:color/white"
         app:elevation="2dp"
@@ -65,7 +65,9 @@
         android:layout_width="wrap_content"
         android:layout_height="30dp"
         android:gravity="center_vertical"
-        android:layout_alignStart="@+id/upvote_icon"/>
+        android:layout_below="@+id/photo"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="6dp"/>
 
     <TextView
         android:id="@+id/captioner_text"

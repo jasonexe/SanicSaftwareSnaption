@@ -218,14 +218,19 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
+            // Because the listener is being used twice, don't display the error if it has already appeared
+            boolean hasDisplayedError = false;
             @Override
             public void onComplete() {}
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(upvoteIcon.getContext(),
-                        upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
-                        Toast.LENGTH_SHORT).show();
+                if (!hasDisplayedError) {
+                    Toast.makeText(upvoteIcon.getContext(),
+                            upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
+                            Toast.LENGTH_SHORT).show();
+                    hasDisplayedError = true;
+                }
             }
         };
 
@@ -234,19 +239,19 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             if (hasUpvoted) {
                 FirebaseUploader.removeUpvote(
                         String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
-                                caption.getId(), FirebaseResourceManager.getUserId()),
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(
                         String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
-                                caption.getId(), FirebaseResourceManager.getUserId()),
-                        listener);
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
                 FirebaseUploader.addUpvote(
-                    String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
-                        caption.getId(), FirebaseResourceManager.getUserId()),
-                    String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
-                            caption.getId(), FirebaseResourceManager.getUserId()),
-                    listener);
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                            caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH,
+                        caption.getUserId(), caption.getId(), FirebaseResourceManager.getUserId()),
+                        listener);
             }
         }
     }
