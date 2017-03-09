@@ -264,15 +264,15 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
                 FirebaseUploader.removeUpvote(
-                        String.format(Constants.GAME_PATH, game.getId()),
-                        String.format(Constants.USER_CREATED_GAME_PATH, game.getPicker(), game.getId()),
+                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(), FirebaseResourceManager.getUserId()),
+                        String.format(Constants.USER_CREATED_GAME_UPVOTE_PATH, game.getPicker(), game.getId(), FirebaseResourceManager.getUserId()),
                         listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
                 FirebaseUploader.addUpvote(
-                        String.format(Constants.GAME_PATH, game.getId()),
-                        String.format(Constants.USER_CREATED_GAME_PATH, game.getPicker(), game.getId()),
+                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(), FirebaseResourceManager.getUserId()),
+                        String.format(Constants.USER_CREATED_GAME_UPVOTE_PATH, game.getPicker(), game.getId(), FirebaseResourceManager.getUserId()),
                         listener);
             }
         }

@@ -233,16 +233,20 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
                 FirebaseUploader.removeUpvote(
-                        String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, caption.getGameId(), caption.getId(), caption.getUserId()),
-                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(), caption.getId(), caption.getUserId()),
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()),
+                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()),
                         listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
                 FirebaseUploader.addUpvote(
-                        String.format(Constants.GAME_CAPTIONS_UPVOTER_PATH, caption.getGameId(), caption.getId(), caption.getUserId()),
-                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(), caption.getId(), caption.getUserId()),
-                        listener);
+                    String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                        caption.getId(), FirebaseResourceManager.getUserId()),
+                    String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
+                            caption.getId(), FirebaseResourceManager.getUserId()),
+                    listener);
             }
         }
     }
