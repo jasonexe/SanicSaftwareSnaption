@@ -30,10 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.snaptiongame.snaptionapp.Constants.FRIENDS_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTION_PATH;
-import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_CAPTION_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_CREATED_GAME_PATH;
@@ -64,6 +62,10 @@ public class FirebaseUploader implements Uploader {
     private static final String POST = "POST";
     private static final String JSON_TO = "to";
     private static final String JSON_DATA = "data";
+    private static final String JSON_TITLE = "title";
+    private static final String JSON_BODY = "body";
+    private static final String JSON_PRIORITY = "priority";
+    private static final String JSON_BADGE_KEY = "badge";
     private static final String JSON_AUTH = "Authorization";
     private static final String JSON_AUTH_KEY = "key=";
     private static final String JSON_CONTENT_TYPE = "Content-Type";
@@ -143,9 +145,18 @@ public class FirebaseUploader implements Uploader {
         final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
             @Override
             public void onData(User user) {
-                JSONObject json = createJson(gameId, user);
-                sendNotification(json);
-                //sendIOSNotification(json);
+                if (user != null) {
+                    JSONObject json = createDataPayload(gameId, user);
+                    //if the user is android user
+                    if (user.getIsAndroid()) {
+                        //send them a data payload
+                        sendNotification(json);
+                    }
+                    else { //if iOS user
+                        //send them a notification payload
+                        sendIOSNotification(user.getDisplayName(), json);
+                    }
+                }
             }
 
             @Override
@@ -165,11 +176,11 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private void sendIOSNotification(JSONObject json) {
+    private void sendIOSNotification(String userName, JSONObject json) {
         try {
             JSONObject data = (JSONObject)json.get(JSON_DATA);
-            data.put("title", "yesssss");
-            data.put("body", "this is right");
+            data.put(JSON_BODY, String.format("%s added you to a game!", userName));
+            data.put(JSON_TITLE, "Snaption");
             json.put("notification", data);
             json.put("priority", "high");
             json.put("badge", "enabled");
@@ -181,7 +192,7 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private JSONObject createJson(String gameId, User user) {
+    private JSONObject createDataPayload(String gameId, User user) {
         JSONObject json = new JSONObject();
         try {
             //json to : notificationId of receiver, data : data
