@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -44,6 +45,7 @@ public class WallFragment extends Fragment {
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
+    private GameType gameType;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
@@ -52,6 +54,7 @@ public class WallFragment extends Fragment {
             }
             wallAdapter.addItems(games);
             isLoading = false;
+            refreshLayout.setRefreshing(false);
         }
 
         @Override
@@ -63,6 +66,18 @@ public class WallFragment extends Fragment {
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
+    @BindView(R.id.swipe_container)
+    protected SwipeRefreshLayout refreshLayout;
+
+    private SwipeRefreshLayout.OnRefreshListener refreshListener =
+            new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+            wallAdapter.clearItems();
+            resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
+            loadMoreGames();
+        }
+    };
 
     public static WallFragment newInstance(GameType gameType) {
         WallFragment fragment = new WallFragment();
@@ -81,7 +96,7 @@ public class WallFragment extends Fragment {
 
         Bundle args = getArguments();
         if (args != null && args.getSerializable(GAME_TYPE) != null) {
-            GameType gameType = (GameType) args.getSerializable(GAME_TYPE);
+            gameType = (GameType) args.getSerializable(GAME_TYPE);
             resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
         }
         else {
@@ -110,6 +125,7 @@ public class WallFragment extends Fragment {
             }
         });
 
+        refreshLayout.setOnRefreshListener(refreshListener);
         loadMoreGames();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
@@ -117,6 +133,9 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
+        if (wallAdapter.getItemCount() == 0) {
+            refreshLayout.setRefreshing(true);
+        }
         resourceManager.retrieveGames();
     }
 
