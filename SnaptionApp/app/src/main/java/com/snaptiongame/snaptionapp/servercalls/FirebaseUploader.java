@@ -145,7 +145,7 @@ public class FirebaseUploader implements Uploader {
             public void onData(User user) {
                 JSONObject json = createJson(gameId, user);
                 sendNotification(json);
-                sendIOSNotification(json);
+                //sendIOSNotification(json);
             }
 
             @Override
