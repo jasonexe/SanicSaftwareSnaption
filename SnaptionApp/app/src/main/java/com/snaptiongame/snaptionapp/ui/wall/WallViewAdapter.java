@@ -335,7 +335,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
             @Override
-            public void onComplete() {}
+            public void onComplete() {
+            }
 
             @Override
             public void onError(String errorMessage) {
@@ -358,5 +359,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                                 FirebaseResourceManager.getUserId()), listener);
             }
         }
+    }
+
+    public void clearItems() {
+        items.clear();
+        notifyDataSetChanged();
     }
 }
