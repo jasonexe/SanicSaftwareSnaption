@@ -25,7 +25,7 @@ public class Game implements Serializable {
     private String maturityRating; //The maturity rating of the game
     private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
-    private Map<String, Integer> votes;
+    private Map<String, Integer> votes; //The list of votes
 
     /**
      * Default constructor.
