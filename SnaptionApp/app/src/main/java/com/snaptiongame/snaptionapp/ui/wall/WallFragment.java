@@ -126,6 +126,7 @@ public class WallFragment extends Fragment {
         });
 
         refreshLayout.setOnRefreshListener(refreshListener);
+        refreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
         loadMoreGames();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
