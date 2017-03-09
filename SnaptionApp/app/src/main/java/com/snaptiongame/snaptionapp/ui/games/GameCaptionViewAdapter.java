@@ -213,7 +213,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param caption The caption object being affected
      * @param hasUpvoted Whether the user has previously upvoted this caption
      */
-    private void handleClickUpvote(final ImageView upvoteIcon, final Caption caption,
+    private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
