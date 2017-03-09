@@ -17,9 +17,8 @@ import android.widget.LinearLayout;
  */
 public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private static final float MIN_PERCENT_HEIGHT = 0.5f;
-    private static final int MAX_VIEW_HEIGHT_DP = 400;
+    private static final int MAX_VIEW_HEIGHT_DP = 350;
     private  float maxViewHeightPx;
-    private float minViewHeight = -1;
     private int maxViewHeight = -1;
     private static final String STATUS_BAR_HEIGHT_RES = "status_bar_height";
     private static final String DIMEN_RES = "dimen";
@@ -87,7 +86,6 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         else {
             this.maxViewHeight = maxViewHeight;
         }
-        this.minViewHeight = maxViewHeight * MIN_PERCENT_HEIGHT;
-        viewBelowView.setPadding(0, 0, 0, Math.round(minViewHeight));
+        viewBelowView.setPadding(0, 0, 0, Math.round(maxViewHeight * MIN_PERCENT_HEIGHT));
     }
 }
