@@ -145,6 +145,7 @@ public class FirebaseUploader implements Uploader {
             public void onData(User user) {
                 JSONObject json = createJson(gameId, user);
                 sendNotification(json);
+                sendIOSNotification(json);
             }
 
             @Override
@@ -161,6 +162,22 @@ public class FirebaseUploader implements Uploader {
                 FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
                         notifyPlayerListener);
             }
+        }
+    }
+
+    private void sendIOSNotification(JSONObject json) {
+        try {
+            JSONObject data = (JSONObject)json.get(JSON_DATA);
+            data.put("title", "yesssss");
+            data.put("body", "this is right");
+            json.put("notification", data);
+            json.put("priority", "high");
+            json.put("badge", "enabled");
+            json.remove(JSON_DATA);
+            System.out.println(json.toString());
+            sendNotification(json);
+        } catch (JSONException err) {
+
         }
     }
 
