@@ -192,9 +192,4 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         items.addAll(newGames);
         this.notifyItemRangeChanged(startPos, newGames.size());
     }
-
-    public void clearItems() {
-        items.clear();
-        notifyDataSetChanged();
-    }
 }

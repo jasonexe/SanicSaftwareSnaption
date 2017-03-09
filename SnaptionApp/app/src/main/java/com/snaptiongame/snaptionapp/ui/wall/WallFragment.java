@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -34,18 +33,11 @@ import butterknife.Unbinder;
  */
 
 public class WallFragment extends Fragment {
-    public static final String PRIVATE_GAME_FRAG = "private_game_fragment";
-    public static final String PUBLIC_GAME_FRAG = "public_game_fragment";
-    public static final String MIXED_GAME_FRAG = "mixed_game_fragment";
-    private static final String GAME_TYPE_EXCEPTION_MSG = "Unset game type. Make sure to call " +
-            "newInstance rather than the constructor directly";
-    private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
     private static final int SCROLL_DOWN_CONST = 1;
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
-    private GameType gameType;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
@@ -54,9 +46,6 @@ public class WallFragment extends Fragment {
             }
             wallAdapter.addItems(games);
             isLoading = false;
-            if (refreshLayout != null) {
-                refreshLayout.setRefreshing(false);
-            }
         }
 
         @Override
@@ -64,30 +53,10 @@ public class WallFragment extends Fragment {
             return Game.class;
         }
     };
-    private GameResourceManager resourceManager;
+    private GameResourceManager resourceManager = new FirebaseGameResourceManager(10, 10, listener, GameType.MIXED_GAMES);
 
     @BindView(R.id.wall_list)
     protected RecyclerView wallListView;
-    @BindView(R.id.swipe_container)
-    protected SwipeRefreshLayout refreshLayout;
-
-    private SwipeRefreshLayout.OnRefreshListener refreshListener =
-            new SwipeRefreshLayout.OnRefreshListener() {
-        @Override
-        public void onRefresh() {
-            wallAdapter.clearItems();
-            resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
-            loadMoreGames();
-        }
-    };
-
-    public static WallFragment newInstance(GameType gameType) {
-        WallFragment fragment = new WallFragment();
-        Bundle arguments = new Bundle();
-        arguments.putSerializable(GAME_TYPE, gameType);
-        fragment.setArguments(arguments);
-        return fragment;
-    }
 
     @Nullable
     @Override
@@ -95,18 +64,7 @@ public class WallFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
-
-        Bundle args = getArguments();
-        if (args != null && args.getSerializable(GAME_TYPE) != null) {
-            gameType = (GameType) args.getSerializable(GAME_TYPE);
-            resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
-        }
-        else {
-            throw new RuntimeException(GAME_TYPE_EXCEPTION_MSG);
-        }
-
-        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
-                StaggeredGridLayoutManager.VERTICAL);
+        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS, StaggeredGridLayoutManager.VERTICAL);
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
@@ -114,7 +72,7 @@ public class WallFragment extends Fragment {
         wallListView.setAdapter(wallAdapter);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
-        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, 0);
+        ScrollFabHider scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
         wallListView.addOnScrollListener(scrollFabHider);
 
         wallListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -127,8 +85,6 @@ public class WallFragment extends Fragment {
             }
         });
 
-        refreshLayout.setOnRefreshListener(refreshListener);
-        refreshLayout.setColorSchemeColors(getResources().getColor(R.color.colorAccent));
         loadMoreGames();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
@@ -136,9 +92,6 @@ public class WallFragment extends Fragment {
 
     private void loadMoreGames() {
         isLoading = true;
-        if (wallAdapter.getItemCount() == 0) {
-            refreshLayout.setRefreshing(true);
-        }
         resourceManager.retrieveGames();
     }
 
