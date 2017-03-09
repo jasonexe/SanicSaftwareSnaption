@@ -11,6 +11,7 @@ public class User implements Person {
     private String id;
     private String email;
     private String displayName;
+    private boolean isAndroid;
     private Map<String, Integer> friends;
     private Map<String, Integer> createdGames;
     private Map<String, Caption> captions;
@@ -30,6 +31,7 @@ public class User implements Person {
         this.notificationId = notificationId;
         this.facebookId = facebookId;
         this.imagePath = imagePath;
+        isAndroid = true;
 
         friends = null;
         createdGames = null;
@@ -100,6 +102,14 @@ public class User implements Person {
 
     public String getImagePath() {
         return imagePath;
+    }
+
+    public boolean getIsAndroid() {
+        return isAndroid;
+    }
+
+    public void setIsAndroid(boolean android) {
+        isAndroid = android;
     }
 
     public void setId(String id) {
