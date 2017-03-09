@@ -37,33 +37,9 @@ import static com.snaptiongame.snaptionapp.Constants.USER_PATH;
 
 public class FirebaseUploader implements Uploader {
 
-    public static final String GAME_PLAYERS_PATH = "games/%s/players";
     private static final String USERS_PATH = "users";
-    private static final String USERS_CREATED_GAMES =  "createdGames";
-    private static final String CAPTION_PATH = "captions";
     private static final String GAMES_PATH = "games";
-    private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
-    private static final String NOTIFICATION_ID_PATH = "users/%s/notificationId";
-    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
-    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
-    private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
-    private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
-    private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
-    private static final String POST = "POST";
-    private static final String JSON_TO = "to";
-    private static final String JSON_DATA = "data";
-    private static final String JSON_NOTIFICATION = "notification";
-    private static final String JSON_TITLE = "title";
-    private static final String JSON_BODY = "body";
-    private static final String JSON_PRIORITY_KEY = "priority";
-    private static final String JSON_PRIORITY_VAL = "high";
-    private static final String JSON_BADGE_KEY = "badge";
-    private static final String JSON_BADGE_VAL = "enabled";
-    private static final String JSON_AUTH = "Authorization";
-    private static final String JSON_AUTH_KEY = "key=";
-    private static final String JSON_CONTENT_TYPE = "Content-Type";
-    private static final String JSON_CONTENT_VAL = "application/json";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
