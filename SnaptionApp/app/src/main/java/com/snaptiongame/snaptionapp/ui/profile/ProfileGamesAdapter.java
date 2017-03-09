@@ -1,25 +1,21 @@
 package com.snaptiongame.snaptionapp.ui.profile;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
-import com.snaptiongame.snaptionapp.ui.profile.ProfileGameViewHolder;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.List;
 
-import static android.R.attr.data;
-import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.CLIP_TO_OUTLINE_MIN_SDK;
+import static com.snaptiongame.snaptionapp.Constants.CLIP_TO_OUTLINE_MIN_SDK;
 
 /**
  * Created by austinrobarts on 1/29/17.
@@ -52,7 +48,7 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
             @Override
             public void onClick(View view) {
                 Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
-                gamePageIntent.putExtra(WallViewAdapter.GAME, game);
+                gamePageIntent.putExtra(Constants.GAME, game);
                 view.getContext().startActivity(gamePageIntent);
             }
         });

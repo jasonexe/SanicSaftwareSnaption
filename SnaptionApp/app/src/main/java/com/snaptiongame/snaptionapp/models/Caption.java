@@ -27,6 +27,7 @@ public class Caption implements Serializable, Comparable<Caption> {
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
     public Map<String, Integer> votes; // List of users who have upvoted this caption
+    private User user;       // The user associated with the game, private to keep firebase out
 
     //Needed for firebase compatibility
     public Caption() {}
@@ -154,5 +155,23 @@ public class Caption implements Serializable, Comparable<Caption> {
         // If there's a tie in the vote count it will sort based on date
         return bVotesSize == aVotesSize ? this.getId().compareTo(a.getId()) :
                 aVotesSize - bVotesSize;
+    }
+
+    /**
+     * Sets the captioner. Named assign to avoid Firebase interaction.
+     *
+     * @param user The captioner to set
+     */
+    public void assignUser(User user) {
+        this.user = user;
+    }
+
+    /**
+     * Gets the captioner. Named retrieve to avoid Firebase interaction.
+     *
+     * @return The captioner
+     */
+    public User retrieveUser() {
+        return user;
     }
 }

@@ -6,11 +6,12 @@ import java.util.Map;
  * Created by austinrobarts on 1/21/17.
  */
 
-public class User implements Person {
+public class User implements Person, Comparable<User> {
 
     private String id;
     private String email;
     private String displayName;
+    private boolean isAndroid;
     private Map<String, Integer> friends;
     private Map<String, Integer> createdGames;
     private Map<String, Caption> captions;
@@ -30,6 +31,7 @@ public class User implements Person {
         this.notificationId = notificationId;
         this.facebookId = facebookId;
         this.imagePath = imagePath;
+        isAndroid = true;
 
         friends = null;
         createdGames = null;
@@ -102,6 +104,14 @@ public class User implements Person {
         return imagePath;
     }
 
+    public boolean getIsAndroid() {
+        return isAndroid;
+    }
+
+    public void setIsAndroid(boolean android) {
+        isAndroid = android;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -164,7 +174,19 @@ public class User implements Person {
 
     @Override
     public boolean equals(Object other) {
+        if (other == null) {
+            return false;
+        }
         return other.getClass() == getClass() && ((User) other).id.equals(id);
+    }
+
+    @Override
+    public int compareTo(User other) {
+        int result = getLowercaseDisplayName().compareTo(other.getLowercaseDisplayName());
+        if (result == 0) {
+            result = email.compareTo(other.getEmail());
+        }
+        return result;
     }
 }
 

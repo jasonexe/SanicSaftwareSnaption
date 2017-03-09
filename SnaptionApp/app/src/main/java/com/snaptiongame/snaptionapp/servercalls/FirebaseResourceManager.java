@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -32,6 +33,7 @@ import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -46,11 +48,6 @@ import java.util.regex.Pattern;
 import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
-    public static final String FRIENDS_PATH = "users/%s/friends";
-    public static final String USER_PRIVATE_GAMES = "users/%s/privateGames";
-    public static final String USER_DIRECTORY = "users/";
-    public static final String CARDS_DIRECTORY = "cards";
-    public static final int NUM_CARDS_IN_HAND = 10;
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
     private static final String FB_FRIENDS_REQUEST = "/%s/friends";
     private static final String FB_REQUEST_DATA = "data";
@@ -184,7 +181,7 @@ public class FirebaseResourceManager {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
-            userPath = USER_DIRECTORY + user.getUid();
+            userPath = String.format(Constants.USER_PATH, user.getUid());
         return userPath;
     }
 
@@ -194,7 +191,7 @@ public class FirebaseResourceManager {
      * @return a string path from the root node to current user
      */
     public static String getUserPath(String id) {
-        return USER_DIRECTORY + id;
+        return String.format(Constants.USER_PATH, id);
     }
 
     /**
@@ -335,8 +332,7 @@ public class FirebaseResourceManager {
     public static void loadCardsFromPack(String packName,
                                          final ResourceListener<List<Card>> listener) {
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
-        String directory = CARDS_DIRECTORY + "_" + Locale.getDefault().getLanguage()
-                + "/" + packName;
+        String directory = String.format(Constants.CARDS_DIRECTORY, Locale.getDefault().getLanguage(), packName);
         DatabaseReference cardsRef = database.getReference(directory);
         // Return all the cards, then we don't have to pull from database to refresh every time
         cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -357,6 +353,48 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Loads an image from Firebase into a given ImageView and notifies the given listener when the
+     * inmage has been loaded into the ImageView.
+     *
+     * @param imagePath Image file path name
+     * @param imageView ImageView in which the image should be loaded
+     * @param listener ResourceListener to be notified when the image has been loaded
+     */
+    public static void loadImageIntoView(final String imagePath, final ImageView imageView,
+                                         final ResourceListener<Boolean> listener) {
+        StorageReference ref = storage.child(imagePath);
+        try {
+            Glide.with(imageView.getContext())
+                    .using(new FirebaseImageLoader())
+                    .load(ref).fitCenter()
+                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, StorageReference model,
+                                                   Target<GlideDrawable> target,
+                                                   boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource,
+                                                       StorageReference model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFromMemoryCache,
+                                                       boolean isFirstResource) {
+                            if (listener != null) {
+                                listener.onData(true);
+                            }
+                            return false;
+                        }
+                    })
+                    .into(imageView);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            FirebaseReporter.reportException(e, "Glide image load failed");
+        }
+    }
+
+    /**
      * Loads an image from Firebase into a given ImageView.
      *
      * @param imagePath The image file path name
@@ -367,7 +405,10 @@ public class FirebaseResourceManager {
         try {
             Glide.with(imageView.getContext())
                     .using(new FirebaseImageLoader())
-                    .load(ref).fitCenter()
+                    .load(ref)
+                    .fitCenter()
+                    // Update signature every hour for profile picture changes.
+                    .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,
@@ -417,7 +458,7 @@ public class FirebaseResourceManager {
      * @param friendListener ResourceListener the list of Friends is returned to
      */
     private static void getFacebookFriends(final User user,
-                                          final ResourceListener<Friend> friendListener) {
+                                           final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
             public void onCompleted(GraphResponse response) {
@@ -503,7 +544,7 @@ public class FirebaseResourceManager {
      * @param resourceListener ResourceListener the user is returned to
      */
     public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
-        Query query = database.getReference(USER_DIRECTORY).orderByChild(FB_ID_CHILD)
+        Query query = database.getReference(String.format(Constants.USERS_PATH)).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -533,7 +574,7 @@ public class FirebaseResourceManager {
      * @param facebookId String unique Facebook id of a Facebook user
      */
     public static void makeFacebookFriendsRequest(GraphRequest.Callback friendsCallback,
-                                                   String facebookId) {
+                                                  String facebookId) {
         new GraphRequest(AccessToken.getCurrentAccessToken(), String.format(FB_FRIENDS_REQUEST,
                 facebookId), null, HttpMethod.GET, friendsCallback).executeAsync();
     }
@@ -570,11 +611,42 @@ public class FirebaseResourceManager {
      */
     public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
         for (String uid : uids.keySet()) {
-            String friend = USER_DIRECTORY + uid;
+            String friend = String.format(Constants.USER_PATH, uid);
             // ensure the user id is a valid one to avoid errors
             if (validFirebasePath(friend)) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
             }
         }
+    }
+
+    /**
+     * Loads a list of users based on the start of their display name and/or e-mail.
+     *
+     * @param begin the name/e-mail to be searched for
+     * @param path the path to the child to determine what the query looks for, being name/e-mail
+     * @param listener ResourceListener the users are returned to
+     */
+    public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
+        Query query = database.getReference(Constants.USERS_PATH).orderByChild(path).startAt(begin).endAt(begin + "~");
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<User> users = new ArrayList<>();
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                if (snapshots.iterator().hasNext()) {
+                    for (DataSnapshot snapshot : snapshots) {
+                        users.add((User) snapshot.getValue(listener.getDataType()));
+                    }
+                }
+                listener.onData(users);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveUsersByName - " + databaseError.toString());
+                listener.onData(null);
+            }
+        });
     }
 }
