@@ -7,9 +7,7 @@ package com.snaptiongame.snaptionapp;
 
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
-import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.testobjects.TestCaption;
 import com.snaptiongame.snaptionapp.testobjects.TestCard;
 
 import org.junit.Test;
