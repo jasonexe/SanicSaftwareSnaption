@@ -3,9 +3,10 @@ package com.snaptiongame.snaptionapp.models;
 import java.util.Map;
 
 /**
- * Created by austinrobarts on 1/21/17.
+ * A model class for the User object.
+ *
+ * @author Austin Robarts
  */
-
 public class User implements Person {
 
     private String id;
