@@ -353,6 +353,48 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Loads an image from Firebase into a given ImageView and notifies the given listener when the
+     * inmage has been loaded into the ImageView.
+     *
+     * @param imagePath Image file path name
+     * @param imageView ImageView in which the image should be loaded
+     * @param listener ResourceListener to be notified when the image has been loaded
+     */
+    public static void loadImageIntoView(final String imagePath, final ImageView imageView,
+                                         final ResourceListener<Boolean> listener) {
+        StorageReference ref = storage.child(imagePath);
+        try {
+            Glide.with(imageView.getContext())
+                    .using(new FirebaseImageLoader())
+                    .load(ref).fitCenter()
+                    .listener(new RequestListener<StorageReference, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, StorageReference model,
+                                                   Target<GlideDrawable> target,
+                                                   boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource,
+                                                       StorageReference model,
+                                                       Target<GlideDrawable> target,
+                                                       boolean isFromMemoryCache,
+                                                       boolean isFirstResource) {
+                            if (listener != null) {
+                                listener.onData(true);
+                            }
+                            return false;
+                        }
+                    })
+                    .into(imageView);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            FirebaseReporter.reportException(e, "Glide image load failed");
+        }
+    }
+
+    /**
      * Loads an image from Firebase into a given ImageView.
      *
      * @param imagePath The image file path name
@@ -416,7 +458,7 @@ public class FirebaseResourceManager {
      * @param friendListener ResourceListener the list of Friends is returned to
      */
     private static void getFacebookFriends(final User user,
-                                          final ResourceListener<Friend> friendListener) {
+                                           final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
             public void onCompleted(GraphResponse response) {
@@ -532,7 +574,7 @@ public class FirebaseResourceManager {
      * @param facebookId String unique Facebook id of a Facebook user
      */
     public static void makeFacebookFriendsRequest(GraphRequest.Callback friendsCallback,
-                                                   String facebookId) {
+                                                  String facebookId) {
         new GraphRequest(AccessToken.getCurrentAccessToken(), String.format(FB_FRIENDS_REQUEST,
                 facebookId), null, HttpMethod.GET, friendsCallback).executeAsync();
     }
@@ -575,5 +617,36 @@ public class FirebaseResourceManager {
                 FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
             }
         }
+    }
+
+    /**
+     * Loads a list of users based on the start of their display name and/or e-mail.
+     *
+     * @param begin the name/e-mail to be searched for
+     * @param path the path to the child to determine what the query looks for, being name/e-mail
+     * @param listener ResourceListener the users are returned to
+     */
+    public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
+        Query query = database.getReference(Constants.USERS_PATH).orderByChild(path).startAt(begin).endAt(begin + "~");
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<User> users = new ArrayList<>();
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                if (snapshots.iterator().hasNext()) {
+                    for (DataSnapshot snapshot : snapshots) {
+                        users.add((User) snapshot.getValue(listener.getDataType()));
+                    }
+                }
+                listener.onData(users);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveUsersByName - " + databaseError.toString());
+                listener.onData(null);
+            }
+        });
     }
 }

@@ -25,6 +25,18 @@ public class Friend implements Person {
         this.facebookId = facebookId;
     }
 
+    /**
+     * Constructor to create a friend from an existing Sanption user.
+     *
+     * @param user User to convert to a friend
+     */
+    public Friend(User user) {
+        this.snaptionId = user.getId();
+        this.displayName = user.getDisplayName();
+        this.email = user.getEmail();
+        this.facebookId = user.getFacebookId();
+    }
+
     @Override
     public String getId() {
         return snaptionId;

@@ -62,8 +62,14 @@ public class Constants {
     public static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
     // Path to the user's notification ID
     public static final String USER_NOTIFICATION_PATH = "users/%s/notificationId";
+    // Path to the user's isAndroid boolean
+    public static final String USER_IS_ANDROID = "users/%s/isAndroid";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
+    // Path to the user's lowercase display name
+    public static final String USER_NAME = "lowercaseDisplayName";
+    // Path to the user's email
+    public static final String EMAIL = "email";
     // END FIREBASE VARIABLES //
 
     // Notification ID used in intents that have notifications

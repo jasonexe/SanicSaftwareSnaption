@@ -304,7 +304,9 @@ public class FirebaseUploader implements Uploader {
                     uploadUserPhoto(user, photo);
                 } else {
                     //update notificationId every login
-                    uploadObject(String.format(NOTIFICATION_ID_PATH, user.getId()), user.getNotificationId());
+                    uploadObject(String.format(Constants.USER_NOTIFICATION_PATH, user.getId()), user.getNotificationId());
+                    //now the user is logged in on firebase
+                    uploadObject(String.format(Constants.USER_IS_ANDROID, user.getId()), user.getIsAndroid());
                 }
                 //notify user has been added or found
                 listener.onData(data);

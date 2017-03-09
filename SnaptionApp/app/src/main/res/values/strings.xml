@@ -56,6 +56,9 @@
     <string name="join_game">Join Game</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
+    <string name="search_text">Search for Snaption users</string>
+    <string name="title_activity_search">Search</string>
+    <string name="no_search">We can\'t find anyone with that name, try searching again.</string>
     <string name="picture_change">Your profile picture has changed, but changes may not be immediately reflected</string>
     <string name="game_invite_notification_text">%s has invited you to a game!</string>
     <string name="game_invite_notification_title">Snaption Game Invitation</string>
