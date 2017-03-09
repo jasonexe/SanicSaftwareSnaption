@@ -222,9 +222,8 @@ public class MainSnaptionActivity extends AppCompatActivity {
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
         drawerLayout.addDrawerListener(mDrawerToggle);
         setupNavigationViews();
+        currentNavDrawerMenuId = R.id.wall_item;
 
-        // wall fragment instantiation
-        mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         //create loginDialog and LoginManager to manager user
         loginDialog = new LoginDialog(this);
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
@@ -305,11 +304,17 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //set logged in only options to visible
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+        //add the my feed menu item if it is not already there
         MenuItem myFeedItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
         if (myFeedItem == null) {
             myFeedItem = bottomNavigationView.getMenu().add(Menu.NONE, R.id.my_feed_item, 0,
                     getResources().getString(R.string.my_feed));
             myFeedItem.setIcon(R.drawable.ic_person_pin_color_24dp);
+        }
+        //if on the wall, update the menu item
+        if (currentNavDrawerMenuId == R.id.wall_item) {
+            currentNavDrawerMenuId = -1;
+            mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         }
         //set drawer item to say log out
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.logout));
@@ -324,7 +329,13 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //set logged in only options to hidden
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+        //remove the my feed menu item
         bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
+        //if on the wall, update the menu item
+        if (currentNavDrawerMenuId == R.id.wall_item) {
+            currentNavDrawerMenuId = -1;
+            mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
+        }
         //set drawer item to say login
         navigationView.getMenu().findItem(R.id.log_option).setTitle(getResources().getString(R.string.login));
     }
