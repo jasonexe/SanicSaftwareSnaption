@@ -140,7 +140,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         data.add((Game) snapshot.getValue(listener.getDataType()));
                     }
                     if (retrievedOnce) {
-                        data.remove(0);
+                        if (data.size() > 0) {
+                            data.remove(0);
+                        }
                     }
                     else {
                         retrievedOnce = true;
