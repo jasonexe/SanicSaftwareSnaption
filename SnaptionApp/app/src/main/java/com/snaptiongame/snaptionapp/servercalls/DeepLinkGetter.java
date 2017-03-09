@@ -13,6 +13,7 @@ import com.google.android.gms.appinvite.AppInviteReferral;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
@@ -25,11 +26,10 @@ import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
  */
 
 public class DeepLinkGetter {
-    private static final int DEEP_LINK_GOOGLE_ID = 1;
 
     public static void checkIfDeepLink(final FragmentActivity activity) {
         GoogleApiClient deepLinkReceiver = new GoogleApiClient.Builder(activity)
-                .enableAutoManage(activity, DEEP_LINK_GOOGLE_ID, new GoogleApiClient.OnConnectionFailedListener() {
+                .enableAutoManage(activity, Constants.DEEP_LINK_GOOGLE_ID, new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                         Snackbar.make(activity.getCurrentFocus(),

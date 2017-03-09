@@ -6,20 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
-import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
-import com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter;
 
 import java.util.List;
-
-import static com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager.GAME_TABLE;
-import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.PHOTO_PATH;
 
 /**
  * The adapter for the recycler view that holds the user's captions
@@ -27,7 +22,7 @@ import static com.snaptiongame.snaptionapp.ui.wall.WallViewAdapter.PHOTO_PATH;
  */
 
 public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptionsViewHolder> {
-    List<Caption> captions;
+    private List<Caption> captions;
 
     public ProfileCaptionsAdapter(List<Caption> captions) {
         this.captions = captions;
@@ -42,12 +37,12 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
             public void onClick(final View view) {
                 String gameId = curCaption.getGameId();
                 FirebaseResourceManager.retrieveSingleNoUpdates(
-                        FirebaseGameResourceManager.GAME_TABLE + "/" + gameId,
+                        String.format(Constants.GAME_PATH, gameId),
                         new ResourceListener<Game>() {
                             @Override
                             public void onData(Game data) {
                                 Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
-                                gamePageIntent.putExtra(WallViewAdapter.GAME, data);
+                                gamePageIntent.putExtra(Constants.GAME, data);
                                 view.getContext().startActivity(gamePageIntent);
                             }
 

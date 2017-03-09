@@ -214,4 +214,13 @@ public class UserTest {
         assertEquals(-1, user7.compareTo(user6));
         assertEquals(1, user7.compareTo(user4));
     }
+
+    @Test
+    public void testIsAndroid() {
+        assertEquals(false, user1.getIsAndroid());
+        assertEquals(true, user2.getIsAndroid());
+        assertEquals(true, user3.getIsAndroid());
+        user3.setIsAndroid(false);
+        assertEquals(false, user3.getIsAndroid());
+    }
 }

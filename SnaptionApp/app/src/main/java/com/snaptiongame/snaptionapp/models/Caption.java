@@ -20,13 +20,14 @@ import java.util.Map;
  * @author Jason Krein
  */
 
-public class Caption implements Serializable {
+public class Caption implements Serializable, Comparable<Caption> {
     public String id;       // The id of the caption
     public String userId;   // The person who created the caption
     public String gameId;   // The game the caption was made on
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
     public Map<String, Integer> votes; // List of users who have upvoted this caption
+    private User user;       // The user associated with the game, private to keep firebase out
 
     //Needed for firebase compatibility
     public Caption() {}
@@ -81,7 +82,7 @@ public class Caption implements Serializable {
     }
 
     public int retrieveNumVotes() {
-        if(votes == null) {
+        if (votes == null) {
             return 0;
         } else {
             return votes.size();
@@ -131,5 +132,46 @@ public class Caption implements Serializable {
 
     public String toString() {
         return this.getId();
+    }
+
+    /**
+     * Compares two Captions for value.
+     *
+     * @param a the caption to compare value to
+     * @return a comparison value
+     */
+    public int compareTo(Caption a) {
+        Map<String, Integer> aVotes = a.getVotes();
+        Map<String, Integer> bVotes = this.getVotes();
+        int aVotesSize = 0;
+        int bVotesSize = 0;
+
+        if (aVotes != null) {
+            aVotesSize = aVotes.size();
+        }
+        if (bVotes != null) {
+            bVotesSize = bVotes.size();
+        }
+        // If there's a tie in the vote count it will sort based on date
+        return bVotesSize == aVotesSize ? this.getId().compareTo(a.getId()) :
+                aVotesSize - bVotesSize;
+    }
+
+    /**
+     * Sets the captioner. Named assign to avoid Firebase interaction.
+     *
+     * @param user The captioner to set
+     */
+    public void assignUser(User user) {
+        this.user = user;
+    }
+
+    /**
+     * Gets the captioner. Named retrieve to avoid Firebase interaction.
+     *
+     * @return The captioner
+     */
+    public User retrieveUser() {
+        return user;
     }
 }
