@@ -569,6 +569,7 @@ public class FirebaseResourceManager {
      * Loads a list of users based on the start of their display name and/or e-mail.
      *
      * @param begin the name/e-mail to be searched for
+     * @param path the path to the child to determine what the query looks for, being name/e-mail
      * @param listener ResourceListener the users are returned to
      */
     public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
@@ -590,6 +591,7 @@ public class FirebaseResourceManager {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveUsersByName - " + databaseError.toString());
+                listener.onData(null);
             }
         });
     }

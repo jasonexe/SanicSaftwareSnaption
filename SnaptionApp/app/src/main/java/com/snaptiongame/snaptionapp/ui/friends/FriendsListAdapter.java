@@ -15,23 +15,45 @@ import java.util.List;
  */
 public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<User> friends;
+    private AddInviteUserCallback callback;
+
+    public interface AddInviteUserCallback {
+        public void addInviteClicked(User user);
+    }
 
     public FriendsListAdapter(List<User> friends) {
         this.friends = friends;
     }
 
+    public FriendsListAdapter(List<User> friends, AddInviteUserCallback callback) {
+        this.friends = friends;
+        this.callback = callback;
+    }
+
     @Override
     public PersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-       return PersonViewHolder.newInstance(parent);
+       PersonViewHolder holder = PersonViewHolder.newInstance(parent);
+       if (callback != null) {
+           holder.addInviteButton.setVisibility(View.VISIBLE);
+       }
+       return holder;
     }
 
     @Override
     public void onBindViewHolder(final PersonViewHolder holder, int position) {
-        User friend = friends.get(position);
+        final User friend = friends.get(position);
         holder.name.setText(friend.getDisplayName());
         holder.email.setText(friend.getEmail());
         holder.email.setVisibility(TextUtils.isEmpty(friend.getEmail()) ? View.GONE : View.VISIBLE);
         FirebaseResourceManager.loadImageIntoView(friends.get(position).getImagePath(), holder.photo);
+        if (callback != null) {
+            holder.addInviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    callback.addInviteClicked(friend);
+                }
+            });
+        }
     }
 
     @Override

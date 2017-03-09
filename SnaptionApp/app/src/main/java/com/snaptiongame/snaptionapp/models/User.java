@@ -172,7 +172,7 @@ public class User implements Person, Comparable<User> {
 
     @Override
     public int compareTo(User other) {
-        int result = displayName.toLowerCase().compareTo(other.getDisplayName().toLowerCase());
+        int result = getLowercaseDisplayName().compareTo(other.getLowercaseDisplayName());
         if (result == 0) {
             result = email.compareTo(other.getEmail());
         }
