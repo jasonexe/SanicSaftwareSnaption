@@ -89,7 +89,6 @@ public class FirebaseNotificationSender {
     }
 
     private static JSONObject buildJsonIOS(String gameId, User to, User from) {
-
         //build notification key-value
         JSONObject notification = new JSONObject();
         JSONObject json = new JSONObject();
