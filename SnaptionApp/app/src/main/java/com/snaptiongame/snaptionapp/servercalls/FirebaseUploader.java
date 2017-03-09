@@ -327,7 +327,7 @@ public class FirebaseUploader implements Uploader {
     }
 
     /**
-     * Adds the upvote to the object in the user object and in the game object.
+     * Adds the upvote to the object.
      *
      * @param path The path to the object
      * @param listener The listener to send callbacks to
@@ -337,7 +337,7 @@ public class FirebaseUploader implements Uploader {
     }
 
     /**
-     * Removes the upvote from the object and in the user object.
+     * Removes the upvote from the object.
      *
      * @param path The path to the object
      * @param listener The listener to send callbacks to
