@@ -126,7 +126,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             }
         }
         else {
-            query = query.limitToFirst(publicLimit);
+            query = query.limitToFirst(publicLimit).endAt(0);
         }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -148,6 +148,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         retrievedOnce = true;
                     }
                 }
+                System.out.println("Public query ending at " + lastRetrievedKey + " priority: " + lastRetrievedPriority);
                 listener.onData(data);
             }
 
