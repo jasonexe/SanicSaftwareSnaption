@@ -359,4 +359,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             }
         }
     }
+
+    public void clearItems() {
+        items.clear();
+        notifyDataSetChanged();
+    }
 }
