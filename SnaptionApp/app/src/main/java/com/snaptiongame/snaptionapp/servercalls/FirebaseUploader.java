@@ -1,7 +1,6 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -18,22 +17,12 @@ import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.snaptiongame.snaptionapp.Constants.FRIENDS_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_CAPTION_PATH;
-import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
 import static com.snaptiongame.snaptionapp.Constants.GAME_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_CAPTION_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_CREATED_GAME_PATH;
@@ -48,27 +37,9 @@ import static com.snaptiongame.snaptionapp.Constants.USER_PATH;
 
 public class FirebaseUploader implements Uploader {
 
-    public static final String GAME_PLAYERS_PATH = "games/%s/players";
     private static final String USERS_PATH = "users";
-    private static final String USERS_CREATED_GAMES =  "createdGames";
-    private static final String CAPTION_PATH = "captions";
     private static final String GAMES_PATH = "games";
-    private static final String IMAGE_PATH = "images";
     private static final String FRIENDS_PATH = "users/%s/friends";
-    private static final String NOTIFICATION_ID_PATH = "users/%s/notificationId";
-    private static final String USER_CAPTIONS_UPVOTES_PATH = "users/%s/captions/%s/votes";
-    private static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes";
-    private static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
-    private static final String FIREBASE_SERVER_KEY = "AAAA1YbN64o:APA91bFkAACOweZYo_FRyN6lIVKEvAoNstDavdLgXPjm4c74WN71kmCQjfR0m6bVaktnejgbbuaAyZp-vWclxv6-sZjm8iW9oyfqTep4fsuA5gZAfPYXJxI5vmkNd5Zzb3d2-p6nchpkcM-go2DfwSXn-BFF9fKTFg\n";
-    private static final String FIREBASE_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
-    private static final String POST = "POST";
-    private static final String JSON_TO = "to";
-    private static final String JSON_DATA = "data";
-    private static final String JSON_AUTH = "Authorization";
-    private static final String JSON_AUTH_KEY = "key=";
-    private static final String JSON_CONTENT_TYPE = "Content-Type";
-    private static final String JSON_CONTENT_VAL = "application/json";
-    private static final String NOTIFICATION_ID = "notificationId";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
@@ -106,7 +77,6 @@ public class FirebaseUploader implements Uploader {
      */
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
-        //TODO notify invited players
         game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
@@ -139,77 +109,30 @@ public class FirebaseUploader implements Uploader {
     }
 
     private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
+
+        final String pickerId = FirebaseResourceManager.getUserId();
         //listener once you get a user to send notification
         final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
             @Override
-            public void onData(User user) {
-                JSONObject json = createJson(gameId, user);
-                sendNotification(json);
+            public void onData(User receiver) {
+                if (receiver != null) {
+                    FirebaseNotificationSender.sendGameCreationNotification(receiver, gameId, pickerId);
+                }
             }
-
             @Override
             public Class getDataType() {
                 return User.class;
             }
         };
 
-        String pickerId = FirebaseResourceManager.getUserId();
         //for each player invited to the game, send notification
         for (String playerId : players) {
             //dont send notificaiton to picker
-            if (playerId != pickerId) {
+            if (!playerId.equals(pickerId)) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
                         notifyPlayerListener);
             }
         }
-    }
-
-    private JSONObject createJson(String gameId, User user) {
-        JSONObject json = new JSONObject();
-        try {
-            //json to : notificationId of receiver, data : data
-            json.put(JSON_TO, user.getNotificationId());
-            JSONObject data = new JSONObject();
-            data.put(NotificationReceiver.GAME_ID_KEY, gameId);
-            data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
-            json.put(JSON_DATA, data);
-            return json;
-        } catch (JSONException err) {
-            err.printStackTrace();
-            Log.e("FIREBASE_UPLOADER", "Failed to create JSON " + err.getMessage());
-        }
-        return json;
-    }
-
-    private void sendNotification(final JSONObject json) {
-        //run each notification on separate thread
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    URL firebaseMessageUrl = new URL(FIREBASE_MESSAGE_URL);
-                    final HttpURLConnection connection =(HttpURLConnection)firebaseMessageUrl.openConnection();
-                    connection.setRequestMethod(POST);
-                    connection.setDoOutput(true);
-                    connection.setRequestProperty(JSON_CONTENT_TYPE, JSON_CONTENT_VAL);
-                    connection.setRequestProperty(JSON_AUTH,  JSON_AUTH_KEY + FIREBASE_SERVER_KEY);
-                    final DataOutputStream write = new DataOutputStream(connection.getOutputStream());
-                    write.writeBytes(json.toString());
-                    write.flush();
-                    write.close();
-                    connection.connect();
-                    Log.d("NOTIFICATION","Send message response msg: " + connection.getResponseMessage());
-                }
-                catch (MalformedURLException err) {
-                    err.printStackTrace();
-                    Log.e("NOTIFICATION", "Failed to create URL " + err.getMessage());
-                }
-                catch (IOException err) {
-                    err.printStackTrace();
-                    Log.e("NOTIFICATION", "Failed to write JSON to firebase " + err.getMessage());
-                }
-            }
-        }).start();
     }
 
     @Override
@@ -306,7 +229,7 @@ public class FirebaseUploader implements Uploader {
                     //update notificationId every login
                     uploadObject(String.format(Constants.USER_NOTIFICATION_PATH, user.getId()), user.getNotificationId());
                     //now the user is logged in on firebase
-                    uploadObject(String.format(Constants.USER_IS_ANDROID, user.getId()), user.getIsAndroid());
+                    uploadObject(String.format(Constants.USER_IS_ANDROID_PATH, user.getId()), user.getIsAndroid());
                 }
                 //notify user has been added or found
                 listener.onData(data);

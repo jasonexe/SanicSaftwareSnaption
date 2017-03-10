@@ -56,7 +56,7 @@ public class Constants {
     // Path to the user's notification ID
     public static final String USER_NOTIFICATION_PATH = "users/%s/notificationId";
     // Path to the user's isAndroid boolean
-    public static final String USER_IS_ANDROID = "users/%s/isAndroid";
+    public static final String USER_IS_ANDROID_PATH = "users/%s/isAndroid";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the user's lowercase display name
