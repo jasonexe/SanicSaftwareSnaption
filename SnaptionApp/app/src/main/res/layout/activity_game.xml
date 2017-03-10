@@ -26,6 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
+        android:background="@color/colorPrimaryDark"
         app:layout_anchor="@id/app_bar"/>
     <FrameLayout
         android:id="@+id/image_progress_bar"
@@ -118,7 +119,7 @@
             android:textColor="@android:color/white"/>
 
         <ImageView
-            android:src="@drawable/ic_chat_bubble"
+            android:src="@drawable/ic_filled_chat_bubble"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginStart="8dp"
@@ -165,12 +166,6 @@
             android:textColor="@color/colorAccent" />
 
     </RelativeLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:id="@+id/black_line2"
-        android:background="@color/colorBlack"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_caption_list"
