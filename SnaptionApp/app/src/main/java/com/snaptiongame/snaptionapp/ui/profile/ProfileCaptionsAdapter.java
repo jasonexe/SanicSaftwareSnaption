@@ -14,7 +14,11 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Map;
+
+import static com.snaptiongame.snaptionapp.ui.games.GameActivity.USE_GAME_ID;
 
 /**
  * The adapter for the recycler view that holds the user's captions
@@ -30,35 +34,30 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
 
     @Override
     public void onBindViewHolder(ProfileCaptionsViewHolder holder, int position) {
-        final Caption curCaption = captions.get(position);
+        Caption curCaption = captions.get(position);
+        final String gameId = curCaption.getGameId();
         holder.captionText.setText(curCaption.retrieveCaptionText());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(final View view) {
-                String gameId = curCaption.getGameId();
-                FirebaseResourceManager.retrieveSingleNoUpdates(
-                        String.format(Constants.GAME_PATH, gameId),
-                        new ResourceListener<Game>() {
-                            @Override
-                            public void onData(Game data) {
-                                Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
-                                gamePageIntent.putExtra(Constants.GAME, data);
-                                view.getContext().startActivity(gamePageIntent);
-                            }
-
-                            @Override
-                            public Class getDataType() {
-                                return Game.class;
-                            }
-                        });
-
+            public void onClick(final View view) {;
+                Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
+                gamePageIntent.putExtra(USE_GAME_ID, gameId);
+                view.getContext().startActivity(gamePageIntent);
             }
         });
+        Map<String, Integer> voters = curCaption.getVotes();
+        if(voters != null) {
+            holder.captionUpvotes.setText(String.valueOf(voters.size()));
+        } else {
+            holder.captionUpvotes.setText(String.valueOf(0));
+        }
+        // Make sure it's visible. Gone by default so that the cards in the game don't need to change.
+        holder.captionUpvotes.setVisibility(View.VISIBLE);
     }
 
     @Override
     public ProfileCaptionsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_option_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.profile_captions, parent, false);
         return new ProfileCaptionsViewHolder(view);
     }
 
