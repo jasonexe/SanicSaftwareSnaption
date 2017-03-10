@@ -323,6 +323,15 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     /**
+     * Removes the listeners from all of the FirebaseResourceManagers.
+     */
+    public void removeFirebaseListeners() {
+        for (FirebaseResourceManager frm : resourceManagerMap.values()) {
+            frm.removeListener();
+        }
+    }
+
+    /**
      * Called when an upvote is clicked. Adds/removes the upvote to/from firebase depending on
      * whether hasUpvoted is true or false.
      *

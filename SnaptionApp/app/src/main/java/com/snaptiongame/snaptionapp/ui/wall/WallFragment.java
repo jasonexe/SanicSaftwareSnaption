@@ -150,9 +150,7 @@ public class WallFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        for (FirebaseResourceManager frm : wallAdapter.resourceManagerMap.values()) {
-            frm.removeListener();
-        }
+        wallAdapter.removeFirebaseListeners();
         unbinder.unbind();
     }
 

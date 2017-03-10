@@ -202,6 +202,15 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         }
     }
 
+    /**
+     * Removes the listeners from all of the FirebaseResourceManagers.
+     */
+    public void removeFirebaseListeners() {
+        for (FirebaseResourceManager frm : resourceManagerMap.values()) {
+            frm.removeListener();
+        }
+    }
+
     // END PUBLIC METHODS //
 
     // BEGIN PRIVATE METHODS //
