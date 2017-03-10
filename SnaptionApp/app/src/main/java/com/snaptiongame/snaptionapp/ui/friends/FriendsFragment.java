@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +18,7 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,15 @@ public class FriendsFragment extends Fragment {
 
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
+
+    private FriendsListAdapter.UserClickCallback userClickCallback = new FriendsListAdapter.UserClickCallback() {
+        @Override
+        public void clickedOnUser(String userId) {
+            Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            intent.putExtra("userId", userId);
+            startActivity(intent);
+        }
+    };
 
     @Nullable
     @Override
@@ -76,7 +87,7 @@ public class FriendsFragment extends Fragment {
                     if (user != null && user.getFriends() != null) {
                         friendNotice.setVisibility(View.GONE);
                         List<User> users = new ArrayList<>();
-                        friendsListAdapter = new FriendsListAdapter(users);
+                        friendsListAdapter = new FriendsListAdapter(users, userClickCallback);
                         friendsListView.setAdapter(friendsListAdapter);
                         loadUsers(user.getFriends());
                     }

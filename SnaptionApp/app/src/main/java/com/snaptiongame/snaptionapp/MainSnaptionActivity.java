@@ -114,6 +114,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     break;
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putString("userId", FirebaseResourceManager.getUserId());
+                    newFragment.setArguments(args);
                     bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;

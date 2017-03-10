@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -19,7 +20,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
-import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
@@ -36,7 +37,7 @@ import butterknife.ButterKnife;
  *
  * @author Hristo Stoytchev
  */
-public class SearchActivity extends HomeAppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
     private List<User> users = new ArrayList<User>();
     private FriendsListAdapter userListAdapter;
     private FriendsViewModel viewModel;
@@ -76,6 +77,43 @@ public class SearchActivity extends HomeAppCompatActivity {
         @Override
         public Class getDataType() {
             return User.class;
+        }
+    };
+
+    FriendsListAdapter.AddInviteUserCallback addInviteUserCallback = new FriendsListAdapter.AddInviteUserCallback() {
+        @Override
+        public void addInviteClicked(final User user) {
+            final Friend friend = new Friend(user);
+
+            // ensure viewModel has been initialized
+            if (viewModel != null) {
+                viewModel.addFriend(friend, new Uploader.UploadListener() {
+                    @Override
+                    public void onComplete() {
+                        // notify user
+                        Toast.makeText(SearchActivity.this,
+                                viewModel.getAddedFriendText(SearchActivity.this,
+                                        friend.displayName, true, null), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        // notify user
+                        Toast.makeText(SearchActivity.this,
+                                viewModel.getAddedFriendText(SearchActivity.this,
+                                        friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    };
+
+    private FriendsListAdapter.UserClickCallback userClickCallback = new FriendsListAdapter.UserClickCallback() {
+        @Override
+        public void clickedOnUser(String userId) {
+            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
+            intent.putExtra("userId", userId);
+            startActivity(intent);
         }
     };
 
@@ -121,33 +159,7 @@ public class SearchActivity extends HomeAppCompatActivity {
             Set<User> set = new TreeSet<>(users);
             searchNotice.setVisibility(View.GONE);
             // set the adapter to be able to add friends
-            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), new FriendsListAdapter.AddInviteUserCallback() {
-                @Override
-                public void addInviteClicked(final User user) {
-                    final Friend friend = new Friend(user);
-
-                    // ensure viewModel has been initialized
-                    if (viewModel != null) {
-                        viewModel.addFriend(friend, new Uploader.UploadListener() {
-                            @Override
-                            public void onComplete() {
-                                // notify user
-                                Toast.makeText(SearchActivity.this,
-                                        viewModel.getAddedFriendText(SearchActivity.this,
-                                                friend.displayName, true, null), Toast.LENGTH_LONG).show();
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                // notify user
-                                Toast.makeText(SearchActivity.this,
-                                        viewModel.getAddedFriendText(SearchActivity.this,
-                                                friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                }
-            });
+            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, userClickCallback);
             userViewList.setAdapter(userListAdapter);
         }
         else {
