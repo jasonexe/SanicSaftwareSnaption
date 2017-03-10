@@ -12,6 +12,7 @@ import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
@@ -60,63 +61,21 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.gameType = gameType;
         userId = FirebaseResourceManager.getUserId();
         mixedGames = new ArrayList<>();
-
-        if(gameType == GameType.MIXED_GAMES) {
-            initManagerAndGetters();
-        }
     }
-
-    private void initManagerAndGetters() {
-        privateGameGetter = new ResourceListener<List<Game>>() {
-            @Override
-            public void onData(List<Game> data) {
-                mixedGames.addAll(data);
-                // Since the limits will normally be relatively small, we can shuffle them
-                // to give a little bit of a different order every time
-                // comment out for now to demonstrate ordering in app
-//                Collections.shuffle(mixedGames);
-                listener.onData(new ArrayList<>(mixedGames));
-            }
-
-            @Override
-            public Class getDataType() {
-                return Game.class;
-            }
-        };
-        privateGameManager = new FirebaseGameResourceManager(0,
-                privateLimit, privateGameGetter, GameType.PRIVATE_GAMES);
-
-        ResourceListener<List<Game>> publicGameGetter = new ResourceListener<List<Game>>() {
-            @Override
-            public void onData(List<Game> data) {
-                mixedGames.addAll(data);
-                privateGameManager.retrieveGames();
-            }
-
-            @Override
-            public Class getDataType() {
-                return Game.class;
-            }
-        };
-        publicGameManager = new FirebaseGameResourceManager(publicLimit,
-                0, publicGameGetter, GameType.PUBLIC_GAMES);
-    }
-
-
 
     public void retrieveGames() {
         mixedGames.clear();
-        if (gameType == GameType.MIXED_GAMES) {
-            publicGameManager.retrievePublicGamesByPriority();
-        } else if (gameType == GameType.PUBLIC_GAMES) {
-            retrievePublicGamesByPriority();
-        } else if (gameType == GameType.PRIVATE_GAMES) {
+        if (gameType == GameType.RANDOM_PUBLIC_GAMES) {
+            retrievePublicGamesByPriority(true);
+        } else if (gameType == GameType.TOP_PUBLIC_GAMES) {
+            retrievePublicGamesByPriority(false);
+        } else if (gameType == GameType.USER_JOINED_GAMES) {
             retrieveUserPrivateGames();
         }
 
     }
 
-    private void retrievePublicGamesByPriority() {
+    private void retrievePublicGamesByPriority(final boolean shuffle) {
         Query query = database.getReference(GAMES_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
@@ -148,7 +107,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         retrievedOnce = true;
                     }
                 }
-                System.out.println("Public query ending at " + lastRetrievedKey + " priority: " + lastRetrievedPriority);
+                if(shuffle) {
+                    Collections.shuffle(data);
+                }
                 listener.onData(data);
             }
 

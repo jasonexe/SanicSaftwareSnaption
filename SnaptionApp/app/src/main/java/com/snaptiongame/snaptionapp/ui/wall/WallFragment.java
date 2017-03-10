@@ -1,10 +1,12 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -93,6 +95,12 @@ public class WallFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        // This will clear fragments if they get stuck above other ones. Can't figure out how to
+        // make them never get stuck, see http://stackoverflow.com/questions/18309815/fragments-displayed-over-each-other
+        // But this will at least not force users to reload the app
+        if(container != null) {
+            container.clearDisappearingChildren();
+        }
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
 
