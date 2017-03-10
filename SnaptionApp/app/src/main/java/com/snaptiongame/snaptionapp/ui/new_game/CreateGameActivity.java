@@ -187,6 +187,7 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
+                    buttonUpload.setClickable(false);
                     Map<String, Integer> friends = new HashMap<>();
                     List<Person> addedFriends =  gameFriendsAdapter.getPersons();
                     for (Person friend : addedFriends) {
