@@ -167,7 +167,8 @@ public class CreateGameActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 byte[] data = null;
-
+                buttonUpload.setClickable(false);
+                boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
                     Toast.makeText(CreateGameActivity.this, "You must pick an image.",
                             Toast.LENGTH_LONG).show();
@@ -187,6 +188,7 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else {
+                    shouldUploadBeClickable = false;
                     Map<String, Integer> friends = new HashMap<>();
                     List<Person> addedFriends =  gameFriendsAdapter.getPersons();
                     for (Person friend : addedFriends) {
@@ -211,6 +213,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         backToMain();
                     }
                 }
+                buttonUpload.setClickable(shouldUploadBeClickable);
             }
         });
 
