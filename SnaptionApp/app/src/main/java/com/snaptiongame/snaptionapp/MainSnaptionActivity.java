@@ -16,7 +16,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +33,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.MainFabBehavior;
 import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
@@ -48,10 +48,7 @@ import butterknife.OnClick;
 
 import static com.snaptiongame.snaptionapp.Constants.GOOGLE_LOGIN_RC;
 
-public class MainSnaptionActivity extends AppCompatActivity {
-    private LoginManager loginManager;
-    public LoginDialog loginDialog;
-
+public class MainSnaptionActivity extends HomeAppCompatActivity {
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
     @BindView(R.id.drawer_layout)
@@ -66,10 +63,13 @@ public class MainSnaptionActivity extends AppCompatActivity {
     protected TextView navDrawerName;
     protected TextView navDrawerEmail;
 
-
+    private LoginManager loginManager;
+    public LoginDialog loginDialog;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private User currentUser;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
-    private ActionBarDrawerToggle mDrawerToggle;
+
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -93,9 +93,6 @@ public class MainSnaptionActivity extends AppCompatActivity {
         int selectedItemId = item.getItemId();
         // if the selected item is different than the currently selected item, replace the fragment
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
-            boolean fabVisible = true;
-            boolean bottomNavVisible = true;
-            boolean fadeAnim = false;
             Fragment newFragment = null;
             switch (selectedItemId) {
                 case R.id.wall_item:
@@ -108,82 +105,55 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     }
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
-                    setToolbarCollapsible(true);
-                    fab.setImageResource(R.drawable.ic_add_white_24dp);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
-                    bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
-                    setToolbarCollapsible(false);
-                    fab.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                     break;
                 case R.id.friends_item:
                     newFragment = new FriendsFragment();
-                    bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
-                    setToolbarCollapsible(true);
-                    fab.setImageResource(R.drawable.ic_add_white_24dp);
                     break;
                 case R.id.log_option:
-                    //check if we are logging in or out based on item text
-                    if (item.getTitle().equals(getResources().getString(R.string.login))) {
-                        //display dialog
-                        loginDialog.show();
-                    }
-                    else {
-                        new AlertDialog.Builder(MainSnaptionActivity.this, 0)
-                                .setMessage(getResources().getString(R.string.logout_prompt))
-                                .setPositiveButton(getResources().getString(R.string.yes),
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                loginManager.logOut();
-                                                item.setTitle(getResources().getString(R.string.login));
-                                            }
-                                        }).setNegativeButton(getResources().getString(R.string.no),
-                                null).create().show();
-
-                    }
+                    logInOutItemSelected(item);
                     break;
                 case R.id.my_feed_item:
-                    fadeAnim = true;
                     newFragment = WallFragment.newInstance(GameType.PRIVATE_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
-                    fadeAnim = true;
                     newFragment =  WallFragment.newInstance(GameType.MIXED_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
-                    fadeAnim = true;
                     newFragment =  WallFragment.newInstance(GameType.PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
             if (newFragment != null) {
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                if (fadeAnim) {
+                if (currentBottomNavMenuId != 0) {
                     ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
                 }
                 ft.replace(R.id.fragment_container, newFragment);
                 ft.commit();
-                updateFragmentViews(fabVisible, bottomNavVisible);
+                updateFragmentViews();
             }
         }
         drawerLayout.closeDrawers();
         return true;
     }
 
-    private void updateFragmentViews(boolean fabVisible, boolean bottomNavVisible) {
-        // hide or show the fab
-        fab.setVisibility(fabVisible ? View.VISIBLE : View.GONE);
+    private void updateFragmentViews() {
+        setToolbarCollapsible(currentNavDrawerMenuId != R.id.profile_item);
         // hide or show the bottom navigation view
-        bottomNavigationView.setVisibility(bottomNavVisible ? View.VISIBLE : View.GONE);
+        bottomNavigationView.setVisibility(currentNavDrawerMenuId == R.id.wall_item ?
+                View.VISIBLE : View.GONE);
+        fab.setImageResource(currentNavDrawerMenuId == R.id.profile_item ?
+                R.drawable.ic_mode_edit_white_24dp : R.drawable.ic_add_white_24dp);
     }
 
     private void setToolbarCollapsible(boolean collapsible) {
@@ -198,22 +168,41 @@ public class MainSnaptionActivity extends AppCompatActivity {
         }
     }
 
+    private void logInOutItemSelected(final MenuItem item) {
+        //check if we are logging in or out based on item text
+        if (item.getTitle().equals(getResources().getString(R.string.login))) {
+            //display dialog
+            loginDialog.show();
+        }
+        else {
+            new AlertDialog.Builder(MainSnaptionActivity.this, 0)
+                    .setMessage(getResources().getString(R.string.logout_prompt))
+                    .setPositiveButton(getResources().getString(R.string.yes),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    loginManager.logOut();
+                                    item.setTitle(getResources().getString(R.string.login));
+                                }
+                            }).setNegativeButton(getResources().getString(R.string.no),
+                    null).create().show();
+
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        // set layout and bind views
         setContentView(R.layout.activity_main_snaption);
-
         ButterKnife.bind(this);
+
         // toolbar and navigation drawer setup
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                R.string.open_nav_drawer, R.string.close_nav_drawer) {};
-        drawerLayout.addDrawerListener(mDrawerToggle);
+        setupToolbar(toolbar);
         setupNavigationViews();
+
         currentNavDrawerMenuId = R.id.wall_item;
 
         //create loginDialog and LoginManager to manager user
@@ -221,7 +210,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
             @Override
             public void onLoginComplete() {
-                setupNavigationViews();
+                updateNavigationViews();
             }
         }, new LoginManager.AuthCallback() {
             @Override
@@ -254,32 +243,40 @@ public class MainSnaptionActivity extends AppCompatActivity {
     }
 
     private void setupNavigationViews() {
+        mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
+                R.string.open_nav_drawer, R.string.close_nav_drawer) {};
+        drawerLayout.addDrawerListener(mDrawerToggle);
         navigationView.setNavigationItemSelectedListener(mNavListener);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
-        FirebaseResourceManager firebaseResourceManager = new FirebaseResourceManager();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
-        navDrawerPhoto = (ImageView) navigationHeaderView.findViewById(R.id.user_photo);
-        navDrawerName = (TextView) navigationHeaderView.findViewById(R.id.user_name);
-        navDrawerEmail = (TextView) navigationHeaderView.findViewById(R.id.user_email);
+        navDrawerPhoto = ButterKnife.findById(navigationHeaderView, R.id.user_photo);
+        navDrawerName = ButterKnife.findById(navigationHeaderView, R.id.user_name);
+        navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
+    }
 
+    private void updateNavigationViews() {
         if (FirebaseResourceManager.getUserPath() != null) {
-            //retrieve information from User table
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                    new ResourceListener<User>() {
-                @Override
-                public void onData(User user) {
-                    if (user != null) {
-                        addUserInfoToNavDrawer(user);
-                    } else {
-                        removeUserInfoFromNavDrawer();
-                    }
-                }
-                @Override
-                public Class getDataType() {
-                    return User.class;
-                }
-            });
+            if (currentUser == null) {
+                //retrieve information from User table
+                FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
+                        new ResourceListener<User>() {
+                            @Override
+                            public void onData(User user) {
+                                currentUser = user;
+                                if (user != null) {
+                                    addUserInfoToNavDrawer(user);
+                                } else {
+                                    removeUserInfoFromNavDrawer();
+                                }
+                            }
+
+                            @Override
+                            public Class getDataType() {
+                                return User.class;
+                            }
+                        });
+            }
         } else {
             removeUserInfoFromNavDrawer();
         }
@@ -305,7 +302,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
             myFeedItem.setIcon(R.drawable.ic_person_pin_color_24dp);
         }
         //if on the wall, update the menu item
-        if (currentNavDrawerMenuId == R.id.wall_item) {
+        if (currentNavDrawerMenuId == R.id.wall_item && currentBottomNavMenuId == 0) {
             currentNavDrawerMenuId = -1;
             mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         }
@@ -325,7 +322,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         //remove the my feed menu item
         bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
         //if on the wall, update the menu item
-        if (currentNavDrawerMenuId == R.id.wall_item) {
+        if (currentNavDrawerMenuId == R.id.wall_item && currentBottomNavMenuId == 0) {
             currentNavDrawerMenuId = -1;
             mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         }
@@ -358,7 +355,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setupNavigationViews();
+        updateNavigationViews();
     }
 
     @Override
