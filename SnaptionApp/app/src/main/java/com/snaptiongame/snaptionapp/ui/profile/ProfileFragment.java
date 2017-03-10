@@ -36,6 +36,8 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +79,10 @@ public class ProfileFragment extends Fragment {
     protected ImageView nameChangeCancel;
     @BindView(R.id.edit_photo_overlay)
     protected ImageView editPhotoOverlay;
+    @BindView(R.id.friends_made)
+    protected TextView friendsMade;
+    @BindView(R.id.total_caption_upvotes)
+    protected TextView totalCapUpvotes;
 
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
@@ -119,15 +125,7 @@ public class ProfileFragment extends Fragment {
             FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
-                    userName.setText(user.getDisplayName());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
-                    gamesCreated.setText(Integer.toString(user.retrieveCreatedGameCount()));
-                    captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
-                    //get the games based on list of games in user
-                    thisUser = user;
-                    getUserGames(user);
-                    getUserCaptions(user, view);
+                    setupUserData(user, view);
                 }
 
                 @Override
@@ -137,6 +135,27 @@ public class ProfileFragment extends Fragment {
             });
         }
         return view;
+    }
+
+    private void setupUserData(User user, View view) {
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
+        userName.setText(user.getDisplayName());
+        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
+        gamesCreated.setText(String.valueOf(user.retrieveCreatedGameCount()));
+        captionsCreated.setText(String.valueOf(user.retrieveCaptionCount()));
+        friendsMade.setText(String.valueOf(user.getFriends().size()));
+        int numCapUpvotes = 0;
+        if(user.getCaptions() != null) {
+            for(Caption caption : user.getCaptions().values()) {
+                numCapUpvotes += caption.retrieveNumVotes();
+            }
+        }
+        totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
+
+        //get the games based on list of games in user
+        thisUser = user;
+        getUserGames(user);
+        getUserCaptions(user, view);
     }
 
     private void getUserCaptions(User user, View view) {

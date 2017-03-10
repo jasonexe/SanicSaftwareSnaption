@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.models;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -53,7 +54,11 @@ public class User implements Person, Comparable<User> {
     }
 
     public Map<String, Integer> getFriends() {
-        return friends;
+        if(friends != null) {
+            return friends;
+        } else {
+            return new HashMap<>();
+        }
     }
 
     public Map<String, Integer> getBlockedUsers() {
