@@ -27,7 +27,6 @@ import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 public class FirebaseGameResourceManager implements GameResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private ResourceListener<List<Game>> listener;
-    private List<Game> mixedGames;
     private List<Game> privateGames;
     private int publicLimit;
     private int privateLimit;
@@ -38,11 +37,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private String userId;
 
     private GameType gameType;
-
-    private ResourceListener<List<Game>> privateGameGetter;
-    private FirebaseGameResourceManager privateGameManager;
-    private FirebaseGameResourceManager publicGameManager;
-
 
     /**
      * Constructor for the FirebaseGameResourceManager. Use this to get games from firebase.
@@ -60,17 +54,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.listener = listener;
         this.gameType = gameType;
         userId = FirebaseResourceManager.getUserId();
-        mixedGames = new ArrayList<>();
     }
 
     public void retrieveGames() {
-        mixedGames.clear();
-        if (gameType == GameType.RANDOM_PUBLIC_GAMES) {
-            retrievePublicGamesByPriority(true);
-        } else if (gameType == GameType.TOP_PUBLIC_GAMES) {
-            retrievePublicGamesByPriority(false);
-        } else if (gameType == GameType.USER_JOINED_GAMES) {
+        // If we're getting the games they joined, just call private games
+        if (gameType == GameType.USER_JOINED_GAMES) {
             retrieveUserPrivateGames();
+        } else {
+            // Otherwise, we're getting either random or top public games, so check which.
+            retrievePublicGamesByPriority(gameType == GameType.RANDOM_PUBLIC_GAMES);
         }
 
     }
