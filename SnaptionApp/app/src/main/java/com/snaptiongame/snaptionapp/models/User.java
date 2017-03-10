@@ -54,11 +54,7 @@ public class User implements Person, Comparable<User> {
     }
 
     public Map<String, Integer> getFriends() {
-        if(friends != null) {
             return friends;
-        } else {
-            return new HashMap<>();
-        }
     }
 
     public Map<String, Integer> getBlockedUsers() {
