@@ -206,8 +206,12 @@ public class ProfileFragment extends Fragment {
 
     @OnClick(R.id.friends_container)
     public void goToFriendsList() {
-        MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
-        activity.switchFragments(R.id.friends_item, null);
+        // If the fragment is part of the MainSnaptionActivity, then switch
+        // Otherwise, don't do anything.
+        if(getActivity() instanceof MainSnaptionActivity) {
+            MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
+            activity.switchFragments(R.id.friends_item, null);
+        }
     }
 
     @OnClick(R.id.stop_name_change)
