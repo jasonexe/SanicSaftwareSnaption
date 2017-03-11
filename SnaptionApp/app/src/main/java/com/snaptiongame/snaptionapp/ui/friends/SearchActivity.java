@@ -108,15 +108,6 @@ public class SearchActivity extends AppCompatActivity {
         }
     };
 
-    private FriendsListAdapter.UserClickCallback userClickCallback = new FriendsListAdapter.UserClickCallback() {
-        @Override
-        public void clickedOnUser(String userId) {
-            Intent intent = new Intent(getApplicationContext(), ProfileActivity.class);
-            intent.putExtra("userId", userId);
-            startActivity(intent);
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,7 +150,7 @@ public class SearchActivity extends AppCompatActivity {
             Set<User> set = new TreeSet<>(users);
             searchNotice.setVisibility(View.GONE);
             // set the adapter to be able to add friends
-            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, userClickCallback);
+            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
         }
         else {

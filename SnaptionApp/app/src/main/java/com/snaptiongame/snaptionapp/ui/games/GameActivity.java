@@ -39,6 +39,7 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
@@ -307,10 +308,12 @@ public class GameActivity extends HomeAppCompatActivity {
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);

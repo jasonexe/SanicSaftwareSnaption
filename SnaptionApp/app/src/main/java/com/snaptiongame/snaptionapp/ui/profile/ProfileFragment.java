@@ -110,13 +110,6 @@ public class ProfileFragment extends Fragment {
         // Set clickability to false - for some reason doesn't work in XML (maybe b/c butterknife?)
         profile.setClickable(false);
 
-        //if other user's profile
-        /*if (userId != FirebaseResourceManager.getUserId()) {
-            //hide fab button
-            FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
-            fab.setVisibility(View.INVISIBLE);
-        }*/
-
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         gameListView.setLayoutManager(gameViewManager);

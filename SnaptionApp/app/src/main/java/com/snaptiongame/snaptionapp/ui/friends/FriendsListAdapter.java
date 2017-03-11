@@ -23,24 +23,20 @@ import java.util.List;
 public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<User> friends;
     private AddInviteUserCallback addInviteUserCallback;
-    private UserClickCallback userClickCallback;
+    private ProfileActivity.ProfileActivityCreator profileMaker;
 
     public interface AddInviteUserCallback {
         public void addInviteClicked(User user);
     }
 
-    public interface UserClickCallback {
-        public void clickedOnUser(String userId);
-    }
-
-    public FriendsListAdapter(List<User> friends, UserClickCallback userClickCallback) {
+    public FriendsListAdapter(List<User> friends, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.friends = friends;
-        this.userClickCallback = userClickCallback;
+        this.profileMaker = profileMaker;
     }
 
     public FriendsListAdapter(List<User> friends, AddInviteUserCallback addInviteUserCallback,
-                              UserClickCallback userClickCallback) {
-        this(friends, userClickCallback);
+                              ProfileActivity.ProfileActivityCreator profileMaker) {
+        this(friends, profileMaker);
         this.addInviteUserCallback = addInviteUserCallback;
     }
 
@@ -71,7 +67,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
         holder.photo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                userClickCallback.clickedOnUser(friend.getId());
+                profileMaker.create(friend.getId());
             }
         });
     }

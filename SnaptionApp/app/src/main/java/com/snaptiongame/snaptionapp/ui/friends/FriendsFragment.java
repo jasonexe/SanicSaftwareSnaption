@@ -42,15 +42,6 @@ public class FriendsFragment extends Fragment {
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
 
-    private FriendsListAdapter.UserClickCallback userClickCallback = new FriendsListAdapter.UserClickCallback() {
-        @Override
-        public void clickedOnUser(String userId) {
-            Intent intent = new Intent(getActivity(), ProfileActivity.class);
-            intent.putExtra("userId", userId);
-            startActivity(intent);
-        }
-    };
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -87,7 +78,7 @@ public class FriendsFragment extends Fragment {
                     if (user != null && user.getFriends() != null) {
                         friendNotice.setVisibility(View.GONE);
                         List<User> users = new ArrayList<>();
-                        friendsListAdapter = new FriendsListAdapter(users, userClickCallback);
+                        friendsListAdapter = new FriendsListAdapter(users, ProfileActivity.getProfileActivityCreator(getContext()));
                         friendsListView.setAdapter(friendsListAdapter);
                         loadUsers(user.getFriends());
                     }

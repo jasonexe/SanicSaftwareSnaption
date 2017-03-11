@@ -22,6 +22,7 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.List;
 
@@ -35,10 +36,12 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     private List<Game> items;
     private MainSnaptionActivity activity;
+    private ProfileActivity.ProfileActivityCreator profileMaker;
 
-    public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
+    public WallViewAdapter(List<Game> items, MainSnaptionActivity activity, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
         this.activity = activity;
+        this.profileMaker = profileMaker;
     }
 
     @Override
@@ -159,13 +162,20 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // display the name and profile picture if a valid user is obtained from the user id
             FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
-                public void onData(User user) {
+                public void onData(final User user) {
                     // replace default is the User is valid
                     if (user != null) {
                         // if there is no photo path, don't display it, use a - instead
                         if (photo != null) {
                             username.setText(user.getDisplayName());
                             FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
+                            photo.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    //call create user profile activity
+                                    profileMaker.create(user.getId());
+                                }
+                            });
                         }
                         else {
                             username.setText(activity.getResources().getString(R.string.captioner_name, user.getDisplayName()));
