@@ -133,18 +133,22 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
-            if (newFragment != null) {
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                if (currentBottomNavMenuId != 0) {
-                    ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
-                }
-                ft.replace(R.id.fragment_container, newFragment);
-                ft.commit();
-                updateFragmentViews();
-            }
+            replaceFragmentWithTransaction(newFragment);
         }
         drawerLayout.closeDrawers();
         return true;
+    }
+
+    private void replaceFragmentWithTransaction(Fragment newFragment) {
+        if (newFragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            if (currentBottomNavMenuId != 0) {
+                ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
+            }
+            ft.replace(R.id.fragment_container, newFragment);
+            ft.commit();
+            updateFragmentViews();
+        }
     }
 
     private void updateFragmentViews() {
