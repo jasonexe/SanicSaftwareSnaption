@@ -153,6 +153,7 @@ public class WallFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        refreshLayout.setRefreshing(false);
         unbinder.unbind();
     }
 }
