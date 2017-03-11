@@ -304,7 +304,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
         Game newGame = items.get(changedIndex);
         newGame.setVotes(newVotes);
-        items.set(changedIndex, newGame);
         WallViewHolder holder = itemNumToHolder.get(changedIndex);
 
         if(holder != null) {

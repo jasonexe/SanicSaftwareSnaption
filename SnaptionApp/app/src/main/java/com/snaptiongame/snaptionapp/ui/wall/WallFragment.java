@@ -74,8 +74,7 @@ public class WallFragment extends Fragment {
             if(games == null) {
                 Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
             } else {
-                for (int gameNum = 0; gameNum < games.size(); gameNum += 1) {
-                    Game curGame = games.get(gameNum);
+                for (Game curGame : games) {
                     ResourceListener<Map<String, Integer>> gameListener = getGameListener(gameVoteListeners.size());
                     FirebaseResourceManager manager = new FirebaseResourceManager();
                     manager.retrieveMapWithUpdates(String.format(Constants.GAME_UPVOTES_PATH, curGame.getId()), gameListener);
