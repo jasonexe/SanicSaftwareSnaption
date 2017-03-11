@@ -372,7 +372,7 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
-        captionAdapter.removeFirebaseListeners();
+        captionAdapter.removeListeners();
     }
 
     @OnClick(R.id.fab)
