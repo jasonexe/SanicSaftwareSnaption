@@ -76,7 +76,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-            return switchFragments(item);
+            return switchFragments(item.getItemId(), item);
         }
     };
     private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationListener =
@@ -85,12 +85,18 @@ public class MainSnaptionActivity extends AppCompatActivity {
         // onNavigationItemSelected gets called when an item in the bottom navigation bar is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            return switchFragments(item);
+            return switchFragments(item.getItemId(), item);
         }
     };
 
-    private boolean switchFragments(final MenuItem item) {
-        int selectedItemId = item.getItemId();
+    /**
+     * If you know the id of the fragment to switch to, call this method with it. Don't necessarily
+     * need to have a menuItem, it's only used if the user clicks login
+     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load
+     * @param item Item clicked, only needed to switch login text
+     * @return true always
+     */
+    public boolean switchFragments(int selectedItemId, final MenuItem item) {
         // if the selected item is different than the currently selected item, replace the fragment
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             boolean fabVisible = true;
