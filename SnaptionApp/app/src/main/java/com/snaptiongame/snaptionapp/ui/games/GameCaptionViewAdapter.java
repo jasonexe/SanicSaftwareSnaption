@@ -98,16 +98,13 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         final Caption finalCaption = items.get(position);
         setUpCaptionView(holder, finalCaption);
 
-        // Adds the firebaseresourcemanager to the map if it is not already in it
+        // Adds a firebase resource manager for the caption to the map if one is not already in it
         if (!resourceManagerMap.containsKey(finalCaption.getId())) {
             FirebaseResourceManager manager = new FirebaseResourceManager();
-            resourceManagerMap.put(finalCaption.getId(), manager);
-            // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
-            // and modifies the click handler
+            // Listens for any changes to the upvotes and updates the caption
             ResourceListener upvoteListener = new ResourceListener<Caption>() {
                 @Override
                 public void onData(Caption updatedCaption) {
-                    // Check to make sure finalCaption exists
                     if (updatedCaption != null) {
                         int oldIndex, newIndex;
                         oldIndex = items.indexOf(finalCaption);
@@ -115,7 +112,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                         items.remove(oldIndex);
                         updatedCaption.assignUser(captionInList.retrieveUser());
                         newIndex = insertCaption(updatedCaption);
-                        // Check to see if the caption has moved, and if it has then animate its change
+                        // Check to see if the caption has moved or changed, and if it has
+                        // then animate its change
                         if (oldIndex != newIndex) {
                             notifyItemMoved(oldIndex, newIndex);
                             notifyItemChanged(newIndex);
@@ -131,12 +129,13 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 }
             };
 
-            //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
+            //Configures resource manager to call the upvote listener whenever the caption is modified
             manager.retrieveSingleWithUpdates(String.format(GAME_CAPTION_PATH,
                     finalCaption.getGameId(), finalCaption.getId()), upvoteListener);
+            resourceManagerMap.put(finalCaption.getId(), manager);
         }
 
-        // Get information about the captioner to display it
+        // Get information about the captioner if it is not already present
         if (finalCaption.retrieveUser() == null) {
             String userPath = FirebaseResourceManager.getUserPath(finalCaption.getUserId());
             FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
