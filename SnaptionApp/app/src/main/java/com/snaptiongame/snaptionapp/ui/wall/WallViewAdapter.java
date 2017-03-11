@@ -121,7 +121,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         } else {
             setUpvoteView(holder, game, 0, false);
         }
-        System.out.println("adding val at " + position + " to array");
         itemNumToHolder.put(position, holder);
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
@@ -242,7 +241,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     @Override
     public void onViewRecycled(WallViewHolder vh) {
         int position = vh.getAdapterPosition();
-        System.out.println("Removing from " + position);
         itemNumToHolder.remove(position);
     }
 
@@ -304,7 +302,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
-        System.out.println("Calling gameChanged");
         Game newGame = items.get(changedIndex);
         newGame.setVotes(newVotes);
         items.set(changedIndex, newGame);
@@ -314,7 +311,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             if (newVotes == null) {
                 setUpvoteView(holder, newGame, 0, false);
             } else {
-                System.out.println("contains key?: " + newVotes.containsKey(FirebaseResourceManager.getUserId()));
                 setUpvoteView(holder, newGame, newVotes.size(), newVotes.containsKey(FirebaseResourceManager.getUserId()));
             }
         }

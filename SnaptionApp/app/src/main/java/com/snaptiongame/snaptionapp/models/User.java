@@ -157,6 +157,11 @@ public class User implements Person, Comparable<User> {
         this.imagePath = imagePath;
     }
 
+    public void setLowercaseDisplayName(String name) {
+        // NoOp, lowercase display name is based on the normal display name. At least we don't
+        // get errors anymore
+    }
+
     public int retrieveCaptionCount() {
         int captionCount = 0;
         if (captions != null) {

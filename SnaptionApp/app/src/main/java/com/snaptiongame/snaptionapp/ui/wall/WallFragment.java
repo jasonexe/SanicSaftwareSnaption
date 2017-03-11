@@ -56,7 +56,6 @@ public class WallFragment extends Fragment {
         return new ResourceListener<Map<String, Integer>>() {
             @Override
             public void onData(Map<String, Integer> data) {
-                System.out.println("Game was changed");
                 wallAdapter.gameChanged(gameNum, data);
             }
 
@@ -126,7 +125,6 @@ public class WallFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
-        System.out.println("Clearing game vote listeners");
         gameVoteListeners = new ArrayList<>();
 
         Bundle args = getArguments();
