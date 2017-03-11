@@ -331,7 +331,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName(Game game) {
+    private void setupPickerName(final Game game) {
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
@@ -339,6 +339,12 @@ public class GameActivity extends HomeAppCompatActivity {
                 if (user != null) {
                     pickerName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
+                    pickerPhoto.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPicker());
+                        }
+                    });
                 }
             }
 
