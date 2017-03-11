@@ -35,7 +35,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-    // Holds the firebaseresourcemanagers to prevent them from having to be re-created and prevents memory leaks
+    // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     // BEGIN PRIVATE CLASSES //
@@ -199,6 +199,15 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         if (!items.contains(newCaption)) {
             items.add(newCaption);
             this.notifyItemInserted(items.size() - 1);
+        }
+    }
+
+    /**
+     * Removes the listeners from all of the FirebaseResourceManagers.
+     */
+    public void removeFirebaseListeners() {
+        for (FirebaseResourceManager frm : resourceManagerMap.values()) {
+            frm.removeListener();
         }
     }
 

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,7 +94,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         @Override
         public void onClick(View upvote) {
-            System.out.println("Upvote button clicked " + hasUpvoted);
             // Check if user is logged in before letting them upvote. If not logged in, display
             // login dialog.
             if (FirebaseResourceManager.getUserId() == null) {
@@ -109,7 +107,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
-        System.out.println("Bind view holder called");
         Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
@@ -335,7 +332,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
             @Override
-            public void onComplete() {}
+            public void onComplete() {
+            }
 
             @Override
             public void onError(String errorMessage) {

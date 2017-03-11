@@ -271,6 +271,7 @@ public class Game implements Serializable {
     /**
      * Returns the top caption. If the game is open, the top caption should be the caption with the
      * most votes. If the game is closed, the top caption should be the winning caption.
+     * Will set the winner value if it is not already set and the game is closed.
      *
      * @return The top caption
      */
@@ -278,14 +279,22 @@ public class Game implements Serializable {
         Caption topCaption = null;
         // If no captions are made, return null
         if (captions != null && captions.size() > 0) {
-            if (isOpen) {
+            // Checks whether the game is over and whether a winner is set
+            if (Calendar.getInstance().getTimeInMillis() < endDate
+                    || winner == null || winner.length() == 0) {
                 // Gets the min because captions are in reverse order
                 topCaption = Collections.min(captions.values());
             }
             else {
                 // Otherwise, return what's in winner
-                return captions.get(getWinner());
+                topCaption = captions.get(winner);
             }
+        }
+        //Sets the winner if it hasn't been already
+        if (Calendar.getInstance().getTimeInMillis() > endDate
+                && (winner == null || winner.length() == 0)
+                && topCaption != null) {
+            winner = topCaption.getId();
         }
         return topCaption;
     }

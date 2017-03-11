@@ -193,6 +193,7 @@ public class GameTest {
         assertEquals(caption1, game.getTopCaption());
 
         //test different amount of upvotes
+        Game game1 = new Game("me", "you", "images/", players, categories, true, end, start, "G");
         Map<String, Integer> votes1 = new HashMap<>();
         Map<String, Integer> votes2 = new HashMap<>();
         votes1.put("1", 1);
@@ -200,13 +201,17 @@ public class GameTest {
         votes2.put("1", 1);
         caption2.votes = votes1;
         caption1.votes = votes2;
-        assertEquals(caption2, game.getTopCaption());
+        game1.addCaption(caption1.getId(), caption1);
+        game1.addCaption(caption2.getId(), caption2);
+        assertEquals(caption2, game1.getTopCaption());
 
         //test winner selected
+        Game game2 = new Game("me", "you", "images/", players, categories, true, Long.MAX_VALUE,
+                start, "G");
         caption1.votes = votes1;
-        game.closeGame();
-        game.setWinner(caption1.getId());
-        assertEquals(caption1, game.getTopCaption());
+        game2.addCaption(caption1.getId(), caption1);
+        game2.addCaption(caption2.getId(), caption2);
+        assertEquals(caption1, game2.getTopCaption());
     }
 
 }

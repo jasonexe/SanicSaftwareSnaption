@@ -68,6 +68,7 @@ public class WallFragment extends Fragment {
     }
 
     private GameType gameType;
+
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
         @Override
         public void onData(List<Game> games) {
