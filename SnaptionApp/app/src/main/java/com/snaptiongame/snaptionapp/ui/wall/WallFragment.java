@@ -105,6 +105,7 @@ public class WallFragment extends Fragment {
             new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
+            clearListeners();
             wallAdapter.clearItems();
             resourceManager = new FirebaseGameResourceManager(10, 10, listener, gameType);
             loadMoreGames();
@@ -184,5 +185,6 @@ public class WallFragment extends Fragment {
         for(FirebaseResourceManager frm : gameVoteListeners) {
             frm.removeListener();
         }
+        gameVoteListeners.clear();
     }
 }
