@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
@@ -16,10 +17,10 @@ import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
  */
 public class ProfileActivity extends HomeAppCompatActivity {
 
-    private static String USER_ID_KEY = "userId";
+    public static String USER_ID_KEY = "userId";
 
     public interface ProfileActivityCreator {
-        public void create(String userId);
+        void create(String userId);
     }
 
     public static ProfileActivityCreator getProfileActivityCreator(final Context context) {
@@ -46,8 +47,5 @@ public class ProfileActivity extends HomeAppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.profile_fragment, fragment)
                 .commit();
-
-
-
     }
 }

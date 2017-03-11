@@ -1,11 +1,8 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
-import android.app.Activity;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -20,6 +17,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
+import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
@@ -37,7 +35,7 @@ import butterknife.ButterKnife;
  *
  * @author Hristo Stoytchev
  */
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends HomeAppCompatActivity {
     private List<User> users = new ArrayList<User>();
     private FriendsListAdapter userListAdapter;
     private FriendsViewModel viewModel;

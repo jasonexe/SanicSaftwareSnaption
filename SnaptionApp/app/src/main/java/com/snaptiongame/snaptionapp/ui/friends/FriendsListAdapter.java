@@ -1,19 +1,13 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
-import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
-import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 
 import java.util.List;
 
