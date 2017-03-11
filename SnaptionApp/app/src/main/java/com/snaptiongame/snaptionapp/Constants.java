@@ -58,6 +58,8 @@ public class Constants {
     public static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes/";
     // Complete path to a specific user that voted a game
     public static final String GAME_UPVOTE_PATH = "games/%s/votes/%s";
+    // Path to all upvotes that the game has
+    public static final String GAME_UPVOTES_PATH = "games/%s/votes/";
     // Complete path to a specific private game a user has created
     public static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
     // Path to the user's notification ID

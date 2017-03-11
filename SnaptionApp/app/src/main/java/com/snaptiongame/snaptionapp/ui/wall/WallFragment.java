@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -28,19 +29,19 @@ import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+
+import static android.R.attr.data;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
  */
 
 public class WallFragment extends Fragment {
-    public static final String PRIVATE_GAME_FRAG = "private_game_fragment";
-    public static final String PUBLIC_GAME_FRAG = "public_game_fragment";
-    public static final String MIXED_GAME_FRAG = "mixed_game_fragment";
     private static final String GAME_TYPE_EXCEPTION_MSG = "Unset game type. Make sure to call " +
             "newInstance rather than the constructor directly";
     private static final String GAME_TYPE = "game_type";
@@ -49,8 +50,21 @@ public class WallFragment extends Fragment {
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
-    private LoginDialog loginDialog;
-    private LoginManager loginManager;
+    private List<FirebaseResourceManager> gameVoteListeners;
+
+    private ResourceListener<Map<String, Integer>> getGameListener(final int gameNum) {
+        return new ResourceListener<Map<String, Integer>>() {
+            @Override
+            public void onData(Map<String, Integer> data) {
+                wallAdapter.gameChanged(gameNum, data);
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        };
+    }
 
     private GameType gameType;
     private ResourceListener<List<Game>> listener = new ResourceListener<List<Game>>() {
@@ -58,6 +72,14 @@ public class WallFragment extends Fragment {
         public void onData(List<Game> games) {
             if(games == null) {
                 Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
+            } else {
+                for (int gameNum = 0; gameNum < games.size(); gameNum += 1) {
+                    Game curGame = games.get(gameNum);
+                    ResourceListener<Map<String, Integer>> gameListener = getGameListener(gameVoteListeners.size());
+                    FirebaseResourceManager manager = new FirebaseResourceManager();
+                    manager.retrieveMapWithUpdates(String.format(Constants.GAME_UPVOTES_PATH, curGame.getId()), gameListener);
+                    gameVoteListeners.add(manager);
+                }
             }
             wallAdapter.addItems(games);
             isLoading = false;
@@ -102,6 +124,8 @@ public class WallFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
+        System.out.println("Clearing game vote listeners");
+        gameVoteListeners = new ArrayList<>();
 
         Bundle args = getArguments();
         if (args != null && args.getSerializable(GAME_TYPE) != null) {
@@ -152,9 +176,13 @@ public class WallFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        for (FirebaseResourceManager frm : wallAdapter.resourceManagerMap.values()) {
+        clearListeners();
+        unbinder.unbind();
+    }
+
+    private void clearListeners() {
+        for(FirebaseResourceManager frm : gameVoteListeners) {
             frm.removeListener();
         }
-        unbinder.unbind();
     }
 }

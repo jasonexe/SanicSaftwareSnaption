@@ -45,13 +45,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     private List<Game> items;
     private MainSnaptionActivity activity;
-    // Holds the firebaseresourcemanagers to prevent them from having to be re-created and prevents memory leaks
-    protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
         this.items = items;
         this.activity = activity;
-        resourceManagerMap = new HashMap<>(items.size());
     }
 
     @Override
@@ -101,24 +98,28 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 activity.loginDialog.show();
             }
             else {
-                handleClickUpvote((ImageView) upvote, game, hasUpvoted);
+                handleClickUpvote(game, hasUpvoted);
             }
         }
     }
 
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
+        System.out.println("Bind view holder called");
         Game game = items.get(position);
 
-        // Adds the firebaseresourcemanager to the map if it is not already in it
-        if (!resourceManagerMap.containsKey(game.getId())) {
-            resourceManagerMap.put(game.getId(), new FirebaseResourceManager());
-        }
         // display the Picker of the game, the one who created it
         displayUser(holder.pickerName, holder.pickerPhoto, String.format(Constants.USER_PATH, game.getPicker()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
+
+        Map<String, Integer> upvoters = game.getVotes();
+        if(upvoters != null) {
+            setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseResourceManager.getUserId()));
+        } else {
+            setUpvoteView(holder, game, 0, false);
+        }
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
         holder.photo.setOnClickListener(new PhotoClickListener(game));
@@ -161,36 +162,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 }
             }
         });
-
-        // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
-        // and modifies the click handler
-        ResourceListener upvoteListener = new ResourceListener<Game>() {
-            @Override
-            public void onData(Game updatedGame) {
-                // Check to make sure caption exists
-                if (updatedGame != null) {
-                    // Set the display to reflect the status of the caption
-                    if (updatedGame.getVotes() != null) {
-                        Map votes = updatedGame.getVotes();
-                        setUpvoteView(holder, updatedGame, votes.size(),
-                                votes.containsKey(FirebaseResourceManager.getUserId()));
-                    }
-                    else {
-                        setUpvoteView(holder, updatedGame, 0, false);
-                    }
-                }
-            }
-
-            @Override
-            public Class getDataType() {
-                return Game.class;
-            }
-        };
-
-        //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
-        resourceManagerMap.get(game.getId()).retrieveSingleWithUpdates(String.format(Constants.GAME_PATH,
-                game.getId()), upvoteListener);
-
     }
 
     /**
@@ -322,15 +293,21 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         this.notifyItemRangeChanged(startPos, newGames.size());
     }
 
+    public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
+        Game newCount = items.get(changedIndex);
+        newCount.setVotes(newVotes);
+        items.set(changedIndex, newCount);
+        notifyItemChanged(changedIndex);
+    }
+
     /**
      * Called when an upvote is clicked. Adds/removes the upvote to/from firebase depending on
      * whether hasUpvoted is true or false.
      *
-     * @param upvoteIcon The view being clicked
      * @param game The game object being affected
      * @param hasUpvoted Whether the user has previously upvoted this game
      */
-    private void handleClickUpvote(final ImageView upvoteIcon, Game game,
+    private void handleClickUpvote(Game game,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
