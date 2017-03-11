@@ -182,6 +182,11 @@ public class MainSnaptionActivity extends AppCompatActivity {
     private void updateFragmentViews(boolean fabVisible, boolean bottomNavVisible) {
         // hide or show the fab
         fab.setVisibility(fabVisible ? View.VISIBLE : View.GONE);
+        if(fabVisible) {
+            // I don't know why hide needs to be called first, but it doesn't work otherwise
+            fab.hide();
+            fab.show();
+        }
         // hide or show the bottom navigation view
         bottomNavigationView.setVisibility(bottomNavVisible ? View.VISIBLE : View.GONE);
     }
