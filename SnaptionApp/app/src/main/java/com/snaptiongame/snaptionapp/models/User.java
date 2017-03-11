@@ -173,6 +173,14 @@ public class User implements Person, Comparable<User> {
         return gameCount;
     }
 
+    public int retrieveFriendsCount() {
+        int friendCount = 0;
+        if(friends != null) {
+            friendCount = friends.size();
+        }
+        return friendCount;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == null) {

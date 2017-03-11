@@ -69,7 +69,7 @@
     <string name="my_feed">My Feed</string>
     <string name="discover">Discover</string>
     <string name="popular">Popular</string>
-    <string name="total_caption_upvote_text">Total Upvotes Received:</string>
+    <string name="total_caption_upvote_text">Upvotes:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

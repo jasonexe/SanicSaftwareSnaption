@@ -143,11 +143,7 @@ public class ProfileFragment extends Fragment {
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
         gamesCreated.setText(String.valueOf(user.retrieveCreatedGameCount()));
         captionsCreated.setText(String.valueOf(user.retrieveCaptionCount()));
-        if(user.getFriends() != null) {
-            friendsMade.setText(String.valueOf(user.getFriends().size()));
-        } else {
-            friendsMade.setText(String.valueOf(0));
-        }
+        friendsMade.setText(String.valueOf(user.retrieveFriendsCount()));
 
         int numCapUpvotes = 0;
         if(user.getCaptions() != null) {
