@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorPrimary"
         app:layout_anchor="@id/app_bar"/>
     <FrameLayout
         android:id="@+id/image_progress_bar"
@@ -48,9 +48,10 @@
             android:id="@+id/picker_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
+            android:background="@color/colorPrimary"
             android:orientation="horizontal"
-            android:padding="5dp">
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp">
 
             <android.support.v7.widget.CardView
                 android:id="@+id/picker_photo_view"
@@ -88,7 +89,6 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_empty_flag" />
 
     </RelativeLayout>
@@ -98,8 +98,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/colorPrimary"
-        android:padding="5dp" >
+        android:background="@color/colorPrimaryDark"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp" >
 
         <TextView
             android:layout_width="wrap_content"
@@ -119,11 +120,10 @@
             android:textColor="@android:color/white"/>
 
         <ImageView
-            android:src="@drawable/ic_filled_chat_bubble"
+            android:src="@drawable/ic_chat_bubble"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_alignParentEnd="true"
             android:gravity="center_vertical"
             android:id="@+id/captions_icon"/>
@@ -185,7 +185,7 @@
         android:layout_gravity="bottom"
         android:orientation="vertical"
         android:id="@+id/caption_items"
-        android:background="#80000000">
+        android:background="@color/colorPrimary">
 
         <include layout="@layout/card_input_layout"
             android:id="@+id/card_input"
