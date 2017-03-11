@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.util.SparseArrayCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,11 +45,13 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.v
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     private List<Game> items;
+    private Map<Integer, WallViewHolder> itemNumToHolder;
     private MainSnaptionActivity activity;
 
     public WallViewAdapter(List<Game> items, MainSnaptionActivity activity) {
         this.items = items;
         this.activity = activity;
+        itemNumToHolder = new HashMap<>();
     }
 
     @Override
@@ -92,6 +95,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         @Override
         public void onClick(View upvote) {
+            System.out.println("Upvote button clicked " + hasUpvoted);
             // Check if user is logged in before letting them upvote. If not logged in, display
             // login dialog.
             if (FirebaseResourceManager.getUserId() == null) {
@@ -120,6 +124,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         } else {
             setUpvoteView(holder, game, 0, false);
         }
+        System.out.println("adding val at " + position + " to array");
+        itemNumToHolder.put(position, holder);
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
         holder.photo.setOnClickListener(new PhotoClickListener(game));
@@ -227,13 +233,20 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // If open and public, normal
             holder.captionText.setTypeface(Typeface.create(holder.captionText.getTypeface(),
                     Typeface.NORMAL), Typeface.NORMAL);
-        } else if (!game.getIsOpen()){
+        } else if (!game.getIsOpen()) {
             // If just closed, bold
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.BOLD);
         } else {
             // If private, italicize
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.ITALIC);
         }
+    }
+
+    @Override
+    public void onViewRecycled(WallViewHolder vh) {
+        int position = vh.getAdapterPosition();
+        System.out.println("Removing from " + position);
+        itemNumToHolder.remove(position);
     }
 
     @Override
@@ -294,10 +307,20 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
-        Game newCount = items.get(changedIndex);
-        newCount.setVotes(newVotes);
-        items.set(changedIndex, newCount);
-        notifyItemChanged(changedIndex);
+        System.out.println("Calling gameChanged");
+        Game newGame = items.get(changedIndex);
+        newGame.setVotes(newVotes);
+        items.set(changedIndex, newGame);
+        WallViewHolder holder = itemNumToHolder.get(changedIndex);
+
+        if(holder != null) {
+            if (newVotes == null) {
+                setUpvoteView(holder, newGame, 0, false);
+            } else {
+                System.out.println("contains key?: " + newVotes.containsKey(FirebaseResourceManager.getUserId()));
+                setUpvoteView(holder, newGame, newVotes.size(), newVotes.containsKey(FirebaseResourceManager.getUserId()));
+            }
+        }
     }
 
     /**

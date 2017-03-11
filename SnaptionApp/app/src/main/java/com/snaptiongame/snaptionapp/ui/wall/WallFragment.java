@@ -56,6 +56,7 @@ public class WallFragment extends Fragment {
         return new ResourceListener<Map<String, Integer>>() {
             @Override
             public void onData(Map<String, Integer> data) {
+                System.out.println("Game was changed");
                 wallAdapter.gameChanged(gameNum, data);
             }
 
@@ -152,7 +153,7 @@ public class WallFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(!isLoading && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
+                if(!isLoading && wallListView != null && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
                     loadMoreGames();
                 }
             }
