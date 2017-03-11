@@ -12,7 +12,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -157,7 +156,7 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     break;
                 case R.id.discover_item:
                     fadeAnim = true;
-                    newFragment =  WallFragment.newInstance(GameType.RANDOM_PUBLIC_GAMES);
+                    newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:

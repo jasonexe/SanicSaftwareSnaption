@@ -12,7 +12,6 @@ import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Game;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
@@ -60,14 +59,54 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         // If we're getting the games they joined, just call private games
         if (gameType == GameType.USER_JOINED_GAMES) {
             retrieveUserPrivateGames();
-        } else {
+        } else if (gameType == GameType.TOP_PUBLIC_GAMES){
             // Otherwise, we're getting either random or top public games, so check which.
-            retrievePublicGamesByPriority(gameType == GameType.RANDOM_PUBLIC_GAMES);
+            retrievePublicGamesByPriority();
+        } else if (gameType == GameType.UNPOPULAR_PUBLIC_GAMES) {
+            retrieveBottomPublicGames();
         }
-
     }
 
-    private void retrievePublicGamesByPriority(final boolean shuffle) {
+    private void retrieveBottomPublicGames() {
+        Query query = database.getReference(GAMES_PATH).orderByPriority();
+        if(retrievedOnce) {
+            query = query.limitToLast(publicLimit).endAt((double) lastRetrievedPriority, lastRetrievedKey);
+        } else {
+            query = query.limitToLast(publicLimit).endAt(-1.);
+        }
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Game> data = new ArrayList<>();
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                boolean gotFirst = false;
+                if (snapshots.iterator().hasNext()) {
+                    for (DataSnapshot snapshot : snapshots) {
+                        if(!gotFirst) {
+                            lastRetrievedPriority = snapshot.getPriority();
+                            lastRetrievedKey = snapshot.getKey();
+                            gotFirst = true;
+                        }
+                        data.add((Game) snapshot.getValue(listener.getDataType()));
+                    }
+                    if (!retrievedOnce) {
+                        retrievedOnce = true;
+                    }
+                }
+                if(data.size() > 0) {
+                    data.remove(data.size() - 1);
+                }
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void retrievePublicGamesByPriority() {
         Query query = database.getReference(GAMES_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
@@ -98,9 +137,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     else {
                         retrievedOnce = true;
                     }
-                }
-                if(shuffle) {
-                    Collections.shuffle(data);
                 }
                 listener.onData(data);
             }

@@ -5,7 +5,7 @@ package com.snaptiongame.snaptionapp.servercalls;
  */
 
 public enum GameType {
-    RANDOM_PUBLIC_GAMES,
+    UNPOPULAR_PUBLIC_GAMES,
     TOP_PUBLIC_GAMES,
     USER_JOINED_GAMES
 }
