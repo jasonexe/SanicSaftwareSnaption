@@ -33,8 +33,8 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public FloatingActionButton createFromExisting;
     @BindView(R.id.upvote_icon)
     public ImageView upvoteIcon;
-    @BindView(R.id.number_upvotes_text)
-    public TextView numberUpvotesText;
+    @BindView(R.id.upvote_count)
+    public TextView upvoteCountText;
 
 
     public WallViewHolder(View itemView) {
