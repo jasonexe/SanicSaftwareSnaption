@@ -70,6 +70,8 @@ public class Constants {
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the user's lowercase display name
     public static final String USER_NAME = "lowercaseDisplayName";
+    // Path to the game's creation date
+    public static final String CREATION_DATE = "creationDate";
     // Path to the user's email
     public static final String EMAIL = "email";
     // END FIREBASE VARIABLES //

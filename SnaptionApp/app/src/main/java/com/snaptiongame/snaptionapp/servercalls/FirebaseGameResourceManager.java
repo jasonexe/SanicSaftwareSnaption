@@ -12,8 +12,11 @@ import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static android.R.attr.data;
+import static com.snaptiongame.snaptionapp.Constants.CREATION_DATE;
 import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 
@@ -26,7 +29,6 @@ import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 public class FirebaseGameResourceManager implements GameResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private ResourceListener<List<Game>> listener;
-    private List<Game> mixedGames;
     private List<Game> privateGames;
     private int publicLimit;
     private int privateLimit;
@@ -37,11 +39,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private String userId;
 
     private GameType gameType;
-
-    private ResourceListener<List<Game>> privateGameGetter;
-    private FirebaseGameResourceManager privateGameManager;
-    private FirebaseGameResourceManager publicGameManager;
-
 
     /**
      * Constructor for the FirebaseGameResourceManager. Use this to get games from firebase.
@@ -59,61 +56,71 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.listener = listener;
         this.gameType = gameType;
         userId = FirebaseResourceManager.getUserId();
-        mixedGames = new ArrayList<>();
-
-        if(gameType == GameType.MIXED_GAMES) {
-            initManagerAndGetters();
-        }
     }
-
-    private void initManagerAndGetters() {
-        privateGameGetter = new ResourceListener<List<Game>>() {
-            @Override
-            public void onData(List<Game> data) {
-                mixedGames.addAll(data);
-                // Since the limits will normally be relatively small, we can shuffle them
-                // to give a little bit of a different order every time
-                // comment out for now to demonstrate ordering in app
-//                Collections.shuffle(mixedGames);
-                listener.onData(new ArrayList<>(mixedGames));
-            }
-
-            @Override
-            public Class getDataType() {
-                return Game.class;
-            }
-        };
-        privateGameManager = new FirebaseGameResourceManager(0,
-                privateLimit, privateGameGetter, GameType.PRIVATE_GAMES);
-
-        ResourceListener<List<Game>> publicGameGetter = new ResourceListener<List<Game>>() {
-            @Override
-            public void onData(List<Game> data) {
-                mixedGames.addAll(data);
-                privateGameManager.retrieveGames();
-            }
-
-            @Override
-            public Class getDataType() {
-                return Game.class;
-            }
-        };
-        publicGameManager = new FirebaseGameResourceManager(publicLimit,
-                0, publicGameGetter, GameType.PUBLIC_GAMES);
-    }
-
-
 
     public void retrieveGames() {
-        mixedGames.clear();
-        if (gameType == GameType.MIXED_GAMES) {
-            publicGameManager.retrievePublicGamesByPriority();
-        } else if (gameType == GameType.PUBLIC_GAMES) {
-            retrievePublicGamesByPriority();
-        } else if (gameType == GameType.PRIVATE_GAMES) {
+        // If we're getting the games they joined, just call private games
+        if (gameType == GameType.USER_JOINED_GAMES) {
             retrieveUserPrivateGames();
+        } else if (gameType == GameType.TOP_PUBLIC_GAMES){
+            // Otherwise, we're getting either random or top public games, so check which.
+            retrievePublicGamesByPriority();
+        } else if (gameType == GameType.UNPOPULAR_PUBLIC_GAMES) {
+            retrieveBottomPublicGames();
         }
+    }
 
+    private void retrieveBottomPublicGames() {
+        Query query = database.getReference(GAMES_PATH).orderByChild(CREATION_DATE);
+        if(retrievedOnce) {
+            // Technically last retrieved priority should be last retrieved creation date, but don't
+            // Want to do extra variables
+            query = query.limitToLast(publicLimit).endAt((long) lastRetrievedPriority, lastRetrievedKey);
+        } else {
+            query = query.limitToLast(publicLimit);
+        }
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean continued = false;
+                List<Game> data = new ArrayList<>();
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                if (snapshots.iterator().hasNext()) {
+                    boolean gotFirst = false;
+                    for (DataSnapshot snapshot : snapshots) {
+                        if((double) snapshot.getPriority() > 0) {
+                            // If we had to do a continue, don't remove the last thing from data
+                            continued = true;
+                            continue;
+                        }
+                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
+                        if(!gotFirst) {
+                            System.out.println("Setting last priority to " + curGame.getCreationDate());
+                            lastRetrievedPriority = curGame.getCreationDate();
+                            lastRetrievedKey = snapshot.getKey();
+                            gotFirst = true;
+                        }
+                        data.add(curGame);
+                    }
+                    if (!retrievedOnce) {
+                        retrievedOnce = true;
+                    }
+                }
+                if(data.size() > 0 && !continued) {
+                    data.remove(data.size() - 1);
+                }
+                // Since it still counts forwards, need to reverse it. IE if the list is 1 2 3 4 5,
+                // and we limitToLast 2, we'll get back 4 5, but want it in 5 4 order. But still
+                // endAt 4 for the next query, which is why we have gotFirst above.
+                Collections.reverse(data);
+                listener.onData(data);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void retrievePublicGamesByPriority() {
@@ -126,7 +133,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             }
         }
         else {
-            query = query.limitToFirst(publicLimit);
+            query = query.limitToFirst(publicLimit).endAt(0);
         }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
