@@ -96,11 +96,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             Fragment newFragment = null;
             switch (selectedItemId) {
                 case R.id.wall_item:
-                    MenuItem bottomNavMenuItem;
-                    if (FirebaseResourceManager.getUserId() != null) {
-                        bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
-                    }
-                    else {
+                    MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
+                    if (bottomNavMenuItem == null) {
                         bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
                     }
                     currentNavDrawerMenuId = selectedItemId;
@@ -185,6 +182,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    currentUser = null;
                                     loginManager.logOut();
                                     item.setTitle(getResources().getString(R.string.login));
                                 }
@@ -306,7 +304,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             myFeedItem.setIcon(R.drawable.ic_person_pin_color_24dp);
         }
         //if on the wall, update the menu item
-        if (currentNavDrawerMenuId == R.id.wall_item && currentBottomNavMenuId == 0) {
+        if (currentNavDrawerMenuId == R.id.wall_item) {
             currentNavDrawerMenuId = -1;
             mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         }
@@ -326,7 +324,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         //remove the my feed menu item
         bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
         //if on the wall, update the menu item
-        if (currentNavDrawerMenuId == R.id.wall_item && currentBottomNavMenuId == 0) {
+        if (currentNavDrawerMenuId == R.id.wall_item) {
             currentNavDrawerMenuId = -1;
             mNavListener.onNavigationItemSelected(navigationView.getMenu().findItem(R.id.wall_item));
         }
