@@ -2,8 +2,6 @@ package com.snaptiongame.snaptionapp.ui.profile;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.Constants;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -36,9 +36,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -48,7 +45,6 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.google.android.gms.internal.zzams.d;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -77,6 +73,10 @@ public class ProfileFragment extends Fragment {
     protected ImageView nameChangeCancel;
     @BindView(R.id.edit_photo_overlay)
     protected ImageView editPhotoOverlay;
+    @BindView(R.id.friends_made)
+    protected TextView friendsMade;
+    @BindView(R.id.total_caption_upvotes)
+    protected TextView totalCapUpvotes;
 
     private Unbinder unbinder;
     private ProfileGamesAdapter gameAdapter;
@@ -101,12 +101,14 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        String userId = getArguments().getString("userId");
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
         unbinder = ButterKnife.bind(this, view);
 
         // Set clickability to false - for some reason doesn't work in XML (maybe b/c butterknife?)
         profile.setClickable(false);
+
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         gameListView.setLayoutManager(gameViewManager);
@@ -114,20 +116,12 @@ public class ProfileFragment extends Fragment {
         gameListView.setAdapter(gameAdapter);
 
         //if the user is logged in
-        if (FirebaseResourceManager.getUserPath() != null) {
+        if (userId != null) {
             //retrieve information from User table
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, userId), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
-                    userName.setText(user.getDisplayName());
-                    FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
-                    gamesCreated.setText(Integer.toString(user.retrieveCreatedGameCount()));
-                    captionsCreated.setText(Integer.toString(user.retrieveCaptionCount()));
-                    //get the games based on list of games in user
-                    thisUser = user;
-                    getUserGames(user);
-                    getUserCaptions(user, view);
+                    setupUserData(user, view);
                 }
 
                 @Override
@@ -137,6 +131,28 @@ public class ProfileFragment extends Fragment {
             });
         }
         return view;
+    }
+
+    private void setupUserData(User user, View view) {
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
+        userName.setText(user.getDisplayName());
+        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
+        gamesCreated.setText(String.valueOf(user.retrieveCreatedGameCount()));
+        captionsCreated.setText(String.valueOf(user.retrieveCaptionCount()));
+        friendsMade.setText(String.valueOf(user.retrieveFriendsCount()));
+
+        int numCapUpvotes = 0;
+        if(user.getCaptions() != null) {
+            for(Caption caption : user.getCaptions().values()) {
+                numCapUpvotes += caption.retrieveNumVotes();
+            }
+        }
+        totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
+
+        //get the games based on list of games in user
+        thisUser = user;
+        getUserGames(user);
+        getUserCaptions(user, view);
     }
 
     private void getUserCaptions(User user, View view) {
@@ -175,6 +191,16 @@ public class ProfileFragment extends Fragment {
             return true;
         }
     };
+
+    @OnClick(R.id.friends_container)
+    public void goToFriendsList() {
+        // If the fragment is part of the MainSnaptionActivity, then switch
+        // Otherwise, don't do anything.
+        if(getActivity() instanceof MainSnaptionActivity) {
+            MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
+            activity.switchFragments(R.id.friends_item);
+        }
+    }
 
     @OnClick(R.id.stop_name_change)
     public void cancelChanges() {
@@ -236,7 +262,7 @@ public class ProfileFragment extends Fragment {
         // Firebase stuff here
         String newText = profileEditName.getText().toString();
         userName.setText(newText);
-        FirebaseUploader.updateDisplayName(newText, FirebaseResourceManager.getUserId());
+        FirebaseUploader.updateDisplayName(newText, thisUser.getId());
     }
 
     // Hides the camera overlay and disables clicking on the profile picture
