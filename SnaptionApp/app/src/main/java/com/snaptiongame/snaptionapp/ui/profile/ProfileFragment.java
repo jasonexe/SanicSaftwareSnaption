@@ -2,28 +2,19 @@ package com.snaptiongame.snaptionapp.ui.profile;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -33,8 +24,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.Constants;
+import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -45,11 +36,6 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
-import org.w3c.dom.Text;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -59,7 +45,6 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.google.android.gms.internal.zzams.d;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -213,7 +198,7 @@ public class ProfileFragment extends Fragment {
         // Otherwise, don't do anything.
         if(getActivity() instanceof MainSnaptionActivity) {
             MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
-            activity.switchFragments(R.id.friends_item, null);
+            activity.switchFragments(R.id.friends_item);
         }
     }
 

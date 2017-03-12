@@ -19,14 +19,11 @@ import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.GameResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.GameType;
-import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
-import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +32,6 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-
-import static android.R.attr.data;
 
 /**
  * Created by brittanyberlanga on 1/12/17.
