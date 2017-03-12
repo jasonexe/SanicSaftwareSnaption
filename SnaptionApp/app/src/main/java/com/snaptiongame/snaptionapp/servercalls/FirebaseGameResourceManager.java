@@ -14,6 +14,8 @@ import com.snaptiongame.snaptionapp.models.Game;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.data;
+import static com.snaptiongame.snaptionapp.Constants.CREATION_DATE;
 import static com.snaptiongame.snaptionapp.Constants.GAMES_PATH;
 import static com.snaptiongame.snaptionapp.Constants.USER_PRIVATE_GAMES;
 
@@ -68,32 +70,37 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     private void retrieveBottomPublicGames() {
-        Query query = database.getReference(GAMES_PATH).orderByPriority();
+        Query query = database.getReference(GAMES_PATH).orderByChild(CREATION_DATE);
         if(retrievedOnce) {
-            query = query.limitToLast(publicLimit).endAt((double) lastRetrievedPriority, lastRetrievedKey);
+            // Technically last retrieved priority should be last retrieved creation date, but don't
+            // Want to do extra variables
+            query = query.limitToFirst(publicLimit).startAt((long) lastRetrievedPriority, lastRetrievedKey);
         } else {
-            query = query.limitToLast(publicLimit).endAt(-1.);
+            query = query.limitToFirst(publicLimit);
         }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean continued = false;
                 List<Game> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
-                boolean gotFirst = false;
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
-                        if(!gotFirst) {
-                            lastRetrievedPriority = snapshot.getPriority();
-                            lastRetrievedKey = snapshot.getKey();
-                            gotFirst = true;
+                        if((double) snapshot.getPriority() > 0) {
+                            // If we had to do a continue, don't remove the last thing from data
+                            continued = true;
+                            continue;
                         }
-                        data.add((Game) snapshot.getValue(listener.getDataType()));
+                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
+                        lastRetrievedPriority = curGame.getCreationDate();
+                        lastRetrievedKey = snapshot.getKey();
+                        data.add(curGame);
                     }
                     if (!retrievedOnce) {
                         retrievedOnce = true;
                     }
                 }
-                if(data.size() > 0) {
+                if(data.size() > 0 && !continued) {
                     data.remove(data.size() - 1);
                 }
                 listener.onData(data);
