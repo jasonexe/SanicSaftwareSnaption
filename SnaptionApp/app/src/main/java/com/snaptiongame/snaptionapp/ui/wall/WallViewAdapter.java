@@ -66,18 +66,18 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         Game game = items.get(position);
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, holder.pickerPhoto, String.format(Constants.USER_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         if (game.getTopCaption() != null) {
-            holder.captionerText.setVisibility(TextView.VISIBLE);
+            holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerText, null, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
+            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
             holder.captionText.setText(R.string.caption_filler);
-            holder.captionerText.setVisibility(TextView.GONE);
+            holder.captionerLayout.setVisibility(TextView.GONE);
         }
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
@@ -168,7 +168,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                             FirebaseResourceManager.loadImageIntoView(user.getImagePath(), photo);
                         }
                         else {
-                            username.setText(activity.getResources().getString(R.string.captioner_name, user.getDisplayName()));
+                            username.setText(user.getDisplayName());
                         }
 
                     }

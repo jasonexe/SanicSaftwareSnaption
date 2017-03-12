@@ -25,7 +25,7 @@ public class ProfileGameViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.caption_photo)
     public ImageView captionPhoto;
     @BindView(R.id.captioner_text)
-    public TextView captionerText; */
+    public TextView captionerName; */
 
     public ProfileGameViewHolder(View itemView) {
         super(itemView);
