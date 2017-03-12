@@ -19,7 +19,7 @@
     <string name="category">Tags (Separate by commas)</string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
-    <string name="games_created">Games Made:</string>
+    <string name="games_created">Games:</string>
     <string name="captions_created">Captions:</string>
     <string name="end_date">End date</string>
     <string name="privacy">Privacy</string>
@@ -63,14 +63,13 @@
     <string name="game_invite_notification_text">%s has invited you to a game!</string>
     <string name="game_invite_notification_title">Snaption Game Invitation</string>
     <string name="private_game_error">There was an error getting your private games</string>
+
     <string name="add_friends">+ add friends</string>
     <string name="no_friends_add_invite">You don\'t have any friends to add or invite.</string>
     <string name="null_user">[deleted]</string>
     <string name="my_feed">My Feed</string>
     <string name="discover">Discover</string>
     <string name="popular">Popular</string>
-    <string name="total_caption_upvote_text">Upvotes:</string>
-    <string name="friends_with_colon">Friends:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
