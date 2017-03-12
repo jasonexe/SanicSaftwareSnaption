@@ -283,6 +283,32 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Set up a listener to receive a map of strings at a specified path without a connection
+     * for future data changes
+     *
+     * @param path the path to the list of strings requested from Firebase
+     * @param listener this will be waiting to receive the object requested
+     */
+    public void retrieveStringMapWithUpdates(String path,
+                                                  final ResourceListener<Map<String, Integer>> listener) {
+        removeListener();
+        databaseReference = database.getReference(path);
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<Map<String, Integer>> t = new GenericTypeIndicator<Map<String, Integer>>() {};
+                Map<String, Integer> items = dataSnapshot.getValue(t);
+                listener.onData(items);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onData(null);
+            }
+        });
+    }
+
+    /**
      * Notifies the given ResourceListener of when a single element of the given path is changed
      *
      * @param path The single element path name
