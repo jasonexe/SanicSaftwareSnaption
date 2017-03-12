@@ -1,11 +1,13 @@
 package com.snaptiongame.snaptionapp.models;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by austinrobarts on 1/21/17.
+ * A model class for the User object.
+ *
+ * @author Austin Robarts
  */
-
 public class User implements Person, Comparable<User> {
 
     private String id;
@@ -53,7 +55,7 @@ public class User implements Person, Comparable<User> {
     }
 
     public Map<String, Integer> getFriends() {
-        return friends;
+            return friends;
     }
 
     public Map<String, Integer> getBlockedUsers() {
@@ -156,6 +158,11 @@ public class User implements Person, Comparable<User> {
         this.imagePath = imagePath;
     }
 
+    public void setLowercaseDisplayName(String name) {
+        // NoOp, lowercase display name is based on the normal display name. At least we don't
+        // get errors anymore
+    }
+
     public int retrieveCaptionCount() {
         int captionCount = 0;
         if (captions != null) {
@@ -170,6 +177,14 @@ public class User implements Person, Comparable<User> {
             gameCount = createdGames.size();
         }
         return gameCount;
+    }
+
+    public int retrieveFriendsCount() {
+        int friendCount = 0;
+        if(friends != null) {
+            friendCount = friends.size();
+        }
+        return friendCount;
     }
 
     @Override
