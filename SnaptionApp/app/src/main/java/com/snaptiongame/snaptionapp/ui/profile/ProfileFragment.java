@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Game;
@@ -101,12 +102,14 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        String userId = getArguments().getString("userId");
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
         unbinder = ButterKnife.bind(this, view);
 
         // Set clickability to false - for some reason doesn't work in XML (maybe b/c butterknife?)
         profile.setClickable(false);
+
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         gameListView.setLayoutManager(gameViewManager);
@@ -114,9 +117,9 @@ public class ProfileFragment extends Fragment {
         gameListView.setAdapter(gameAdapter);
 
         //if the user is logged in
-        if (FirebaseResourceManager.getUserPath() != null) {
+        if (userId != null) {
             //retrieve information from User table
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, userId), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
@@ -236,7 +239,7 @@ public class ProfileFragment extends Fragment {
         // Firebase stuff here
         String newText = profileEditName.getText().toString();
         userName.setText(newText);
-        FirebaseUploader.updateDisplayName(newText, FirebaseResourceManager.getUserId());
+        FirebaseUploader.updateDisplayName(newText, thisUser.getId());
     }
 
     // Hides the camera overlay and disables clicking on the profile picture

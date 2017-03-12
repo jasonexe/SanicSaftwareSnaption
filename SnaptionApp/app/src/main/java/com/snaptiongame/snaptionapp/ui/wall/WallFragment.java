@@ -25,6 +25,7 @@ import com.snaptiongame.snaptionapp.servercalls.GameType;
 import com.snaptiongame.snaptionapp.servercalls.LoginManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 
 import java.util.ArrayList;
@@ -141,7 +142,7 @@ public class WallFragment extends Fragment {
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
-        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), (MainSnaptionActivity)getActivity());
+        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), (MainSnaptionActivity)getActivity(), ProfileActivity.getProfileActivityCreator(getContext()));
         wallListView.setAdapter(wallAdapter);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);

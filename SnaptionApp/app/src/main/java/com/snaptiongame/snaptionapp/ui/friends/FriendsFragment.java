@@ -17,6 +17,7 @@ import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +77,7 @@ public class FriendsFragment extends Fragment {
                     if (user != null && user.getFriends() != null) {
                         friendNotice.setVisibility(View.GONE);
                         List<User> users = new ArrayList<>();
-                        friendsListAdapter = new FriendsListAdapter(users);
+                        friendsListAdapter = new FriendsListAdapter(users, ProfileActivity.getProfileActivityCreator(getContext()));
                         friendsListView.setAdapter(friendsListAdapter);
                         loadUsers(user.getFriends());
                     }

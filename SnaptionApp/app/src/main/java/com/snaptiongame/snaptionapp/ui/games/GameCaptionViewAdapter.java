@@ -16,6 +16,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.text.NumberFormat;
 import java.util.Collections;
@@ -35,6 +36,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
+    private ProfileActivity.ProfileActivityCreator profileMaker;
     // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
@@ -81,10 +83,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param items The list of Captions to build the views from
      * @param loginDialog The dialog to display when the user needs to log in
      */
-    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog) {
+    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog,
+                                  ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
+        this.profileMaker = profileMaker;
         resourceManagerMap = new HashMap<>(items.size());
     }
 
@@ -313,12 +317,19 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param captioner The user who made the caption
      * @param holder The view holder containing the caption information
      */
-    private void setCaptionerView(User captioner, CaptionViewHolder holder) {
+    private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
         // Display the captioner's information
         if (captioner != null) {
             holder.captionerName.setText(captioner.getDisplayName());
             FirebaseResourceManager.loadImageIntoView(captioner.getImagePath(),
                     holder.captionerPhoto);
+            //set click listener to go to user's profile
+            holder.captionerPhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    profileMaker.create(captioner.getId());
+                }
+            });
         }
         // Set the default view for a user
         else {
