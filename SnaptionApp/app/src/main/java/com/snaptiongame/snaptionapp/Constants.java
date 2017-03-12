@@ -1,14 +1,19 @@
 package com.snaptiongame.snaptionapp;
 
 /**
- * Constants should never be or need to be concatenated. Ff you want to use a path just use "/%s/", where the %s is the id within that directory, and use String.format to fill in the ids
- * If a constant is a path to a single instance, it should be "_PATH"
- * If a constant is to a list or map, it should be named "S_PATH"
- * If a constant is to a path within a directory, it should be __PATH, nesting as deep as necessary, and depending on rules 2 and 3 to add an S if necessary
- * If a constant falls outside of this category, ask the group or just do whatever makes sense to you, especially if it's something that will only be used in the class you're working on
- * Created by jason_000 on 3/7/2017.
+ * A file containing constants that are going to be used in multiple classes.
+ *
+ * 1. Constants should never be or need to be concatenated. If you want to use a path just use
+ *    "/%s/", where the %s is the id within that directory, and use String.format to fill in the ids
+ * 2. If a constant is a path to a single instance, it should be "<DIRECTORY>_PATH"
+ * 3. If a constant is to a list or map, it should be named "<DIRECTORY>S_PATH"
+ * 4. If a constant is to a path within a directory, it should be <DIRECTORY>_<DIRECTORY>_PATH,
+ *    nesting as deep as necessary, and depending on rules 2 and 3 to add an S if necessary
+ * 5. If a constant falls outside of this category, ask the group or just do whatever makes sense
+ *    to you, especially if it's something that will only be used in the class you're working on
+ *
+ * @author Jason Krein
  */
-
 public class Constants {
     // Message used when creating a game from existing to indicate to the createGame activity
     // That is what is happening
@@ -48,15 +53,19 @@ public class Constants {
     // Complete path to a specific user that voted
     public static final String USER_CAPTIONS_UPVOTE_PATH = "users/%s/captions/%s/votes/%s";
     // Complete path to a specific user that voted in a game's caption
-    public static final String GAME_CAPTIONS_UPVOTER_PATH = "games/%s/captions/%s/votes/%s";
+    public static final String GAME_CAPTIONS_UPVOTE_PATH = "games/%s/captions/%s/votes/%s";
     // Path to all the upvotes in a game's caption
     public static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes/";
+    // Complete path to a specific user that voted a game
+    public static final String GAME_UPVOTE_PATH = "games/%s/votes/%s";
+    // Path to all upvotes that the game has
+    public static final String GAME_UPVOTES_PATH = "games/%s/votes/";
     // Complete path to a specific private game a user has created
     public static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
     // Path to the user's notification ID
     public static final String USER_NOTIFICATION_PATH = "users/%s/notificationId";
     // Path to the user's isAndroid boolean
-    public static final String USER_IS_ANDROID = "users/%s/isAndroid";
+    public static final String USER_IS_ANDROID_PATH = "users/%s/isAndroid";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the user's lowercase display name
