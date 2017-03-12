@@ -12,6 +12,7 @@ import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static android.R.attr.data;
@@ -74,9 +75,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         if(retrievedOnce) {
             // Technically last retrieved priority should be last retrieved creation date, but don't
             // Want to do extra variables
-            query = query.limitToFirst(publicLimit).startAt((long) lastRetrievedPriority, lastRetrievedKey);
+            query = query.limitToLast(publicLimit).endAt((long) lastRetrievedPriority, lastRetrievedKey);
         } else {
-            query = query.limitToFirst(publicLimit);
+            query = query.limitToLast(publicLimit);
         }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -85,6 +86,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 List<Game> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
+                    boolean gotFirst = false;
                     for (DataSnapshot snapshot : snapshots) {
                         if((double) snapshot.getPriority() > 0) {
                             // If we had to do a continue, don't remove the last thing from data
@@ -92,8 +94,12 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                             continue;
                         }
                         Game curGame = (Game) snapshot.getValue(listener.getDataType());
-                        lastRetrievedPriority = curGame.getCreationDate();
-                        lastRetrievedKey = snapshot.getKey();
+                        if(!gotFirst) {
+                            System.out.println("Setting last priority to " + curGame.getCreationDate());
+                            lastRetrievedPriority = curGame.getCreationDate();
+                            lastRetrievedKey = snapshot.getKey();
+                            gotFirst = true;
+                        }
                         data.add(curGame);
                     }
                     if (!retrievedOnce) {
@@ -103,6 +109,10 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 if(data.size() > 0 && !continued) {
                     data.remove(data.size() - 1);
                 }
+                // Since it still counts forwards, need to reverse it. IE if the list is 1 2 3 4 5,
+                // and we limitToLast 2, we'll get back 4 5, but want it in 5 4 order. But still
+                // endAt 4 for the next query, which is why we have gotFirst above.
+                Collections.reverse(data);
                 listener.onData(data);
             }
 
