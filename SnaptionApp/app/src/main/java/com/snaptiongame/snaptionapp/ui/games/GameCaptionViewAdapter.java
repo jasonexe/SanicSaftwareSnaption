@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.User;
@@ -34,7 +35,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-
+    // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     // BEGIN PRIVATE CLASSES //
@@ -94,21 +95,57 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param position The position in the list of Captions
      */
     @Override
-    public void onBindViewHolder(final CaptionViewHolder holder, final int position) {
-        final Caption caption = items.get(position);
-        // Adds the firebaseresourcemanager to the map if it is not already in it
-        if (!resourceManagerMap.containsKey(caption.getId())) {
-            resourceManagerMap.put(caption.getId(), new FirebaseResourceManager());
+    public void onBindViewHolder(CaptionViewHolder holder, int position) {
+        final Caption finalCaption = items.get(position);
+        setUpCaptionView(holder, finalCaption);
+
+        // Adds a firebase resource manager for the caption to the map if one is not already in it
+        if (!resourceManagerMap.containsKey(finalCaption.getId())) {
+            FirebaseResourceManager manager = new FirebaseResourceManager();
+            // Listens for any changes to the upvotes and updates the caption
+            ResourceListener upvoteListener = new ResourceListener<Caption>() {
+                @Override
+                public void onData(Caption updatedCaption) {
+                    if (updatedCaption != null) {
+                        int oldIndex, newIndex;
+                        oldIndex = items.indexOf(finalCaption);
+                        Caption captionInList = items.get(oldIndex);
+                        items.remove(oldIndex);
+                        updatedCaption.assignUser(captionInList.retrieveUser());
+                        newIndex = insertCaption(updatedCaption);
+                        // Check to see if the caption has moved or changed, and if it has
+                        // then animate its change
+                        if (oldIndex != newIndex) {
+                            notifyItemMoved(oldIndex, newIndex);
+                            notifyItemChanged(newIndex);
+                        } else {
+                            notifyItemChanged(oldIndex);
+                        }
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return Caption.class;
+                }
+            };
+
+            //Configures resource manager to call the upvote listener whenever the caption is modified
+            manager.retrieveSingleWithUpdates(String.format(GAME_CAPTION_PATH,
+                    finalCaption.getGameId(), finalCaption.getId()), upvoteListener);
+            resourceManagerMap.put(finalCaption.getId(), manager);
         }
 
-        String userPath = FirebaseResourceManager.getUserPath(caption.getUserId());
-        // Get information about the captioner to display it
-        if (caption.retrieveUser() == null) {
+        // Get information about the captioner if it is not already present
+        if (finalCaption.retrieveUser() == null) {
+            String userPath = FirebaseResourceManager.getUserPath(finalCaption.getUserId());
             FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    caption.assignUser(user);
-                    setCaptionerView(user, holder);
+                    int captionNdx = items.indexOf(finalCaption);
+                    Caption captionInList = items.get(captionNdx);
+                    captionInList.assignUser(user);
+                    notifyItemChanged(captionNdx);
                 }
 
                 @Override
@@ -117,48 +154,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 }
             });
         }
-        else {
-            setCaptionerView(caption.retrieveUser(), holder);
-        }
-
-        // Listens for any changes to the upvotes, modifies the upvote icon, number of upvotes,
-        // and modifies the click handler
-        ResourceListener upvoteListener = new ResourceListener<Caption>() {
-            @Override
-            public void onData(Caption updatedCaption) {
-                // Check to make sure caption exists
-                if (updatedCaption != null) {
-                    int oldIndex, newIndex;
-                    oldIndex = items.indexOf(caption);
-                    items.remove(oldIndex);
-                    newIndex = insertCaption(updatedCaption);
-                    // Check to see if the caption has moved, and if it has then animate its change
-                    if (oldIndex != newIndex) {
-                        notifyItemMoved(oldIndex, newIndex);
-                    }
-                    // Set the display to reflect the status of the caption
-                    if (updatedCaption.votes != null) {
-                        Map votes = updatedCaption.votes;
-                        setUpvoteView(holder, updatedCaption, votes.size(),
-                                votes.containsKey(FirebaseResourceManager.getUserId()));
-                    }
-                    else {
-                         setUpvoteView(holder, updatedCaption, 0, false);
-                    }
-                }
-            }
-
-            @Override
-            public Class getDataType() {
-                return Caption.class;
-            }
-        };
-
-        holder.captionText.setText(caption.retrieveCaptionText());
-
-        //Gets the map of upvotes and configures it to call the upvote listener whenever it is modified
-        resourceManagerMap.get(caption.getId()).retrieveSingleWithUpdates(String.format(GAME_CAPTION_PATH,
-                caption.getGameId(), caption.getId()), upvoteListener);
     }
 
     /**
@@ -201,6 +196,13 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         }
     }
 
+    public void removeListeners() {
+        for (FirebaseResourceManager frm : resourceManagerMap.values()) {
+            frm.removeListener();
+        }
+        resourceManagerMap.clear();
+    }
+
     // END PUBLIC METHODS //
 
     // BEGIN PRIVATE METHODS //
@@ -217,27 +219,40 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
+            // Because the listener is being used twice, don't display the error if it has already appeared
+            boolean hasDisplayedError = false;
             @Override
             public void onComplete() {}
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(upvoteIcon.getContext(),
-                        upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
-                        Toast.LENGTH_SHORT).show();
+                if (!hasDisplayedError) {
+                    Toast.makeText(upvoteIcon.getContext(),
+                            upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
+                            Toast.LENGTH_SHORT).show();
+                    hasDisplayedError = true;
+                }
             }
         };
 
         if (caption != null) {
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.addUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                            caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH,
+                        caption.getUserId(), caption.getId(), FirebaseResourceManager.getUserId()),
+                        listener);
             }
         }
     }
@@ -258,6 +273,20 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         else {
             upvoteIcon.setImageDrawable(upvoteIcon.getResources()
                     .getDrawable(R.drawable.thumbs_up_blank));
+        }
+    }
+
+    private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
+        holder.captionText.setText(caption.retrieveCaptionText());
+        setCaptionerView(caption.retrieveUser(), holder);
+        // Set the display to reflect the status of the caption
+        if (caption.votes != null) {
+            Map votes = caption.votes;
+            setUpvoteView(holder, caption, votes.size(),
+                    votes.containsKey(FirebaseResourceManager.getUserId()));
+        }
+        else {
+            setUpvoteView(holder, caption, 0, false);
         }
     }
 
