@@ -93,6 +93,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                             continued = true;
                             continue;
                         }
+                        continued = false;
                         Game curGame = (Game) snapshot.getValue(listener.getDataType());
                         if(!gotFirst) {
                             System.out.println("Setting last priority to " + curGame.getCreationDate());
