@@ -126,15 +126,15 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     logInOutItemSelected();
                     break;
                 case R.id.my_feed_item:
-                    newFragment = WallFragment.newInstance(GameType.PRIVATE_GAMES);
+                    newFragment = WallFragment.newInstance(GameType.USER_JOINED_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
-                    newFragment =  WallFragment.newInstance(GameType.MIXED_GAMES);
+                    newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
-                    newFragment =  WallFragment.newInstance(GameType.PUBLIC_GAMES);
+                    newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
