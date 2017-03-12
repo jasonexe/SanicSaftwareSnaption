@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.User;
@@ -15,6 +16,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.text.NumberFormat;
 import java.util.Collections;
@@ -34,7 +36,8 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private List<Caption> items;
     private LoginDialog loginDialog;
-
+    private ProfileActivity.ProfileActivityCreator profileMaker;
+    // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
 
     // BEGIN PRIVATE CLASSES //
@@ -80,10 +83,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param items The list of Captions to build the views from
      * @param loginDialog The dialog to display when the user needs to log in
      */
-    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog) {
+    public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog,
+                                  ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
+        this.profileMaker = profileMaker;
         resourceManagerMap = new HashMap<>(items.size());
     }
 
@@ -218,27 +223,40 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
+            // Because the listener is being used twice, don't display the error if it has already appeared
+            boolean hasDisplayedError = false;
             @Override
             public void onComplete() {}
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(upvoteIcon.getContext(),
-                        upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
-                        Toast.LENGTH_SHORT).show();
+                if (!hasDisplayedError) {
+                    Toast.makeText(upvoteIcon.getContext(),
+                            upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
+                            Toast.LENGTH_SHORT).show();
+                    hasDisplayedError = true;
+                }
             }
         };
 
         if (caption != null) {
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(
+                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
+                                caption.getId(), FirebaseResourceManager.getUserId()), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(caption.getId(), FirebaseResourceManager.getUserId(),
-                        caption.getUserId(), caption.getGameId(), listener);
+                FirebaseUploader.addUpvote(
+                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
+                            caption.getId(), FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH,
+                        caption.getUserId(), caption.getId(), FirebaseResourceManager.getUserId()),
+                        listener);
             }
         }
     }
@@ -299,12 +317,19 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param captioner The user who made the caption
      * @param holder The view holder containing the caption information
      */
-    private void setCaptionerView(User captioner, CaptionViewHolder holder) {
+    private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
         // Display the captioner's information
         if (captioner != null) {
             holder.captionerName.setText(captioner.getDisplayName());
             FirebaseResourceManager.loadImageIntoView(captioner.getImagePath(),
                     holder.captionerPhoto);
+            //set click listener to go to user's profile
+            holder.captionerPhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    profileMaker.create(captioner.getId());
+                }
+            });
         }
         // Set the default view for a user
         else {

@@ -30,6 +30,31 @@
         app:fabSize="mini"
         android:visibility="gone"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/upvote_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/photo"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="-20dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/thumbs_up_blank"
+        app:backgroundTint="@android:color/white"
+        app:elevation="2dp"
+        app:fabSize="mini"/>
+
+    <TextView
+        android:id="@+id/number_upvotes_text"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/photo"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="6dp"/>
+
+    <TextView
+        android:id="@+id/captioner_text"
     <RelativeLayout
         android:id="@+id/game_info"
         android:layout_width="match_parent"
