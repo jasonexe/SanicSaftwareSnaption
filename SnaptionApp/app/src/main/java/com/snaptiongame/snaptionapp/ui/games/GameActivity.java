@@ -39,6 +39,7 @@ import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaptionapp.ui.ScrollFabHider;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 import com.snaptiongame.snaptionapp.utilities.BitmapConverter;
 
 import java.text.SimpleDateFormat;
@@ -307,10 +308,12 @@ public class GameActivity extends HomeAppCompatActivity {
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
         }
         else {
-            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(), loginDialog);
+            captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -328,7 +331,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName(Game game) {
+    private void setupPickerName(final Game game) {
         String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
@@ -336,6 +339,12 @@ public class GameActivity extends HomeAppCompatActivity {
                 if (user != null) {
                     pickerName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
+                    pickerPhoto.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPicker());
+                        }
+                    });
                 }
             }
 
@@ -372,9 +381,7 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
-        for (FirebaseResourceManager frm : captionAdapter.resourceManagerMap.values()) {
-            frm.removeListener();
-        }
+        captionAdapter.removeListeners();
     }
 
     @OnClick(R.id.fab)

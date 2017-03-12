@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by austinrobarts on 1/21/17.
+ * A model class for the User object.
+ *
+ * @author Austin Robarts
  */
-
 public class User implements Person, Comparable<User> {
 
     private String id;
@@ -155,6 +156,11 @@ public class User implements Person, Comparable<User> {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public void setLowercaseDisplayName(String name) {
+        // NoOp, lowercase display name is based on the normal display name. At least we don't
+        // get errors anymore
     }
 
     public int retrieveCaptionCount() {

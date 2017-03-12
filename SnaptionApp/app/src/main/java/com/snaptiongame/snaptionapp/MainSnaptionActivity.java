@@ -39,6 +39,7 @@ import com.snaptiongame.snaptionapp.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaptionapp.ui.friends.FriendsFragment;
 import com.snaptiongame.snaptionapp.ui.login.LoginDialog;
 import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileFragment;
 import com.snaptiongame.snaptionapp.ui.wall.WallFragment;
 
@@ -120,6 +121,9 @@ public class MainSnaptionActivity extends AppCompatActivity {
                     break;
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putString(ProfileActivity.USER_ID_KEY, FirebaseResourceManager.getUserId());
+                    newFragment.setArguments(args);
                     bottomNavVisible = false;
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
