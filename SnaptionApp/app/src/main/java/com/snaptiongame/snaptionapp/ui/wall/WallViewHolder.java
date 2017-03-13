@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.snaptiongame.snaptionapp.R;
@@ -28,6 +29,8 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public TextView captionerName;
     @BindView(R.id.captioner_photo)
     public ImageView captionerPhoto;
+    @BindView(R.id.game_info)
+    public RelativeLayout gameInfoLayout;
     @BindView(R.id.upvote_icon)
     public ImageView upvoteIcon;
     @BindView(R.id.upvote_count)

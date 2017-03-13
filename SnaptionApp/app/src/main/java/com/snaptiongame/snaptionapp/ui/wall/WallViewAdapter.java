@@ -16,17 +16,18 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaptionapp.Constants;
-import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
-import com.snaptiongame.snaptionapp.servercalls.Uploader;
-import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.models.User;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
+import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.games.GameActivity;
+import com.snaptiongame.snaptionapp.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
+import com.snaptiongame.snaptionapp.utilities.ViewUtilities;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
@@ -44,7 +45,9 @@ import static com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager.v
  */
 
 public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
-
+    private static final int UPVOTE_ANIM_DIST = 40;
+    private static final int UPVOTE_ANIM_DURATION = 800;
+    private static final float UPVOTE_ANIM_SCALE = 0.5f;
     private List<Game> items;
     private Map<Integer, WallViewHolder> itemNumToHolder;
     private MainSnaptionActivity activity;
@@ -121,9 +124,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         Map<String, Integer> upvoters = game.getVotes();
         if(upvoters != null) {
-            setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseResourceManager.getUserId()));
+            setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseResourceManager.getUserId()), false);
         } else {
-            setUpvoteView(holder, game, 0, false);
+            setUpvoteView(holder, game, 0, false, false);
         }
         itemNumToHolder.put(position, holder);
 
@@ -175,13 +178,19 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * Sets the upvote icon to be either filled or empty depending on whether the user has upvoted
      * the game.
      *
-     * @param upvoteIcon The view being affected
+     * @param holder WallViewHolder containing the upvote icon
      * @param hasUpvoted Whether the user has upvoted the game
+     * @param animate Whether the upvote icon should show a "ghost" animation
      */
-    private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
+    private void setUpvoteIcon(final WallViewHolder holder, boolean hasUpvoted, boolean animate) {
+        ImageView upvoteIcon = holder.upvoteIcon;
         upvoteIcon.setImageDrawable(hasUpvoted ?
                 ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up) :
                 ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up_outline));
+        if (animate) {
+            ViewUtilities.animateGhost(holder.gameInfoLayout, upvoteIcon, UPVOTE_ANIM_DIST,
+                    UPVOTE_ANIM_DURATION, UPVOTE_ANIM_SCALE);
+        }
     }
 
     /**
@@ -190,15 +199,18 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      *
      * @param holder The holder for the view
      * @param game The game being affected
+     * @param numUpvotes number of game upvotes
+     * @param hasUpvoted whether the user has upvoted the game
+     * @param animate whether the upvote icon should show a "ghost" animation
      */
     private void setUpvoteView(WallViewHolder holder, Game game, int numUpvotes,
-                               boolean hasUpvoted) {
+                               boolean hasUpvoted, boolean animate) {
         // Set upvoteCountText to be the the number of upvotes;
         holder.upvoteCountText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
         holder.upvoteIcon.setOnClickListener(new WallViewAdapter.UpvoteClickListener(game, hasUpvoted));
         // Sets the icon depending on whether it has been upvoted
-        setUpvoteIcon(holder.upvoteIcon, hasUpvoted);
+        setUpvoteIcon(holder, hasUpvoted, animate);
     }
 
     private void displayCaption(WallViewHolder holder, Game game) {
@@ -309,14 +321,19 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
         Game newGame = items.get(changedIndex);
+        Map<String, Integer> oldVotes = newGame.getVotes();
         newGame.setVotes(newVotes);
         WallViewHolder holder = itemNumToHolder.get(changedIndex);
 
         if(holder != null) {
             if (newVotes == null) {
-                setUpvoteView(holder, newGame, 0, false);
+                setUpvoteView(holder, newGame, 0, false, false);
             } else {
-                setUpvoteView(holder, newGame, newVotes.size(), newVotes.containsKey(FirebaseResourceManager.getUserId()));
+                String userId = FirebaseResourceManager.getUserId();
+                boolean hasUpvoted = newVotes.containsKey(userId);
+                boolean hasUpvotedPrior = oldVotes != null && oldVotes.containsKey(userId);
+                setUpvoteView(holder, newGame, newVotes.size(), hasUpvoted, hasUpvoted
+                        && !hasUpvotedPrior);
             }
         }
     }

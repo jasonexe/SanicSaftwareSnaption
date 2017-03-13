@@ -116,7 +116,7 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onData(User receiver) {
                 if (receiver != null) {
-                    FirebaseNotificationSender.sendGameCreationNotification(receiver, gameId, pickerId);
+                    FirebaseNotificationSender.sendGameCreationNotification(receiver, pickerId, gameId);
                 }
             }
             @Override

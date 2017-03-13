@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.google.firebase.crash.FirebaseCrash;
 import com.snaptiongame.snaptionapp.Constants;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.models.User;
 
 import org.json.JSONException;
@@ -55,7 +54,7 @@ public class FirebaseNotificationSender {
         }
         else { //if iOS user
             //get user so we can display name in notification
-            FirebaseResourceManager.retrieveSingleNoUpdates(Constants.USER_PATH + "/" + from,
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, from),
                     new ResourceListener<User>() {
                         @Override
                         public void onData(User inviter) {
@@ -94,7 +93,8 @@ public class FirebaseNotificationSender {
         JSONObject json = new JSONObject();
         try {
             //add gameId and userId to notification
-            notification.put(NotificationReceiver.USER_ID_KEY, from);
+            json.put(JSON_TO, to.getNotificationId());
+            notification.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
             notification.put(NotificationReceiver.GAME_ID_KEY, gameId);
             //add title and body to notification
             notification.put(JSON_BODY, String.format(IOS_NOTIFICATION_BODY, from.getDisplayName()));
