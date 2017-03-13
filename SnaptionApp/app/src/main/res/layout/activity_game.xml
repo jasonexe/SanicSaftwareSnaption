@@ -184,7 +184,7 @@
         android:layout_gravity="bottom"
         android:orientation="vertical"
         android:id="@+id/caption_items"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimaryTransparent">
 
         <include layout="@layout/card_input_layout"
             android:id="@+id/card_input"
