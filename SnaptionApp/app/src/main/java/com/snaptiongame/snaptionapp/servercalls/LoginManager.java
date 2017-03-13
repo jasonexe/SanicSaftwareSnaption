@@ -76,11 +76,9 @@ public class LoginManager {
             FirebaseUser changedUser = firebaseAuth.getCurrentUser();
             if(changedUser != null) {
                 if(changedUser.getProviders() != null && changedUser.getProviders().size() > 0) {
-                    // User can only have 1 provider in this list
-                    String providerId = changedUser.getProviders().get(0);
-                    // Check if they are facebook. If so, need to set facebook ID
                     String facebookId = null;
-                    if(providerId.equals(FacebookAuthProvider.PROVIDER_ID)) {
+                    // Check if they are facebook. If so, need to set facebook ID
+                    if(changedUser.getProviders().contains(FacebookAuthProvider.PROVIDER_ID)) {
                         // Users will usually have 2 providers in this list - firebase then
                         // Facebook or google
                         for(UserInfo info : changedUser.getProviderData()) {
