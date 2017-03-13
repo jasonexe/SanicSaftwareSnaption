@@ -32,6 +32,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import java.io.InputStream;
 import java.net.URL;
 
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.R;
@@ -69,6 +70,31 @@ public class LoginManager {
         void onLoginComplete();
     }
 
+    private FirebaseAuth.AuthStateListener revalidator = new FirebaseAuth.AuthStateListener() {
+        @Override
+        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            FirebaseUser changedUser = firebaseAuth.getCurrentUser();
+            if(changedUser != null) {
+                if(changedUser.getProviders() != null && changedUser.getProviders().size() > 0) {
+                    String facebookId = null;
+                    // Check if they are facebook. If so, need to set facebook ID
+                    if(changedUser.getProviders().contains(FacebookAuthProvider.PROVIDER_ID)) {
+                        // Users will usually have 2 providers in this list - firebase then
+                        // Facebook or google
+                        for(UserInfo info : changedUser.getProviderData()) {
+                            if(info.getProviderId().equals(FacebookAuthProvider.PROVIDER_ID)) {
+                                facebookId = info.getUid();
+                            }
+                        }
+                    } else {
+                        downloadPhoto(changedUser.getPhotoUrl().toString());
+                    }
+                    uploadUser(facebookId);
+                }
+            }
+        }
+    };
+
     /**
      * Constructor used when login and logout callbacks want to be defined on construction
      * @param activity activity used for GoogleAPI for managing
@@ -77,7 +103,7 @@ public class LoginManager {
      * @param loginAuthCallback called for succesful or unsuccessful login
      * @param logoutAuthCallback called for successful or unsuccessful logout
      */
-    public LoginManager(FragmentActivity activity, Uploader uploader, LoginListener listener,
+    public LoginManager(FragmentActivity activity, final Uploader uploader, LoginListener listener,
                         AuthCallback loginAuthCallback, AuthCallback logoutAuthCallback) {
         this.activity = activity;
         this.uploader = uploader;
@@ -87,6 +113,11 @@ public class LoginManager {
         auth = FirebaseAuth.getInstance();
         callbackManager = CallbackManager.Factory.create();
         profilePhoto = null;
+
+        // This will make sure their stuff is uploaded, even if it was deleted from the database.
+        // We could probably delete some other stuff and just use the state listener, but
+        // I'm not sure what could be safely deleted.
+        auth.addAuthStateListener(revalidator);
     }
 
     public interface AuthCallback {
