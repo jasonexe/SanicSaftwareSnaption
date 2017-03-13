@@ -9,4 +9,6 @@
     <color name="greenBackground">#30D93E</color>
     <color name="lightGrey">#20000000</color>
     <color name="lightColorAccent">#0091ea</color>
+    <color name="grey">#BDBDBD</color>
+    <color name="colorPrimaryLight">#C5CAE9</color>
 </resources>

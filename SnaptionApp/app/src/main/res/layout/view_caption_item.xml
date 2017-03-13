@@ -38,7 +38,7 @@
 
     <ImageView
         android:id="@+id/upvote_icon"
-        android:src="@drawable/thumbs_up_blank"
+        android:src="@drawable/thumb_up_outline"
         android:layout_width="30dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"

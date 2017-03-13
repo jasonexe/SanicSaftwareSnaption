@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -109,11 +110,11 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final WallViewHolder holder, int position) {
+    public void onBindViewHolder(WallViewHolder holder, int position) {
         Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, holder.pickerPhoto, String.format(Constants.USER_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
@@ -139,9 +140,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         final String imagePath = game.getImagePath();
         // TODO add a confirmation dialog that they want to create the new game??
-        holder.createFromExisting.setOnClickListener(new View.OnClickListener() {
+        holder.photo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onLongClick(final View view) {
                 //if the user is logged in
                 if (FirebaseResourceManager.getUserId() != null) {
                     // If they want to create a game from this one, start the create game intent
@@ -149,7 +150,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                     FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
                         @Override
                         public void onData(Uri data) {
-                            Context buttonContext = holder.createFromExisting.getContext();
+                            Context buttonContext = view.getContext();
                             Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
                             createGameIntent.putExtra(Constants.EXTRA_MESSAGE, data);
                             createGameIntent.putExtra(Constants.PHOTO_PATH, imagePath);
@@ -165,6 +166,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 else { //prompt user to log in
                     activity.loginDialog.show();
                 }
+                return true;
             }
         });
     }
@@ -177,15 +179,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param hasUpvoted Whether the user has upvoted the game
      */
     private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
-        if (hasUpvoted) {
-            //Using the deprecated method because the current version isn't compatible with our min API
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
-                    .getDrawable(R.drawable.thumbs_up_filled));
-        }
-        else {
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
-                    .getDrawable(R.drawable.thumbs_up_blank));
-        }
+        upvoteIcon.setImageDrawable(hasUpvoted ?
+                ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up) :
+                ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up_outline));
     }
 
     /**
@@ -197,8 +193,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      */
     private void setUpvoteView(WallViewHolder holder, Game game, int numUpvotes,
                                boolean hasUpvoted) {
-        // Set numberUpvotesText to be the the number of upvotes;
-        holder.numberUpvotesText.setText(NumberFormat.getInstance().format(numUpvotes));
+        // Set upvoteCountText to be the the number of upvotes;
+        holder.upvoteCountText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
         holder.upvoteIcon.setOnClickListener(new WallViewAdapter.UpvoteClickListener(game, hasUpvoted));
         // Sets the icon depending on whether it has been upvoted
@@ -207,14 +203,14 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
     private void displayCaption(WallViewHolder holder, Game game) {
         if (game.getTopCaption() != null) {
-            holder.captionerText.setVisibility(TextView.VISIBLE);
+            holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerText, null, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
+            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
             holder.captionText.setText(R.string.caption_filler);
-            holder.captionerText.setVisibility(TextView.GONE);
+            holder.captionerLayout.setVisibility(TextView.GONE);
         }
     }
 
@@ -286,7 +282,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                             });
                         }
                         else {
-                            username.setText(activity.getResources().getString(R.string.captioner_name, user.getDisplayName()));
+                            username.setText(user.getDisplayName());
                         }
 
                     }

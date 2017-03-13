@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -269,15 +270,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param hasUpvoted Whether the user has upvoted the caption
      */
     private void setUpvoteIcon(ImageView upvoteIcon, boolean hasUpvoted) {
-        if (hasUpvoted) {
-            //Using the deprecated method because the current version isn't compatible with our min API
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
-                    .getDrawable(R.drawable.thumbs_up_filled));
-        }
-        else {
-            upvoteIcon.setImageDrawable(upvoteIcon.getResources()
-                    .getDrawable(R.drawable.thumbs_up_blank));
-        }
+        upvoteIcon.setImageDrawable(hasUpvoted ?
+                ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up) :
+                ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up_outline));
     }
 
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
@@ -303,7 +298,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      */
     private void setUpvoteView(CaptionViewHolder holder, Caption caption, int numUpvotes,
                                boolean hasUpvoted) {
-        // Set numberUpvotesText to be the the number of upvotes;
+        // Set upvoteCountText to be the the number of upvotes;
         holder.numberUpvotesText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
         holder.upvoteIcon.setOnClickListener(new UpvoteClickListener(caption, hasUpvoted));
