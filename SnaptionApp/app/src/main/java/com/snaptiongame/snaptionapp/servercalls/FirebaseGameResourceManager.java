@@ -88,19 +88,18 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 if (snapshots.iterator().hasNext()) {
                     boolean gotFirst = false;
                     for (DataSnapshot snapshot : snapshots) {
+                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
+                        if(!gotFirst) {
+                            lastRetrievedPriority = curGame.getCreationDate();
+                            lastRetrievedKey = snapshot.getKey();
+                            gotFirst = true;
+                        }
                         if(snapshot.getPriority() != null && (double) snapshot.getPriority() > 0) {
                             // If we had to do a continue, don't remove the last thing from data
                             continued = true;
                             continue;
                         }
                         continued = false;
-                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
-                        if(!gotFirst) {
-                            System.out.println("Setting last priority to " + curGame.getCreationDate());
-                            lastRetrievedPriority = curGame.getCreationDate();
-                            lastRetrievedKey = snapshot.getKey();
-                            gotFirst = true;
-                        }
                         data.add(curGame);
                     }
                     if (!retrievedOnce) {
