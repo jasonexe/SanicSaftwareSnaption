@@ -1,9 +1,11 @@
 package com.snaptiongame.snaptionapp.utilities;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 /**
  * Created by brittanyberlanga on 2/19/17.
@@ -68,5 +70,41 @@ public class ViewUtilities {
             }
         });
         heightAnimator.start();
+    }
+
+    /**
+     * Creates a "ghost" image of a given ImageView. The ghost will originate at the ImageView's
+     * position, animate upwards, and then disappear. During the animation, the ghost will scale
+     * it's size and become transparent.
+     *
+     * @param parent ViewGroup containing the ImageView and the ViewGroup the ghost will be added to
+     * @param imageView ImageView to create a ghost of
+     * @param distanceDp upward distance the ghost should travel
+     * @param duration duration of the animation
+     * @param scaleBy scale amount
+     */
+    public static void animateGhost(final ViewGroup parent, ImageView imageView, float distanceDp,
+                                    int duration, float scaleBy) {
+        final ImageView ghostView = new ImageView(imageView.getContext());
+        ghostView.setImageDrawable(imageView.getDrawable());
+        parent.addView(ghostView);
+        ghostView.setX(imageView.getX());
+        ghostView.setY(imageView.getY());
+        float animationDist = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, distanceDp,
+                parent.getResources().getDisplayMetrics());
+        ghostView.animate().alpha(0f)
+                .translationYBy(-animationDist).setDuration(duration).scaleXBy(scaleBy)
+                .scaleYBy(scaleBy).setListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        parent.removeView(ghostView);
+                    }
+                    @Override
+                    public void onAnimationStart(Animator animation) {}
+                    @Override
+                    public void onAnimationCancel(Animator animation) {}
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {}
+                }).start();
     }
 }
