@@ -88,25 +88,26 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 if (snapshots.iterator().hasNext()) {
                     boolean gotFirst = false;
                     for (DataSnapshot snapshot : snapshots) {
-                        if((double) snapshot.getPriority() > 0) {
+                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
+                        if(!gotFirst) {
+                            lastRetrievedPriority = curGame.getCreationDate();
+                            lastRetrievedKey = snapshot.getKey();
+                            gotFirst = true;
+                        }
+                        if(snapshot.getPriority() != null && (double) snapshot.getPriority() > 0) {
                             // If we had to do a continue, don't remove the last thing from data
                             continued = true;
                             continue;
                         }
                         continued = false;
-                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
-                        if(!gotFirst) {
-                            System.out.println("Setting last priority to " + curGame.getCreationDate());
-                            lastRetrievedPriority = curGame.getCreationDate();
-                            lastRetrievedKey = snapshot.getKey();
-                            gotFirst = true;
-                        }
                         data.add(curGame);
                     }
                     if (!retrievedOnce) {
                         retrievedOnce = true;
                     }
                 }
+                // TODO this will remove the brand-newest game. Not a big deal for now, but should
+                // fix in the future
                 if(data.size() > 0 && !continued) {
                     data.remove(data.size() - 1);
                 }
@@ -131,6 +132,11 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
                 query = query.limitToFirst(publicLimit + 1)
                         .startAt((double) lastRetrievedPriority, lastRetrievedKey).endAt(0);
+            }  else {
+                // If for some reason last priority isn't set to double, we can still use the key
+                // Start at min double value so we know we aren't missing any
+                query = query.limitToFirst(privateLimit + 1)
+                        .startAt(Double.MIN_VALUE, lastRetrievedKey).endAt(0);
             }
         }
         else {
@@ -174,6 +180,10 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             if (lastRetrievedPriority instanceof Double) {
                 query = query.limitToFirst(privateLimit + 1)
                         .startAt((double) lastRetrievedPriority, lastRetrievedKey);
+            } else {
+                // If for some reason last priority isn't set to double, we can still use the key
+                // Start at min double value so we know we aren't missing any
+                query = query.limitToFirst(privateLimit + 1).startAt(Double.MIN_VALUE, lastRetrievedKey);
             }
         }
         else {
