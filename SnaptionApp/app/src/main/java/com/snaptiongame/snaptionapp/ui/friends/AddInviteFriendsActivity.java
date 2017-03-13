@@ -27,6 +27,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 
@@ -132,7 +133,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
                     }
                 });
             }
-        });
+        }, ProfileActivity.getProfileActivityCreator(this));
         loginProviderFriends.setAdapter(addFriendAdapter);
     }
 

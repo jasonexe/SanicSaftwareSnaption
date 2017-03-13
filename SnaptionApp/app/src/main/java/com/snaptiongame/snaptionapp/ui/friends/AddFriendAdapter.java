@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.List;
 
@@ -18,14 +19,17 @@ import java.util.List;
 public class AddFriendAdapter extends RecyclerView.Adapter<PersonViewHolder> {
     private List<Friend> friends;
     private AddInviteFriendCallback callback;
+    private ProfileActivity.ProfileActivityCreator profileMaker;
 
     public interface AddInviteFriendCallback {
         public void addInviteClicked(Friend friend);
     }
 
-    public AddFriendAdapter(List<Friend> friends, AddInviteFriendCallback callback) {
+    public AddFriendAdapter(List<Friend> friends, AddInviteFriendCallback callback,
+                            ProfileActivity.ProfileActivityCreator profileMaker) {
         this.friends = friends;
         this.callback = callback;
+        this.profileMaker = profileMaker;
     }
 
     @Override
@@ -49,6 +53,12 @@ public class AddFriendAdapter extends RecyclerView.Adapter<PersonViewHolder> {
         holder.email.setText(friend.email);
         holder.email.setVisibility(TextUtils.isEmpty(friend.email) ? View.GONE : View.VISIBLE);
         FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.photo);
+        holder.photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                profileMaker.create(friend.getId());
+            }
+        });
         if (callback != null) {
             holder.addInviteButton.setOnClickListener(new View.OnClickListener() {
                 @Override

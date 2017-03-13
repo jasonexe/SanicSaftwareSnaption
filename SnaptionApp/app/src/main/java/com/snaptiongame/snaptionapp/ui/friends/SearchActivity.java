@@ -1,8 +1,6 @@
 package com.snaptiongame.snaptionapp.ui.friends;
 
-import android.app.Activity;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +18,7 @@ import com.snaptiongame.snaptionapp.servercalls.FirebaseUploader;
 import com.snaptiongame.snaptionapp.servercalls.ResourceListener;
 import com.snaptiongame.snaptionapp.servercalls.Uploader;
 import com.snaptiongame.snaptionapp.ui.HomeAppCompatActivity;
+import com.snaptiongame.snaptionapp.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
@@ -79,6 +78,34 @@ public class SearchActivity extends HomeAppCompatActivity {
         }
     };
 
+    FriendsListAdapter.AddInviteUserCallback addInviteUserCallback = new FriendsListAdapter.AddInviteUserCallback() {
+        @Override
+        public void addInviteClicked(final User user) {
+            final Friend friend = new Friend(user);
+
+            // ensure viewModel has been initialized
+            if (viewModel != null) {
+                viewModel.addFriend(friend, new Uploader.UploadListener() {
+                    @Override
+                    public void onComplete() {
+                        // notify user
+                        Toast.makeText(SearchActivity.this,
+                                viewModel.getAddedFriendText(SearchActivity.this,
+                                        friend.displayName, true, null), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        // notify user
+                        Toast.makeText(SearchActivity.this,
+                                viewModel.getAddedFriendText(SearchActivity.this,
+                                        friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,33 +148,7 @@ public class SearchActivity extends HomeAppCompatActivity {
             Set<User> set = new TreeSet<>(users);
             searchNotice.setVisibility(View.GONE);
             // set the adapter to be able to add friends
-            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), new FriendsListAdapter.AddInviteUserCallback() {
-                @Override
-                public void addInviteClicked(final User user) {
-                    final Friend friend = new Friend(user);
-
-                    // ensure viewModel has been initialized
-                    if (viewModel != null) {
-                        viewModel.addFriend(friend, new Uploader.UploadListener() {
-                            @Override
-                            public void onComplete() {
-                                // notify user
-                                Toast.makeText(SearchActivity.this,
-                                        viewModel.getAddedFriendText(SearchActivity.this,
-                                                friend.displayName, true, null), Toast.LENGTH_LONG).show();
-                            }
-
-                            @Override
-                            public void onError(String errorMessage) {
-                                // notify user
-                                Toast.makeText(SearchActivity.this,
-                                        viewModel.getAddedFriendText(SearchActivity.this,
-                                                friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                }
-            });
+            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
         }
         else {
