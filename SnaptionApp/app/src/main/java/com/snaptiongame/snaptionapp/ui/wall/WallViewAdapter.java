@@ -110,7 +110,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final WallViewHolder holder, int position) {
+    public void onBindViewHolder(WallViewHolder holder, int position) {
         Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
@@ -140,9 +140,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         final String imagePath = game.getImagePath();
         // TODO add a confirmation dialog that they want to create the new game??
-        holder.createFromExisting.setOnClickListener(new View.OnClickListener() {
+        holder.photo.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onLongClick(final View view) {
                 //if the user is logged in
                 if (FirebaseResourceManager.getUserId() != null) {
                     // If they want to create a game from this one, start the create game intent
@@ -150,7 +150,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                     FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
                         @Override
                         public void onData(Uri data) {
-                            Context buttonContext = holder.createFromExisting.getContext();
+                            Context buttonContext = view.getContext();
                             Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
                             createGameIntent.putExtra(Constants.EXTRA_MESSAGE, data);
                             createGameIntent.putExtra(Constants.PHOTO_PATH, imagePath);
@@ -166,6 +166,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 else { //prompt user to log in
                     activity.loginDialog.show();
                 }
+                return true;
             }
         });
     }
