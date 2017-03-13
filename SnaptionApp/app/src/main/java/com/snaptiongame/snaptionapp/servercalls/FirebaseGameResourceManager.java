@@ -106,6 +106,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         retrievedOnce = true;
                     }
                 }
+                // TODO this will remove the brand-newest game. Not a big deal for now, but should
+                // fix in the future
                 if(data.size() > 0 && !continued) {
                     data.remove(data.size() - 1);
                 }
