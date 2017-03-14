@@ -1,16 +1,31 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.models;
 
 /**
- * Testing the Game class.
+ * Testing the Caption class.
  * @author Cameron Geehr
  */
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.User;
+import com.snaptiongame.snaptionapp.testobjects.TestCaption;
 import com.snaptiongame.snaptionapp.testobjects.TestCard;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.rule.PowerMockRule;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +37,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 
 /**
@@ -29,7 +47,37 @@ import static org.junit.Assert.fail;
  *
  * @author Cameron Geehr
  */
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
+@PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
+@SuppressStaticInitializationFor({"com.google.firebase.auth.FirebaseAuth"})
+@PrepareForTest({FirebaseAuth.class})
 public class CaptionTest {
+    @Rule
+    public PowerMockRule rule = new PowerMockRule();
+
+    @Mock
+    private FirebaseAuth auth;
+
+    @Mock
+    private FirebaseUser user;
+
+    @Before
+    public void setup() {
+        initMocks(this);
+        mockStatic(FirebaseAuth.class);
+        try {
+            when(FirebaseAuth.class, "getInstance").thenReturn(auth);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testConstructTest() {
+        TestCaption caption = new TestCaption();
+        assertTrue(true);
+    }
 
     @Test
     public void verifyConstructors() {
@@ -116,4 +164,41 @@ public class CaptionTest {
         assertTrue(caption2.compareTo(caption1) > 0);
     }
 
+    // Need to run this one as an instrumented test since Caption uses SpannableStringBuilder,
+    // which is an Android resource
+    @Test
+    public void retrieveTwoInputCaptionTest() throws  Exception {
+        ArrayList<String> inputArr = new ArrayList<String>();
+        inputArr.add("Yay");
+        inputArr.add("Cards work");
+        String cardText = "%s! %s! I like ice cream";
+        Card testCard = new Card(cardText);
+        Caption testCaption = new Caption("TestId", "TestGameId", "Test user", testCard, inputArr);
+        assertEquals("Yay! Cards work! I like ice cream", testCaption.retrieveCaptionText().toString());
+    }
+
+    @Test
+    public void retrieveCardNoInputTest() {
+        ArrayList<String> inputArr = new ArrayList<>();
+        Card testCard = new Card("hello");
+        Caption testCaption = new Caption("TestId", "TestGameId", "Test user", testCard, inputArr);
+
+        assertEquals("hello", testCaption.retrieveCaptionText().toString());
+    }
+
+    @Test
+    public void blankWhenNoCard() {
+        Caption testCap = new Caption();
+        assertEquals("", testCap.retrieveCaptionText().toString());
+    }
+
+    @Test
+    public void testCaptionAuthValidation() {
+        ArrayList<String> inputArr = new ArrayList<>();
+        Card testCard = new Card("hello");
+        when(user.getUid()).thenReturn("Uid");
+        when(auth.getCurrentUser()).thenReturn(user);
+        Caption testCap = new Caption("TestId", "TestGameId", testCard, inputArr);
+        assertEquals("Uid", testCap.getUserId());
+    }
 }

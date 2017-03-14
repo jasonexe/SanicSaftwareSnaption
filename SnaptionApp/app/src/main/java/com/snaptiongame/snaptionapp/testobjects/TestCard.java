@@ -23,16 +23,4 @@ public class TestCard {
 
         return new Card(someCardText.get(rand.nextInt(someCardText.size())));
     }
-
-    // These will only have one place for input.
-    public static Card getTestCardDoubleInput() {
-        Random rand = new Random();
-        List<String> someCardText = new ArrayList<>();
-        someCardText.add("Hello! I like %s in my %s");
-        someCardText.add("%s is my fave %s");
-        someCardText.add("%s, I %s");
-        someCardText.add("The right number of %s is %s");
-
-        return new Card(someCardText.get(rand.nextInt(someCardText.size())));
-    }
 }

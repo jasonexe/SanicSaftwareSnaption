@@ -1,12 +1,10 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.snaptiongame.snaptionapp.Constants;
-import com.snaptiongame.snaptionapp.MainSnaptionActivity;
 import com.snaptiongame.snaptionapp.R;
 import com.snaptiongame.snaptionapp.models.Game;
 import com.snaptiongame.snaptionapp.servercalls.FirebaseGameResourceManager;
@@ -145,7 +142,7 @@ public class WallFragment extends Fragment {
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
 
-        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), (MainSnaptionActivity)getActivity(), ProfileActivity.getProfileActivityCreator(getContext()));
+        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), ProfileActivity.getProfileActivityCreator(getContext()));
         wallListView.setAdapter(wallAdapter);
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
