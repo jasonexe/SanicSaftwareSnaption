@@ -40,6 +40,8 @@ public class Constants {
     public static final String CARDS_DIRECTORY = "cards_%s/%s";
     // Path to the list of players in a game in Firebase
     public static final String GAME_PLAYERS_PATH = "games/%s/players";
+    // Path to a player in a game
+    public static final String GAME_PLAYER_PATH = "games/%s/players/%s";
     // Name of the table in a user that contains their created games
     public static final String USER_CREATED_GAME_PATH =  "users/%s/createdGames/%s";
     // Name of the images folder in storage
