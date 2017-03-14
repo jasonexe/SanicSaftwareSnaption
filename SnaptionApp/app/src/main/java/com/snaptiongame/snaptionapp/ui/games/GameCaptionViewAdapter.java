@@ -117,7 +117,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                         Caption captionInList = items.get(oldIndex);
                         items.remove(oldIndex);
                         updatedCaption.assignUser(captionInList.retrieveUser());
-                        newIndex = insertCaption(updatedCaption);
+                        newIndex = CaptionLogic.insertCaption(items, updatedCaption);
                         // Check to see if the caption has moved or changed, and if it has
                         // then animate its change
                         if (oldIndex != newIndex) {
@@ -333,30 +333,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             holder.captionerPhoto.setImageDrawable(holder.captionerPhoto.getContext()
                     .getResources().getDrawable(R.drawable.com_facebook_profile_picture_blank_square));
         }
-    }
-
-    /**
-     * Inserts the caption into the items list in the proper order.
-     *
-     * @param caption The caption to insert
-     */
-    private int insertCaption(Caption caption) {
-        int index = 0;
-        boolean added = false;
-
-        while (index < items.size() && !added) {
-            if (caption.compareTo(items.get(index)) < 0) {
-                items.add(index, caption);
-                added = true;
-            }
-            else {
-                index++;
-            }
-        }
-        if (!added) {
-            items.add(caption);
-        }
-        return index;
     }
 
 }
