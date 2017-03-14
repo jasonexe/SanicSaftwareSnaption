@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.models;
 
 import org.junit.Test;
 import org.junit.Before;
@@ -125,6 +125,7 @@ public class UserTest {
         user1.setId("id");
         user1.setEmail("email");
         user1.setDisplayName("displayName");
+        user1.setLowercaseDisplayName("displayname");
         user1.setNotificationId("notificationId");
         user1.setImagePath("imagePath");
         user1.setFacebookId("facebookId");
@@ -135,7 +136,7 @@ public class UserTest {
         assertEquals("notificationId", user1.getNotificationId());
         assertEquals("facebookId", user1.getFacebookId());
         assertEquals("imagePath", user1.getImagePath());
-
+        assertEquals("displayname", user1.getLowercaseDisplayName());
     }
 
     @Test
@@ -165,6 +166,12 @@ public class UserTest {
         assertTrue(user2.getFriends().containsKey("friend2"));
         assertTrue(user2.getCaptions().containsKey("caption1"));
         assertTrue(user2.getCaptions().containsKey("caption2"));
+    }
+
+    @Test
+    public void testRetrieveFriendsCount() {
+        assertEquals(0, user1.retrieveFriendsCount());
+        assertEquals(2, user3.retrieveFriendsCount());
     }
 
     @Test
