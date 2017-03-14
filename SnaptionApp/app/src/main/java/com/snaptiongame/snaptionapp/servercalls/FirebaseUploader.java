@@ -129,7 +129,7 @@ public class FirebaseUploader implements Uploader {
         for (String playerId : players) {
             //dont send notificaiton to picker
             if (!playerId.equals(pickerId)) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, playerId),
+                FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
                         notifyPlayerListener);
             }
         }
@@ -311,7 +311,7 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         String userId = FirebaseResourceManager.getUserId();
 
-        childUpdates.put(String.format(Constants.GAME_PLAYERS_PATH, gameId, userId), 1);
+        childUpdates.put(String.format(Constants.GAME_PLAYERS_PATH, gameId) + "/" + userId, 1);
         childUpdates.put(String.format(Constants.USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override
