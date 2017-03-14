@@ -129,7 +129,7 @@ public class FirebaseUploader implements Uploader {
         for (String playerId : players) {
             //dont send notificaiton to picker
             if (!playerId.equals(pickerId)) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(USERS_PATH + "/" + playerId,
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, playerId),
                         notifyPlayerListener);
             }
         }
