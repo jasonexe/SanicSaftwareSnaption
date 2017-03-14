@@ -38,6 +38,7 @@ public class FriendsFragment extends Fragment {
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
 
+    private FirebaseResourceManager firebase = new FirebaseResourceManager();
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
 
@@ -63,6 +64,7 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        firebase.removeListener();
         unbinder.unbind();
     }
 
@@ -71,7 +73,7 @@ public class FriendsFragment extends Fragment {
      */
     private void populateFriends() {
         if (FirebaseResourceManager.getUserPath() != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+            firebase.retrieveSingleWithUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     if (user != null && user.getFriends() != null) {
