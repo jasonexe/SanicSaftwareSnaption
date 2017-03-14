@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp;
+package com.snaptiongame.snaptionapp.models;
 
 /**
  * Testing the Game class.
@@ -212,6 +212,33 @@ public class GameTest {
         game2.addCaption(caption1.getId(), caption1);
         game2.addCaption(caption2.getId(), caption2);
         assertEquals(caption1, game2.getTopCaption());
+
+        //test winner already set
+        game1.setWinner(caption1.getId());
+        assertEquals(caption1, game1.getTopCaption());
     }
 
+    @Test
+    public void verifyCategoriesNull() {
+        Game game = new Game();
+        assertNull(game.getCategories());
+    }
+
+    @Test
+    public void verifyPlayersNull() {
+        Game game = new Game();
+        assertNull(game.getPlayers());
+    }
+
+    @Test
+    public void verifyVotesNull() {
+        Game game = new Game();
+        assertNull(game.getVotes());
+    }
+
+    @Test
+    public void verifyCaptionsNull() {
+        Game game = new Game();
+        assertNull(game.getCaptions());
+    }
 }
