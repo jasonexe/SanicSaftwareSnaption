@@ -50,12 +50,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private static final float UPVOTE_ANIM_SCALE = 0.5f;
     private List<Game> items;
     private Map<Integer, WallViewHolder> itemNumToHolder;
-    private MainSnaptionActivity activity;
     private ProfileActivity.ProfileActivityCreator profileMaker;
 
-    public WallViewAdapter(List<Game> items, MainSnaptionActivity activity, ProfileActivity.ProfileActivityCreator profileMaker) {
+    public WallViewAdapter(List<Game> items, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
-        this.activity = activity;
         this.profileMaker = profileMaker;
         itemNumToHolder = new HashMap<>();
     }
@@ -104,10 +102,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             // Check if user is logged in before letting them upvote. If not logged in, display
             // login dialog.
             if (FirebaseResourceManager.getUserId() == null) {
-                activity.loginDialog.show();
+                ((MainSnaptionActivity) upvote.getContext()).loginDialog.show();
             }
             else {
-                handleClickUpvote(game, hasUpvoted);
+                handleClickUpvote(upvote.getContext(), game, hasUpvoted);
             }
         }
     }
@@ -167,7 +165,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                     });
                 }
                 else { //prompt user to log in
-                    activity.loginDialog.show();
+                    ((MainSnaptionActivity) view.getContext()).loginDialog.show();
                 }
                 return true;
             }
@@ -345,7 +343,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param game The game object being affected
      * @param hasUpvoted Whether the user has previously upvoted this game
      */
-    private void handleClickUpvote(Game game,
+    private void handleClickUpvote(final Context context, Game game,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
@@ -355,7 +353,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
             @Override
             public void onError(String errorMessage) {
-                Toast.makeText(activity, activity.getResources().getString(R.string.upvote_error),
+                Toast.makeText(context, context.getResources().getString(R.string.upvote_error),
                         Toast.LENGTH_SHORT).show();
             }
         };
