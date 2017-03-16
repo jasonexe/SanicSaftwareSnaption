@@ -41,7 +41,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml", sdk = 21)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
-@SuppressStaticInitializationFor("com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager")
+@SuppressStaticInitializationFor("com.snaptiongame.snaption.servercalls.FirebaseResourceManager")
 @PrepareForTest(FirebaseResourceManager.class)
 public class WallViewAdapterTest {
     WallViewAdapter adapter;

@@ -41,7 +41,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
-@SuppressStaticInitializationFor("com.snaptiongame.snaptionapp.servercalls.FirebaseResourceManager")
+@SuppressStaticInitializationFor("com.snaptiongame.snaption.servercalls.FirebaseResourceManager")
 @PrepareForTest(FirebaseResourceManager.class)
 public class FriendsViewModelTest {
     private static final String FB_PROVIDER_LABEL = "Facebook friends on Snaption";
