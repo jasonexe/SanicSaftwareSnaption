@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.snaptiongame.snaptionapp">
+    package="com.snaptiongame.snaption">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -14,7 +14,7 @@
             android:value="@string/facebook_app_id"/>
 
         <activity
-            android:name=".MainSnaptionActivity"
+            android:name="com.snaptiongame.snaption.MainSnaptionActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:screenOrientation="portrait">
@@ -49,17 +49,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.new_game.CreateGameActivity"
+        <activity android:name="com.snaptiongame.snaption.ui.new_game.CreateGameActivity"
             android:label="@string/create_game"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
-        <activity android:name=".ui.profile.ProfileActivity"
+        <activity android:name="com.snaptiongame.snaption.ui.profile.ProfileActivity"
             android:label="@string/profile"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
-        <activity android:name=".ui.friends.AddInviteFriendsActivity"
+        <activity android:name="com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"
             android:label="@string/friends">
             <intent-filter>
@@ -69,16 +69,16 @@
                 android:resource="@xml/searchable"/>
         </activity>
 
-        <activity android:name=".ui.games.GameActivity"
+        <activity android:name="com.snaptiongame.snaption.ui.games.GameActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/captions">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainSnaptionActivity"/>
+                android:value="com.snaptiongame.snaption.MainSnaptionActivity"/>
         </activity>
 
-        <activity android:name=".ui.friends.SearchActivity"
+        <activity android:name="com.snaptiongame.snaption.ui.friends.SearchActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_search" >
             <intent-filter>
@@ -91,13 +91,13 @@
         </activity>
 
         <service
-            android:name=".servercalls.NotificationReceiver">
+            android:name="com.snaptiongame.snaption.servercalls.NotificationReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 
-        <service android:name=".servercalls.FirebaseTokenMonitor">
+        <service android:name="com.snaptiongame.snaption.servercalls.FirebaseTokenMonitor">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
