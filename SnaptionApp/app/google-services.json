@@ -56,15 +56,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "917089676170-k3rkp00eib280qk4sutrp4cthm3dklls.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "adf"
               }
+            },
+            {
+              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },
@@ -81,6 +81,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "917089676170-530n910jl0u7u2houfdnsflh2siv0b68.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.snaptiongame.snaption",
+            "certificate_hash": "a98113eec59896ca3057a7def506427d203616e0"
+          }
+        },
         {
           "client_id": "917089676170-q3pj76i6jjj4bp3tfioh3t1mln14mpfu.apps.googleusercontent.com",
           "client_type": 1,
@@ -107,15 +115,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
               "client_id": "917089676170-k3rkp00eib280qk4sutrp4cthm3dklls.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "adf"
               }
+            },
+            {
+              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+              "client_type": 3
             }
           ]
         },

@@ -57,7 +57,7 @@ public class FirebaseDeepLinkCreator {
     // URL to firebase's dynamic shortlink generator
     private static final String SHORT_LINK_GENERATOR_URL = "https://firebasedynamiclinks.googleapis.com";
     // Our app's default android package
-    private static final String ANDROID_PACKAGE = "com.snaptiongame.snaptionapp";
+    private static final String ANDROID_PACKAGE = "com.snaptiongame.snaption";
     // The iOS app's default package. Taken from firebase
     private static final String IOS_PACKAGE = "edu.calpoly.csc.2168.snapsquad.verticalprototype";
     // The key for the shortlink to send in the intent if needed
