@@ -231,8 +231,8 @@ public class GameActivity extends HomeAppCompatActivity {
                             // start transition now that image is loaded
                             supportStartPostponedEnterTransition();
                             // add a new behavior to the image view
-                            minimizeImageBehavior = new MinimizeViewBehavior(imageView);
-                            ((CoordinatorLayout.LayoutParams) gameContentLayout.getLayoutParams())
+                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
                                     .setBehavior(minimizeImageBehavior);
                             animateBitmapColorSwatch(bitmap);
                         }
