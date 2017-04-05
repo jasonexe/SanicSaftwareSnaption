@@ -1,11 +1,14 @@
 package com.snaptiongame.snaptionapp.ui.wall;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,7 +78,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             Context imageContext = view.getContext();
             Intent createGameIntent = new Intent(imageContext, GameActivity.class);
             createGameIntent.putExtra(Constants.GAME, game);
-            imageContext.startActivity(createGameIntent);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation((Activity) imageContext, view, game.getId());
+            imageContext.startActivity(createGameIntent, options.toBundle());
         }
     }
 
@@ -130,6 +135,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
         holder.photo.setOnClickListener(new PhotoClickListener(game));
+        ViewCompat.setTransitionName(holder.photo, game.getId());
 
         // distinguish between complete and incomplete games, and public/private
         setCaptionTextStyle(holder, game);

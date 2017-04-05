@@ -6,6 +6,8 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -29,11 +31,11 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.snaptiongame.snaptionapp.Constants;
 import com.snaptiongame.snaptionapp.models.Caption;
 import com.snaptiongame.snaptionapp.models.Card;
 import com.snaptiongame.snaptionapp.models.Friend;
 import com.snaptiongame.snaptionapp.models.User;
-import com.snaptiongame.snaptionapp.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,7 +57,7 @@ public class FirebaseResourceManager {
     private static final String FB_ID_CHILD = "facebookId";
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
-
+    private static FirebaseImageLoader imageLoader = new FirebaseImageLoader();
 
     private ValueEventListener valueEventListener;
     private DatabaseReference databaseReference;
@@ -391,8 +393,9 @@ public class FirebaseResourceManager {
         StorageReference ref = storage.child(imagePath);
         try {
             Glide.with(imageView.getContext())
-                    .using(new FirebaseImageLoader())
+                    .using(imageLoader)
                     .load(ref).fitCenter()
+                    .dontAnimate()
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,
@@ -430,9 +433,12 @@ public class FirebaseResourceManager {
         StorageReference ref = storage.child(imagePath);
         try {
             Glide.with(imageView.getContext())
-                    .using(new FirebaseImageLoader())
+                    .using(imageLoader)
                     .load(ref)
                     .fitCenter()
+                    .dontAnimate()
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .priority(Priority.IMMEDIATE)
                     // Update signature every hour for profile picture changes.
                     .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {

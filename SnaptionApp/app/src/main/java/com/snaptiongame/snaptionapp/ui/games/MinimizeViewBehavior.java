@@ -6,7 +6,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 /**
  * MinimizeViewBehavior represents the minimizing and expanding behavior of an view that is
@@ -23,7 +22,7 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private static final String STATUS_BAR_HEIGHT_RES = "status_bar_height";
     private static final String DIMEN_RES = "dimen";
     private static final String ANDROID_RES = "android";
-    private LinearLayout viewBelowView = null;
+    private View minimizeView;
     private int appBarHeight = -1;
     private int statusBarHeight = -1;
 
@@ -31,8 +30,8 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
 
     public MinimizeViewBehavior() {}
 
-    public MinimizeViewBehavior(LinearLayout viewBelowView) {
-        this.viewBelowView = viewBelowView;
+    public MinimizeViewBehavior(View minimizeView) {
+        this.minimizeView = minimizeView;
     }
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) {
@@ -44,7 +43,6 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
                                           View dependency) {
         if (appBarHeight < 0) {
             appBarHeight = dependency.getHeight();
-            updateViewMaxHeight(child.getHeight());
             Resources res = child.getResources();
             statusBarHeight = res.getDimensionPixelSize(res.getIdentifier(STATUS_BAR_HEIGHT_RES,
                     DIMEN_RES, ANDROID_RES));
@@ -56,25 +54,15 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         dependency.getLocationOnScreen(location);
         float dependencyY = location[1];
 
-        if (maxViewHeight <= 0 || child.getHeight() > maxViewHeightPx) {
-            updateViewMaxHeight(child.getHeight());
+        if (maxViewHeight <= 0 || minimizeView.getHeight() > maxViewHeightPx) {
+            updateViewMaxHeight(minimizeView.getHeight());
         }
         if (maxViewHeight > 0) {
-            // translate the  view
-            float viewY = dependencyY + appBarHeight - statusBarHeight;
-            child.setY(viewY);
-            
-            // minimize/expand  view
-            ViewGroup.LayoutParams lp = child.getLayoutParams();
-            int Height = Math.round((maxViewHeight - maxViewHeight * MIN_PERCENT_HEIGHT) /
+            // minimize/expand view
+            ViewGroup.LayoutParams lp = minimizeView.getLayoutParams();
+            lp.height = Math.round((maxViewHeight - maxViewHeight * MIN_PERCENT_HEIGHT) /
                     appBarHeight * (dependencyY - statusBarHeight) + maxViewHeight);
-            lp.height = Height;
-            child.setLayoutParams(lp);
-
-            if (viewBelowView != null) {
-                // translate the view under the  view
-                viewBelowView.setY(viewY + Height);
-            }
+            minimizeView.setLayoutParams(lp);
         }
         return true;
     }
@@ -86,6 +74,5 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         else {
             this.maxViewHeight = maxViewHeight;
         }
-        viewBelowView.setPadding(0, 0, 0, Math.round(maxViewHeight * MIN_PERCENT_HEIGHT));
     }
 }

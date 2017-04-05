@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,7 +18,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -145,12 +145,10 @@ public class GameActivity extends HomeAppCompatActivity {
     public View progressSpinner;
 
     @BindView(R.id.coord_layout)
-    protected  CoordinatorLayout coordinatorLayout;
+    protected CoordinatorLayout coordinatorLayout;
 
     @BindView(R.id.game_content)
     public LinearLayout gameContentLayout;
-    @BindView(R.id.image_progress_bar)
-    protected FrameLayout imageProgressBar;
 
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
@@ -175,11 +173,14 @@ public class GameActivity extends HomeAppCompatActivity {
         ButterKnife.bind(this);
         setupToolbar(toolbar);
 
+        supportPostponeEnterTransition();
+
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
         if(startedIntent.hasExtra(Constants.GAME)) {
             game = (Game)getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             setupGameElements(game);
+            ViewCompat.setTransitionName(imageView, game.getId());
         } else if(startedIntent.hasExtra(USE_GAME_ID)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
@@ -201,9 +202,6 @@ public class GameActivity extends HomeAppCompatActivity {
                         }
                     });
         }
-        // initialize minimize image behavior
-        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-        ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(minimizeImageBehavior);
     }
 
     private void setupGameElements(Game game) {
@@ -213,13 +211,11 @@ public class GameActivity extends HomeAppCompatActivity {
             @Override
             public void onData(Boolean data) {
                 if (data) {
-                    // hide the progress bar and remove its behavior
-                    imageProgressBar.setVisibility(View.GONE);
-                    ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(null);
+                    supportStartPostponedEnterTransition();
                     // add a new behavior to the image view
-                    minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-                    ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams()).setBehavior(minimizeImageBehavior);
-                    minimizeImageBehavior.updateViewMaxHeight(imageView.getHeight());
+                    minimizeImageBehavior = new MinimizeViewBehavior(imageView);
+                    ((CoordinatorLayout.LayoutParams) gameContentLayout.getLayoutParams()).setBehavior(minimizeImageBehavior);
+
                 }
             }
             @Override
