@@ -1,5 +1,6 @@
 package com.snaptiongame.snaptionapp.servercalls;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -389,7 +391,7 @@ public class FirebaseResourceManager {
      * @param listener ResourceListener to be notified when the image has been loaded
      */
     public static void loadImageIntoView(final String imagePath, final ImageView imageView,
-                                         final ResourceListener<Boolean> listener) {
+                                         final ResourceListener<Bitmap> listener) {
         StorageReference ref = storage.child(imagePath);
         try {
             Glide.with(imageView.getContext())
@@ -401,6 +403,9 @@ public class FirebaseResourceManager {
                         public boolean onException(Exception e, StorageReference model,
                                                    Target<GlideDrawable> target,
                                                    boolean isFirstResource) {
+                            if (listener != null) {
+                                listener.onData(null);
+                            }
                             return false;
                         }
 
@@ -411,7 +416,7 @@ public class FirebaseResourceManager {
                                                        boolean isFromMemoryCache,
                                                        boolean isFirstResource) {
                             if (listener != null) {
-                                listener.onData(true);
+                                listener.onData(((GlideBitmapDrawable) resource).getBitmap());
                             }
                             return false;
                         }

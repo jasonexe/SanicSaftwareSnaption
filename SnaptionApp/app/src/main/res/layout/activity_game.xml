@@ -32,23 +32,18 @@
                     android:id="@+id/picker_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
-                    android:orientation="horizontal"
-                    android:padding="4dp"
-                    android:paddingEnd="8dp"
-                    android:paddingStart="8dp">
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp">
 
                     <android.support.v7.widget.CardView
                         android:id="@+id/picker_photo_view"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_alignParentStart="true"
-                        android:layout_centerHorizontal="true"
-                        android:innerRadius="0dp"
-                        android:shape="ring"
-                        android:thicknessRatio="1.9"
+                        android:layout_centerVertical="true"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="2dp">
+                        app:cardElevation="0dp">
 
                         <ImageView
                             android:id="@+id/picker_photo"
@@ -60,18 +55,17 @@
                     <TextView
                         android:id="@+id/picker_name"
                         android:layout_width="wrap_content"
-                        android:layout_height="30dp"
+                        android:layout_height="wrap_content"
                         android:layout_toEndOf="@id/picker_photo_view"
-                        android:gravity="center_vertical"
-                        android:paddingStart="8dp"
-                        android:textColor="@android:color/white" />
+                        android:layout_centerVertical="true"
+                        android:paddingStart="8dp"/>
 
                     <ImageView
                         android:id="@+id/flag_icon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_empty_flag" />
+                        android:src="@drawable/flag_outline" />
 
                 </RelativeLayout>
 
@@ -79,7 +73,6 @@
                     android:id="@+id/date_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/colorPrimaryDark"
                     android:orientation="horizontal"
                     android:padding="2dp"
                     android:paddingEnd="10dp"
@@ -91,33 +84,30 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="8dp"
-                        android:text="@string/end_date"
-                        android:textColor="@android:color/white" />
+                        android:text="@string/end_date" />
 
                     <TextView
                         android:id="@+id/text_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_toEndOf="@id/end_date"
-                        android:textColor="@android:color/white" />
+                        android:layout_toEndOf="@id/end_date" />
 
                     <ImageView
                         android:id="@+id/captions_icon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
-                        android:src="@drawable/ic_chat_bubble" />
+                        android:src="@drawable/ic_chat_bubble_outline_grey_400_24dp" />
 
                     <TextView
                         android:id="@+id/number_captions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:layout_toStartOf="@id/captions_icon"
-                        android:textColor="@android:color/white" />
+                        android:layout_toStartOf="@id/captions_icon" />
 
                     <Button
                         android:id="@+id/invite_friends"

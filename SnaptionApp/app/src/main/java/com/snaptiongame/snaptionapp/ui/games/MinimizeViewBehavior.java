@@ -64,6 +64,7 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
                     appBarHeight * (dependencyY - statusBarHeight) + maxViewHeight);
             minimizeView.setLayoutParams(lp);
         }
+        child.invalidate();
         return true;
     }
 
