@@ -134,7 +134,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // distinguish between complete and incomplete games, and public/private
         setCaptionTextStyle(holder, game);
 
-        if (Build.VERSION.SDK_INT >= Constants.CLIP_TO_OUTLINE_MIN_SDK) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }

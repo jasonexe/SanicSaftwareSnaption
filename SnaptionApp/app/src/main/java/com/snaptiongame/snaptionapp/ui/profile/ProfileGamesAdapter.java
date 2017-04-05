@@ -15,8 +15,6 @@ import com.snaptiongame.snaptionapp.ui.games.GameActivity;
 
 import java.util.List;
 
-import static com.snaptiongame.snaptionapp.Constants.CLIP_TO_OUTLINE_MIN_SDK;
-
 /**
  * Created by austinrobarts on 1/29/17.
  */
@@ -40,7 +38,7 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
         final Game game = games.get(games.size() - 1 - position);
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
 
-        if (Build.VERSION.SDK_INT >= CLIP_TO_OUTLINE_MIN_SDK) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
