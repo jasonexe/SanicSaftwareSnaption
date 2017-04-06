@@ -442,6 +442,7 @@ public class FirebaseResourceManager {
                     .load(ref)
                     .fitCenter()
                     .dontAnimate()
+                    // Caches the full image to make reloading faster
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .priority(Priority.IMMEDIATE)
                     // Update signature every hour for profile picture changes.

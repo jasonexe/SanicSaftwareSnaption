@@ -23,20 +23,24 @@ public class ColorUtilities {
     public static final int IS_DARK = 1;
     public static final int LIGHTNESS_UNKNOWN = 2;
     private static final float SCRIM_ADJUSTMENT = 0.5f;
+    private static final int BITMAP_HEIGHT = 24;
 
     public interface ColorListener {
         void onColorGenerated(int color);
     }
 
+    /**
+     * Generates the most populous color within the top (image width x 24dp) area of the image
+     *
+     * @param context       context used for measuring density pixels
+     * @param bitmap        image bitmap
+     * @param colorListener listener called when the color is generated
+     */
     public static void generateBitmapColor(Context context, final Bitmap bitmap, final ColorListener colorListener) {
         final int twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                24, context.getResources().getDisplayMetrics());
-        Palette.from(bitmap)
-                .maximumColorCount(3)
-                .clearFilters()
-                .setRegion(0, 0, bitmap.getWidth() - 1, twentyFourDip) /* - 1 to work around
-                        https://code.google.com/p/android/issues/detail?id=191013 */
-                .generate(new Palette.PaletteAsyncListener() {
+                BITMAP_HEIGHT, context.getResources().getDisplayMetrics());
+        generateBitmapPalette(bitmap, bitmap.getWidth() - 1, twentyFourDip,
+                new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
                         boolean isDark;
@@ -56,14 +60,21 @@ public class ColorUtilities {
                 });
     }
 
+    /**
+     * Generates the proper home arrow color based on the most populous color within the top
+     * left (24dp x 24dp) area of the image. If the most populous color is light, a dark grey color
+     * is passed to the listener. If the most populous color is dark, a whitle color is passed to
+     * the listener.
+     *
+     * @param context       context used for measuring density pixels
+     * @param bitmap        image bitmap
+     * @param colorListener listener called when the color is generated
+     */
     public static void generateHomeArrowColor(final Context context, final Bitmap bitmap, final ColorListener colorListener) {
         final int twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                24, context.getResources().getDisplayMetrics());
-        Palette.from(bitmap)
-                .maximumColorCount(3)
-                .clearFilters()
-                .setRegion(0, 0, twentyFourDip, twentyFourDip)
-                .generate(new Palette.PaletteAsyncListener() {
+                BITMAP_HEIGHT, context.getResources().getDisplayMetrics());
+        generateBitmapPalette(bitmap, bitmap.getWidth() - 1, twentyFourDip,
+                new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
                         boolean isDark;
@@ -73,10 +84,19 @@ public class ColorUtilities {
                         } else {
                             isDark = lightness == IS_DARK;
                         }
-                        int color = ContextCompat.getColor(context, isDark? android.R.color.white : R.color.darkGrey);
+                        int color = ContextCompat.getColor(context, isDark ? android.R.color.white : R.color.darkGrey);
                         colorListener.onColorGenerated(color);
                     }
                 });
+    }
+
+    private static void generateBitmapPalette(Bitmap bitmap, int width, int height,
+                                              Palette.PaletteAsyncListener paletteListener) {
+        Palette.from(bitmap)
+                .maximumColorCount(3)
+                .clearFilters()
+                .setRegion(0, 0, width, height)
+                .generate(paletteListener);
     }
 
     /**
@@ -157,8 +177,7 @@ public class ColorUtilities {
      */
     public static
     @ColorInt
-    int scrimify(@ColorInt int color,
-                 boolean isDark,
+    int scrimify(@ColorInt int color, boolean isDark,
                  @FloatRange(from = 0f, to = 1f) float lightnessMultiplier) {
         float[] hsl = new float[3];
         ColorUtils.colorToHSL(color, hsl);

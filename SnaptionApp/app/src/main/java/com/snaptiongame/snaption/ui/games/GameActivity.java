@@ -83,6 +83,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private final static String EMPTY_SIZE = "0";
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
+    private static final long BITMAP_ANIM_DURATION = 1000L;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
@@ -200,11 +201,12 @@ public class GameActivity extends HomeAppCompatActivity {
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
         if (startedIntent.hasExtra(Constants.GAME)) {
+            game = (Game) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
+            // set the shared transition view name
+            ViewCompat.setTransitionName(imageView, game.getId());
             // postpone transition til image is loaded
             supportPostponeEnterTransition();
-            game = (Game) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             setupGameElements(game);
-            ViewCompat.setTransitionName(imageView, game.getId());
         } else if (startedIntent.hasExtra(USE_GAME_ID)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
@@ -246,6 +248,7 @@ public class GameActivity extends HomeAppCompatActivity {
                                     .setBehavior(minimizeImageBehavior);
                             // start transition now that image is loaded
                             supportStartPostponedEnterTransition();
+                            // animate the image color swatch
                             animateBitmapColorSwatch(bitmap);
                         }
                     }
@@ -283,7 +286,7 @@ public class GameActivity extends HomeAppCompatActivity {
                                             getSupportActionBar().setHomeAsUpIndicator(upArrow);
                                         }
                                     });
-                            // animate the color change of the status bar, image, and game info
+                            // animate the color change of the status bar and image
                             ValueAnimator statusBarColorAnim = ValueAnimator.ofArgb(
                                     getWindow().getStatusBarColor(), color);
                             statusBarColorAnim.addUpdateListener(new ValueAnimator
@@ -295,7 +298,7 @@ public class GameActivity extends HomeAppCompatActivity {
                                     imageView.setBackgroundColor(transitionColor);
                                 }
                             });
-                            statusBarColorAnim.setDuration(1000L);
+                            statusBarColorAnim.setDuration(BITMAP_ANIM_DURATION);
                             statusBarColorAnim.setInterpolator(AnimationUtils.loadInterpolator(GameActivity.this,
                                     android.R.interpolator.fast_out_slow_in));
                             statusBarColorAnim.start();
