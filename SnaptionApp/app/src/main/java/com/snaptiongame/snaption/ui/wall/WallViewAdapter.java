@@ -1,12 +1,10 @@
 package com.snaptiongame.snaption.ui.wall;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
@@ -27,7 +25,6 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
-import com.snaptiongame.snaption.ui.games.GameActivity;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
@@ -54,6 +51,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private List<Game> items;
     private Map<Integer, WallViewHolder> itemNumToHolder;
     private ProfileActivity.ProfileActivityCreator profileMaker;
+    private OnClickGamePhotoListener onClickGamePhotoListener;
 
     public WallViewAdapter(List<Game> items, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
@@ -67,21 +65,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         return new WallViewHolder(view);
     }
 
-    class PhotoClickListener implements View.OnClickListener {
-        Game game;
-        public PhotoClickListener(Game game) {
-            this.game = game;
-        }
-
-        @Override
-        public void onClick(View view) {
-            Context imageContext = view.getContext();
-            Intent createGameIntent = new Intent(imageContext, GameActivity.class);
-            createGameIntent.putExtra(Constants.GAME, game);
-            ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation((Activity) imageContext, view, game.getId());
-            imageContext.startActivity(createGameIntent, options.toBundle());
-        }
+    public interface OnClickGamePhotoListener {
+        void onClickGamePhoto(View view, Game game);
     }
 
     /**
@@ -116,8 +101,8 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(WallViewHolder holder, int position) {
-        Game game = items.get(position);
+    public void onBindViewHolder(final WallViewHolder holder, int position) {
+        final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
         displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
@@ -134,7 +119,14 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         itemNumToHolder.put(position, holder);
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
-        holder.photo.setOnClickListener(new PhotoClickListener(game));
+        holder.photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onClickGamePhotoListener != null) {
+                    onClickGamePhotoListener.onClickGamePhoto(holder.photo, game);
+                }
+            }
+        });
         ViewCompat.setTransitionName(holder.photo, game.getId());
 
         // distinguish between complete and incomplete games, and public/private
@@ -383,5 +375,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void clearItems() {
         items.clear();
         notifyDataSetChanged();
+    }
+
+    public void setOnClickGamePhotoListener(OnClickGamePhotoListener onClickGamePhotoListener) {
+        this.onClickGamePhotoListener = onClickGamePhotoListener;
     }
 }
