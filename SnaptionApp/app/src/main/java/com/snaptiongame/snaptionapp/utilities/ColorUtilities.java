@@ -11,7 +11,7 @@ import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.TypedValue;
 
-import com.snaptiongame.snaptionapp.R;
+import com.snaptiongame.snaption.R;
 
 /**
  * Created by brittanyberlanga on 4/4/17.
