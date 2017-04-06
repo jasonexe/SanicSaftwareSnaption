@@ -36,7 +36,7 @@
             android:background="@android:color/white"
             app:menu="@menu/menu_navigation_bottom"
             app:elevation="8dp"
-            app:layout_behavior="com.snaptiongame.snaptionapp.utilities.BottomNavigationBehavior"/>
+            app:layout_behavior="com.snaptiongame.snaption.utilities.BottomNavigationBehavior"/>
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
