@@ -166,6 +166,9 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.date_container)
     public RelativeLayout dateContainer;
 
+    @BindView(R.id.progress_bar)
+    public View progressBar;
+
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
         public void onData(Caption data) {
@@ -188,6 +191,11 @@ public class GameActivity extends HomeAppCompatActivity {
         setContentView(R.layout.activity_game);
         ButterKnife.bind(this);
         setupToolbar(toolbar);
+
+        // add scrolling behavior to progress bar
+        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                .setBehavior(minimizeImageBehavior);
 
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
@@ -228,12 +236,16 @@ public class GameActivity extends HomeAppCompatActivity {
                     @Override
                     public void onData(final Bitmap bitmap) {
                         if (bitmap != null) {
-                            // start transition now that image is loaded
-                            supportStartPostponedEnterTransition();
+                            // remove the progress bar
+                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                    .setBehavior(null);
+                            progressBar.setVisibility(View.GONE);
                             // add a new behavior to the image view
                             minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
                             ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
                                     .setBehavior(minimizeImageBehavior);
+                            // start transition now that image is loaded
+                            supportStartPostponedEnterTransition();
                             animateBitmapColorSwatch(bitmap);
                         }
                     }

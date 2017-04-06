@@ -33,6 +33,7 @@ public class ColorUtilities {
                 24, context.getResources().getDisplayMetrics());
         Palette.from(bitmap)
                 .maximumColorCount(3)
+                .clearFilters()
                 .setRegion(0, 0, bitmap.getWidth() - 1, twentyFourDip) /* - 1 to work around
                         https://code.google.com/p/android/issues/detail?id=191013 */
                 .generate(new Palette.PaletteAsyncListener() {
@@ -49,9 +50,6 @@ public class ColorUtilities {
                         int color = -1;
                         if (topColor != null) {
                             color = scrimify(topColor.getRgb(), isDark, SCRIM_ADJUSTMENT);
-                            if (color == -1) {
-                                color = topColor.getRgb();
-                            }
                         }
                         colorListener.onColorGenerated(color);
                     }
