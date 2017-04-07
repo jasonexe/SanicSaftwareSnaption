@@ -101,15 +101,15 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                         continued = false;
                         data.add(curGame);
                     }
+                    if(data.size() > 0 && !continued && retrievedOnce) {
+                        data.remove(data.size() - 1);
+                    }
+
                     if (!retrievedOnce) {
                         retrievedOnce = true;
                     }
                 }
-                // TODO this will remove the brand-newest game. Not a big deal for now, but should
-                // fix in the future
-                if(data.size() > 0 && !continued) {
-                    data.remove(data.size() - 1);
-                }
+
                 // Since it still counts forwards, need to reverse it. IE if the list is 1 2 3 4 5,
                 // and we limitToLast 2, we'll get back 4 5, but want it in 5 4 order. But still
                 // endAt 4 for the next query, which is why we have gotFirst above.
