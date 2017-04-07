@@ -62,9 +62,20 @@ public class FriendsFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        populateFriends();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        firebase.removeListener();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
-        firebase.removeListener();
         unbinder.unbind();
     }
 
