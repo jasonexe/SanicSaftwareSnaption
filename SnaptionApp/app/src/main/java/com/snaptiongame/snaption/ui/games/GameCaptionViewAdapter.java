@@ -327,6 +327,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 holder.captionerPhoto.setImageDrawable(ContextCompat.getDrawable(
                         holder.captionerPhoto.getContext(),
                         R.drawable.com_facebook_profile_picture_blank_square));
+                holder.captionerPhoto.setOnClickListener(null);
             }
             // Display the captioner info if valid user
             else {
