@@ -11,9 +11,12 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.FRIENDS_PATH;
+import static com.snaptiongame.snaption.Constants.PROVIDER_FACEBOOK;
+import static com.snaptiongame.snaption.Constants.PROVIDER_GOOGLE;
 import static com.snaptiongame.snaption.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaption.servercalls.Uploader.UploadListener;
 
@@ -31,8 +34,9 @@ public class FriendsViewModel {
     }
 
     public void getLoginProviderFriends(final ResourceListener<Friend> listener) {
+        List<String> providers = FirebaseResourceManager.getProviders();
         // if the user logged in with Facebook
-        if (!TextUtils.isEmpty(user.getFacebookId())) {
+        if (providers.contains(PROVIDER_FACEBOOK)) {
             // retrieve user's friends to use for filtering out Facebook friends that are already
             // their friends
             FirebaseResourceManager.retrieveStringMapNoUpdates(String.format(FRIENDS_PATH, user.getId()),
@@ -50,7 +54,7 @@ public class FriendsViewModel {
 
         }
         // else the user logged in with Google+
-        else {
+        else if (providers.contains(PROVIDER_GOOGLE)) {
             // TODO get Google+ friends
         }
     }
