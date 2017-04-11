@@ -69,10 +69,11 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         }
     }
 
+    // This method retrieves games in the order they are created, from newest to oldest
     private void retrieveBottomPublicGames() {
         Query query = database.getReference(GAMES_PATH).orderByChild(CREATION_DATE);
         if(retrievedOnce) {
-            // Technically last retrieved priority should be last retrieved creation date, but don't
+            // Technically last retrieved priority should be named last retrieved creation date, but don't
             // Want to do extra variables
             query = query.limitToLast(publicLimit).endAt((long) lastRetrievedPriority, lastRetrievedKey);
         } else {
@@ -85,7 +86,9 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 List<Game> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
-                    boolean gotFirst = false;
+                    // Since we're using the first game's creation date and key, this boolean is
+                    // to track if they have been set yet.
+                    boolean gotFirst = false; 
                     for (DataSnapshot snapshot : snapshots) {
                         Game curGame = (Game) snapshot.getValue(listener.getDataType());
                         if(!gotFirst) {
@@ -93,14 +96,20 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                             lastRetrievedKey = snapshot.getKey();
                             gotFirst = true;
                         }
+                        // Checks if the game is private or not. If it is, then the priority will be > 0, meaning don't put it in data
                         if(snapshot.getPriority() != null && (double) snapshot.getPriority() > 0) {
                             // If we had to do a continue, don't remove the last thing from data
                             continued = true;
                             continue;
                         }
+                        // This is only set to false if the above if statement is false. This and the above logic makes it
+                        // so that if the last game retrieved was private, then we won't remove the game retrieved before it
+                        // from the list.
                         continued = false;
                         data.add(curGame);
                     }
+                    // If the last retrieved game was not private, and this is not
+                    // the first query then remove it (it will be retrieved in the next query)
                     if(data.size() > 0 && !continued && retrievedOnce) {
                         data.remove(data.size() - 1);
                     }
@@ -110,7 +119,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     }
                 }
 
-                // Since it still counts forwards, need to reverse it. IE if the list is 1 2 3 4 5,
+                // Since the query still counts forwards, need to reverse it. IE if the list is 1 2 3 4 5,
                 // and we limitToLast 2, we'll get back 4 5, but want it in 5 4 order. But still
                 // endAt 4 for the next query, which is why we have gotFirst above.
                 Collections.reverse(data);
