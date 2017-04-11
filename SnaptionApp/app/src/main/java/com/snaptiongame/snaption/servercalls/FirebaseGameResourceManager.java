@@ -35,6 +35,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private boolean retrievedOnce = false;
     private String lastRetrievedKey;
     private Object lastRetrievedPriority;
+    private Object lastRetrievedCreationDate;
     private String userId;
 
     private GameType gameType;
@@ -73,9 +74,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     private void retrieveBottomPublicGames() {
         Query query = database.getReference(GAMES_PATH).orderByChild(CREATION_DATE);
         if(retrievedOnce) {
-            // Technically last retrieved priority should be named last retrieved creation date, but don't
-            // Want to do extra variables
-            query = query.limitToLast(publicLimit).endAt((long) lastRetrievedPriority, lastRetrievedKey);
+            query = query.limitToLast(publicLimit).endAt((long) lastRetrievedCreationDate, lastRetrievedKey);
         } else {
             query = query.limitToLast(publicLimit);
         }
@@ -92,7 +91,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     for (DataSnapshot snapshot : snapshots) {
                         Game curGame = (Game) snapshot.getValue(listener.getDataType());
                         if(!gotFirst) {
-                            lastRetrievedPriority = curGame.getCreationDate();
+                            lastRetrievedCreationDate = curGame.getCreationDate();
                             lastRetrievedKey = snapshot.getKey();
                             gotFirst = true;
                         }
