@@ -1,7 +1,11 @@
 package com.snaptiongame.snaption.ui.friends;
 
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuthProvider;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
@@ -11,15 +15,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
 import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +35,7 @@ import java.util.Map;
 import static com.snaptiongame.snaption.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaption.servercalls.Uploader.UploadListener;
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -76,14 +85,22 @@ public class FriendsViewModelTest {
 
     @Test
     public void testGetFbProviderLabel() {
-        when(user.getFacebookId()).thenReturn(TEST_FB_ID);
+        List<String> providers = new ArrayList<>();
+        providers.add(FacebookAuthProvider.PROVIDER_ID);
+        PowerMockito.mockStatic(FirebaseResourceManager.class);
+        BDDMockito.given(FirebaseResourceManager.getProviders())
+                .willReturn(providers);
         assertEquals(FB_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
     }
 
     @Test
     public void testGetGoogleProviderLabel() {
-        when(user.getFacebookId()).thenReturn(null);
+        List<String> providers = new ArrayList<>();
+        providers.add(GoogleAuthProvider.PROVIDER_ID);
+        PowerMockito.mockStatic(FirebaseResourceManager.class);
+        BDDMockito.given(FirebaseResourceManager.getProviders())
+                .willReturn(providers);
         assertEquals(GOOGLE_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
     }
@@ -107,7 +124,11 @@ public class FriendsViewModelTest {
 
     @Test
     public void testGetFbProviderFriends() {
-        mockStatic(FirebaseResourceManager.class);
+        List<String> providers = new ArrayList<>();
+        providers.add(FacebookAuthProvider.PROVIDER_ID);
+        PowerMockito.mockStatic(FirebaseResourceManager.class);
+        BDDMockito.given(FirebaseResourceManager.getProviders())
+                .willReturn(providers);
         when(user.getFacebookId()).thenReturn(TEST_FB_ID);
         when(user.getId()).thenReturn(TEST_SNAPTION_ID);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
