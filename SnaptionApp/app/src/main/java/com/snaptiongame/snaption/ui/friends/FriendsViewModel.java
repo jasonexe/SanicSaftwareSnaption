@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.FRIENDS_PATH;
-import static com.snaptiongame.snaption.Constants.PROVIDER_FACEBOOK;
-import static com.snaptiongame.snaption.Constants.PROVIDER_GOOGLE;
 import static com.snaptiongame.snaption.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaption.servercalls.Uploader.UploadListener;
 
