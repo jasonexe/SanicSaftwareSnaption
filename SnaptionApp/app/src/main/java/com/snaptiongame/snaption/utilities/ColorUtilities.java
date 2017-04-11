@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp.utilities;
+package com.snaptiongame.snaption.utilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -39,7 +39,7 @@ public class ColorUtilities {
     public static void generateBitmapColor(Context context, final Bitmap bitmap, final ColorListener colorListener) {
         final int twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 BITMAP_HEIGHT, context.getResources().getDisplayMetrics());
-        generateBitmapPalette(bitmap, bitmap.getWidth() - 1, twentyFourDip,
+        generateBitmapPalette(bitmap, bitmap.getWidth() - 1, twentyFourDip, false,
                 new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
@@ -54,6 +54,9 @@ public class ColorUtilities {
                         int color = -1;
                         if (topColor != null) {
                             color = scrimify(topColor.getRgb(), isDark, SCRIM_ADJUSTMENT);
+                            if (color == -1) {
+                                color = topColor.getRgb();
+                            }
                         }
                         colorListener.onColorGenerated(color);
                     }
@@ -73,14 +76,14 @@ public class ColorUtilities {
     public static void generateHomeArrowColor(final Context context, final Bitmap bitmap, final ColorListener colorListener) {
         final int twentyFourDip = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 BITMAP_HEIGHT, context.getResources().getDisplayMetrics());
-        generateBitmapPalette(bitmap, bitmap.getWidth() - 1, twentyFourDip,
+        generateBitmapPalette(bitmap, twentyFourDip, twentyFourDip, true,
                 new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(Palette palette) {
                         boolean isDark;
                         int lightness = isDark(palette);
                         if (lightness == LIGHTNESS_UNKNOWN) {
-                            isDark = isDark(bitmap, bitmap.getWidth() / 2, 0);
+                            isDark = isDark(bitmap, 0, 0);
                         } else {
                             isDark = lightness == IS_DARK;
                         }
@@ -90,13 +93,13 @@ public class ColorUtilities {
                 });
     }
 
-    private static void generateBitmapPalette(Bitmap bitmap, int width, int height,
+    private static void generateBitmapPalette(Bitmap bitmap, int width, int height, boolean clearFilters,
                                               Palette.PaletteAsyncListener paletteListener) {
-        Palette.from(bitmap)
-                .maximumColorCount(3)
-                .clearFilters()
-                .setRegion(0, 0, width, height)
-                .generate(paletteListener);
+        Palette.Builder builder = Palette.from(bitmap).maximumColorCount(3);
+        if (clearFilters) {
+            builder = builder.clearFilters();
+        }
+        builder.setRegion(0, 0, width, height).generate(paletteListener);
     }
 
     /**

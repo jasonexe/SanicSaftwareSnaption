@@ -49,7 +49,7 @@ import com.snaptiongame.snaption.ui.ScrollFabHider;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
-import com.snaptiongame.snaptionapp.utilities.ColorUtilities;
+import com.snaptiongame.snaption.utilities.ColorUtilities;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -280,10 +280,7 @@ public class GameActivity extends HomeAppCompatActivity {
                                     bitmap, new ColorUtilities.ColorListener() {
                                         @Override
                                         public void onColorGenerated(int arrowColor) {
-                                            final Drawable upArrow = ContextCompat
-                                                    .getDrawable(GameActivity.this, R.drawable.back_arrow);
-                                            upArrow.setColorFilter(arrowColor, PorterDuff.Mode.SRC_ATOP);
-                                            getSupportActionBar().setHomeAsUpIndicator(upArrow);
+                                            setupHomeArrow(arrowColor);
                                         }
                                     });
                             // animate the color change of the status bar and image
@@ -304,6 +301,15 @@ public class GameActivity extends HomeAppCompatActivity {
                             statusBarColorAnim.start();
                         }
                     });
+        }
+    }
+
+    private void setupHomeArrow(int arrowColor) {
+        if (getSupportActionBar() != null) {
+            final Drawable upArrow = ContextCompat
+                    .getDrawable(GameActivity.this, R.drawable.back_arrow);
+            upArrow.setColorFilter(arrowColor, PorterDuff.Mode.SRC_ATOP);
+            getSupportActionBar().setHomeAsUpIndicator(upArrow);
         }
     }
 
