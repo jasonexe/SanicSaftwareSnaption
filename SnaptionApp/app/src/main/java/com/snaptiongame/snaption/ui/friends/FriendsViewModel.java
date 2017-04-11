@@ -60,7 +60,9 @@ public class FriendsViewModel {
     }
 
     public String getLoginProviderLabel(Context appContext) {
-        if (!TextUtils.isEmpty(user.getFacebookId())) {
+        List<String> providers = FirebaseResourceManager.getProviders();
+        // if the user logged in with Facebook
+        if (providers.contains(PROVIDER_FACEBOOK)) {
             return appContext.getString(R.string.fb_friends);
         }
         else {
@@ -97,6 +99,13 @@ public class FriendsViewModel {
     }
 
     public int getFacebookButtonVisibility() {
-        return user.getFacebookId() != null ? View.VISIBLE : View.INVISIBLE;
+        List<String> providers = FirebaseResourceManager.getProviders();
+        // if the user logged in with Facebook
+        if (providers.contains(PROVIDER_FACEBOOK)) {
+            return View.VISIBLE;
+        }
+        else {
+            return View.INVISIBLE;
+        }
     }
 }
