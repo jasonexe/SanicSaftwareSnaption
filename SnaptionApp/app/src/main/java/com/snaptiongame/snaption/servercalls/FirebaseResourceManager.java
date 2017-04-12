@@ -56,45 +56,10 @@ public class FirebaseResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
 
-
     private ValueEventListener valueEventListener;
     private DatabaseReference databaseReference;
 
     public FirebaseResourceManager() {}
-
-    /**
-     * Notifies the given ResourceListener of when elements in the table of the given path is changed
-     *
-     * @param path The table path name
-     * @param listener A ResourceListener for a List of the resource class type associated with the
-     *                 table elements
-     */
-    public void retrieveAllWithUpdates(String path, final ResourceListener listener) {
-        // if the FirebaseResourceManager is already being used to listen to the db, remove the
-        // previous listener
-        removeListener();
-
-        databaseReference = database.getReference(path);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List data = new ArrayList<>();
-                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
-                for (DataSnapshot snapshot : snapshots) {
-                    data.add(snapshot.getValue(listener.getDataType()));
-                }
-                // Notify the ResourceListener that data was received
-                listener.onData(data);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        };
-        databaseReference.addValueEventListener(valueEventListener);
-    }
 
     /**
      * Notifies the given ResourceListener of when elements in the table of the given path is
@@ -110,33 +75,29 @@ public class FirebaseResourceManager {
         removeListener();
 
         databaseReference = database.getReference(path);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // Needs to check for the specific object, else Object will set it as a map or array
-                // If you need this method for another data type, add in more if statements
-                if (listener.getDataType() == Caption.class) {
-                    // Tells firebase what type of object to return
-                    GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
-                            new GenericTypeIndicator<Map<String, Caption>>() {};
-                    Map<String, Caption> data = dataSnapshot.getValue(genericTypeIndicator);
-                    listener.onData(data);
-                }
-                else {
-                    // Tells firebase what type of object to return
-                    GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
-                            new GenericTypeIndicator<Map<String, Object>>() {};
-                    Map<String, Object> data = dataSnapshot.getValue(genericTypeIndicator);
-                    listener.onData(data);
-                }
-            }
+        GenericTypeIndicator<Map<String, Object>> genericTypeIndicator =
+                new GenericTypeIndicator<Map<String, Object>>() {};
+        valueEventListener = EventListenCreator.getValueEventListener(genericTypeIndicator, listener);
+        databaseReference.addValueEventListener(valueEventListener);
+    }
 
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        };
+    /**
+     * Notifies the given ResourceListener of when elements in the table of the given path is
+     * changed.
+     *
+     * @param path The table path name
+     * @param listener A ResourceListener for a Map of the resource class type associated with the
+     *                 table elements
+     */
+    public void retrieveCaptionMapWithUpdates(String path, final ResourceListener listener) {
+        // if the FirebaseResourceManager is already being used to listen to the db, remove the
+        // previous listener
+        removeListener();
+
+        databaseReference = database.getReference(path);
+        GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
+                new GenericTypeIndicator<Map<String, Caption>>() {};
+        valueEventListener = EventListenCreator.getValueEventListener(genericTypeIndicator, listener);
         databaseReference.addValueEventListener(valueEventListener);
     }
 
@@ -216,45 +177,7 @@ public class FirebaseResourceManager {
     public static void retrieveSingleNoUpdates(String path, final ResourceListener listener) {
         //used for just receiving data once
         DatabaseReference ref = database.getReference(path);
-        ValueEventListener firebaseResponse = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Object data = dataSnapshot.getValue(listener.getDataType());
-                listener.onData(data);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w(TAG, "Failed to read value.", databaseError.toException());
-            }
-        };
-        //set up single event listener that only sends info once
-        ref.addListenerForSingleValueEvent(firebaseResponse);
-
-    }
-
-    /**
-     * Set up a listener to receive a list of strings at a specified path without a connection
-     * for future data changes
-     *
-     * @param path the path to the list of strings requested from Firebase
-     * @param listener this will be waiting to receive the object requested
-     */
-    public static void retrieveStringListNoUpdates(String path, final ResourceListener<List<String>> listener) {
-        final DatabaseReference ref = database.getReference().child(path);
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<String>> t = new GenericTypeIndicator<List<String>>() {};
-                List<String> items = dataSnapshot.getValue(t);
-                listener.onData(items);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onData(null);
-            }
-        });
+        ref.addListenerForSingleValueEvent(EventListenCreator.getValueEventListener(listener.getDataType(), listener));
     }
 
     /**
@@ -267,45 +190,8 @@ public class FirebaseResourceManager {
     public static void retrieveStringMapNoUpdates(String path,
                                                   final ResourceListener<Map<String, Integer>> listener) {
         final DatabaseReference ref = database.getReference().child(path);
-        ref.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<Map<String, Integer>> t = new GenericTypeIndicator<Map<String, Integer>>() {};
-                Map<String, Integer> items = dataSnapshot.getValue(t);
-                listener.onData(items);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onData(null);
-            }
-        });
-    }
-
-    /**
-     * Set up a listener to receive a map of strings at a specified path without a connection
-     * for future data changes
-     *
-     * @param path the path to the list of strings requested from Firebase
-     * @param listener this will be waiting to receive the object requested
-     */
-    public void retrieveStringMapWithUpdates(String path,
-                                                  final ResourceListener<Map<String, Integer>> listener) {
-        removeListener();
-        databaseReference = database.getReference(path);
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<Map<String, Integer>> t = new GenericTypeIndicator<Map<String, Integer>>() {};
-                Map<String, Integer> items = dataSnapshot.getValue(t);
-                listener.onData(items);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                listener.onData(null);
-            }
-        });
+        GenericTypeIndicator<Map<String, Integer>> type = new GenericTypeIndicator<Map<String, Integer>>() {};
+        ref.addListenerForSingleValueEvent(EventListenCreator.getValueEventListener(type, listener));
     }
 
     /**
@@ -321,23 +207,9 @@ public class FirebaseResourceManager {
         removeListener();
 
         databaseReference = database.getReference(path);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Object data = dataSnapshot.getValue(listener.getDataType());
-                // Notify the ResourceListener that data was received
-                listener.onData(data);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        };
+        valueEventListener = EventListenCreator.getValueEventListener(listener.getDataType(), listener);
         databaseReference.addValueEventListener(valueEventListener);
     }
-
 
     /**
      * Stops db notifications to a previously set ResourceListener
@@ -360,22 +232,8 @@ public class FirebaseResourceManager {
         //Gets locale. Cards is either cards_en or cards_es. Where should we validate this?
         String directory = String.format(Constants.CARDS_DIRECTORY, Locale.getDefault().getLanguage(), packName);
         DatabaseReference cardsRef = database.getReference(directory);
-        // Return all the cards, then we don't have to pull from database to refresh every time
-        cardsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                GenericTypeIndicator<List<Card>> typeIndicator =
-                        new GenericTypeIndicator<List<Card>>() {};
-                List<Card> allCards = dataSnapshot.getValue(typeIndicator);
-                // Need to subtract from total size so there's no overflow
-                listener.onData(allCards);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                System.err.println(databaseError.getMessage());
-            }
-        });
+        GenericTypeIndicator<List<Card>> typeIndicator = new GenericTypeIndicator<List<Card>>() {};
+        cardsRef.addListenerForSingleValueEvent(EventListenCreator.getValueEventListener(typeIndicator, listener));
     }
 
     /**
