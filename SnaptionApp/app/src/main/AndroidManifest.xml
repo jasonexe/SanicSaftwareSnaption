@@ -72,7 +72,7 @@
         <activity android:name="com.snaptiongame.snaption.ui.games.GameActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:label="@string/captions">
+            android:label="">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.snaptiongame.snaption.MainSnaptionActivity"/>

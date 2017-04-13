@@ -1,9 +1,11 @@
 package com.snaptiongame.snaption.ui.wall;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import com.snaptiongame.snaption.servercalls.GameResourceManager;
 import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
+import com.snaptiongame.snaption.ui.games.GameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
@@ -136,14 +139,7 @@ public class WallFragment extends Fragment {
         else {
             throw new RuntimeException(GAME_TYPE_EXCEPTION_MSG);
         }
-
-        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
-                StaggeredGridLayoutManager.VERTICAL);
-        wallListView.setLayoutManager(manager);
-        wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
-
-        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), ProfileActivity.getProfileActivityCreator(getContext()));
-        wallListView.setAdapter(wallAdapter);
+        setupWallList();
         //set up fab scroll listener
         FloatingActionButton fab = (FloatingActionButton)this.getActivity().findViewById(R.id.fab);
         ScrollFabHider scrollFabHider = new ScrollFabHider(fab, 0);
@@ -164,6 +160,26 @@ public class WallFragment extends Fragment {
         loadMoreGames();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(getResources().getString(R.string.snaption_wall));
         return view;
+    }
+
+    private void setupWallList() {
+        final StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
+                StaggeredGridLayoutManager.VERTICAL);
+        wallListView.setLayoutManager(manager);
+        wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
+        wallAdapter = new WallViewAdapter(new ArrayList<Game>(), ProfileActivity.getProfileActivityCreator(getContext()));
+        wallAdapter.setOnClickGamePhotoListener(new WallViewAdapter.OnClickGamePhotoListener() {
+            @Override
+            public void onClickGamePhoto(View view, Game game) {
+                // start game activity with shared image transition
+                Intent createGameIntent = new Intent(getActivity(), GameActivity.class);
+                createGameIntent.putExtra(Constants.GAME, game);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(getActivity(), view, game.getId());
+                getActivity().startActivity(createGameIntent, options.toBundle());
+            }
+        });
+        wallListView.setAdapter(wallAdapter);
     }
 
     private void loadMoreGames() {

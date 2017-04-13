@@ -3,22 +3,21 @@ package com.snaptiongame.snaption.ui.games;
 import android.content.res.Resources;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 /**
- * MinimizeViewBehavior represents the minimizing and expanding behavior of an view that is
+ * MinimizeViewBehavior represents the minimizing and expanding behavior of a view that is
  * dependent on the position of a AppBarLayout above it. The view will collapse to half it's
- * original or specified max height. The maximum height of the view is 400dp.
+ * original or specified max height. The maximum height of the view is 50% of the phone screen.
  *
  * @author Brittany Berlanga
  */
 public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private static final float MIN_PERCENT_HEIGHT = 0.5f;
-    private static final int MAX_VIEW_HEIGHT_DP = 350;
-    private  float maxViewHeightPx;
+    private static final float MAX_VIEW_HEIGHT_PERCENT = 0.5f;
+    private float maxViewHeightPx;
     private int maxViewHeight = -1;
     private static final String STATUS_BAR_HEIGHT_RES = "status_bar_height";
     private static final String DIMEN_RES = "dimen";
@@ -48,8 +47,7 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
             Resources res = child.getResources();
             statusBarHeight = res.getDimensionPixelSize(res.getIdentifier(STATUS_BAR_HEIGHT_RES,
                     DIMEN_RES, ANDROID_RES));
-            maxViewHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                    MAX_VIEW_HEIGHT_DP, res.getDisplayMetrics());
+            maxViewHeightPx = res.getDisplayMetrics().heightPixels * MAX_VIEW_HEIGHT_PERCENT;
         }
 
         int[] location = new int[2];
@@ -60,20 +58,18 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
             updateViewMaxHeight(child.getHeight());
         }
         if (maxViewHeight > 0) {
-            // translate the  view
-            float viewY = dependencyY + appBarHeight - statusBarHeight;
-            child.setY(viewY);
-            
+            float viewY = child.getY();
+
             // minimize/expand  view
             ViewGroup.LayoutParams lp = child.getLayoutParams();
-            int Height = Math.round((maxViewHeight - maxViewHeight * MIN_PERCENT_HEIGHT) /
+            int height = Math.round((maxViewHeight - maxViewHeight * MIN_PERCENT_HEIGHT) /
                     appBarHeight * (dependencyY - statusBarHeight) + maxViewHeight);
-            lp.height = Height;
+            lp.height = height;
             child.setLayoutParams(lp);
 
             if (viewBelowView != null) {
                 // translate the view under the  view
-                viewBelowView.setY(viewY + Height);
+                viewBelowView.setY(viewY + height);
             }
         }
         return true;
