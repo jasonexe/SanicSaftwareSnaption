@@ -93,6 +93,7 @@
             android:id="@+id/profile_name_editable"
             android:textSize="24sp"
             android:textAlignment="center"
+            android:imeOptions="actionDone"
             android:padding="10dp"
             android:layout_toEndOf="@id/view2"/>
 

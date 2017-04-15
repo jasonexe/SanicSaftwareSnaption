@@ -1,25 +1,33 @@
 package com.snaptiongame.snaption.ui.games;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -41,6 +49,7 @@ import com.snaptiongame.snaption.ui.ScrollFabHider;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
+import com.snaptiongame.snaption.utilities.ColorUtilities;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -65,6 +74,7 @@ import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromLis
  * This class is the core of the game screen, is in charge of basically all the UI-related, and some
  * logic-related Game code. This Activity is started when a user clicks on a photo on the wall
  * TODO needs to verify that a user is logged in before adding captions.
+ *
  * @Author Jason Krein, Cameron Geehr
  */
 public class GameActivity extends HomeAppCompatActivity {
@@ -73,6 +83,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private final static String EMPTY_SIZE = "0";
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
+    private static final long BITMAP_ANIM_DURATION = 1000L;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
@@ -145,12 +156,19 @@ public class GameActivity extends HomeAppCompatActivity {
     public View progressSpinner;
 
     @BindView(R.id.coord_layout)
-    protected  CoordinatorLayout coordinatorLayout;
+    protected CoordinatorLayout coordinatorLayout;
 
     @BindView(R.id.game_content)
     public LinearLayout gameContentLayout;
-    @BindView(R.id.image_progress_bar)
-    protected FrameLayout imageProgressBar;
+
+    @BindView(R.id.picker_container)
+    public RelativeLayout pickerContainer;
+
+    @BindView(R.id.date_container)
+    public RelativeLayout dateContainer;
+
+    @BindView(R.id.progress_bar)
+    public View progressBar;
 
     private ResourceListener captionListener = new ResourceListener<Caption>() {
         @Override
@@ -175,12 +193,21 @@ public class GameActivity extends HomeAppCompatActivity {
         ButterKnife.bind(this);
         setupToolbar(toolbar);
 
+        // add scrolling behavior to progress bar
+        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                .setBehavior(minimizeImageBehavior);
+
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
-        if(startedIntent.hasExtra(Constants.GAME)) {
-            game = (Game)getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
+        if (startedIntent.hasExtra(Constants.GAME)) {
+            game = (Game) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
+            // set the shared transition view name
+            ViewCompat.setTransitionName(imageView, game.getId());
+            // postpone transition til image is loaded
+            supportPostponeEnterTransition();
             setupGameElements(game);
-        } else if(startedIntent.hasExtra(USE_GAME_ID)) {
+        } else if (startedIntent.hasExtra(USE_GAME_ID)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
             String gameId = startedIntent.getStringExtra(USE_GAME_ID);
@@ -188,7 +215,7 @@ public class GameActivity extends HomeAppCompatActivity {
                     new ResourceListener<Game>() {
                         @Override
                         public void onData(Game data) {
-                            if(data != null) {
+                            if (data != null) {
                                 setupGameElements(data);
                             } else {
                                 System.err.println("Game activity was passed an incorrect gameId");
@@ -201,32 +228,36 @@ public class GameActivity extends HomeAppCompatActivity {
                         }
                     });
         }
-        // initialize minimize image behavior
-        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-        ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(minimizeImageBehavior);
     }
 
     private void setupGameElements(Game game) {
         this.game = game;
         photoPath = game.getImagePath();
-        FirebaseResourceManager.loadImageIntoView(photoPath, imageView, new ResourceListener<Boolean>() {
-            @Override
-            public void onData(Boolean data) {
-                if (data) {
-                    // hide the progress bar and remove its behavior
-                    imageProgressBar.setVisibility(View.GONE);
-                    ((CoordinatorLayout.LayoutParams) imageProgressBar.getLayoutParams()).setBehavior(null);
-                    // add a new behavior to the image view
-                    minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-                    ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams()).setBehavior(minimizeImageBehavior);
-                    minimizeImageBehavior.updateViewMaxHeight(imageView.getHeight());
-                }
-            }
-            @Override
-            public Class getDataType() {
-                return Boolean.class;
-            }
-        });
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
+                new ResourceListener<Bitmap>() {
+                    @Override
+                    public void onData(final Bitmap bitmap) {
+                        if (bitmap != null) {
+                            // remove the progress bar
+                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                    .setBehavior(null);
+                            progressBar.setVisibility(View.GONE);
+                            // add a new behavior to the image view
+                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
+                                    .setBehavior(minimizeImageBehavior);
+                            // start transition now that image is loaded
+                            supportStartPostponedEnterTransition();
+                            // animate the image color swatch
+                            animateBitmapColorSwatch(bitmap);
+                        }
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return Boolean.class;
+                    }
+                });
         initLoginManager();
         setupButtonDisplay(game);
         setupCaptionList(game);
@@ -234,6 +265,52 @@ public class GameActivity extends HomeAppCompatActivity {
         setupPickerName(game);
         setupCaptionCardView();
         startCommentManager(game);
+    }
+
+
+    private void animateBitmapColorSwatch(final Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ColorUtilities.generateBitmapColor(GameActivity.this, bitmap,
+                    new ColorUtilities.ColorListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                        @Override
+                        public void onColorGenerated(int color) {
+                            // change the back arrow to dark grey if the image is light
+                            ColorUtilities.generateHomeArrowColor(GameActivity.this,
+                                    bitmap, new ColorUtilities.ColorListener() {
+                                        @Override
+                                        public void onColorGenerated(int arrowColor) {
+                                            setupHomeArrow(arrowColor);
+                                        }
+                                    });
+                            // animate the color change of the status bar and image
+                            ValueAnimator statusBarColorAnim = ValueAnimator.ofArgb(
+                                    getWindow().getStatusBarColor(), color);
+                            statusBarColorAnim.addUpdateListener(new ValueAnimator
+                                    .AnimatorUpdateListener() {
+                                @Override
+                                public void onAnimationUpdate(ValueAnimator animation) {
+                                    int transitionColor = (int) animation.getAnimatedValue();
+                                    getWindow().setStatusBarColor(transitionColor);
+                                    imageView.setBackgroundColor(transitionColor);
+                                }
+                            });
+                            statusBarColorAnim.setDuration(BITMAP_ANIM_DURATION);
+                            statusBarColorAnim.setInterpolator(AnimationUtils.loadInterpolator(GameActivity.this,
+                                    android.R.interpolator.fast_out_slow_in));
+                            statusBarColorAnim.start();
+                        }
+                    });
+        }
+    }
+
+    private void setupHomeArrow(int arrowColor) {
+        if (getSupportActionBar() != null) {
+            final Drawable upArrow = ContextCompat
+                    .getDrawable(GameActivity.this, R.drawable.back_arrow);
+            upArrow.setColorFilter(arrowColor, PorterDuff.Mode.SRC_ATOP);
+            getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        }
     }
 
     private void setupButtonDisplay(Game game) {
@@ -266,23 +343,23 @@ public class GameActivity extends HomeAppCompatActivity {
     private void determineButtonDisplay(String pickerId, Set<String> players) {
         String thisUser = FirebaseResourceManager.getUserId();
         // If they're not logged in, just show join game
-        if(thisUser == null) {
+        if (thisUser == null) {
             setJoinGameIsVisible(true);
             return;
         }
         boolean thisPlayerInGame = false;
         // If this user is the picker or they're in the players list, they're in the game
-        if(pickerId.equals(thisUser) || (players != null && players.contains(thisUser))) {
+        if (pickerId.equals(thisUser) || (players != null && players.contains(thisUser))) {
             thisPlayerInGame = true;
         }
         // If this is a public game, anyone can send an invite to it if they've joined
-        if(game.getIsPublic()) {
+        if (game.getIsPublic()) {
             // If they're in the list of players, they can invite
             // If they're not, show them the join button
             setJoinGameIsVisible(!thisPlayerInGame);
         } else {
             // If it's a private game and the picker is logged in, they can invite people
-            if(pickerId.equals(thisUser)) {
+            if (pickerId.equals(thisUser)) {
                 setJoinGameIsVisible(false);
             } else {
                 // If they're not in the game, set join to visible. Otherwise, not visible
@@ -294,7 +371,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void setJoinGameIsVisible(boolean isVisible) {
-        if(isVisible) {
+        if (isVisible) {
             inviteFriendsButton.setVisibility(View.GONE);
             joinGameButton.setVisibility(View.VISIBLE);
         } else {
@@ -310,8 +387,7 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this));
-        }
-        else {
+        } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this));
             numberCaptions.setText(EMPTY_SIZE);
@@ -390,14 +466,13 @@ public class GameActivity extends HomeAppCompatActivity {
         if (FirebaseResourceManager.getUserId() != null) {
             toggleVisibility(captionCardsList);
             //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-            if(cardInputView.getVisibility() == View.VISIBLE) {
+            if (cardInputView.getVisibility() == View.VISIBLE) {
                 cardInputView.setVisibility(View.GONE);
                 // In case they press the fab while it's being hidden after scrolling
                 // This prevents it from being hidden forever.
                 hideKeyboard();
             }
-        }
-        else { //if they are logged out
+        } else { //if they are logged out
             //display the loginDialog
             displayLoginDialog();
         }
@@ -405,7 +480,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.join_game_button)
     public void joinGame() {
-        if(FirebaseResourceManager.getUserId() == null) {
+        if (FirebaseResourceManager.getUserId() == null) {
             loginDialog.show();
             return;
         }
@@ -442,6 +517,7 @@ public class GameActivity extends HomeAppCompatActivity {
                 loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
                 setupGameElements(game);
             }
+
             @Override
             public void onError() {
                 //login was a failure
@@ -473,7 +549,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private String getSampleCaption() {
         Caption toReturn = game.getTopCaption();
-        if(toReturn != null) {
+        if (toReturn != null) {
             return toReturn.retrieveCaptionText().toString();
         } else {
             Random rand = new Random();
@@ -482,7 +558,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void toggleVisibility(View view) {
-        if(view.getVisibility() == View.VISIBLE) {
+        if (view.getVisibility() == View.VISIBLE) {
             view.setVisibility(View.GONE);
         } else {
             view.setVisibility(View.VISIBLE);
@@ -494,12 +570,12 @@ public class GameActivity extends HomeAppCompatActivity {
         float curRotation = fab.getRotation();
         // If the caption card list is visible, fab should be rotated to 135 deg. If it isn't,
         // then rotate it. and make it smaller
-        if(captionCardsList.getVisibility() == View.VISIBLE) {
-            if(curRotation != FAB_ROTATION) {
+        if (captionCardsList.getVisibility() == View.VISIBLE) {
+            if (curRotation != FAB_ROTATION) {
                 ObjectAnimator.ofFloat(fab, "rotation",
                         0f, FAB_ROTATION).setDuration(ROTATION_TIME).start();
             }
-        } else if(curRotation != 0) {
+        } else if (curRotation != 0) {
             // Rotate back to 0 if it's not already there and the card list is hidden
             ObjectAnimator.ofFloat(fab, "rotation",
                     FAB_ROTATION, 0f).setDuration(ROTATION_TIME).start();
@@ -580,23 +656,24 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void populateCards(String packName) {
         FirebaseResourceManager.loadCardsFromPack(packName,
-            new ResourceListener<List<Card>>() {
-                @Override
-                public void onData(List<Card> data) {
-                    allCards = data;
-                    refreshCards();
-                }
+                new ResourceListener<List<Card>>() {
+                    @Override
+                    public void onData(List<Card> data) {
+                        allCards = data;
+                        refreshCards();
+                    }
 
-                @Override
-                public Class getDataType() {
-                    return null; // Not used.
-                }
-            });
+                    @Override
+                    public Class getDataType() {
+                        return null; // Not used.
+                    }
+                });
     }
 
     /**
      * This is called after returning from a login intent from either Facebook or Google
      * This initiates the connection with firebase after contacting Facebook or Google
+     *
      * @param requestCode
      * @param resultCode
      * @param data

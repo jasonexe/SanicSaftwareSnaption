@@ -79,8 +79,8 @@ public class Constants {
     // END FIREBASE VARIABLES //
 
     // Notification ID used in intents that have notifications
-    public static final int CLIP_TO_OUTLINE_MIN_SDK = 21;
     public static final int DEEP_LINK_GOOGLE_ID = 1;
     public static final int NUM_CARDS_IN_HAND = 10;
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
+
 }
