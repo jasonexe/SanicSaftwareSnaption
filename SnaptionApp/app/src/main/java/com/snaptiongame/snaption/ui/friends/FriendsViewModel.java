@@ -4,6 +4,8 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
@@ -11,6 +13,7 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.FRIENDS_PATH;
@@ -31,8 +34,9 @@ public class FriendsViewModel {
     }
 
     public void getLoginProviderFriends(final ResourceListener<Friend> listener) {
+        List<String> providers = FirebaseResourceManager.getProviders();
         // if the user logged in with Facebook
-        if (!TextUtils.isEmpty(user.getFacebookId())) {
+        if (providers.contains(FacebookAuthProvider.PROVIDER_ID)) {
             // retrieve user's friends to use for filtering out Facebook friends that are already
             // their friends
             FirebaseResourceManager.retrieveStringMapNoUpdates(String.format(FRIENDS_PATH, user.getId()),
@@ -50,13 +54,15 @@ public class FriendsViewModel {
 
         }
         // else the user logged in with Google+
-        else {
+        else if (providers.contains(GoogleAuthProvider.PROVIDER_ID)) {
             // TODO get Google+ friends
         }
     }
 
     public String getLoginProviderLabel(Context appContext) {
-        if (!TextUtils.isEmpty(user.getFacebookId())) {
+        List<String> providers = FirebaseResourceManager.getProviders();
+        // if the user logged in with Facebook
+        if (providers.contains(FacebookAuthProvider.PROVIDER_ID)) {
             return appContext.getString(R.string.fb_friends);
         }
         else {
@@ -93,6 +99,13 @@ public class FriendsViewModel {
     }
 
     public int getFacebookButtonVisibility() {
-        return user.getFacebookId() != null ? View.VISIBLE : View.INVISIBLE;
+        List<String> providers = FirebaseResourceManager.getProviders();
+        // if the user logged in with Facebook
+        if (providers.contains(FacebookAuthProvider.PROVIDER_ID)) {
+            return View.VISIBLE;
+        }
+        else {
+            return View.INVISIBLE;
+        }
     }
 }
