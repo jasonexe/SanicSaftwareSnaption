@@ -88,12 +88,12 @@ public class ProfileFragment extends Fragment {
     private byte[] newPhoto;
     private User thisUser;
     private FloatingActionButton fab;
-    private boolean canViewPrivateGames;
+    private boolean isUser;
     private ResourceListener gameListener = new ResourceListener<Game>() {
         @Override
         public void onData(Game data) {
             // filter out private games if needed
-            if (canDisplayGame(data, canViewPrivateGames)) {
+            if (canDisplayGame(data, isUser)) {
                 gameAdapter.addGame(data);
             }
         }
@@ -110,7 +110,7 @@ public class ProfileFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         String userId = getArguments().getString(ProfileFragment.USER_ID_ARG);
         String currentUserId = FirebaseResourceManager.getUserId();
-        canViewPrivateGames = currentUserId != null && currentUserId.equals(userId);
+        isUser = currentUserId != null && currentUserId.equals(userId);
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
         unbinder = ButterKnife.bind(this, view);
@@ -193,7 +193,7 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onData(Game data) {
                     // filter out captions of private games if needed
-                    if (canDisplayGame(data, canViewPrivateGames)) {
+                    if (canDisplayGame(data, isUser)) {
                         filterListener.captionFiltered(caption);
                     }
                 }
@@ -206,8 +206,8 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private boolean canDisplayGame(Game game, boolean canViewPrivateGames) {
-        return game != null && (canViewPrivateGames ||
+    private boolean canDisplayGame(Game game, boolean isUser) {
+        return game != null && (isUser ||
                 game.getIsPublic() ||
                 FirebaseResourceManager.getUserId() != null && game.getPlayers() != null &&
                         game.getPlayers().containsKey(FirebaseResourceManager.getUserId()));
