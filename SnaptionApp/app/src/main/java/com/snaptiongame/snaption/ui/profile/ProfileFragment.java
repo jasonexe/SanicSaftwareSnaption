@@ -261,8 +261,12 @@ public class ProfileFragment extends Fragment {
     private void saveEditName() {
         // Firebase stuff here
         String newText = profileEditName.getText().toString();
-        userName.setText(newText);
-        FirebaseUploader.updateDisplayName(newText, thisUser.getId());
+        if (!newText.equals(thisUser.getDisplayName())) {
+            FirebaseUploader.updateDisplayName(newText, thisUser.getId());
+            thisUser.setDisplayName(newText);
+            userName.setText(newText);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
+        }
     }
 
     // Hides the camera overlay and disables clicking on the profile picture
