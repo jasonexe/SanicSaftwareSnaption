@@ -571,9 +571,6 @@ public class FirebaseResourceManager {
                 }
             }
         }
-        /*else {
-            friendListener.onData(null);
-        }*/
     }
 
     /**
