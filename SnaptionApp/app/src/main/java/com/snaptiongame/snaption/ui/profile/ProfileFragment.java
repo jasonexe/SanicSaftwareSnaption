@@ -171,12 +171,17 @@ public class ProfileFragment extends Fragment {
         Map<String, Caption> mapUserCaptions = user.getCaptions();
         captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
         if (mapUserCaptions != null) {
-            filterCaptions(new ArrayList<>(mapUserCaptions.values()), new CaptionFilterListener() {
-                @Override
-                public void captionFiltered(Caption caption) {
-                    captionsAdapter.addCaption(caption);
-                }
-            });
+            if (isUser) {
+                captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
+            }
+            else {
+                filterCaptions(new ArrayList<>(mapUserCaptions.values()), new CaptionFilterListener() {
+                    @Override
+                    public void captionFiltered(Caption caption) {
+                        captionsAdapter.addCaption(caption);
+                    }
+                });
+            }
         }
         captionsListView.setAdapter(captionsAdapter);
     }
