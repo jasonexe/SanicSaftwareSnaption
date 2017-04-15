@@ -212,6 +212,19 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Gets the list of providers that the current user's account is associated with.
+     * @return the list of providers the user's account is associated with
+     */
+    public static List<String> getProviders() {
+        List<String> providers = new ArrayList<String>();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            providers = currentUser.getProviders();
+        }
+        return providers;
+    }
+
+    /**
      * Set up a listener to receive an object at a specified path without a connection
      * for future data changes
      * @param path the path to the object requested from Firebase
@@ -545,7 +558,8 @@ public class FirebaseResourceManager {
     private static void handleFacebookFriendsResponse(
             GraphResponse response, final ResourceListener<Friend> friendListener) {
         // parse the Facebook response to a list of Friends
-        final JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
+        final JSONArray friends = response.getJSONObject() != null ?
+                response.getJSONObject().optJSONArray(FB_REQUEST_DATA) : null;
         if (friends != null) {
             for (int ndx = 0; ndx < friends.length(); ndx++) {
                 final JSONObject friend = friends.optJSONObject(ndx);
@@ -568,9 +582,6 @@ public class FirebaseResourceManager {
                     });
                 }
             }
-        }
-        else {
-            friendListener.onData(null);
         }
     }
 
