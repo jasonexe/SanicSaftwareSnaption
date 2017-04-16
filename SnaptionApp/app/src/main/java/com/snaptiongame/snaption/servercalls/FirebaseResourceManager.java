@@ -144,19 +144,18 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
-    public void addChildListener(String path, final ResourceListener listener) {
+    public void addChildListener(String path, final ChildResourceListener listener) {
         removeListener();
         databaseReference = database.getReference(path);
         ChildEventListener childListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                listener.onData(dataSnapshot.getValue(listener.getDataType()));
+                listener.onNewData(dataSnapshot.getValue(listener.getDataType()));
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                // No op, not updating yet.
-                // TODO Will put stuff in here once upvotes happen, probably
+                listener.onDataChanged(dataSnapshot.getValue(listener.getDataType()));
             }
 
             @Override

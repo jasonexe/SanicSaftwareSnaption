@@ -38,6 +38,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -170,14 +171,20 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.progress_bar)
     public View progressBar;
 
-    private ResourceListener captionListener = new ResourceListener<Caption>() {
+    private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
-        public void onData(Caption data) {
+        public void onNewData(Caption data) {
             if (data != null) {
                 captionAdapter.addCaption(data);
                 numberCaptions.setText(String.format(Locale.getDefault(),
                         "%d", captionAdapter.getItemCount()));
             }
+        }
+
+        @Override
+        public void onDataChanged(Caption data) {
+            captionAdapter.captionChanged(data);
+            System.err.println("Caption changed");
         }
 
         @Override
@@ -457,20 +464,31 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
-        captionAdapter.removeListeners();
     }
 
     @OnClick(R.id.fab)
     public void displayCardOptions() {
         //if the user is logged in they can caption
         if (FirebaseResourceManager.getUserId() != null) {
-            toggleVisibility(captionCardsList);
-            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-            if (cardInputView.getVisibility() == View.VISIBLE) {
-                cardInputView.setVisibility(View.GONE);
-                // In case they press the fab while it's being hidden after scrolling
-                // This prevents it from being hidden forever.
-                hideKeyboard();
+//            (captionCardsList);
+//            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+//            if (cardInputView.getVisibility() == View.VISIBLE) {
+//                cardInputView.setVisibility(View.GONE);
+//                // In case they press the fab while it's being hidden after scrolling
+//                // This prevents it from being hidden forever.
+//                hideKeyboard();
+//            }
+            String[] inputs = {"dreaming", "late o' clock", "Peanut butter and jelly", "pizza", "cheese pizza", "pepperoni pizza"};
+            for (int i = 0; i < 2000; i ++) {
+                Random rand = new Random();
+                int inputNum = rand.nextInt(inputs.length);
+                int cardTextNum = rand.nextInt(allCards.size());
+                String userInput = inputs[inputNum];
+                Card card = allCards.get(cardTextNum);
+                Uploader uploader = new FirebaseUploader();
+                // Game will be a class variable probs
+                Game game = this.game;
+                addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, card, game);
             }
         } else { //if they are logged out
             //display the loginDialog
@@ -585,12 +603,10 @@ public class GameActivity extends HomeAppCompatActivity {
         fab.show();
     }
 
-    public void submit() {
-        String userInput = editCaptionText.getText().toString();
+    public void submit(String userInput) {
         editCaptionText.setText("");
         Uploader uploader = new FirebaseUploader();
         // Game will be a class variable probs
-        List<String> empty = new ArrayList<>();
         Game game = this.game;
         addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
         toggleVisibility(cardInputView);
@@ -609,7 +625,8 @@ public class GameActivity extends HomeAppCompatActivity {
         public boolean onEditorAction(TextView textView, int actionId,
                                       KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                submit();
+                String userInput = editCaptionText.getText().toString();
+                submit(userInput);
             }
             return true;
         }

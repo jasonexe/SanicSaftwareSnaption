@@ -39,8 +39,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private List<Caption> items;
     private LoginDialog loginDialog;
     private ProfileActivity.ProfileActivityCreator profileMaker;
-    // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
-    protected Map<String, FirebaseResourceManager> resourceManagerMap;
     private User unknownUser = new User(UNKNOWN_USER_ID, null, null, null, null, null);
 
     // BEGIN PRIVATE CLASSES //
@@ -92,7 +90,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
         this.profileMaker = profileMaker;
-        resourceManagerMap = new HashMap<>(items.size());
     }
 
     /**
@@ -102,46 +99,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param position The position in the list of Captions
      */
     @Override
-    public void onBindViewHolder(CaptionViewHolder holder, int position) {
+    public void onBindViewHolder(final CaptionViewHolder holder, int position) {
         final Caption finalCaption = items.get(position);
         setUpCaptionView(holder, finalCaption);
-
-        // Adds a firebase resource manager for the caption to the map if one is not already in it
-        if (!resourceManagerMap.containsKey(finalCaption.getId())) {
-            FirebaseResourceManager manager = new FirebaseResourceManager();
-            // Listens for any changes to the upvotes and updates the caption
-            ResourceListener upvoteListener = new ResourceListener<Caption>() {
-                @Override
-                public void onData(Caption updatedCaption) {
-                    if (updatedCaption != null) {
-                        int oldIndex, newIndex;
-                        oldIndex = items.indexOf(finalCaption);
-                        Caption captionInList = items.get(oldIndex);
-                        items.remove(oldIndex);
-                        updatedCaption.assignUser(captionInList.retrieveUser());
-                        newIndex = insertCaption(updatedCaption);
-                        // Check to see if the caption has moved or changed, and if it has
-                        // then animate its change
-                        if (oldIndex != newIndex) {
-                            notifyItemMoved(oldIndex, newIndex);
-                            notifyItemChanged(newIndex);
-                        } else {
-                            notifyItemChanged(oldIndex);
-                        }
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Caption.class;
-                }
-            };
-
-            //Configures resource manager to call the upvote listener whenever the caption is modified
-            manager.retrieveSingleWithUpdates(String.format(GAME_CAPTION_PATH,
-                    finalCaption.getGameId(), finalCaption.getId()), upvoteListener);
-            resourceManagerMap.put(finalCaption.getId(), manager);
-        }
 
         // Get information about the captioner if it is not already present
         if (finalCaption.retrieveUser() == null) {
@@ -149,14 +109,15 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    int captionNdx = items.indexOf(finalCaption);
-                    Caption captionInList = items.get(captionNdx);
+//                    int captionNdx = items.indexOf(finalCaption);
+//                    Caption captionInList = items.get(captionNdx);
                     // if the user could not be found, set user to unknown user
                     if (user == null) {
                         user = unknownUser;
                     }
-                    captionInList.assignUser(user);
-                    notifyItemChanged(captionNdx);
+//                    captionInList.assignUser(user);
+//                    notifyItemChanged(captionNdx);
+                    setCaptionerView(user, holder);
                 }
 
                 @Override
@@ -164,6 +125,25 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                     return User.class;
                 }
             });
+        }
+    }
+
+    public void captionChanged(Caption updatedCaption) {
+        if (updatedCaption != null) {
+            int oldIndex, newIndex;
+            oldIndex = items.indexOf(updatedCaption);
+            Caption captionInList = items.get(oldIndex);
+            items.remove(oldIndex);
+            updatedCaption.assignUser(captionInList.retrieveUser());
+            newIndex = insertCaption(updatedCaption);
+            // Check to see if the caption has moved or changed, and if it has
+            // then animate its change
+            if (oldIndex != newIndex) {
+                notifyItemMoved(oldIndex, newIndex);
+                notifyItemChanged(newIndex);
+            } else {
+                notifyItemChanged(oldIndex);
+            }
         }
     }
 
@@ -205,13 +185,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             items.add(newCaption);
             this.notifyItemInserted(items.size() - 1);
         }
-    }
-
-    public void removeListeners() {
-        for (FirebaseResourceManager frm : resourceManagerMap.values()) {
-            frm.removeListener();
-        }
-        resourceManagerMap.clear();
     }
 
     // END PUBLIC METHODS //
@@ -283,7 +256,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
         holder.captionText.setText(caption.retrieveCaptionText());
-        setCaptionerView(caption.retrieveUser(), holder);
+//        setCaptionerView(caption.retrieveUser(), holder);
         // Set the display to reflect the status of the caption
         if (caption.votes != null) {
             Map votes = caption.votes;
@@ -319,6 +292,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param holder The view holder containing the caption information
      */
     private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
+        System.err.println("Setting up with user " + captioner);
         if (captioner != null) {
             // Set the default captioner info if unknown user
             if (captioner.equals(unknownUser)) {
