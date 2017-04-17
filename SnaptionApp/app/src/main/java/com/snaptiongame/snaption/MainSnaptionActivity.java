@@ -70,6 +70,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     private User currentUser;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
+    // Used for keeping track of if this Activity is paused -- needed so logging in from
+    // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
