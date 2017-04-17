@@ -35,11 +35,13 @@ import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
  */
 public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHolder> {
 
+    private static final String UNKNOWN_USER_ID = "unknown";
     private List<Caption> items;
     private LoginDialog loginDialog;
     private ProfileActivity.ProfileActivityCreator profileMaker;
     // Holds the FirebaseResourceManagers to prevent them from having to be re-created and prevents memory leaks
     protected Map<String, FirebaseResourceManager> resourceManagerMap;
+    private User unknownUser = new User(UNKNOWN_USER_ID, null, null, null, null, null);
 
     // BEGIN PRIVATE CLASSES //
 
@@ -149,6 +151,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 public void onData(User user) {
                     int captionNdx = items.indexOf(finalCaption);
                     Caption captionInList = items.get(captionNdx);
+                    // if the user could not be found, set user to unknown user
+                    if (user == null) {
+                        user = unknownUser;
+                    }
                     captionInList.assignUser(user);
                     notifyItemChanged(captionNdx);
                 }
@@ -313,25 +319,29 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param holder The view holder containing the caption information
      */
     private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
-        // Display the captioner's information
         if (captioner != null) {
-            holder.captionerName.setText(captioner.getDisplayName());
-            FirebaseResourceManager.loadImageIntoView(captioner.getImagePath(),
-                    holder.captionerPhoto);
-            //set click listener to go to user's profile
-            holder.captionerPhoto.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    profileMaker.create(captioner.getId());
-                }
-            });
-        }
-        // Set the default view for a user
-        else {
-            holder.captionerName.setText(holder.captionerName
-                    .getContext().getResources().getString(R.string.null_user));
-            holder.captionerPhoto.setImageDrawable(holder.captionerPhoto.getContext()
-                    .getResources().getDrawable(R.drawable.com_facebook_profile_picture_blank_square));
+            // Set the default captioner info if unknown user
+            if (captioner.equals(unknownUser)) {
+                holder.captionerName.setText(holder.captionerName
+                        .getContext().getResources().getString(R.string.null_user));
+                holder.captionerPhoto.setImageDrawable(ContextCompat.getDrawable(
+                        holder.captionerPhoto.getContext(),
+                        R.drawable.com_facebook_profile_picture_blank_square));
+                holder.captionerPhoto.setOnClickListener(null);
+            }
+            // Display the captioner info if valid user
+            else {
+                holder.captionerName.setText(captioner.getDisplayName());
+                FirebaseResourceManager.loadImageIntoView(captioner.getImagePath(),
+                        holder.captionerPhoto);
+                //set click listener to go to user's profile
+                holder.captionerPhoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        profileMaker.create(captioner.getId());
+                    }
+                });
+            }
         }
     }
 

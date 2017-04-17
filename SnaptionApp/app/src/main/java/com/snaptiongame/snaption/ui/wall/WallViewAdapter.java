@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,6 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
-import com.snaptiongame.snaption.ui.games.GameActivity;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
@@ -51,6 +51,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private List<Game> items;
     private Map<Integer, WallViewHolder> itemNumToHolder;
     private ProfileActivity.ProfileActivityCreator profileMaker;
+    private OnClickGamePhotoListener onClickGamePhotoListener;
 
     public WallViewAdapter(List<Game> items, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.items = items;
@@ -64,55 +65,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         return new WallViewHolder(view);
     }
 
-    class PhotoClickListener implements View.OnClickListener {
-        Game game;
-        public PhotoClickListener(Game game) {
-            this.game = game;
-        }
-
-        @Override
-        public void onClick(View view) {
-            Context imageContext = view.getContext();
-            Intent createGameIntent = new Intent(imageContext, GameActivity.class);
-            createGameIntent.putExtra(Constants.GAME, game);
-            imageContext.startActivity(createGameIntent);
-        }
-    }
-
-    /**
-     * The click listener for the upvote button.
-     */
-    private class UpvoteClickListener implements View.OnClickListener {
-        Game game;
-        boolean hasUpvoted;
-
-        /**
-         * Constructs the upvote click listener.
-         *
-         * @param game The game to listen to
-         * @param hasUpvoted Whether the current user has upvoted the caption
-         */
-        public UpvoteClickListener(Game game, boolean hasUpvoted) {
-            this.game = game;
-            this.hasUpvoted = hasUpvoted;
-        }
-
-        @Override
-        public void onClick(View upvote) {
-            // Check if user is logged in before letting them upvote. If not logged in, display
-            // login dialog.
-            if (FirebaseResourceManager.getUserId() == null) {
-                ((MainSnaptionActivity) upvote.getContext()).loginDialog.show();
-            }
-            else {
-                handleClickUpvote(upvote.getContext(), game, hasUpvoted);
-            }
-        }
+    public interface OnClickGamePhotoListener {
+        void onClickGamePhoto(View view, Game game);
     }
 
     @Override
-    public void onBindViewHolder(WallViewHolder holder, int position) {
-        Game game = items.get(position);
+    public void onBindViewHolder(final WallViewHolder holder, int position) {
+        final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
         displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
@@ -129,12 +88,20 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         itemNumToHolder.put(position, holder);
 
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
-        holder.photo.setOnClickListener(new PhotoClickListener(game));
+        holder.photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onClickGamePhotoListener != null) {
+                    onClickGamePhotoListener.onClickGamePhoto(holder.photo, game);
+                }
+            }
+        });
+        ViewCompat.setTransitionName(holder.photo, game.getId());
 
         // distinguish between complete and incomplete games, and public/private
         setCaptionTextStyle(holder, game);
 
-        if (Build.VERSION.SDK_INT >= Constants.CLIP_TO_OUTLINE_MIN_SDK) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // allows the image to be clipped with rounded edges
             holder.photo.setClipToOutline(true);
         }
@@ -201,12 +168,25 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param hasUpvoted whether the user has upvoted the game
      * @param animate whether the upvote icon should show a "ghost" animation
      */
-    private void setUpvoteView(WallViewHolder holder, Game game, int numUpvotes,
-                               boolean hasUpvoted, boolean animate) {
+    private void setUpvoteView(WallViewHolder holder, final Game game, int numUpvotes,
+                               final boolean hasUpvoted, boolean animate) {
         // Set upvoteCountText to be the the number of upvotes;
         holder.upvoteCountText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
-        holder.upvoteIcon.setOnClickListener(new WallViewAdapter.UpvoteClickListener(game, hasUpvoted));
+        final Context context = holder.itemView.getContext();
+        holder.upvoteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if user is logged in before letting them upvote. If not logged in, display
+                // login dialog.
+                if (FirebaseResourceManager.getUserId() == null) {
+                    ((MainSnaptionActivity) context).loginDialog.show();
+                }
+                else {
+                    handleClickUpvote(context, game, hasUpvoted);
+                }
+            }
+        });
         // Sets the icon depending on whether it has been upvoted
         setUpvoteIcon(holder, hasUpvoted, animate);
     }
@@ -377,5 +357,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     public void clearItems() {
         items.clear();
         notifyDataSetChanged();
+    }
+
+    public void setOnClickGamePhotoListener(OnClickGamePhotoListener onClickGamePhotoListener) {
+        this.onClickGamePhotoListener = onClickGamePhotoListener;
     }
 }

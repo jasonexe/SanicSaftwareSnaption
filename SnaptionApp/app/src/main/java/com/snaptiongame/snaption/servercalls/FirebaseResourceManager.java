@@ -1,11 +1,15 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -55,6 +59,7 @@ public class FirebaseResourceManager {
     private static final String FB_ID_CHILD = "facebookId";
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
+    private static FirebaseImageLoader imageLoader = new FirebaseImageLoader();
 
     private ValueEventListener valueEventListener;
     private DatabaseReference databaseReference;
@@ -120,6 +125,19 @@ public class FirebaseResourceManager {
             id = user.getUid();
         }
         return id;
+    }
+
+    /**
+     * Gets the list of providers that the current user's account is associated with.
+     * @return the list of providers the user's account is associated with
+     */
+    public static List<String> getProviders() {
+        List<String> providers = new ArrayList<String>();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            providers = currentUser.getProviders();
+        }
+        return providers;
     }
 
     /**
@@ -199,17 +217,21 @@ public class FirebaseResourceManager {
      * @param listener ResourceListener to be notified when the image has been loaded
      */
     public static void loadImageIntoView(final String imagePath, final ImageView imageView,
-                                         final ResourceListener<Boolean> listener) {
+                                         final ResourceListener<Bitmap> listener) {
         StorageReference ref = storage.child(imagePath);
         try {
             Glide.with(imageView.getContext())
-                    .using(new FirebaseImageLoader())
+                    .using(imageLoader)
                     .load(ref).fitCenter()
+                    .dontAnimate()
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,
                                                    Target<GlideDrawable> target,
                                                    boolean isFirstResource) {
+                            if (listener != null) {
+                                listener.onData(null);
+                            }
                             return false;
                         }
 
@@ -220,7 +242,7 @@ public class FirebaseResourceManager {
                                                        boolean isFromMemoryCache,
                                                        boolean isFirstResource) {
                             if (listener != null) {
-                                listener.onData(true);
+                                listener.onData(((GlideBitmapDrawable) resource).getBitmap());
                             }
                             return false;
                         }
@@ -242,9 +264,13 @@ public class FirebaseResourceManager {
         StorageReference ref = storage.child(imagePath);
         try {
             Glide.with(imageView.getContext())
-                    .using(new FirebaseImageLoader())
+                    .using(imageLoader)
                     .load(ref)
                     .fitCenter()
+                    .dontAnimate()
+                    // Caches the full image to make reloading faster
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .priority(Priority.IMMEDIATE)
                     // Update signature every hour for profile picture changes.
                     .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
@@ -345,7 +371,8 @@ public class FirebaseResourceManager {
     private static void handleFacebookFriendsResponse(
             GraphResponse response, final ResourceListener<Friend> friendListener) {
         // parse the Facebook response to a list of Friends
-        final JSONArray friends = response.getJSONObject().optJSONArray(FB_REQUEST_DATA);
+        final JSONArray friends = response.getJSONObject() != null ?
+                response.getJSONObject().optJSONArray(FB_REQUEST_DATA) : null;
         if (friends != null) {
             for (int ndx = 0; ndx < friends.length(); ndx++) {
                 final JSONObject friend = friends.optJSONObject(ndx);
@@ -368,9 +395,6 @@ public class FirebaseResourceManager {
                     });
                 }
             }
-        }
-        else {
-            friendListener.onData(null);
         }
     }
 
