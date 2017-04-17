@@ -68,6 +68,7 @@ public class LoginManager {
 
     public interface LoginListener {
         void onLoginComplete();
+        void onLogoutComplete();
     }
 
     private FirebaseAuth.AuthStateListener revalidator = new FirebaseAuth.AuthStateListener() {
@@ -133,7 +134,7 @@ public class LoginManager {
         //sign out of firebase
         auth.signOut();
         //tell the view to update
-        listener.onLoginComplete();
+        listener.onLogoutComplete();
     }
 
     public void loginWithGoogle() {
