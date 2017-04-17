@@ -51,6 +51,7 @@ public class EventListenCreatorTest {
 
     @Before
     public void setup() {
+        childListener = Mockito.mock(ChildResourceListener.class);
         listener = Mockito.mock(ResourceListener.class);
         data = Mockito.mock(DataSnapshot.class);
         error = Mockito.mock(DatabaseError.class);
