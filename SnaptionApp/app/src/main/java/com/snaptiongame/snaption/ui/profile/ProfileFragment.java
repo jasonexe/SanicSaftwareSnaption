@@ -37,6 +37,7 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -50,6 +51,8 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by austinrobarts on 1/23/17.
  */
 public class ProfileFragment extends Fragment {
+
+    public static final String USER_ID_ARG = "userId";
 
     private static final String GAME_DIRECTORY = "games";
     private static final int IMAGE_PICK_CODE = 8;
@@ -85,10 +88,14 @@ public class ProfileFragment extends Fragment {
     private byte[] newPhoto;
     private User thisUser;
     private FloatingActionButton fab;
+    private boolean isUser;
     private ResourceListener gameListener = new ResourceListener<Game>() {
         @Override
         public void onData(Game data) {
-            gameAdapter.addGame(data);
+            // filter out private games if needed
+            if (canDisplayGame(data, isUser)) {
+                gameAdapter.addGame(data);
+            }
         }
 
         @Override
@@ -101,7 +108,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        String userId = getArguments().getString("userId");
+        String userId = getArguments().getString(ProfileFragment.USER_ID_ARG);
+        String currentUserId = FirebaseResourceManager.getUserId();
+        isUser = currentUserId != null && currentUserId.equals(userId);
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
         unbinder = ButterKnife.bind(this, view);
@@ -160,13 +169,53 @@ public class ProfileFragment extends Fragment {
                 LinearLayoutManager.HORIZONTAL, false);
         captionsListView.setLayoutManager(captionViewManager);
         Map<String, Caption> mapUserCaptions = user.getCaptions();
-        // If the user has made any captions, display them, otherwise use an empty arraylist
-        if(mapUserCaptions != null) {
-            captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
-        } else {
-            captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
+        captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
+        if (mapUserCaptions != null) {
+            if (isUser) {
+                captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
+            }
+            else {
+                filterCaptions(new ArrayList<>(mapUserCaptions.values()), new CaptionFilterListener() {
+                    @Override
+                    public void captionFiltered(Caption caption) {
+                        captionsAdapter.addCaption(caption);
+                    }
+                });
+            }
         }
         captionsListView.setAdapter(captionsAdapter);
+    }
+
+    private interface CaptionFilterListener {
+        void captionFiltered(Caption caption);
+    }
+
+    private void filterCaptions(List<Caption> captions, final CaptionFilterListener filterListener) {
+        // filter out captions of private games if needed
+        for (final Caption caption : captions) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH,
+                    caption.gameId), new ResourceListener<Game>() {
+                @Override
+                public void onData(Game data) {
+                    // filter out captions of private games if needed
+                    if (canDisplayGame(data, isUser)) {
+                        filterListener.captionFiltered(caption);
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return Game.class;
+                }
+            });
+        }
+    }
+
+    private boolean canDisplayGame(Game game, boolean isUser) {
+        return game != null && (isUser ||
+                game.getIsPublic() ||
+                FirebaseResourceManager.getUserId() != null && game.getPlayers() != null &&
+                        game.getPlayers().containsKey(FirebaseResourceManager.getUserId()));
     }
 
     private void getUserGames(User user) {
@@ -175,7 +224,7 @@ public class ProfileFragment extends Fragment {
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds.keySet()) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(GAME_DIRECTORY + "/" + gameId, gameListener);
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
             }
         }
     }

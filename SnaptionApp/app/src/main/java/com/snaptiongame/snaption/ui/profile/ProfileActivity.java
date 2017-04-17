@@ -14,8 +14,6 @@ import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
  */
 public class ProfileActivity extends HomeAppCompatActivity {
 
-    public static String USER_ID_KEY = "userId";
-
     public interface ProfileActivityCreator {
         void create(String userId);
     }
@@ -25,7 +23,7 @@ public class ProfileActivity extends HomeAppCompatActivity {
             @Override
             public void create(String userId) {
                 Intent intent = new Intent(context, ProfileActivity.class);
-                intent.putExtra(USER_ID_KEY, userId);
+                intent.putExtra(ProfileFragment.USER_ID_ARG, userId);
                 context.startActivity(intent);
             }
         };
@@ -38,7 +36,7 @@ public class ProfileActivity extends HomeAppCompatActivity {
         //go to the user's profile
         Fragment fragment = new ProfileFragment();
         Bundle args = new Bundle();
-        args.putString("userId", getIntent().getStringExtra("userId"));
+        args.putString(ProfileFragment.USER_ID_ARG, getIntent().getStringExtra(ProfileFragment.USER_ID_ARG));
         fragment.setArguments(args);
         getSupportFragmentManager()
                 .beginTransaction()
