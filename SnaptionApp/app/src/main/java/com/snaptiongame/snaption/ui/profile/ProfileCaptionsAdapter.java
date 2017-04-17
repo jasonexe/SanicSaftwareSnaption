@@ -54,4 +54,9 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
     public int getItemCount() {
         return captions.size();
     }
+
+    public void addCaption(Caption caption) {
+        captions.add(caption);
+        notifyItemInserted(captions.size() - 1);
+    }
 }

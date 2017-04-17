@@ -69,37 +69,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         void onClickGamePhoto(View view, Game game);
     }
 
-    /**
-     * The click listener for the upvote button.
-     */
-    private class UpvoteClickListener implements View.OnClickListener {
-        Game game;
-        boolean hasUpvoted;
-
-        /**
-         * Constructs the upvote click listener.
-         *
-         * @param game The game to listen to
-         * @param hasUpvoted Whether the current user has upvoted the caption
-         */
-        public UpvoteClickListener(Game game, boolean hasUpvoted) {
-            this.game = game;
-            this.hasUpvoted = hasUpvoted;
-        }
-
-        @Override
-        public void onClick(View upvote) {
-            // Check if user is logged in before letting them upvote. If not logged in, display
-            // login dialog.
-            if (FirebaseResourceManager.getUserId() == null) {
-                ((MainSnaptionActivity) upvote.getContext()).loginDialog.show();
-            }
-            else {
-                handleClickUpvote(upvote.getContext(), game, hasUpvoted);
-            }
-        }
-    }
-
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         final Game game = items.get(position);
@@ -199,12 +168,25 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param hasUpvoted whether the user has upvoted the game
      * @param animate whether the upvote icon should show a "ghost" animation
      */
-    private void setUpvoteView(WallViewHolder holder, Game game, int numUpvotes,
-                               boolean hasUpvoted, boolean animate) {
+    private void setUpvoteView(WallViewHolder holder, final Game game, int numUpvotes,
+                               final boolean hasUpvoted, boolean animate) {
         // Set upvoteCountText to be the the number of upvotes;
         holder.upvoteCountText.setText(NumberFormat.getInstance().format(numUpvotes));
         // Sets the click listener, which changes implementation depending on upvote status
-        holder.upvoteIcon.setOnClickListener(new WallViewAdapter.UpvoteClickListener(game, hasUpvoted));
+        final Context context = holder.itemView.getContext();
+        holder.upvoteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if user is logged in before letting them upvote. If not logged in, display
+                // login dialog.
+                if (FirebaseResourceManager.getUserId() == null) {
+                    ((MainSnaptionActivity) context).loginDialog.show();
+                }
+                else {
+                    handleClickUpvote(context, game, hasUpvoted);
+                }
+            }
+        });
         // Sets the icon depending on whether it has been upvoted
         setUpvoteIcon(holder, hasUpvoted, animate);
     }
