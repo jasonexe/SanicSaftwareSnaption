@@ -103,7 +103,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      */
     @Override
     public void onBindViewHolder(final CaptionViewHolder holder, int position) {
-        final Caption finalCaption = items.get(position);
+        Caption finalCaption = items.get(position);
         setUpCaptionView(holder, finalCaption);
         String userId = finalCaption.getUserId();
 
@@ -120,7 +120,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                         user = unknownUser;
                     }
                     userMap.put(user.getId(), user);
-                    setCaptionerView(user, holder);
+                    notifyItemChanged(holder.getAdapterPosition());
                 }
 
                 @Override

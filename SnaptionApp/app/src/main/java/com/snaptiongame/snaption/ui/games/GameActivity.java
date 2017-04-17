@@ -184,7 +184,6 @@ public class GameActivity extends HomeAppCompatActivity {
         @Override
         public void onDataChanged(Caption data) {
             captionAdapter.captionChanged(data);
-            System.err.println("Caption changed");
         }
 
         @Override
