@@ -22,8 +22,10 @@ import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 
@@ -40,6 +42,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private LoginDialog loginDialog;
     private ProfileActivity.ProfileActivityCreator profileMaker;
     private User unknownUser = new User(UNKNOWN_USER_ID, null, null, null, null, null);
+    private Map<String, User> userMap = new HashMap<>(); // Map from userIds to User
 
     // BEGIN PRIVATE CLASSES //
 
@@ -102,21 +105,21 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     public void onBindViewHolder(final CaptionViewHolder holder, int position) {
         final Caption finalCaption = items.get(position);
         setUpCaptionView(holder, finalCaption);
+        String userId = finalCaption.getUserId();
 
         // Get information about the captioner if it is not already present
-        if (finalCaption.retrieveUser() == null) {
+        if (userMap.containsKey(userId)) {
+            setCaptionerView(userMap.get(userId), holder);
+        } else {
             String userPath = FirebaseResourceManager.getUserPath(finalCaption.getUserId());
             FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-//                    int captionNdx = items.indexOf(finalCaption);
-//                    Caption captionInList = items.get(captionNdx);
                     // if the user could not be found, set user to unknown user
                     if (user == null) {
                         user = unknownUser;
                     }
-//                    captionInList.assignUser(user);
-//                    notifyItemChanged(captionNdx);
+                    userMap.put(user.getId(), user);
                     setCaptionerView(user, holder);
                 }
 
@@ -256,7 +259,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
         holder.captionText.setText(caption.retrieveCaptionText());
-//        setCaptionerView(caption.retrieveUser(), holder);
         // Set the display to reflect the status of the caption
         if (caption.votes != null) {
             Map votes = caption.votes;
@@ -292,7 +294,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param holder The view holder containing the caption information
      */
     private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
-        System.err.println("Setting up with user " + captioner);
         if (captioner != null) {
             // Set the default captioner info if unknown user
             if (captioner.equals(unknownUser)) {
