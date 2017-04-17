@@ -1,10 +1,12 @@
 package com.snaptiongame.snaption.ui;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.AttributeSet;
 import android.view.View;
 
 import com.snaptiongame.snaption.R;
@@ -15,6 +17,19 @@ import com.snaptiongame.snaption.R;
 
 public class MainFabBehavior extends CoordinatorLayout.Behavior<FloatingActionButton> {
     private boolean snackbarVisible = false;
+    private int screenHeightPx;
+    private int minSnackbarHeightPx;
+    private int fabMarginPx;
+
+    public MainFabBehavior(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        Resources res = context.getResources();
+        screenHeightPx = res.getDisplayMetrics().heightPixels;
+        minSnackbarHeightPx = screenHeightPx -
+                res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
+        fabMarginPx = res.getDimensionPixelSize(R.dimen.fab_margin);
+    }
+
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, FloatingActionButton child, View dependency) {
         return dependency instanceof BottomNavigationView || dependency instanceof Snackbar.SnackbarLayout;
@@ -30,23 +45,18 @@ public class MainFabBehavior extends CoordinatorLayout.Behavior<FloatingActionBu
         if (!snackbarVisible && dependency instanceof BottomNavigationView) {
             // if the bottom navigation view is visible
             if (dependency.getVisibility() == View.VISIBLE) {
-                child.setY(Math.round(location[1] - res.getDimensionPixelSize(R.dimen.fab_margin) -
-                        child.getHeight() * 1.5));
+                setFabMarginWithDependency(child, location[1]);
             // else if the bottom navigation view is gone
             } else {
-                child.setY(Math.round(location[1] - res.getDimensionPixelSize(R.dimen.fab_margin) -
-                        child.getHeight() * 0.5));
+                setDefaultFabMargin(child);
             }
         }
         // if a snackbar is visible, set the position of the fab relative to the snackbar
         else if (dependency instanceof Snackbar.SnackbarLayout){
-            int minPos = res.getDisplayMetrics().heightPixels -
-                    res.getDimensionPixelSize(R.dimen.wall_bottom_navigation_height);
             // if the snackbar is above the bottom navigation view
-            if (location[1] < minPos) {
+            if (location[1] < minSnackbarHeightPx) {
                 snackbarVisible = true;
-                child.setY(Math.round(location[1] - res.getDimensionPixelSize(R.dimen.fab_margin) -
-                        child.getHeight() * 1.5));
+                setFabMarginWithDependency(child, location[1]);
             }
             // else if the snackbar is at the same height or lower than the bottom navigation view
             else {
@@ -54,5 +64,17 @@ public class MainFabBehavior extends CoordinatorLayout.Behavior<FloatingActionBu
             }
         }
         return true;
+    }
+
+    private void setDefaultFabMargin(FloatingActionButton child) {
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
+        lp.setMargins(0, 0, fabMarginPx, fabMarginPx);
+        child.setLayoutParams(lp);
+    }
+
+    private void setFabMarginWithDependency(FloatingActionButton child, int dependencyHeight) {
+        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) child.getLayoutParams();
+        lp.setMargins(0, 0, fabMarginPx, screenHeightPx - dependencyHeight + fabMarginPx);
+        child.setLayoutParams(lp);
     }
 }

@@ -252,7 +252,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
-        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setBehavior(new MainFabBehavior());
+        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setBehavior(new MainFabBehavior(this, null));
 
         DeepLinkGetter.checkIfDeepLink(this);
     }
