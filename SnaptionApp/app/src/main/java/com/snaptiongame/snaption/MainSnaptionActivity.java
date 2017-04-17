@@ -227,6 +227,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             public void onLoginComplete() {
                 updateNavigationViews();
             }
+            @Override
+            public void onLogoutComplete() {
+                switchFragments(R.id.wall_item);
+                updateNavigationViews();
+            }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {

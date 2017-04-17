@@ -510,6 +510,10 @@ public class GameActivity extends HomeAppCompatActivity {
             public void onLoginComplete() {
                 //probably do not need to do anything here
             }
+            @Override
+            public void onLogoutComplete() {
+                //nothing needed here either
+            }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
