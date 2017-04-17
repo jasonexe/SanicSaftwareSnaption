@@ -81,56 +81,10 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
-    /**
-     * Notifies the given ResourceListener of when elements in the table of the given path is
-     * changed.
-     *
-     * @param path The table path name
-     * @param listener A ResourceListener for a Map of the resource class type associated with the
-     *                 table elements
-     */
-    public void retrieveCaptionMapWithUpdates(String path, final ResourceListener listener) {
-        // if the FirebaseResourceManager is already being used to listen to the db, remove the
-        // previous listener
-        removeListener();
-
-        databaseReference = database.getReference(path);
-        GenericTypeIndicator<Map<String, Caption>> genericTypeIndicator =
-                new GenericTypeIndicator<Map<String, Caption>>() {};
-        valueEventListener = EventListenCreator.getValueEventListener(genericTypeIndicator, listener);
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
     public void addChildListener(String path, final ResourceListener listener) {
         removeListener();
         databaseReference = database.getReference(path);
-        ChildEventListener childListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                listener.onData(dataSnapshot.getValue(listener.getDataType()));
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                // No op, not updating yet.
-                // TODO Will put stuff in here once upvotes happen, probably
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                // No op, don't need to do anything if a comment is removed
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                // No op, comments won't be moved.
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // No op for now.
-            }
-        };
+        ChildEventListener childListener = EventListenCreator.getChildEventListener(listener.getDataType(), listener);
         databaseReference.addChildEventListener(childListener);
     }
 

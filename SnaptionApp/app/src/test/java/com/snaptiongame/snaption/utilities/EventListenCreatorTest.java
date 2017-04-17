@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.utilities;
 import android.content.Intent;
 import android.util.Log;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseException;
@@ -134,6 +135,31 @@ public class EventListenCreatorTest {
 
         //test canceled event
         Mockito.verify(error).toException();
+        Mockito.verify(listener).onData(null);
+    }
+
+    @Test
+    public void testTypeChildListenerCorrect() {
+        Mockito.when(listener.getDataType()).thenReturn(Caption.class);
+        Mockito.when(data.getValue(Caption.class)).thenReturn(caption);
+
+        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, listener);
+        eventListener.onChildAdded(data, "test");
+
+        //test succesful onData event
+        Mockito.verify(data).getValue(Caption.class);
+        Mockito.verify(listener).onData(caption);
+    }
+
+    @Test
+    public void testTypeChildListenerIncorrect() {
+        Mockito.when(listener.getDataType()).thenReturn(Caption.class);
+        Mockito.when(data.getValue(Caption.class)).thenThrow(InputMismatchException.class);
+        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, listener);
+        eventListener.onChildAdded(data, "test");
+
+        //test incorrect onData event
+        Mockito.verify(data).getValue(Caption.class);
         Mockito.verify(listener).onData(null);
     }
 }
