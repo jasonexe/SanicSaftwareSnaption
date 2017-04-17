@@ -28,8 +28,6 @@ public class CardLogic {
                 cardNum -= 1;
             }
         }
-        Card blankCard = new Card("%s", BLANK_CARD);
-        forHand.add(blankCard);
         return forHand;
     }
 

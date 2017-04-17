@@ -653,7 +653,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void refreshCards() {
         Random rand = new Random();
         // Add refresh card  is in the activity so that we can use the resource file. Easier to test
-        handCards = addRefreshCard(getRandomCardsFromList(allCards, rand));
+        handCards = addRefreshAndBlankCard(getRandomCardsFromList(allCards, rand));
 
         if (cardListAdapter != null) {
             cardListAdapter.replaceOptions(handCards);
@@ -661,9 +661,11 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.scrollToPosition(0);
     }
 
-    private List<Card> addRefreshCard(List<Card> cards) {
+    private List<Card> addRefreshAndBlankCard(List<Card> cards) {
         Card refreshCard = new Card(getResources().getString(R.string.refresh));
         refreshCard.setId(REFRESH_STRING);
+        Card blankCard = new Card("%s", BLANK_CARD);
+        cards.add(blankCard);
         cards.add(refreshCard);
         return cards;
     }
