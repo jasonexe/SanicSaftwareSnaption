@@ -470,25 +470,13 @@ public class GameActivity extends HomeAppCompatActivity {
     public void displayCardOptions() {
         //if the user is logged in they can caption
         if (FirebaseResourceManager.getUserId() != null) {
-//            (captionCardsList);
-//            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-//            if (cardInputView.getVisibility() == View.VISIBLE) {
-//                cardInputView.setVisibility(View.GONE);
-//                // In case they press the fab while it's being hidden after scrolling
-//                // This prevents it from being hidden forever.
-//                hideKeyboard();
-//            }
-            String[] inputs = {"dreaming", "late o' clock", "Peanut butter and jelly", "pizza", "cheese pizza", "pepperoni pizza"};
-            for (int i = 0; i < 2000; i ++) {
-                Random rand = new Random();
-                int inputNum = rand.nextInt(inputs.length);
-                int cardTextNum = rand.nextInt(allCards.size());
-                String userInput = inputs[inputNum];
-                Card card = allCards.get(cardTextNum);
-                Uploader uploader = new FirebaseUploader();
-                // Game will be a class variable probs
-                Game game = this.game;
-                addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, card, game);
+            toggleVisibility(captionCardsList);
+            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+            if (cardInputView.getVisibility() == View.VISIBLE) {
+                cardInputView.setVisibility(View.GONE);
+                // In case they press the fab while it's being hidden after scrolling
+                // This prevents it from being hidden forever.
+                hideKeyboard();
             }
         } else { //if they are logged out
             //display the loginDialog
