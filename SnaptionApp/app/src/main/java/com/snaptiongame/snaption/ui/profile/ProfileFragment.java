@@ -309,8 +309,8 @@ public class ProfileFragment extends Fragment {
     // Saves the name to firebase, also updates the name in the profile
     private void saveEditName() {
         // Firebase stuff here
-        String newText = profileEditName.getText().toString();
-        if (!newText.equals(thisUser.getDisplayName())) {
+        String newText = profileEditName.getText().toString().trim();
+        if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
             FirebaseUploader.updateDisplayName(newText, thisUser.getId());
             thisUser.setDisplayName(newText);
             userName.setText(newText);
