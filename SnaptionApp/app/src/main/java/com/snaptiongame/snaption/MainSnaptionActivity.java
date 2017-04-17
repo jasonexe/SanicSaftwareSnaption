@@ -69,6 +69,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     private User currentUser;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
+    // Used for keeping track of if this Activity is paused -- needed so logging in from
+    // other screens will not trigger an attempted UI update while this activity is gone.
+    private boolean isPaused;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -207,6 +210,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isPaused = false;
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // set layout and bind views
@@ -224,30 +228,40 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         loginManager = new LoginManager(this, new FirebaseUploader(), new LoginManager.LoginListener() {
             @Override
             public void onLoginComplete() {
-                updateNavigationViews();
+                if(!isPaused) {
+                    updateNavigationViews();
+                }
             }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 //login was a success
-                loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                if(!isPaused) {
+                    loginDialog.showPostLogDialog(getResources().getString(R.string.login_success));
+                }
             }
             @Override
             public void onError() {
                 //login was a failure
-                loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+                if(!isPaused) {
+                    loginDialog.showPostLogDialog(getResources().getString(R.string.login_failure));
+                }
             }
         }, new LoginManager.AuthCallback() {
             @Override
             public void onSuccess() {
                 //logout was a success
-                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                if(!isPaused) {
+                    loginDialog.showPostLogDialog(getResources().getString(R.string.logout_success));
+                }
             }
 
             @Override
             public void onError() {
                 //logout was a failure
-                loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+                if(!isPaused) {
+                    loginDialog.showPostLogDialog(getResources().getString(R.string.logout_failure));
+                }
             }
         });
         loginDialog.setLoginManager(loginManager);
@@ -369,7 +383,14 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        isPaused = false;
         updateNavigationViews();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isPaused = true;
     }
 
     @Override
