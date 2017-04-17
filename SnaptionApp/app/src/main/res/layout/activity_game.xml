@@ -198,7 +198,6 @@
             android:id="@+id/possible_caption_cards_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="20dp"
             android:visibility="gone" />
     </LinearLayout>
 

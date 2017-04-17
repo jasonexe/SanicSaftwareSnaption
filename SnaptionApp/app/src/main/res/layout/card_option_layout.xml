@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/caption_card_container"
-    android:orientation="vertical" android:layout_width="100dp"
-    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_width="100dp"
+    android:layout_height="150dp"
     android:background="@drawable/image_border"
     android:gravity="center"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    android:layout_marginTop="10dp"
-    android:layout_marginBottom="0dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="5dp"
-    android:translationZ="2dp"
+    android:layout_marginLeft="4dp"
+    android:layout_marginRight="4dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:padding="8dp"
     android:elevation="2dp">
 
     <ImageView
@@ -23,16 +21,11 @@
         android:id="@+id/refresh_icon"
         android:src="@drawable/ic_refresh_white_24dp" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/possible_caption_card_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingEnd="15dp"
-        android:paddingStart="15dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
         android:gravity="center"
-        android:layout_gravity="center"
-        android:text=""/>
+        android:layout_gravity="center"/>
 
 </LinearLayout>
