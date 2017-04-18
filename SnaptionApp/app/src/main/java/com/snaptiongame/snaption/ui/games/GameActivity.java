@@ -38,6 +38,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -170,14 +171,19 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.progress_bar)
     public View progressBar;
 
-    private ResourceListener captionListener = new ResourceListener<Caption>() {
+    private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
-        public void onData(Caption data) {
+        public void onNewData(Caption data) {
             if (data != null) {
                 captionAdapter.addCaption(data);
                 numberCaptions.setText(String.format(Locale.getDefault(),
                         "%d", captionAdapter.getItemCount()));
             }
+        }
+
+        @Override
+        public void onDataChanged(Caption data) {
+            captionAdapter.captionChanged(data);
         }
 
         @Override
@@ -457,7 +463,6 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
-        captionAdapter.removeListeners();
     }
 
     @OnClick(R.id.fab)
@@ -589,12 +594,10 @@ public class GameActivity extends HomeAppCompatActivity {
         fab.show();
     }
 
-    public void submit() {
-        String userInput = editCaptionText.getText().toString();
+    public void submit(String userInput) {
         editCaptionText.setText("");
         Uploader uploader = new FirebaseUploader();
         // Game will be a class variable probs
-        List<String> empty = new ArrayList<>();
         Game game = this.game;
         addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
         toggleVisibility(cardInputView);
@@ -613,7 +616,8 @@ public class GameActivity extends HomeAppCompatActivity {
         public boolean onEditorAction(TextView textView, int actionId,
                                       KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                submit();
+                String userInput = editCaptionText.getText().toString();
+                submit(userInput);
             }
             return true;
         }
