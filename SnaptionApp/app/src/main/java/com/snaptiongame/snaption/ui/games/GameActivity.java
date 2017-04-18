@@ -590,16 +590,18 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     public void submit() {
-        String userInput = editCaptionText.getText().toString();
-        editCaptionText.setText("");
-        Uploader uploader = new FirebaseUploader();
-        // Game will be a class variable probs
-        List<String> empty = new ArrayList<>();
-        Game game = this.game;
-        addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
-        toggleVisibility(cardInputView);
-        toggleVisibility(captionCardsList);
-        hideKeyboard();
+        String userInput = editCaptionText.getText().toString().trim();
+        if (!userInput.isEmpty()) {
+            editCaptionText.setText("");
+            Uploader uploader = new FirebaseUploader();
+            // Game will be a class variable probs
+            List<String> empty = new ArrayList<>();
+            Game game = this.game;
+            addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
+            toggleVisibility(cardInputView);
+            toggleVisibility(captionCardsList);
+            hideKeyboard();
+        }
     }
 
     private void hideKeyboard() {
