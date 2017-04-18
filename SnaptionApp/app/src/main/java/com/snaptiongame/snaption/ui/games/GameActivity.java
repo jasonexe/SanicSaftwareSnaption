@@ -18,6 +18,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -81,7 +82,10 @@ import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromLis
 public class GameActivity extends HomeAppCompatActivity {
     public static final String USE_GAME_ID = "useGameId";
     public static final String REFRESH_STRING = "refresh";
+    public static final String BLANK_CARD = "__blank__";
     private final static String EMPTY_SIZE = "0";
+    private static final int MAX_PREFILLED_LENGTH = 30;
+    private static final int MAX_CUSTOM_LENGTH = 50;
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
     private static final long BITMAP_ANIM_DURATION = 1000L;
@@ -627,27 +631,37 @@ public class GameActivity extends HomeAppCompatActivity {
      * This class is used in the Adapter, and is called when a card is clicked.
      */
     class CardToTextConverter {
-        public void convertCard(Card curCard) {
+        void convertCard(Card curCard) {
             if (curCard.getId().equals(REFRESH_STRING)) {
                 refreshCards();
             } else {
                 curUserCard = curCard;
-                firstHalfCardText.setText(
-                        curCard.retrieveFirstHalfText());
-                secondHalfCardText.setText(
-                        curCard.retrieveSecondHalfText());
-                cardInputView.setVisibility(View.VISIBLE);
-                editCaptionText.requestFocus();
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(editCaptionText, InputMethodManager.SHOW_IMPLICIT);
+                displayCardInput(curCard.retrieveFirstHalfText(), curCard.retrieveSecondHalfText(),
+                        curCard.getId().equals(BLANK_CARD));
             }
         }
+    }
+
+    private void displayCardInput(String firstHalfText, String secondHalfText, boolean customInput) {
+        firstHalfCardText.setText(firstHalfText);
+        secondHalfCardText.setText(secondHalfText);
+        cardInputView.setVisibility(View.VISIBLE);
+        if(customInput) {
+            editCaptionText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(MAX_CUSTOM_LENGTH)});
+        } else {
+            // This is needed so if they click the custom one then a different one, the length resets
+            editCaptionText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(MAX_PREFILLED_LENGTH)});
+        }
+        editCaptionText.requestFocus();
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(editCaptionText, InputMethodManager.SHOW_IMPLICIT);
     }
 
     private void refreshCards() {
         Random rand = new Random();
         // Add refresh card  is in the activity so that we can use the resource file. Easier to test
-        handCards = addRefreshCard(getRandomCardsFromList(allCards, rand));
+        handCards = addRefreshAndBlankCard(getRandomCardsFromList(allCards, rand));
 
         if (cardListAdapter != null) {
             cardListAdapter.replaceOptions(handCards);
@@ -655,9 +669,11 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.scrollToPosition(0);
     }
 
-    private List<Card> addRefreshCard(List<Card> cards) {
+    private List<Card> addRefreshAndBlankCard(List<Card> cards) {
         Card refreshCard = new Card(getResources().getString(R.string.refresh));
         refreshCard.setId(REFRESH_STRING);
+        Card blankCard = new Card("%s", BLANK_CARD);
+        cards.add(blankCard);
         cards.add(refreshCard);
         return cards;
     }
