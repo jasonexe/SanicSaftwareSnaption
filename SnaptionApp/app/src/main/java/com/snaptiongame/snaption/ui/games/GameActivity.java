@@ -599,14 +599,16 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     public void submit(String userInput) {
-        editCaptionText.setText("");
-        Uploader uploader = new FirebaseUploader();
-        // Game will be a class variable probs
-        Game game = this.game;
-        addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
-        toggleVisibility(cardInputView);
-        toggleVisibility(captionCardsList);
-        hideKeyboard();
+        if (!userInput.isEmpty()) {
+            editCaptionText.setText("");
+            Uploader uploader = new FirebaseUploader();
+            // Game will be a class variable probs
+            Game game = this.game;
+            addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
+            toggleVisibility(cardInputView);
+            toggleVisibility(captionCardsList);
+            hideKeyboard();
+        }
     }
 
     private void hideKeyboard() {
@@ -620,7 +622,7 @@ public class GameActivity extends HomeAppCompatActivity {
         public boolean onEditorAction(TextView textView, int actionId,
                                       KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                String userInput = editCaptionText.getText().toString();
+                String userInput = editCaptionText.getText().toString().trim();
                 submit(userInput);
             }
             return true;
