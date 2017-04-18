@@ -86,7 +86,7 @@ public class FirebaseResourceManager {
         databaseReference.addValueEventListener(valueEventListener);
     }
 
-    public void addChildListener(String path, final ChildResourceListener listener) {
+    public void addChildListener(String path, final ResourceListener listener) {
         removeListener();
         databaseReference = database.getReference(path);
         ChildEventListener childListener = EventListenCreator.getChildEventListener(listener.getDataType(), listener);

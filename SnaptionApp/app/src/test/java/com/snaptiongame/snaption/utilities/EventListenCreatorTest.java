@@ -10,7 +10,6 @@ import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.EventListenCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -43,7 +42,6 @@ import static junit.framework.Assert.assertTrue;
 public class EventListenCreatorTest {
 
     ResourceListener listener;
-    ChildResourceListener childListener;
     DataSnapshot data;
     DatabaseError error;
     Caption caption;
@@ -51,7 +49,6 @@ public class EventListenCreatorTest {
 
     @Before
     public void setup() {
-        childListener = Mockito.mock(ChildResourceListener.class);
         listener = Mockito.mock(ResourceListener.class);
         data = Mockito.mock(DataSnapshot.class);
         error = Mockito.mock(DatabaseError.class);
@@ -143,26 +140,26 @@ public class EventListenCreatorTest {
 
     @Test
     public void testTypeChildListenerCorrect() {
-        Mockito.when(childListener.getDataType()).thenReturn(Caption.class);
+        Mockito.when(listener.getDataType()).thenReturn(Caption.class);
         Mockito.when(data.getValue(Caption.class)).thenReturn(caption);
 
-        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, childListener);
+        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, listener);
         eventListener.onChildAdded(data, "test");
 
         //test succesful onData event
         Mockito.verify(data).getValue(Caption.class);
-        Mockito.verify(childListener).onNewData(caption);
+        Mockito.verify(listener).onData(caption);
     }
 
     @Test
     public void testTypeChildListenerIncorrect() {
-        Mockito.when(childListener.getDataType()).thenReturn(Caption.class);
+        Mockito.when(listener.getDataType()).thenReturn(Caption.class);
         Mockito.when(data.getValue(Caption.class)).thenThrow(InputMismatchException.class);
-        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, childListener);
+        ChildEventListener eventListener = EventListenCreator.getChildEventListener(Caption.class, listener);
         eventListener.onChildAdded(data, "test");
 
         //test incorrect onData event
         Mockito.verify(data).getValue(Caption.class);
-        Mockito.verify(childListener).onNewData(null);
+        Mockito.verify(listener).onData(null);
     }
 }
