@@ -67,6 +67,7 @@ import butterknife.OnClick;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 import static com.snaptiongame.snaption.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromList;
 
@@ -401,7 +402,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void setupEndDate(Game game) {
         Calendar calendar = Calendar.getInstance();
         // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
-        calendar.setTimeInMillis(game.getEndDate() * 1000);
+        calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
         endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
                 .format(calendar.getTime()));
     }

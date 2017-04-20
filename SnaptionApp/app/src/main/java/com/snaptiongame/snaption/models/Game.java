@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+
 /**
  * Class to keep track of game info.
  *
@@ -230,7 +232,7 @@ public class Game implements Serializable {
      * @return Whether the game is still going
      */
     public boolean getIsOpen() {
-        return isOpen || (Calendar.getInstance().getTimeInMillis()/1000) > getEndDate();
+        return isOpen || (Calendar.getInstance().getTimeInMillis()/MILLIS_PER_SECOND) > getEndDate();
     }
 
     /**
