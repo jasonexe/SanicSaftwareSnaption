@@ -196,7 +196,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         friends.put(friend.getId(), 1);
                     }
                     categories = getCategoriesFromText(categoryInput.getText().toString());
-                    endDate = calendar.getTimeInMillis();
+                    endDate = calendar.getTimeInMillis() / 1000;
                     //Generate unique key for Games
 
                     String gameId = uploader.getNewGameKey();

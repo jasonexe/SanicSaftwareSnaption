@@ -400,7 +400,8 @@ public class GameActivity extends HomeAppCompatActivity {
     // Displays the date that the game will end underneath the picture
     private void setupEndDate(Game game) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(game.getEndDate());
+        // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
+        calendar.setTimeInMillis(game.getEndDate() * 1000);
         endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
                 .format(calendar.getTime()));
     }

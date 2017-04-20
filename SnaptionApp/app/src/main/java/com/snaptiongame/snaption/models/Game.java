@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.models;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -229,7 +230,7 @@ public class Game implements Serializable {
      * @return Whether the game is still going
      */
     public boolean getIsOpen() {
-        return isOpen;
+        return (Calendar.getInstance().getTimeInMillis()/1000) > getEndDate();
     }
 
     /**
