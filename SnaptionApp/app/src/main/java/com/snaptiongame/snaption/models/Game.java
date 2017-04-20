@@ -230,7 +230,7 @@ public class Game implements Serializable {
      * @return Whether the game is still going
      */
     public boolean getIsOpen() {
-        return (Calendar.getInstance().getTimeInMillis()/1000) > getEndDate();
+        return isOpen || (Calendar.getInstance().getTimeInMillis()/1000) > getEndDate();
     }
 
     /**

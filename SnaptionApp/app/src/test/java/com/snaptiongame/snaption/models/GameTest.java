@@ -10,6 +10,7 @@ import com.snaptiongame.snaption.testobjects.TestCaption;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +154,7 @@ public class GameTest {
         Map<String, Integer> categories = new HashMap<>();
         categories.put("lol", 1);
         categories.put("kitten", 1);
-        long end = 1000;
+        long end = Calendar.getInstance().getTimeInMillis();
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, "G");
 
