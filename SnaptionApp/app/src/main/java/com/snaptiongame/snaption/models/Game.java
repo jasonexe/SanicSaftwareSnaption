@@ -93,7 +93,7 @@ public class Game implements Serializable {
         captions = new HashMap<>();
         votes = new HashMap<>();
         isOpen = true;
-        creationDate = Calendar.getInstance().getTimeInMillis();
+        creationDate = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND;
         winner = "";
     }
 
