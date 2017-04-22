@@ -51,6 +51,10 @@ public class CardOptionsAdapter extends RecyclerView.Adapter<CardOptionsViewHold
                     .getColor(R.color.colorText));
             holder.refreshIcon.setVisibility(View.GONE);
         }
+
+        if(cardAtPos.getId().equals(GameActivity.BLANK_CARD)) {
+            holder.possibleCardView.setText(holder.possibleCardView.getContext().getString(R.string.make_own_caption_prompt));
+        }
     }
 
     @Override

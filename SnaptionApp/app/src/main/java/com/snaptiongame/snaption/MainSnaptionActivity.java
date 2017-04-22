@@ -3,6 +3,7 @@ package com.snaptiongame.snaption;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -49,6 +50,7 @@ import butterknife.OnClick;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends HomeAppCompatActivity {
+    private static final String survey_url = "https://docs.google.com/forms/d/e/1FAIpQLSerSw6piYc20yi64SVjM48n7MklEFrg4Nk-oS5oRhlz_uxxRA/viewform";
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
     @BindView(R.id.drawer_layout)
@@ -102,6 +104,12 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             Fragment newFragment = null;
             switch (selectedItemId) {
+                case R.id.feedback_item:
+                    //provide survey for bug reporting and feature requests/reviews
+                    Uri uri = Uri.parse(survey_url);
+                    //go to the website for google form
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    break;
                 case R.id.wall_item:
                     MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
                     if (bottomNavMenuItem == null) {
@@ -231,6 +239,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 if(!isPaused) {
                     updateNavigationViews();
                 }
+            }
+            @Override
+            public void onLogoutComplete() {
+                switchFragments(R.id.wall_item);
+                updateNavigationViews();
             }
         }, new LoginManager.AuthCallback() {
             @Override

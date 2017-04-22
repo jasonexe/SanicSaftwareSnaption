@@ -3,8 +3,11 @@ package com.snaptiongame.snaption.models;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 /**
  * Class to keep track of game info.
@@ -90,7 +93,7 @@ public class Game implements Serializable {
         captions = new HashMap<>();
         votes = new HashMap<>();
         isOpen = true;
-        creationDate = Calendar.getInstance().getTimeInMillis();
+        creationDate = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND;
         winner = "";
     }
 
@@ -229,7 +232,7 @@ public class Game implements Serializable {
      * @return Whether the game is still going
      */
     public boolean getIsOpen() {
-        return isOpen;
+        return isOpen || (Calendar.getInstance().getTimeInMillis()/MILLIS_PER_SECOND) > getEndDate();
     }
 
     /**

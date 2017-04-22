@@ -82,6 +82,6 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         else {
             this.maxViewHeight = maxViewHeight;
         }
-        viewBelowView.setPadding(0, 0, 0, Math.round(maxViewHeight * MIN_PERCENT_HEIGHT));
+        viewBelowView.setPadding(0, 0, 0, Math.round(this.maxViewHeight * MIN_PERCENT_HEIGHT));
     }
 }

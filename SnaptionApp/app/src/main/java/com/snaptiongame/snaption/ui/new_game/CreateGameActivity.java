@@ -51,6 +51,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+
 
 /**
  * @author Cameron Geehr
@@ -196,7 +198,7 @@ public class CreateGameActivity extends AppCompatActivity {
                         friends.put(friend.getId(), 1);
                     }
                     categories = getCategoriesFromText(categoryInput.getText().toString());
-                    endDate = calendar.getTimeInMillis();
+                    endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
                     //Generate unique key for Games
 
                     String gameId = uploader.getNewGameKey();

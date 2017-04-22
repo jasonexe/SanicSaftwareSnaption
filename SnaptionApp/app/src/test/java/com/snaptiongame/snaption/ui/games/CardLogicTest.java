@@ -101,7 +101,6 @@ public class CardLogicTest {
         expectedList.add(card4);
         expectedList.add(card3);
         expectedList.add(card2);
-        expectedList.add(card10);
         Random mockedRandom = mock(Random.class);
         when(mockedRandom.nextInt(randomCards.size()-1)).thenReturn(0)
                 .thenReturn(8)

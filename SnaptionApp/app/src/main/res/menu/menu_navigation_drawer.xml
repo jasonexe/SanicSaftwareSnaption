@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/feedback_item"
+        android:title="@string/feedback_text"
+        android:icon="@drawable/ic_snaption" />
+    <item
         android:id="@+id/wall_item"
         android:title="@string/snaption_wall"
         android:icon="@drawable/ic_dashboard_grey_400_18dp"/>
