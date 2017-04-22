@@ -166,7 +166,7 @@ public class CreateGameActivity extends AppCompatActivity {
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] data = null;
+                Bitmap data = null;
                 buttonUpload.setClickable(false);
                 boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
@@ -401,18 +401,13 @@ public class CreateGameActivity extends AppCompatActivity {
      * @param imageUri - The location of the image in the device
      * @return A byte array containing the data from the image
      */
-    private byte[] getImageFromUri(Uri imageUri) {
-        byte[] data = null;
+    private Bitmap getImageFromUri(Uri imageUri) {
+        Bitmap data = null;
 
         try {
             InputStream stream = getContentResolver().openInputStream(imageUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            data = BitmapFactory.decodeStream(stream);
             stream.close();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-            baos.close();
         }
         catch (IOException e) {
             FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");

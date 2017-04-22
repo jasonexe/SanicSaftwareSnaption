@@ -1,5 +1,6 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -9,6 +10,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.snaptiongame.snaption.Constants;
@@ -17,10 +19,13 @@ import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static android.R.attr.bitmap;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
@@ -42,6 +47,7 @@ public class FirebaseUploader implements Uploader {
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
+    private static final int COMPRESSION_QUALITY = 100;
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -76,7 +82,7 @@ public class FirebaseUploader implements Uploader {
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
-    public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
+    public void addGame(Game game, Bitmap photo, UploadDialogInterface uploadCallback) {
         game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
@@ -167,14 +173,34 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
+    private void uploadPhoto(Game game, Bitmap photo, final UploadDialogInterface uploadCallback) {
         // Upload photo to storage
+        double height = photo.getHeight();
+        double width = photo.getWidth();
+        // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
+        double ratio = width / height;
+        StorageMetadata imageMetadata = new StorageMetadata.Builder()
+                .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(ratio))
+                .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
-        UploadTask uploadTask = imageLoc.putBytes(photo);
+        imageLoc.updateMetadata(imageMetadata);
+
+        byte[] data = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            photo.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, baos);
+            data = baos.toByteArray();
+            baos.close();
+        } catch (IOException e) {
+            FirebaseReporter.reportException(e, "Error closing the compression stream");
+        }
+
+
+        UploadTask uploadTask = imageLoc.putBytes(data);
         //Creating the progress dialog
-        uploadCallback.onStartUpload(photo.length);
+        uploadCallback.onStartUpload(data.length);
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
