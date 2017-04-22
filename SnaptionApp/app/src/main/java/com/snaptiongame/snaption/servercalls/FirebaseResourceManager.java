@@ -264,13 +264,15 @@ public class FirebaseResourceManager {
      */
     public static void loadImageIntoView(String imagePath, final ImageView imageView) {
         StorageReference ref = storage.child(imagePath);
-        ref.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-            @Override
-            public void onSuccess(StorageMetadata storageMetadata) {
-                System.err.println("Metadata: " + storageMetadata.getCustomMetadata(Constants.ASPECT_RATIO_KEY));
-            }
-        });
         try {
+            ref.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                @Override
+                public void onSuccess(StorageMetadata storageMetadata) {
+                    double metadata = Double.parseDouble(storageMetadata.getCustomMetadata(Constants.ASPECT_RATIO_KEY));
+                    // TODO Do whatever with the metadata here to set imageView size before full download
+                }
+            });
+
             Glide.with(imageView.getContext())
                     .using(imageLoader)
                     .load(ref)
