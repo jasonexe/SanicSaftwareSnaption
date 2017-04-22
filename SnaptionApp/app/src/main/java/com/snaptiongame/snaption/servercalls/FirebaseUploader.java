@@ -47,7 +47,9 @@ public class FirebaseUploader implements Uploader {
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
-    private static final int COMPRESSION_QUALITY = 100;
+    // Percentage of acceptable loss when compressing.
+    // There's probably a better way to do compression that guarantees stuff is below a certain size.
+    private static final int COMPRESSION_QUALITY = 80;
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -179,13 +181,12 @@ public class FirebaseUploader implements Uploader {
         double width = photo.getWidth();
         // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
         double ratio = width / height;
-        StorageMetadata imageMetadata = new StorageMetadata.Builder()
+        final StorageMetadata imageMetadata = new StorageMetadata.Builder()
                 .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(ratio))
                 .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference imageLoc = storage.getReference()
+        final StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
-        imageLoc.updateMetadata(imageMetadata);
 
         byte[] data = null;
         try {
@@ -211,7 +212,8 @@ public class FirebaseUploader implements Uploader {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // When done uploading, hide the progress bar
+                // When done uploading, hide the progress bar and set the metadata
+                imageLoc.updateMetadata(imageMetadata);
                 uploadCallback.onUploadDone();
             }
         }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
