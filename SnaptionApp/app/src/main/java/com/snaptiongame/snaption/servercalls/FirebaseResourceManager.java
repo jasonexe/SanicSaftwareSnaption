@@ -57,9 +57,9 @@ public class FirebaseResourceManager {
     private static final String FB_REQUEST_DATA = "data";
     private static final String FB_REQUEST_ID = "id";
     private static final String FB_ID_CHILD = "facebookId";
-    private static FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private static StorageReference storage = FirebaseStorage.getInstance().getReference();
-    private static FirebaseImageLoader imageLoader = new FirebaseImageLoader();
+    protected static FirebaseDatabase database = FirebaseDatabase.getInstance();
+    protected static StorageReference storage = FirebaseStorage.getInstance().getReference();
+    protected static FirebaseImageLoader imageLoader = new FirebaseImageLoader();
 
     private ValueEventListener valueEventListener;
     private DatabaseReference databaseReference;

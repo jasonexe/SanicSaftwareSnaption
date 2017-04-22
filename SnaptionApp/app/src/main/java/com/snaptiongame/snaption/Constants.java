@@ -24,6 +24,12 @@ public class Constants {
     public static final String GAME = "game";
 
     // BEGIN FIREBASE VARIABLES //
+
+    //ALL USER DATA PATHS
+    //Path to
+    public static final String USERS_METADATA_PATH = "users/public/metadata";
+    public static final String USER_METADATA_PATH = "users/public/metadata/%s";
+
     // Path to root users map in Firebase
     public static final String USERS_PATH = "users";
     // Path to a specific user in Firebase

@@ -9,31 +9,29 @@ import java.util.Map;
  */
 public class User implements Person, Comparable<User> {
 
-    private String id;
-    private String email;
-    private String displayName;
-    private boolean isAndroid;
     private Map<String, Integer> friends;
     private Map<String, Integer> createdGames;
     private Map<String, Caption> captions;
-    private String notificationId;
-    private String facebookId;
-    private String imagePath;
     private Map<String, Integer> blockedUsers; // Ids of users this user has blocked
     private Map<String, Integer> privateGames; // Private games this user was invited to
+    private UserMetadata metadata;
+    private UserPrivateData privateData;
+    private UserPublicData publicData;
 
     //needed for firebase compatibility
     public User() {}
 
-    public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
-        this.id = id;
-        this.email = email;
-        this.displayName = displayName;
-        this.notificationId = notificationId;
-        this.facebookId = facebookId;
-        this.imagePath = imagePath;
-        isAndroid = true;
+    public User(UserMetadata metadata, UserPublicData publicData, UserPrivateData privateData) {
+        this.metadata = metadata;
+        this.publicData = publicData;
+        this.privateData = privateData;
+    }
 
+    public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
+        metadata = new UserMetadata(displayName, email, imagePath, notificationId, facebookId, id);
+
+        privateData = new UserPrivateData();
+        publicData = new UserPublicData();
         friends = null;
         createdGames = null;
         captions = null;
@@ -46,6 +44,7 @@ public class User implements Person, Comparable<User> {
                 Map<String, Integer> games, Map<String, Caption> captions,
                 Map<String, Integer> blockedUsers, Map<String, Integer> privateGames) {
         this(id, email, displayName, notificationId, facebookId, imagePath);
+        publicData.setFriends(friends);
         this.friends = friends;
         this.createdGames = games;
         this.captions = captions;
@@ -73,20 +72,16 @@ public class User implements Person, Comparable<User> {
         return captions;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String retrieveDisplayName() {
+        return metadata.getDisplayName();
     }
 
     public String getLowercaseDisplayName() {
-        String lowerName = null;
-        if (displayName != null) {
-            lowerName = displayName.toLowerCase();
-        }
-        return lowerName;
+        metadata.getSearchName();
     }
 
     public String getEmail() {
-        return email;
+        return metadata.getEmail();
     }
 
     public String getFacebookId() {
@@ -94,7 +89,7 @@ public class User implements Person, Comparable<User> {
     }
 
     public String getId() {
-        return id;
+        return metadata.getId();
     }
 
     public String getNotificationId() {
