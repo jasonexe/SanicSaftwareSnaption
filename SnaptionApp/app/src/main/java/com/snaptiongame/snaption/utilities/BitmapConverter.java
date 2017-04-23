@@ -1,16 +1,22 @@
 package com.snaptiongame.snaption.utilities;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -56,6 +62,58 @@ public class BitmapConverter {
             FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
             e.printStackTrace();
         }
+        return data;
+    }
+
+    // Calculates what inSampleSize to use when loading an image from the phone, which downscales it
+    private static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    public static byte[] decodeSampledBitmapFromStream(ParcelFileDescriptor pfd,
+                                                         int reqWidth, int reqHeight) {
+        byte[] data = null;
+        // First decode with inJustDecodeBounds=true to check dimensions
+        FileDescriptor descriptor = pfd.getFileDescriptor();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFileDescriptor(descriptor, null, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        Bitmap bmp = BitmapFactory.decodeFileDescriptor(descriptor, null, options);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, Constants.COMPRESSION_VALUE, baos);
+        data = baos.toByteArray();
+        try {
+            baos.close();
+        } catch (IOException e) {
+            FirebaseReporter.reportException(e, "Couldn't close output stream");
+            e.printStackTrace();
+        }
+
         return data;
     }
 }

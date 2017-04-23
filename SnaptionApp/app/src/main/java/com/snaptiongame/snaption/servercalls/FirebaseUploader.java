@@ -90,9 +90,9 @@ public class FirebaseUploader implements Uploader {
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
-    public void addGame(Game game, Uri photoUri, UploadDialogInterface uploadCallback) {
+    public void addGame(Game game, byte[] data, double aspectRatio, UploadDialogInterface uploadCallback) {
         game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
-        uploadPhoto(game, photoUri, uploadCallback);
+        uploadPhoto(game, data, aspectRatio, uploadCallback);
         addCompletedGameObj(game);
     }
 
@@ -181,36 +181,16 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private void uploadPhoto(Game game, Uri photoUri, final UploadDialogInterface uploadCallback) {
-        // Upload photo to storage
-        BitmapFactory.Options fileInfo = new BitmapFactory.Options();
-        // Only need the dimensions
-        fileInfo.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(photoUri.getPath());
+    private void uploadPhoto(Game game, byte[] data, double aspectRatio, final UploadDialogInterface uploadCallback) {
 
-        double height = fileInfo.outHeight;
-        double width = fileInfo.outWidth;
-        // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
-        double ratio = width / height;
         StorageMetadata imageMetadata = new StorageMetadata.Builder()
-                .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(ratio))
+                .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(aspectRatio))
                 .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         final StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
 
-//        byte[] data = null;
-//        try {
-//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//            photo.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, baos);
-//            data = baos.toByteArray();
-//            baos.close();
-//        } catch (IOException e) {
-//            FirebaseReporter.reportException(e, "Error closing the compression stream");
-//        }
-
-
-        UploadTask uploadTask = imageLoc.putFile(photoUri, imageMetadata);
+        UploadTask uploadTask = imageLoc.putBytes(data, imageMetadata);
         //Creating the progress dialog
 
 

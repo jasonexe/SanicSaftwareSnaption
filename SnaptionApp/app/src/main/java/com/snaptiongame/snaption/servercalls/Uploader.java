@@ -35,7 +35,7 @@ public interface Uploader {
      * @param game
      * @param photo
      */
-    public void addGame(Game game, Uri photoUri,
+    public void addGame(Game game, byte[] data, double aspectRatio,
                         FirebaseUploader.UploadDialogInterface uploadCallback);
 
     /**
