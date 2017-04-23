@@ -440,27 +440,6 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     /**
-     * Takes the image from a uri and converts it into a byte array for uploading.
-     *
-     * @param imageUri - The location of the image in the device
-     * @return A byte array containing the data from the image
-     */
-    private Bitmap getImageFromUri(Uri imageUri) {
-        Bitmap data = null;
-
-        try {
-            InputStream stream = getContentResolver().openInputStream(imageUri);
-            data = BitmapFactory.decodeStream(stream);
-            stream.close();
-        }
-        catch (IOException e) {
-            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
-            e.printStackTrace();
-        }
-        return data;
-    }
-
-    /**
      * Takes a string of text, separates each word by comma, and removes any repeated words.
      *
      * @param text - The text to parse with comma delimiters
