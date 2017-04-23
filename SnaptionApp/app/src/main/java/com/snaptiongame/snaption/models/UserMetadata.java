@@ -9,7 +9,6 @@ package com.snaptiongame.snaption.models;
 public class UserMetadata {
 
     private String displayName;
-    private String searchName;
     private String email;
     private String imagePath;
     private String notificationId;
@@ -26,6 +25,7 @@ public class UserMetadata {
         this.notificationId = notificationId;
         this.facebookId = facebookId;
         this.id = id;
+        isAndroid = true;
     }
 
     public String getDisplayName() {
@@ -33,7 +33,7 @@ public class UserMetadata {
     }
 
     public String getSearchName() {
-        return searchName;
+        return displayName.toLowerCase();
     }
 
     public String getEmail() {
@@ -52,10 +52,6 @@ public class UserMetadata {
         return facebookId;
     }
 
-    public boolean isAndroid() {
-        return isAndroid;
-    }
-
     public boolean getIsAndroid() {
         return isAndroid;
     }
@@ -69,7 +65,7 @@ public class UserMetadata {
     }
 
     public void setSearchName(String searchName) {
-        this.searchName = searchName;
+        //NoOP can only set display name not search name
     }
 
     public void setEmail(String email) {
