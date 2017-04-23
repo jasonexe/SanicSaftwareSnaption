@@ -53,7 +53,7 @@ public class Constants {
     // Path to the user's isAndroid boolean
     public static final String _USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
     // Path to the user's lowercase display name
-    public static final String _USER_NAME = "searchName";
+    public static final String SEARCH_NAME = "searchName";
 
 
     // Path to root users map in Firebase
