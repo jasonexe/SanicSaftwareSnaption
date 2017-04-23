@@ -118,7 +118,7 @@ public class BitmapConverter {
         return data;
     }
 
-    public static double getUriAspectRatio(ParcelFileDescriptor pfd) throws FileNotFoundException {
+    public static double getFileDescriptorAspectRatio(ParcelFileDescriptor pfd) throws FileNotFoundException {
         // Upload photo to storage
         BitmapFactory.Options fileInfo = new BitmapFactory.Options();
         // Only need the dimensions

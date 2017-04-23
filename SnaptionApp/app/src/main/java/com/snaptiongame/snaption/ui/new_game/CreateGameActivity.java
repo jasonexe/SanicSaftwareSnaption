@@ -40,7 +40,6 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -251,7 +250,7 @@ public class CreateGameActivity extends AppCompatActivity {
             try {
                 ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(imageUri, "r");
                 UploaderDialog dialog = new UploaderDialog();
-                double aspectRatio = BitmapConverter.getUriAspectRatio(pfd);
+                double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
                 Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                         friends, categories, isPublic, endDate, maturityRating);
                 uploader.addGame(game, data, aspectRatio, dialog);
