@@ -72,6 +72,8 @@ public class BitmapConverter {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
+        System.err.println("Height: " + height);
+        System.err.println("width: " + width);
         int inSampleSize = 1;
 
         if (height > reqHeight || width > reqWidth) {
@@ -82,10 +84,11 @@ public class BitmapConverter {
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both
             // height and width larger than the requested height and width.
             while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
+                    || (halfWidth / inSampleSize) >= reqWidth) {
                 inSampleSize *= 2;
             }
         }
+        System.err.println("Using sample size: " + inSampleSize);
 
         return inSampleSize;
     }

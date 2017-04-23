@@ -523,7 +523,7 @@ public class CreateGameActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(byte[] bytes) {
             super.onPostExecute(bytes);
-            convertingDialog.hide();
+            convertingDialog.dismiss();
             uploadGame(bytes);
 
         }
