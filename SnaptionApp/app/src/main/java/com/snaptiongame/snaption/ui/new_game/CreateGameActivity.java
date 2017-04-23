@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v7.app.ActionBar;
@@ -39,7 +40,6 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,7 +55,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
-import static com.snaptiongame.snaption.utilities.BitmapConverter.decodeSampledBitmapFromStream;
 
 
 /**
@@ -194,35 +193,12 @@ public class CreateGameActivity extends AppCompatActivity {
                 }
                 else {
                     shouldUploadBeClickable = false;
-                    Map<String, Integer> friends = new HashMap<>();
-                    List<Person> addedFriends =  gameFriendsAdapter.getPersons();
-                    for (Person friend : addedFriends) {
-                        // TODO if/when inviting is also supported, handle when a Friend is added
-                        friends.put(friend.getId(), 1);
-                    }
-                    categories = getCategoriesFromText(categoryInput.getText().toString());
-                    endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
-                    //Generate unique key for Games
-
-                    String gameId = uploader.getNewGameKey();
-                    if(!alreadyExisting) {
-                        try {
-                            UploaderDialog dialog = new UploaderDialog();
-                            double aspectRatio = getUriAspectRatio(imageUri);
-                            byte[] data = getCompressedImage(imageUri);
-                            Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                                    friends, categories, isPublic, endDate, maturityRating);
-                            uploader.addGame(game, data, aspectRatio, dialog);
-                        } catch (Exception e) {
-                            Toast.makeText(CreateGameActivity.this, "Error, file not found",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        // If the photo does exist, addGame but without the data
-                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                friends, categories, isPublic, endDate, maturityRating);
-                        uploader.addGame(game);
-                        backToMain();
+                    try {
+                        ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
+                        new ImageCompressTask().execute(fd);
+                    } catch (Exception e) {
+                        Toast.makeText(CreateGameActivity.this, "Error, file not found",
+                                Toast.LENGTH_LONG).show();
                     }
                 }
                 buttonUpload.setClickable(shouldUploadBeClickable);
@@ -259,36 +235,50 @@ public class CreateGameActivity extends AppCompatActivity {
         setupFriendsViews();
     }
 
-    private byte[] getCompressedImage(Uri uri) throws FileNotFoundException {
-        ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(uri, "r");
-        // TODO run this on a separate thread, and display a "compressing" dialog while it runs
-        byte[] data = BitmapConverter.decodeSampledBitmapFromStream(
-                fd,
-                Constants.MAX_IMAGE_UPLOAD_WIDTH,
-                Constants.MAX_IMAGE_UPLOAD_HEIGHT);
-
-        return data;
-    }
-
-    private double getUriAspectRatio(Uri uri) throws FileNotFoundException {
-        // Upload photo to storage
-        BitmapFactory.Options fileInfo = new BitmapFactory.Options();
-        // Only need the dimensions
-        fileInfo.inJustDecodeBounds = true;
-        ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(uri, "r");
-        if(fd.getFileDescriptor() != null) {
-            BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, fileInfo);
-        } else {
-            throw new FileNotFoundException();
+    private void uploadGame(byte[] data) {
+        Map<String, Integer> friends = new HashMap<>();
+        List<Person> addedFriends =  gameFriendsAdapter.getPersons();
+        for (Person friend : addedFriends) {
+            // TODO if/when inviting is also supported, handle when a Friend is added
+            friends.put(friend.getId(), 1);
         }
+        categories = getCategoriesFromText(categoryInput.getText().toString());
+        endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
+        //Generate unique key for Games
 
-        double height = fileInfo.outHeight;
-        double width = fileInfo.outWidth;
-        // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
-        double ratio = width / height;
-        // Can also get the MIME type in here for Gifs? fileInfo.outMimeType
-        return ratio;
+        String gameId = uploader.getNewGameKey();
+        if(!alreadyExisting) {
+            try {
+                ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(imageUri, "r");
+                UploaderDialog dialog = new UploaderDialog();
+                double aspectRatio = BitmapConverter.getUriAspectRatio(pfd);
+                Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
+                        friends, categories, isPublic, endDate, maturityRating);
+                uploader.addGame(game, data, aspectRatio, dialog);
+            } catch (Exception e) {
+                Toast.makeText(CreateGameActivity.this, "Error, file not found",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            // If the photo does exist, addGame but without the data
+            Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
+                    friends, categories, isPublic, endDate, maturityRating);
+            uploader.addGame(game);
+            backToMain();
+        }
     }
+
+    private ProgressDialog showConvertProgress() {
+        ProgressDialog convertDialog = new ProgressDialog(CreateGameActivity.this);
+        convertDialog.setIndeterminate(true);
+        convertDialog.setMessage(getString(R.string.converting));
+        convertDialog.setCanceledOnTouchOutside(false);
+        //Display progress dialog
+        convertDialog.show();
+        return convertDialog;
+    }
+
+
 
     @OnClick(R.id.add_photo_layout)
     public void onClickAddPhoto() {
@@ -513,6 +503,28 @@ public class CreateGameActivity extends AppCompatActivity {
     private void showDate(Calendar calendar) {
         //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
+    }
+
+    private class ImageCompressTask extends AsyncTask<ParcelFileDescriptor, Integer, byte[]> {
+        ProgressDialog convertingDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            convertingDialog = showConvertProgress();
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            convertingDialog.hide();
+            uploadGame(bytes);
+
+        }
+
+        @Override
+        protected byte[] doInBackground(ParcelFileDescriptor... pfds) {
+            return BitmapConverter.decodeSampledBitmapFromStream(pfds[0], Constants.MAX_IMAGE_UPLOAD_WIDTH, Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+        }
     }
 
 }

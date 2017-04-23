@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -90,7 +91,7 @@ public class BitmapConverter {
     }
 
     public static byte[] decodeSampledBitmapFromStream(ParcelFileDescriptor pfd,
-                                                         int reqWidth, int reqHeight) {
+                                                       int reqWidth, int reqHeight) {
         byte[] data = null;
         // First decode with inJustDecodeBounds=true to check dimensions
         FileDescriptor descriptor = pfd.getFileDescriptor();
@@ -115,5 +116,24 @@ public class BitmapConverter {
         }
 
         return data;
+    }
+
+    public static double getUriAspectRatio(ParcelFileDescriptor pfd) throws FileNotFoundException {
+        // Upload photo to storage
+        BitmapFactory.Options fileInfo = new BitmapFactory.Options();
+        // Only need the dimensions
+        fileInfo.inJustDecodeBounds = true;
+        if(pfd.getFileDescriptor() != null) {
+            BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor(), null, fileInfo);
+        } else {
+            throw new FileNotFoundException();
+        }
+
+        double height = fileInfo.outHeight;
+        double width = fileInfo.outWidth;
+        // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
+        double ratio = width / height;
+        // Can also get the MIME type in here for Gifs? fileInfo.outMimeType
+        return ratio;
     }
 }
