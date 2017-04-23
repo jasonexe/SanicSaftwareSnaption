@@ -203,10 +203,10 @@ public class CreateGameActivity extends AppCompatActivity {
 
                     String gameId = uploader.getNewGameKey();
                     if(!alreadyExisting) {
-                        data = getImageFromUri(imageUri);
+                        //data = getImageFromUri(imageUri);
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                                 friends, categories, isPublic, endDate, maturityRating);
-                        uploader.addGame(game, data, new UploaderDialog());
+                        uploader.addGame(game, imageUri, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
@@ -334,19 +334,23 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
         int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+        boolean started = false;
         // IE 1000 = display with kilobytes
 
         ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
         @Override
         public void onStartUpload(long maxBytes) {
-            loadingDialog.setIndeterminate(false);
-            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            loadingDialog.setProgress(0);
-            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
-            loadingDialog.setMessage("Uploading photo");
-            loadingDialog.setMax((int) maxBytes/progressDivisor);
-            //Display progress dialog
-            loadingDialog.show();
+            if(!started) {
+                started = true;
+                loadingDialog.setIndeterminate(false);
+                loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                loadingDialog.setProgress(0);
+                loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+                loadingDialog.setMessage("Uploading photo");
+                loadingDialog.setMax((int) maxBytes/progressDivisor);
+                //Display progress dialog
+                loadingDialog.show();
+            }
         }
 
         @Override

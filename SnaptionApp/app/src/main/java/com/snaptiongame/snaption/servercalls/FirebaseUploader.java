@@ -1,6 +1,8 @@
 package com.snaptiongame.snaption.servercalls;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -20,12 +22,15 @@ import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static android.R.attr.bitmap;
+import static android.R.attr.data;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
@@ -33,6 +38,7 @@ import static com.snaptiongame.snaption.Constants.USER_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_PATH;
+import static com.snaptiongame.snaption.R.id.photo;
 
 /**
  * FirebaseUploader is used for uploading data to Firebase and updating values.
@@ -80,13 +86,13 @@ public class FirebaseUploader implements Uploader {
     /**
      * Call this if the game needs to be uploaded
      * @param game The game to upload. Its image path should be just the name of the file.
-     * @param photo Byte array of photo
+     * @param photoUri Uri to the photo on user's phone
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
-    public void addGame(Game game, Bitmap photo, UploadDialogInterface uploadCallback) {
+    public void addGame(Game game, Uri photoUri, UploadDialogInterface uploadCallback) {
         game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
-        uploadPhoto(game, photo, uploadCallback);
+        uploadPhoto(game, photoUri, uploadCallback);
         addCompletedGameObj(game);
     }
 
@@ -175,33 +181,38 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private void uploadPhoto(Game game, Bitmap photo, final UploadDialogInterface uploadCallback) {
+    private void uploadPhoto(Game game, Uri photoUri, final UploadDialogInterface uploadCallback) {
         // Upload photo to storage
-        double height = photo.getHeight();
-        double width = photo.getWidth();
+        BitmapFactory.Options fileInfo = new BitmapFactory.Options();
+        // Only need the dimensions
+        fileInfo.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoUri.getPath());
+
+        double height = fileInfo.outHeight;
+        double width = fileInfo.outWidth;
         // Ratio is width/height of the image, 16:9 would be a 1920 x 1080 image, etc.
         double ratio = width / height;
-        final StorageMetadata imageMetadata = new StorageMetadata.Builder()
+        StorageMetadata imageMetadata = new StorageMetadata.Builder()
                 .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(ratio))
                 .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         final StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
 
-        byte[] data = null;
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            photo.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, baos);
-            data = baos.toByteArray();
-            baos.close();
-        } catch (IOException e) {
-            FirebaseReporter.reportException(e, "Error closing the compression stream");
-        }
+//        byte[] data = null;
+//        try {
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            photo.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, baos);
+//            data = baos.toByteArray();
+//            baos.close();
+//        } catch (IOException e) {
+//            FirebaseReporter.reportException(e, "Error closing the compression stream");
+//        }
 
 
-        UploadTask uploadTask = imageLoc.putBytes(data);
+        UploadTask uploadTask = imageLoc.putFile(photoUri, imageMetadata);
         //Creating the progress dialog
-        uploadCallback.onStartUpload(data.length);
+
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -212,14 +223,14 @@ public class FirebaseUploader implements Uploader {
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // When done uploading, hide the progress bar and set the metadata
-                imageLoc.updateMetadata(imageMetadata);
+                // When done uploading, hide the progress bar
                 uploadCallback.onUploadDone();
             }
         }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                 uploadCallback.onUploadProgress(taskSnapshot.getBytesTransferred());
+                uploadCallback.onStartUpload(taskSnapshot.getTotalByteCount());
                 //Display progress as it updates
             }
         });

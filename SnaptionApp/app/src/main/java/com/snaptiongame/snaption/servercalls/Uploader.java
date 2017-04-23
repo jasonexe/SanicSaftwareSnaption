@@ -1,6 +1,7 @@
 package com.snaptiongame.snaption.servercalls;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
@@ -34,7 +35,7 @@ public interface Uploader {
      * @param game
      * @param photo
      */
-    public void addGame(Game game, Bitmap photo,
+    public void addGame(Game game, Uri photoUri,
                         FirebaseUploader.UploadDialogInterface uploadCallback);
 
     /**
