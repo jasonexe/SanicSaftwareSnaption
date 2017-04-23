@@ -192,12 +192,16 @@ public class CreateGameActivity extends AppCompatActivity {
                 }
                 else {
                     shouldUploadBeClickable = false;
-                    try {
-                        ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
-                        new ImageCompressTask().execute(fd);
-                    } catch (Exception e) {
-                        Toast.makeText(CreateGameActivity.this, "Error, file not found",
-                                Toast.LENGTH_LONG).show();
+                    if(!alreadyExisting) {
+                        try {
+                            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
+                            new ImageCompressTask().execute(fd);
+                        } catch (Exception e) {
+                            Toast.makeText(CreateGameActivity.this, "Error, file not found",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        uploadGame(null);
                     }
                 }
                 buttonUpload.setClickable(shouldUploadBeClickable);
@@ -234,6 +238,7 @@ public class CreateGameActivity extends AppCompatActivity {
         setupFriendsViews();
     }
 
+    // Set data = to null if game already exists
     private void uploadGame(byte[] data) {
         Map<String, Integer> friends = new HashMap<>();
         List<Person> addedFriends =  gameFriendsAdapter.getPersons();
@@ -246,7 +251,9 @@ public class CreateGameActivity extends AppCompatActivity {
         //Generate unique key for Games
 
         String gameId = uploader.getNewGameKey();
-        if(!alreadyExisting) {
+        // Data should always be null if the game already exists. If the game doesn't exist (and is
+        // being pulled from the user's device) then data should be populated.
+        if(!alreadyExisting && data != null) {
             try {
                 ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(imageUri, "r");
                 UploaderDialog dialog = new UploaderDialog();
