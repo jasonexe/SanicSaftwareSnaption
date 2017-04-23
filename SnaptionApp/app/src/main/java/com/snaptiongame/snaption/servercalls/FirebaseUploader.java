@@ -53,9 +53,6 @@ public class FirebaseUploader implements Uploader {
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
-    // Percentage of acceptable loss when compressing.
-    // There's probably a better way to do compression that guarantees stuff is below a certain size.
-    private static final int COMPRESSION_QUALITY = 80;
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -86,7 +83,8 @@ public class FirebaseUploader implements Uploader {
     /**
      * Call this if the game needs to be uploaded
      * @param game The game to upload. Its image path should be just the name of the file.
-     * @param photoUri Uri to the photo on user's phone
+     * @param data Compressed byte array of the photo
+     * @param aspectRatio The aspect ratio of the photo
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
@@ -187,7 +185,7 @@ public class FirebaseUploader implements Uploader {
                 .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(aspectRatio))
                 .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        final StorageReference imageLoc = storage.getReference()
+        StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
 
         UploadTask uploadTask = imageLoc.putBytes(data, imageMetadata);

@@ -208,14 +208,8 @@ public class CreateGameActivity extends AppCompatActivity {
                     if(!alreadyExisting) {
                         try {
                             UploaderDialog dialog = new UploaderDialog();
-                            ProgressDialog convertDialog = showConvertingDialog();
                             double aspectRatio = getUriAspectRatio(imageUri);
-                            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
-                            byte[] data = BitmapConverter.decodeSampledBitmapFromStream(
-                                    fd,
-                                    Constants.MAX_IMAGE_UPLOAD_WIDTH,
-                                    Constants.MAX_IMAGE_UPLOAD_HEIGHT);
-                            convertDialog.hide();
+                            byte[] data = getCompressedImage(imageUri);
                             Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
                                     friends, categories, isPublic, endDate, maturityRating);
                             uploader.addGame(game, data, aspectRatio, dialog);
@@ -263,6 +257,17 @@ public class CreateGameActivity extends AppCompatActivity {
             }
         });
         setupFriendsViews();
+    }
+
+    private byte[] getCompressedImage(Uri uri) throws FileNotFoundException {
+        ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(uri, "r");
+        // TODO run this on a separate thread, and display a "compressing" dialog while it runs
+        byte[] data = BitmapConverter.decodeSampledBitmapFromStream(
+                fd,
+                Constants.MAX_IMAGE_UPLOAD_WIDTH,
+                Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+
+        return data;
     }
 
     private double getUriAspectRatio(Uri uri) throws FileNotFoundException {
@@ -366,14 +371,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private void showNoFriends() {
         friendProgressBar.setVisibility(View.GONE);
         noFriendsView.setVisibility(View.VISIBLE);
-    }
-
-    private ProgressDialog showConvertingDialog() {
-        ProgressDialog convertDialog = new ProgressDialog(CreateGameActivity.this);
-        convertDialog.setMessage(getResources().getString(R.string.converting));
-        convertDialog.show();
-
-        return convertDialog;
     }
 
     private class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
