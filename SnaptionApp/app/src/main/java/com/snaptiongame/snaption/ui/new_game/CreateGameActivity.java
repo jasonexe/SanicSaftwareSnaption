@@ -381,6 +381,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 started = true;
                 loadingDialog.setIndeterminate(false);
                 loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setProgress(0);
                 loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
                 loadingDialog.setMessage("Uploading photo");
