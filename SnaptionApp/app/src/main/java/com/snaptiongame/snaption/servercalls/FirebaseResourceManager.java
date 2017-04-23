@@ -268,7 +268,9 @@ public class FirebaseResourceManager {
             ref.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                 @Override
                 public void onSuccess(StorageMetadata storageMetadata) {
-                    double metadata = Double.parseDouble(storageMetadata.getCustomMetadata(Constants.ASPECT_RATIO_KEY));
+                    if(storageMetadata.getCustomMetadata(Constants.ASPECT_RATIO_KEY) != null) {
+                        double metadata = Double.parseDouble(storageMetadata.getCustomMetadata(Constants.ASPECT_RATIO_KEY));
+                    }
                     // TODO Do whatever with the metadata here to set imageView size before full download
                 }
             });
