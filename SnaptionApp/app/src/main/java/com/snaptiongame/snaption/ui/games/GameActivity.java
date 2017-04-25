@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -469,6 +470,16 @@ public class GameActivity extends HomeAppCompatActivity {
         super.onDestroy();
         commentManager.removeListener();
         joinedGameManager.removeListener();
+    }
+
+    @OnClick (R.id.image_view)
+    public void onClickGameImage() {
+        Intent photoZoomIntent = new Intent(this, PhotoZoomActivity.class);
+        photoZoomIntent.putExtra(PhotoZoomActivity.PHOTO_PATH, game.getImagePath());
+        photoZoomIntent.putExtra(PhotoZoomActivity.TRANSITION_NAME, game.getId());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                imageView, game.getId());
+        startActivity(photoZoomIntent, options.toBundle());
     }
 
     @OnClick(R.id.fab)
