@@ -109,10 +109,15 @@ public class Constants {
     public static final String SEARCH_NAME = "searchName";
 
     //ALL GAME DATA PATHS for database redesign
+    //PUBLIC
     //Path to public root game metadata directory in Firebase
     public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";
     //Path to specific public game metadata directory in Firebase
     public static final String GAME_PUBLIC_METADATA_PATH = "games/public/metadata/%s";
+    //Path to specific public game map of upvotes
+    public static final String GAME_PUBLIC_METADATA_UPVOTES_PATH = "games/public/metadata/%s/upvotes";
+    //Path to specific public game map of tags
+    public static final String GAME_PUBLIC_METADATA_TAGS_PATH = "games/public/metadata/%s/tags";
     //Path to public root game data directory
     public static final String GAMES_PUBLIC_DATA_PATH = "games/public/data";
     //Path to games's public data like the captions and people in the game
@@ -123,15 +128,21 @@ public class Constants {
     public static final String GAME_PUBLIC_DATA_CAPTION_PATH = "games/public/data/%s/captions/%s";
     //Path to the public game's specific caption's card
     public static final String GAME_PUBLIC_DATA_CAPTION_CARD_PATH = "games/public/data/%s/captions/%s/card";
+    //Path to the private game's specific caption's map of upvotes
+    public static final String GAME_PUBLIC_DATA_CAPTION_UPVOTES_PATH = "games/public/data/%s/captions/%s/upvotes";
     //Path to the public game's players
     public static final String GAME_PUBLIC_DATA_PLAYERS_PATH = "games/public/data/%s/players";
     //Path to the public game's specific player
     public static final String GAME_PUBLIC_DATA_PLAYER_PATH = "games/public/data/%s/players/%s";
-
+    //PRIVATE
     //Path to private root game metadata directory in Firebase
     public static final String GAMES_PRIVATE_METADATA_PATH = "games/private/metadata";
     //Path to specific private game metadata directory in Firebase
     public static final String GAME_PRIVATE_METADATA_PATH = "games/private/metadata/%s";
+    //Path to specific private game map of upvotes
+    public static final String GAME_PRIVATE_METADATA_UPVOTES_PATH = "games/private/metadata/%s/upvotes";
+    //Path to specific private game map of tags
+    public static final String GAME_PRIVATE_METADATA_TAGS_PATH = "games/private/metadata/%s/tags";
     //Path to private root game data directory
     public static final String GAMES_PRIVATE_DATA_PATH = "games/private/data";
     //Path to games's private data like the captions and people in the game
@@ -142,11 +153,20 @@ public class Constants {
     public static final String GAME_PRIVATE_DATA_CAPTION_PATH = "games/private/data/%s/captions/%s";
     //Path to the private game's specific caption's card
     public static final String GAME_PRIVATE_DATA_CAPTION_CARD_PATH = "games/private/data/%s/captions/%s/card";
+    //Path to the private game's specific caption's map of upvotes
+    public static final String GAME_PRIVATE_DATA_CAPTION_UPVOTES_PATH = "games/private/data/%s/captions/%s/upvotes";
     //Path to the private game's players
     public static final String GAME_PRIVATE_DATA_PLAYERS_PATH = "games/private/data/%s/players";
     //Path to the private game's specific player
     public static final String GAME_PRIVATE_DATA_PLAYER_PATH = "games/private/data/%s/players/%s";
 
+    //ALL TAG DATA PATHS for database redesign
+    //Path to the base tags directory
+    public static final String TAGS_PATH = "tags";
+    //Path to a specific tag name's map of gameIds
+    public static final String TAG_PATH = "tags/%s";
+    //Path to a tag name's specific gameId
+    public static final String TAG_GAME_PATH = "tags/%s/%s";
 
     // Notification ID used in intents that have notifications
     public static final int DEEP_LINK_GOOGLE_ID = 1;
