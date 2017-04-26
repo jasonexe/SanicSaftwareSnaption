@@ -78,6 +78,76 @@ public class Constants {
     public static final String EMAIL = "email";
     // END FIREBASE VARIABLES //
 
+    //ALL USER DATA PATHS for database redesign
+    //Path to root user metadata directory in Firebase
+    public static final String USERS_METADATA_PATH = "users/public/metadata";
+    //Path to specific user metadata directory in Firebase
+    public static final String USER_METADATA_PATH = "users/public/metadata/%s";
+    //Path to user's public data like friends, public game captions, and created public games
+    public static final String USER_PUBLIC_DATA_PATH = "users/public/data/%s";
+    //Path to user's data that is private
+    public static final String USER_PRIVATE_DATA_PATH = "users/private/%s";
+    //Path to user's friend's list
+    public static final String USER_FRIENDS_PATH = "users/public/data/%s/friends";
+    //Path to user's joined games
+    public static final String JOINED_GAMES_PATH = "users/private/%s/joinedGames";
+    //Path to user's private created games
+    public static final String PRIVATE_CREATED_GAMES_PATH = "users/private/%s/createdGames";
+    //Path to user's public created games
+    public static final String PUBLIC_CREATED_GAMES_PATH = "users/public/data/%s/createdGames";
+    //Path to user's private created captions
+    public static final String PRIVATE_CREATED_CAPTIONS_PATH = "users/private/%s/captions";
+    //Path to user's public created captions
+    public static final String PUBLIC_CREATED_CAPTIONS_PATH = "users/public/data/%s/captions";
+    // Complete path to a specific private game a user has created
+    public static final String USER_PRIVATE_GAME_PATH = "users/%s/privateGames/%s";
+    // Path to the user's notification ID
+    public static final String _USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
+    // Path to the user's isAndroid boolean
+    public static final String _USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
+    // Path to the user's lowercase display name
+    public static final String SEARCH_NAME = "searchName";
+
+    //ALL GAME DATA PATHS for database redesign
+    //Path to public root game metadata directory in Firebase
+    public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";
+    //Path to specific public game metadata directory in Firebase
+    public static final String GAME_PUBLIC_METADATA_PATH = "games/public/metadata/%s";
+    //Path to public root game data directory
+    public static final String GAMES_PUBLIC_DATA_PATH = "games/public/data";
+    //Path to games's public data like the captions and people in the game
+    public static final String GAME_PUBLIC_DATA_PATH = "games/public/data/%s";
+    //Path to the public game's captions
+    public static final String GAME_PUBLIC_DATA_CAPTIONS_PATH = "games/public/data/%s/captions";
+    //Path to the public game's specific caption
+    public static final String GAME_PUBLIC_DATA_CAPTION_PATH = "games/public/data/%s/captions/%s";
+    //Path to the public game's specific caption's card
+    public static final String GAME_PUBLIC_DATA_CAPTION_CARD_PATH = "games/public/data/%s/captions/%s/card";
+    //Path to the public game's players
+    public static final String GAME_PUBLIC_DATA_PLAYERS_PATH = "games/public/data/%s/players";
+    //Path to the public game's specific player
+    public static final String GAME_PUBLIC_DATA_PLAYER_PATH = "games/public/data/%s/players/%s";
+
+    //Path to private root game metadata directory in Firebase
+    public static final String GAMES_PRIVATE_METADATA_PATH = "games/private/metadata";
+    //Path to specific private game metadata directory in Firebase
+    public static final String GAME_PRIVATE_METADATA_PATH = "games/private/metadata/%s";
+    //Path to private root game data directory
+    public static final String GAMES_PRIVATE_DATA_PATH = "games/private/data";
+    //Path to games's private data like the captions and people in the game
+    public static final String GAME_PRIVATE_DATA_PATH = "games/private/data/%s";
+    //Path to the private game's captions
+    public static final String GAME_PRIVATE_DATA_CAPTIONS_PATH = "games/private/data/%s/captions";
+    //Path to the private game's specific caption
+    public static final String GAME_PRIVATE_DATA_CAPTION_PATH = "games/private/data/%s/captions/%s";
+    //Path to the private game's specific caption's card
+    public static final String GAME_PRIVATE_DATA_CAPTION_CARD_PATH = "games/private/data/%s/captions/%s/card";
+    //Path to the private game's players
+    public static final String GAME_PRIVATE_DATA_PLAYERS_PATH = "games/private/data/%s/players";
+    //Path to the private game's specific player
+    public static final String GAME_PRIVATE_DATA_PLAYER_PATH = "games/private/data/%s/players/%s";
+
+
     // Notification ID used in intents that have notifications
     public static final int DEEP_LINK_GOOGLE_ID = 1;
     public static final int NUM_CARDS_IN_HAND = 10;
