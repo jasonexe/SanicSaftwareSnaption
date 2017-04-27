@@ -47,7 +47,7 @@ public class Constants {
     //Path to user's public created captions
     public static final String PUBLIC_CREATED_CAPTIONS_PATH = "users/public/data/%s/captions";
     // Complete path to a specific private game a user has created
-    public static final String USER_PRIVATE_GAME_PATH = "users/%s/privateGames/%s";
+    public static final String USER_PRIVATE_GAME_PATH = "users/private/%s/privateGames/%s";
     // Path to the user's notification ID
     public static final String _USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
     // Path to the user's isAndroid boolean
