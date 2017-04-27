@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.snaptiongame.snaption.Constants.GAMES_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
@@ -37,8 +39,6 @@ import static com.snaptiongame.snaption.Constants.USER_PATH;
 
 public class FirebaseUploader implements Uploader {
 
-    private static final String USERS_PATH = "users";
-    private static final String GAMES_PATH = "games";
     private static final String FRIENDS_PATH = "users/%s/friends";
     private static final String USERNAME_PATH = "users/%s/displayName";
     private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
@@ -77,7 +77,6 @@ public class FirebaseUploader implements Uploader {
      */
     @Override
     public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
-        game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
         uploadPhoto(game, photo, uploadCallback);
         addCompletedGameObj(game);
     }
@@ -137,7 +136,9 @@ public class FirebaseUploader implements Uploader {
 
     @Override
     public String getNewGameKey() {
-        DatabaseReference gamesFolderRef = database.getReference(GAMES_PATH);
+        //String access = isPublic ? "public" : "private";
+        String gamesFolderPath = String.format(GAMES_PUBLIC_METADATA_PATH);
+        DatabaseReference gamesFolderRef = database.getReference(gamesFolderPath);
         return gamesFolderRef.push().getKey();
     }
 

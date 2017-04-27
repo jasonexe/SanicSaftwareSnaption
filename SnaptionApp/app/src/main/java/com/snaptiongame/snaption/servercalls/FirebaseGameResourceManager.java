@@ -22,6 +22,7 @@ import java.util.Map;
 import static com.snaptiongame.snaption.Constants.CREATION_DATE;
 import static com.snaptiongame.snaption.Constants.GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.JOINED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.USER_PRIVATE_GAMES;
 
@@ -180,7 +181,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePublicGamesByPriority - " + databaseError.toString());
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(),
+                        "retrievePublicGamesByPriority - " + databaseError.toString());
             }
         });
     }
@@ -221,42 +223,56 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 else {
                     retrievedOnce = true;
                 }
+                //Take the game id map and convert them to games
                 convertIdsToGames(gameIds);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePrivateGamesByPriority - " + databaseError.toString());
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(),
+                        "retrievePrivateGamesByPriority - " + databaseError.toString());
                 FirebaseReporter.reportException(null, "Error getting private database info");
                 listener.onData(null);
             }
         });
     }
 
+    /**
+     * Takes a map of game IDs and their accessibility strings and converts them to a list of games.
+     *
+     * @param gameIds A map of game IDs and their accessibility strings
+     */
     private void convertIdsToGames(Map<String, String> gameIds) {
         privateGames = new ArrayList<>();
         convertIdsToGamesHelper(new ArrayList<>(gameIds.keySet()), gameIds);
     }
 
-    private void convertIdsToGamesHelper(List<String> keys, final Map<String, String> gameIds) {
+    /**
+     * A recursive function to help convert the map of game ids to a list of games. It removes a key
+     * for each iteration.
+     *
+     * @param keys A list of game IDs
+     * @param gameIds A map of game IDs and their accessibility strings
+     */
+    private void convertIdsToGamesHelper(final List<String> keys, final Map<String, String> gameIds) {
         // If this is last game, don't recursive
-        if (gameIds.size() == 0) {
+        if (keys.size() == 0) {
             listener.onData(privateGames);
         } else {
-            //Check to see if public or private to use private or public game path
-            DatabaseReference gameRef = database.getReference(String.format(Constants.GAME_METADATA_PATH, gameIds.get(0), gameIds.get(0)));
+            //Create a path from the accessibility and the game id
+            String gamePath = String.format(GAME_METADATA_PATH,
+                    gameIds.get(keys.get(0)), keys.get(0));
+            DatabaseReference gameRef = database.getReference(gamePath);
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     privateGames.add(dataSnapshot.getValue(GameMetaData.class));
-                    gameIds.remove(0);
-                    convertIdsToGamesHelper(gameIds);
+                    keys.remove(0);
+                    convertIdsToGamesHelper(keys, gameIds);
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
+                public void onCancelled(DatabaseError databaseError) {}
             });
         }
     }

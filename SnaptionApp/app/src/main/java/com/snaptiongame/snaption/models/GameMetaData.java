@@ -69,7 +69,7 @@ public class GameMetaData implements Serializable {
                 Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND);
     }
 
-    public String getGameId() {
+    public String getId() {
         return gameId;
     }
 
@@ -111,20 +111,8 @@ public class GameMetaData implements Serializable {
         return creationDate;
     }
 
-    public void setGameId(String gameId) {
-        this.gameId = gameId;
-    }
-
-    public void setPickerId(String pickerId) {
-        this.pickerId = pickerId;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    public void setTags(Map<String, Integer> tags) {
-        this.tags = tags;
+    public boolean isOpen() {
+        return (Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND) < endDate;
     }
 
     public void setUpvotes(Map<String, Integer> upvotes) {
@@ -133,17 +121,5 @@ public class GameMetaData implements Serializable {
 
     public void setTopCaption(Caption topCaption) {
         this.topCaption = topCaption;
-    }
-
-    public void setIsPublic(boolean aPublic) {
-        isPublic = aPublic;
-    }
-
-    public void setEndDate(long endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setCreationDate(long creationDate) {
-        this.creationDate = creationDate;
     }
 }

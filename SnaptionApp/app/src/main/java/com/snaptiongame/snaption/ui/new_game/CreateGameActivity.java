@@ -203,21 +203,23 @@ public class CreateGameActivity extends AppCompatActivity {
                     endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
                     //Generate unique key for Games
 
-                    String gameId = uploader.getNewGameKey();
+                    String gameId = uploader.getNewGameKey(isPublic);
                     if (!alreadyExisting) {
                         imageData = getImageFromUri(imageUri);
 
                         GameData data = new GameData(friends, null);
+                        String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
                         GameMetaData metaData = new GameMetaData(gameId, FirebaseResourceManager.getUserId(),
-                                gameId + ".jpg", tags, isPublic, endDate);
+                                imagePath, tags, isPublic, endDate);
                         Game game = new Game(data, metaData);
 
                         uploader.addGame(game, imageData, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         GameData data = new GameData(friends, null);
+                        String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
                         GameMetaData metaData = new GameMetaData(gameId, FirebaseResourceManager.getUserId(),
-                                gameId + ".jpg", tags, isPublic, endDate);
+                                imagePath, tags, isPublic, endDate);
                         Game game = new Game(data, metaData);
 
                         uploader.addGame(game);
