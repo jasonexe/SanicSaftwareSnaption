@@ -29,6 +29,7 @@ public class Game implements Serializable {
     private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
     private Map<String, Integer> votes; //The list of votes
+    private double imageAspectRatio;
 
     /**
      * Default constructor.
@@ -50,7 +51,7 @@ public class Game implements Serializable {
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
                 Map<String, Integer> categories, boolean isPublic, long endDate, long creationDate,
-                String maturityRating) {
+                String maturityRating, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -60,6 +61,7 @@ public class Game implements Serializable {
         this.endDate = endDate;
         this.creationDate = creationDate;
         this.maturityRating = maturityRating;
+        this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
         votes = new HashMap<>();
@@ -80,7 +82,7 @@ public class Game implements Serializable {
      * @param maturityRating The maturity rating of the card
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
-                Map<String, Integer> categories, boolean isPublic, long endDate, String maturityRating) {
+                Map<String, Integer> categories, boolean isPublic, long endDate, String maturityRating, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -89,12 +91,17 @@ public class Game implements Serializable {
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.maturityRating = maturityRating;
+        this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
         votes = new HashMap<>();
         isOpen = true;
         creationDate = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND;
         winner = "";
+    }
+
+    public double getImageAspectRatio() {
+        return imageAspectRatio;
     }
 
     /**

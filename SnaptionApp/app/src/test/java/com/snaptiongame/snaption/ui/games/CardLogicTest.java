@@ -35,7 +35,7 @@ public class CardLogicTest {
         String userId = "testUserId";
         String cardText = "testCard %s";
         String cardId = "testCardId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
+        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature", 1);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = new Card(cardText, cardId);
         expectedInput.add(userInput);
@@ -57,7 +57,7 @@ public class CardLogicTest {
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
         String userId = "testUserId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
+        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature", 1);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = null;
         expectedInput.add(userInput);

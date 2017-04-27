@@ -259,7 +259,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 UploaderDialog dialog = new UploaderDialog();
                 double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
                 Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                        friends, categories, isPublic, endDate, maturityRating);
+                        friends, categories, isPublic, endDate, maturityRating, aspectRatio);
                 uploader.addGame(game, data, aspectRatio, dialog);
             } catch (Exception e) {
                 Toast.makeText(CreateGameActivity.this, "Error, file not found",
@@ -267,8 +267,9 @@ public class CreateGameActivity extends AppCompatActivity {
             }
         } else {
             // If the photo does exist, addGame but without the data
+            // TODO figure out a better way to do this... will have to pull the game probably.
             Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                    friends, categories, isPublic, endDate, maturityRating);
+                    friends, categories, isPublic, endDate, maturityRating, 1);
             uploader.addGame(game);
             backToMain();
         }
