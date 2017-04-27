@@ -145,7 +145,7 @@ public class GameTest {
         assertEquals(caption1, game2.getTopCaption());
 
         //test winner already set
-        game1.setWinner(caption1.getId());
+        game1.(caption1.getId());
         assertEquals(caption1, game1.getTopCaption());
     }
 

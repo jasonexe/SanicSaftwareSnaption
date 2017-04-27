@@ -18,7 +18,6 @@ import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
  */
 
 public class Game implements Serializable {
-    private String id; //The ID of the game
     private GameData data; //The object containing the players and captions
     private GameMetaData metaData; //The object containing all other information about the game
 
@@ -27,8 +26,13 @@ public class Game implements Serializable {
      */
     public Game() {}
 
-    public Game(String id, GameData data, GameMetaData metaData) {
-        this.id = id;
+    /**
+     * Creates the game using data and metadata.
+     *
+     * @param data The object containing the players and captions
+     * @param metaData The object containing all other information about the game
+     */
+    public Game(GameData data, GameMetaData metaData) {
         this.data = data;
         this.metaData = metaData;
     }
@@ -53,11 +57,43 @@ public class Game implements Serializable {
         this.metaData = metaData;
     }
 
+    /**
+     * Sets the map of upvotes.
+     *
+     * @param upvotes The map of upvotes
+     */
     public void setUpvotes(Map<String, Integer> upvotes) {
         metaData.setUpvotes(upvotes);
     }
 
+    /**
+     * Sets the game's top caption.
+     *
+     * @param topCaption
+     */
+    public void setTopCaption(Caption topCaption) {
+        metaData.setTopCaption(topCaption);
+    }
+
     /** Accessor Methods **/
+
+    /**
+     * Returns the game's data.
+     *
+     * @return The object containing the players and captions
+     */
+    public GameData getData() {
+        return data;
+    }
+
+    /**
+     * Returns the game's metadata.
+     *
+     * @return The object containing all other information about the game
+     */
+    public GameMetaData getMetaData() {
+        return metaData;
+    }
 
     /**
      * Returns the ID of the game.
@@ -65,7 +101,7 @@ public class Game implements Serializable {
      * @return The ID of the game
      */
     public String getId() {
-        return id;
+        return metaData.getGameId();
     }
 
     /**

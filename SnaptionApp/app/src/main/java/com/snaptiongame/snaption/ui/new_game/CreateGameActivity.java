@@ -208,17 +208,17 @@ public class CreateGameActivity extends AppCompatActivity {
                         imageData = getImageFromUri(imageUri);
 
                         GameData data = new GameData(friends, null);
-                        GameMetaData metaData = new GameMetaData(FirebaseResourceManager.getUserId(),
+                        GameMetaData metaData = new GameMetaData(gameId, FirebaseResourceManager.getUserId(),
                                 gameId + ".jpg", tags, isPublic, endDate);
-                        Game game = new Game(gameId, data, metaData);
+                        Game game = new Game(data, metaData);
 
                         uploader.addGame(game, imageData, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
                         GameData data = new GameData(friends, null);
-                        GameMetaData metaData = new GameMetaData(FirebaseResourceManager.getUserId(),
+                        GameMetaData metaData = new GameMetaData(gameId, FirebaseResourceManager.getUserId(),
                                 gameId + ".jpg", tags, isPublic, endDate);
-                        Game game = new Game(gameId, data, metaData);
+                        Game game = new Game(data, metaData);
 
                         uploader.addGame(game);
                         backToMain();

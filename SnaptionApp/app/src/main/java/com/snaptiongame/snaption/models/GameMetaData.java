@@ -69,6 +69,10 @@ public class GameMetaData implements Serializable {
                 Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND);
     }
 
+    public String getGameId() {
+        return gameId;
+    }
+
     public String getPickerId() {
         return pickerId;
     }
@@ -105,6 +109,10 @@ public class GameMetaData implements Serializable {
 
     public long getCreationDate() {
         return creationDate;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
     }
 
     public void setPickerId(String pickerId) {
