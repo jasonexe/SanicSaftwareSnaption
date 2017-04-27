@@ -97,48 +97,48 @@ public class FirebaseResourceManager {
      * Gets the direct path to the user table in the database
      * @return a string path from the root node to current user
      */
-    public static String getUserPath() {
+    /*public static String getUserPath() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userPath = null;
         if (user != null)
             userPath = String.format(Constants.USER_PATH, user.getUid());
         return userPath;
-    }
+    }*/
 
     /**
      * Gets the direct path to the user table in the database
      * @param id The ID of the user whose path to find
      * @return a string path from the root node to current user
      */
-    public static String getUserPath(String id) {
+    /*public static String getUserPath(String id) {
         return String.format(Constants.USER_PATH, id);
-    }
+    }*/
 
     /**
      * Get the user id of the current user
      * @return a string key to the user table
      */
-    public static String getUserId() {
+    /*public static String getUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String id = null;
         if (user != null) {
             id = user.getUid();
         }
         return id;
-    }
+    }*/
 
     /**
      * Gets the list of providers that the current user's account is associated with.
      * @return the list of providers the user's account is associated with
      */
-    public static List<String> getProviders() {
+    /*public static List<String> getProviders() {
         List<String> providers = new ArrayList<String>();
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             providers = currentUser.getProviders();
         }
         return providers;
-    }
+    }*/
 
     /**
      * Set up a listener to receive an object at a specified path without a connection
@@ -321,7 +321,7 @@ public class FirebaseResourceManager {
      * @param user Facebook user
      * @param friendListener ResourceListener the list of Friends is returned to
      */
-    private static void getFacebookFriends(final User user,
+    /*private static void getFacebookFriends(final User user,
                                            final ResourceListener<Friend> friendListener) {
         // create Facebook graph request callback
         GraphRequest.Callback friendsCallback = new GraphRequest.Callback() {
@@ -330,7 +330,7 @@ public class FirebaseResourceManager {
             }
         };
         makeFacebookFriendsRequest(friendsCallback, user.getFacebookId());
-    }
+    }*/
 
     /**
      * Retrieves a list of Friends, representing the Facebook friends that have logged
@@ -342,7 +342,7 @@ public class FirebaseResourceManager {
      * @param friendsFilter Snaption ids of friends that should not be returned
      * @param friendListener ResourceListener the list of Friends is returned to
      */
-    public static void getFacebookFriends(final User user, final Map<String, Integer> friendsFilter,
+    /*public static void getFacebookFriends(final User user, final Map<String, Integer> friendsFilter,
                                           final ResourceListener<Friend> friendListener) {
         getFacebookFriends(user, new ResourceListener<Friend>() {
             @Override
@@ -358,7 +358,7 @@ public class FirebaseResourceManager {
                 return Friend.class;
             }
         });
-    }
+    }*/
 
     /**
      * Parses a Facebook graph response from requesting a list of friends into a list of Friend
@@ -368,7 +368,7 @@ public class FirebaseResourceManager {
      * @param response Facebook graph response from requesting a list of friends
      * @param friendListener ResourceListener the list of Friends is returned to
      */
-    private static void handleFacebookFriendsResponse(
+     /*private static void handleFacebookFriendsResponse(
             GraphResponse response, final ResourceListener<Friend> friendListener) {
         // parse the Facebook response to a list of Friends
         final JSONArray friends = response.getJSONObject() != null ?
@@ -396,7 +396,7 @@ public class FirebaseResourceManager {
                 }
             }
         }
-    }
+    }*/
 
     /**
      * Retrieves the Snaption User associated with the given Facebook unique id, and returns the
@@ -405,7 +405,7 @@ public class FirebaseResourceManager {
      * @param facebookId String unique Facebook id of a Facebook user
      * @param resourceListener ResourceListener the user is returned to
      */
-    public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
+    /*public static void getFacebookUser(String facebookId, final ResourceListener<User> resourceListener) {
         Query query = database.getReference(String.format(Constants.USERS_PATH)).orderByChild(FB_ID_CHILD)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -426,7 +426,7 @@ public class FirebaseResourceManager {
                 resourceListener.onData(null);
             }
         });
-    }
+    }*/
 
     /**
      * Creates and executes a Facebook graph request to retrieve the Facebook friends of the
@@ -463,52 +463,5 @@ public class FirebaseResourceManager {
     public static boolean validFirebasePath(String path) {
         Pattern pattern = Pattern.compile("[.#$\\[\\]]");
         return !pattern.matcher(path).find();
-    }
-
-    /**
-     * Loads a map of users. This will most often be used to retrieve the friends of a user
-     *
-     * @param uids Map of user ids
-     * @param listener ResourceListener the users are returned to
-     */
-    public static void loadUsers(Map<String, Integer> uids, ResourceListener<User> listener) {
-        for (String uid : uids.keySet()) {
-            String friend = String.format(Constants.USER_PATH, uid);
-            // ensure the user id is a valid one to avoid errors
-            if (validFirebasePath(friend)) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
-            }
-        }
-    }
-
-    /**
-     * Loads a list of users based on the start of their display name and/or e-mail.
-     *
-     * @param begin the name/e-mail to be searched for
-     * @param path the path to the child to determine what the query looks for, being name/e-mail
-     * @param listener ResourceListener the users are returned to
-     */
-    public static void retrieveUsersByName(String begin, String path, final ResourceListener<List<User>> listener) {
-        Query query = database.getReference(Constants.USERS_PATH).orderByChild(path).startAt(begin).endAt(begin + "~");
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                List<User> users = new ArrayList<>();
-                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
-                if (snapshots.iterator().hasNext()) {
-                    for (DataSnapshot snapshot : snapshots) {
-                        users.add((User) snapshot.getValue(listener.getDataType()));
-                    }
-                }
-                listener.onData(users);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrieveUsersByName - " + databaseError.toString());
-                listener.onData(null);
-            }
-        });
     }
 }

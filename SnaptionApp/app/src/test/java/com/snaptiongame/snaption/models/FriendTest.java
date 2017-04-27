@@ -38,7 +38,7 @@ public class FriendTest {
 
     @Test
     public void testUserConstructor() {
-        User createFrom = new User(userId, email, userName, notifyId, fbId, imagePath);
+        UserMetadata createFrom = new UserMetadata(userId, email, userName, notifyId, fbId, imagePath);
         Friend createdFriend = new Friend(createFrom);
         assertEquals(userId, createdFriend.getId());
         assertEquals(userName, createdFriend.getDisplayName());
@@ -50,7 +50,7 @@ public class FriendTest {
     @Test
     public void testEqualsTrue() {
         Friend customFriend = new Friend(userId, userName, email, fbId);
-        User createFrom = new User(userId, email, userName, notifyId, fbId, imagePath);
+        UserMetadata createFrom = new UserMetadata(userId, email, userName, notifyId, fbId, imagePath);
         Friend createdFriend = new Friend(createFrom);
         assertTrue(customFriend.equals(createdFriend));
     }
@@ -58,7 +58,7 @@ public class FriendTest {
     @Test
     public void testEqualsFalse() {
         Friend customFriend = new Friend("BADID", userName, email, fbId);
-        User createFrom = new User(userId, email, userName, notifyId, fbId, imagePath);
+        UserMetadata createFrom = new UserMetadata(userId, email, userName, notifyId, fbId, imagePath);
         Friend createdFriend = new Friend(createFrom);
         assertFalse(customFriend.equals(createdFriend));
     }

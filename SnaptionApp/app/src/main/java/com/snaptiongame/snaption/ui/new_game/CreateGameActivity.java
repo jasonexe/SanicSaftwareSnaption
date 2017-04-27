@@ -30,9 +30,11 @@ import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
@@ -204,12 +206,12 @@ public class CreateGameActivity extends AppCompatActivity {
                     String gameId = uploader.getNewGameKey();
                     if(!alreadyExisting) {
                         data = getImageFromUri(imageUri);
-                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
+                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), gameId + ".jpg",
                                 friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game, data, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
-                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
+                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), existingPhotoPath,
                                 friends, categories, isPublic, endDate, maturityRating);
                         uploader.addGame(game);
                         backToMain();
@@ -285,16 +287,16 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     private void loadFriends() {
-        String userPath = FirebaseResourceManager.getUserPath();
-        if (userPath != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+        String userId = FirebaseUserResourceManager.getUserId();
+        if (userId != null) {
+            FirebaseUserResourceManager.getUserFriends(userId, new ResourceListener<Map<String, Integer>>() {
                 @Override
-                public void onData(User user) {
-                    if (user != null && user.getFriends() != null) {
+                public void onData(Map<String, Integer> friends) {
+                    if (friends != null) {
                         // load each friend
-                        FirebaseResourceManager.loadUsers(user.getFriends(), new ResourceListener<User>() {
+                        FirebaseUserResourceManager.loadUsers(friends, new ResourceListener<UserMetadata>() {
                             @Override
-                            public void onData(User user) {
+                            public void onData(UserMetadata user) {
                                 if (user != null) {
                                     if (friendsListAdapter.getItemCount() == 0) {
                                         showFriends();
@@ -305,7 +307,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
                             @Override
                             public Class getDataType() {
-                                return User.class;
+                                return UserMetadata.class;
                             }
                         });
                     }

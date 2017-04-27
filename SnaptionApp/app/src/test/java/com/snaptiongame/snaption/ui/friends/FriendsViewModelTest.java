@@ -5,8 +5,10 @@ import com.google.firebase.auth.FirebaseAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
@@ -67,7 +69,7 @@ public class FriendsViewModelTest {
     @Rule
     public PowerMockRule rule = new PowerMockRule();
     @Mock
-    private User user;
+    private UserMetadata user;
     @Mock
     private Friend friend;
     @Mock
@@ -88,7 +90,7 @@ public class FriendsViewModelTest {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
         PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(FB_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
@@ -99,7 +101,7 @@ public class FriendsViewModelTest {
         List<String> providers = new ArrayList<>();
         providers.add(GoogleAuthProvider.PROVIDER_ID);
         PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(GOOGLE_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
@@ -127,7 +129,7 @@ public class FriendsViewModelTest {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
         PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         when(user.getFacebookId()).thenReturn(TEST_FB_ID);
         when(user.getId()).thenReturn(TEST_SNAPTION_ID);

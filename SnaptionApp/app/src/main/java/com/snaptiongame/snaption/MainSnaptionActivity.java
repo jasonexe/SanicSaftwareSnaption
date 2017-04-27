@@ -28,9 +28,11 @@ import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.DeepLinkGetter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -68,7 +70,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     private LoginManager loginManager;
     public LoginDialog loginDialog;
     private ActionBarDrawerToggle mDrawerToggle;
-    private User currentUser;
+    private UserMetadata currentUser;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
     // Used for keeping track of if this Activity is paused -- needed so logging in from
@@ -122,7 +124,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
                     Bundle args = new Bundle();
-                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseResourceManager.getUserId());
+                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
                     newFragment.setArguments(args);
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
@@ -297,13 +299,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     }
 
     private void updateNavigationViews() {
-        if (FirebaseResourceManager.getUserPath() != null) {
+        String id = FirebaseUserResourceManager.getUserId();
+        if (id != null) {
             if (currentUser == null) {
                 //retrieve information from User table
-                FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                        new ResourceListener<User>() {
+                FirebaseUserResourceManager.getUserMetadataById(id, new ResourceListener<UserMetadata>() {
                             @Override
-                            public void onData(User user) {
+                            public void onData(UserMetadata user) {
                                 currentUser = user;
                                 if (user != null) {
                                     addUserInfoToNavDrawer(user);
@@ -314,7 +316,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
                             @Override
                             public Class getDataType() {
-                                return User.class;
+                                return UserMetadata.class;
                             }
                         });
             }
@@ -323,7 +325,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void addUserInfoToNavDrawer(User user) {
+    private void addUserInfoToNavDrawer(UserMetadata user) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
@@ -374,7 +376,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
         if (currentNavDrawerMenuId == R.id.wall_item) {
-            if (FirebaseResourceManager.getUserId() != null) {
+            if (FirebaseUserResourceManager.getUserId() != null) {
                 Intent intent = new Intent(this, CreateGameActivity.class);
                 startActivity(intent);
             }

@@ -9,12 +9,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
@@ -36,7 +39,7 @@ import butterknife.ButterKnife;
  * @author Hristo Stoytchev
  */
 public class SearchActivity extends HomeAppCompatActivity {
-    private List<User> users = new ArrayList<User>();
+    private List<UserMetadata> users = new ArrayList<UserMetadata>();
     private FriendsListAdapter userListAdapter;
     private FriendsViewModel viewModel;
     private FirebaseUploader uploader;
@@ -49,24 +52,24 @@ public class SearchActivity extends HomeAppCompatActivity {
     protected TextView searchNotice;
 
     // the listener that gets the list of Users based on username
-    private ResourceListener<List<User>> nameListener = new ResourceListener<List<User>>() {
+    private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
         @Override
-        public void onData(List<User> userList) {
+        public void onData(List<UserMetadata> userList) {
             users.addAll(userList);
             // query Firebase for Users based on e-mail only after this query is finished
-            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), Constants.EMAIL, emailListener);
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, emailListener);
         }
 
         @Override
         public Class getDataType() {
-            return User.class;
+            return UserMetadata.class;
         }
     };
 
     // the listener that gets the list of Users based on e-mail
-    private ResourceListener<List<User>> emailListener = new ResourceListener<List<User>>() {
+    private ResourceListener<List<UserMetadata>> emailListener = new ResourceListener<List<UserMetadata>>() {
         @Override
-        public void onData(List<User> userList) {
+        public void onData(List<UserMetadata> userList) {
             users.addAll(userList);
             // display the list of Users after getting the remaining ones
             displayUsers();
@@ -74,13 +77,13 @@ public class SearchActivity extends HomeAppCompatActivity {
 
         @Override
         public Class getDataType() {
-            return User.class;
+            return UserMetadata.class;
         }
     };
 
     FriendsListAdapter.AddInviteUserCallback addInviteUserCallback = new FriendsListAdapter.AddInviteUserCallback() {
         @Override
-        public void addInviteClicked(final User user) {
+        public void addInviteClicked(final UserMetadata user) {
             final Friend friend = new Friend(user);
 
             // ensure viewModel has been initialized
@@ -132,7 +135,7 @@ public class SearchActivity extends HomeAppCompatActivity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             query = intent.getStringExtra(SearchManager.QUERY);
             // query firebase for Users based on displayname
-            FirebaseResourceManager.retrieveUsersByName(query.toLowerCase(), Constants.USER_NAME, nameListener);
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
         }
 
     }
@@ -145,7 +148,7 @@ public class SearchActivity extends HomeAppCompatActivity {
         // display the list of users if there are any, otherwise tell the user nothing matched
         if (users.size() > 0) {
             // convert to a treeset to remove duplicates and be in alphabetical order
-            Set<User> set = new TreeSet<>(users);
+            Set<UserMetadata> set = new TreeSet<>(users);
             searchNotice.setVisibility(View.GONE);
             // set the adapter to be able to add friends
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
@@ -160,10 +163,10 @@ public class SearchActivity extends HomeAppCompatActivity {
      * Initialize the view model that allows for adding friends.
      */
     private void initializeViewModel() {
-        FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUserMetadataById(FirebaseUserResourceManager.getUserId(),
+                new ResourceListener<UserMetadata>() {
                     @Override
-                    public void onData(User user) {
+                    public void onData(UserMetadata user) {
                         if (user != null) {
                             viewModel = new FriendsViewModel(user, uploader);
                         }
@@ -171,7 +174,7 @@ public class SearchActivity extends HomeAppCompatActivity {
 
                     @Override
                     public Class getDataType() {
-                        return User.class;
+                        return UserMetadata.class;
                     }
                 });
     }

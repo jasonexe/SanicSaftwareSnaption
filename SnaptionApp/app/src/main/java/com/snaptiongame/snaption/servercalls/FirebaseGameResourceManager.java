@@ -55,7 +55,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.privateLimit = privateLimit;
         this.listener = listener;
         this.gameType = gameType;
-        userId = FirebaseResourceManager.getUserId();
+        userId = FirebaseUserResourceManager.getUserId();
     }
 
     public void retrieveGames() {

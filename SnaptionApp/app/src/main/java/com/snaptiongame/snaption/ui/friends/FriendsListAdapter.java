@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
@@ -15,20 +16,20 @@ import java.util.List;
  * @author Hristo Stoytchev
  */
 public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
-    private List<User> friends;
+    private List<UserMetadata> friends;
     private AddInviteUserCallback addInviteUserCallback;
     private ProfileActivity.ProfileActivityCreator profileMaker;
 
     public interface AddInviteUserCallback {
-        public void addInviteClicked(User user);
+        public void addInviteClicked(UserMetadata user);
     }
 
-    public FriendsListAdapter(List<User> friends, ProfileActivity.ProfileActivityCreator profileMaker) {
+    public FriendsListAdapter(List<UserMetadata> friends, ProfileActivity.ProfileActivityCreator profileMaker) {
         this.friends = friends;
         this.profileMaker = profileMaker;
     }
 
-    public FriendsListAdapter(List<User> friends, AddInviteUserCallback addInviteUserCallback,
+    public FriendsListAdapter(List<UserMetadata> friends, AddInviteUserCallback addInviteUserCallback,
                               ProfileActivity.ProfileActivityCreator profileMaker) {
         this(friends, profileMaker);
         this.addInviteUserCallback = addInviteUserCallback;
@@ -45,7 +46,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
 
     @Override
     public void onBindViewHolder(final PersonViewHolder holder, int position) {
-        final User friend = friends.get(position);
+        final UserMetadata friend = friends.get(position);
         holder.name.setText(friend.getDisplayName());
         holder.email.setText(friend.getEmail());
         holder.email.setVisibility(TextUtils.isEmpty(friend.getEmail()) ? View.GONE : View.VISIBLE);
@@ -71,7 +72,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
         return friends.size();
     }
 
-    public void addSingleItem(User user) {
+    public void addSingleItem(UserMetadata user) {
         friends.add(user);
         notifyItemInserted(friends.size() - 1);
     }

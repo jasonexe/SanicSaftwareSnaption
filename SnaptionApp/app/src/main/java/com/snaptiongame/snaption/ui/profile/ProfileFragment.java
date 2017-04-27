@@ -33,6 +33,7 @@ import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
@@ -109,7 +110,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         String userId = getArguments().getString(ProfileFragment.USER_ID_ARG);
-        String currentUserId = FirebaseResourceManager.getUserId();
+        String currentUserId = FirebaseUserResourceManager.getUserId();
         isUser = currentUserId != null && currentUserId.equals(userId);
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -127,7 +128,7 @@ public class ProfileFragment extends Fragment {
         //if the user is logged in
         if (userId != null) {
             //retrieve information from User table
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, userId), new ResourceListener<User>() {
+            FirebaseUserResourceManager.getUserById(userId, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     setupUserData(user, view);
@@ -214,8 +215,8 @@ public class ProfileFragment extends Fragment {
     private boolean canDisplayGame(Game game, boolean isUser) {
         return game != null && (isUser ||
                 game.getIsPublic() ||
-                FirebaseResourceManager.getUserId() != null && game.getPlayers() != null &&
-                        game.getPlayers().containsKey(FirebaseResourceManager.getUserId()));
+                FirebaseUserResourceManager.getUserId() != null && game.getPlayers() != null &&
+                        game.getPlayers().containsKey(FirebaseUserResourceManager.getUserId()));
     }
 
     private void getUserGames(User user) {
@@ -328,7 +329,7 @@ public class ProfileFragment extends Fragment {
     private void saveProfilePic() {
         if(newPhoto != null) {
             clearGlideCache();
-            FirebaseUploader.uploadUserPhoto(thisUser, newPhoto);
+            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto);
             AlertDialog dialog = new AlertDialog.Builder(getContext())
                     .setMessage(getResources().getString(R.string.picture_change)).create();
             dialog.show();

@@ -77,7 +77,7 @@ public class FirebaseNotificationSender {
             json.put(JSON_TO, to.getNotificationId());
             JSONObject data = new JSONObject();
             data.put(NotificationReceiver.GAME_ID_KEY, gameId);
-            data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
+            data.put(NotificationReceiver.USER_ID_KEY, FirebaseUserResourceManager.getUserId());
             json.put(JSON_DATA, data);
             return json;
         } catch (JSONException err) {
@@ -94,7 +94,7 @@ public class FirebaseNotificationSender {
         try {
             //add gameId and userId to notification
             json.put(JSON_TO, to.getNotificationId());
-            notification.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
+            notification.put(NotificationReceiver.USER_ID_KEY, FirebaseUserResourceManager.getUserId());
             notification.put(NotificationReceiver.GAME_ID_KEY, gameId);
             //add title and body to notification
             notification.put(JSON_BODY, String.format(IOS_NOTIFICATION_BODY, from.getDisplayName()));

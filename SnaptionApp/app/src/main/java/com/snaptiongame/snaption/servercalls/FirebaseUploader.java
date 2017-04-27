@@ -16,6 +16,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
+import static com.snaptiongame.snaption.Constants.USER_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_PATH;
 
@@ -110,7 +112,7 @@ public class FirebaseUploader implements Uploader {
 
     private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
 
-        final String pickerId = FirebaseResourceManager.getUserId();
+        final String pickerId = FirebaseUserResourceManager.getUserId();
         //listener once you get a user to send notification
         final ResourceListener<User> notifyPlayerListener = new ResourceListener<User>() {
             @Override
@@ -214,17 +216,17 @@ public class FirebaseUploader implements Uploader {
     }
 
     @Override
-    public void addUser(final User user, final byte[] photo, final ResourceListener<User> listener) {
+    public void addUser(final UserMetadata user, final byte[] photo, final ResourceListener<UserMetadata> listener) {
         //check if User already exists in Database
-        FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, user.getId()), new ResourceListener<User>() {
+        FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_METADATA_PATH, user.getId()), new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User data) {
+            public void onData(UserMetadata data) {
                 //if User does not exist
                 if (data == null) {
                     //upload user
                     uploadObject(String.format(USER_PATH, user.getId()), user);
                     //upload user photo
-                    uploadUserPhoto(user, photo);
+                    uploadUserPhoto(user.getImagePath(), photo);
                 } else {
                     //update notificationId every login
                     uploadObject(String.format(Constants.USER_NOTIFICATION_PATH, user.getId()), user.getNotificationId());
@@ -237,13 +239,13 @@ public class FirebaseUploader implements Uploader {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }
 
-    public static void uploadUserPhoto(User user, byte[] photo) {
-        StorageReference ref = FirebaseStorage.getInstance().getReference().child(user.getImagePath());
+    public static void uploadUserPhoto(String userImagePath, byte[] photo) {
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(userImagePath);
         ref.putBytes(photo);
     }
 
@@ -309,7 +311,7 @@ public class FirebaseUploader implements Uploader {
         // TODO check that joined games should actually go in private in the user
         Map<String, Object> childUpdates = new HashMap<>();
         String gameId = game.getId();
-        String userId = FirebaseResourceManager.getUserId();
+        String userId = FirebaseUserResourceManager.getUserId();
 
         childUpdates.put(String.format(Constants.GAME_PLAYER_PATH, gameId, userId), 1);
         childUpdates.put(String.format(Constants.USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
@@ -321,7 +323,7 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    public void addFriend(final User user, final Friend friend, final UploadListener listener) {
+    public void addFriend(final UserMetadata user, final Friend friend, final UploadListener listener) {
         // add the friend to the user's friends list
         addFriendToHashMap(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {
             @Override

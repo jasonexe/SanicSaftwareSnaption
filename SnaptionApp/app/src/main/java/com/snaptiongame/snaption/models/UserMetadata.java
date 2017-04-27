@@ -6,7 +6,7 @@ package com.snaptiongame.snaption.models;
  * Created by austinrobarts on 4/22/17.
  */
 
-public class UserMetadata {
+public class UserMetadata implements Person{
 
     private String displayName;
     private String email;
