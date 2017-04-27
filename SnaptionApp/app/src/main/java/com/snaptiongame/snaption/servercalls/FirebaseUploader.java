@@ -103,10 +103,11 @@ public class FirebaseUploader implements Uploader {
         GameMetaData gameMetaData = game.getMetaData();
         GameData gameData = game.getData();
 
+        //Upload the game's metadata
         DatabaseReference metaDataRef = database.getReference(
                 String.format(GAME_METADATA_PATH, access, gameId));
         metaDataRef.setValue(gameMetaData);
-
+        //Upload the game's data
         DatabaseReference dataRef = database.getReference(
                 String.format(GAME_DATA_PATH, access, gameId));
         dataRef.setValue(gameData);
@@ -156,8 +157,10 @@ public class FirebaseUploader implements Uploader {
     }
 
     @Override
-    public String getNewCaptionKey(String gameId) {
-        DatabaseReference captionFolderRef = database.getReference(String.format(GAME_CAPTIONS_PATH, gameId));
+    public String getNewCaptionKey(Game game) {
+        String access = game.getIsPublic() ? "public" : "private";
+        String captionsFolderPath = String.format(GAME_DATA_CAPTIONS_PATH, access, game.getId());
+        DatabaseReference captionFolderRef = database.getReference(captionsFolderPath);
         return captionFolderRef.push().getKey();
     }
 
@@ -219,13 +222,16 @@ public class FirebaseUploader implements Uploader {
      * This adds the caption to the database. The Caption needs to be added to both
      * the game, and to the user "Captions" map, which maps from caption Ids to captions
      * @param caption The Caption object, has all the necessary stuff
+     * @param isPublic Whether the caption is being added to a public or private game
      */
     @Override
-    public void addCaptions(Caption caption) {
+    public void addCaptions(Caption caption, boolean isPublic) {
         String gameId = caption.getGameId();
         String userId = caption.getUserId();
         String captId = caption.getId();
-        String gameCaptionPath = String.format(GAME_CAPTION_PATH, gameId, captId);
+        String access = isPublic ? "public" : "private";
+
+        String gameCaptionPath = String.format(GAME_DATA_CAPTION_PATH, access, gameId, captId);
         uploadObject(gameCaptionPath, caption);
         String userCaptionPath = String.format(USER_CAPTION_PATH, userId, captId);
         uploadObject(userCaptionPath, caption);

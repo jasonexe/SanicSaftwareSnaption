@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.ui.games;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
 import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
@@ -37,7 +38,8 @@ public class CardLogicTest {
         String cardText = "testCard %s";
         String cardId = "testCardId";
         GameMetaData gameMetaData = new GameMetaData(gameId, "a", "images/", null, true, 1000, 500);
-        Game game = new Game(null, gameMetaData);
+        GameData gameData = new GameData();
+        Game game = new Game(gameData, gameMetaData);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = new Card(cardText, cardId);
         expectedInput.add(userInput);
@@ -45,10 +47,10 @@ public class CardLogicTest {
                 expectedCard, expectedInput);
 
         Uploader mockedUploader = mock(Uploader.class);
-        when(mockedUploader.getNewCaptionKey(gameId)).thenReturn(captionId);
+        when(mockedUploader.getNewCaptionKey(game)).thenReturn(captionId);
         CardLogic.addCaption(userInput, userId, mockedUploader, expectedCard, game);
 
-        verify(mockedUploader).addCaptions(correctCaption);
+        verify(mockedUploader).addCaptions(correctCaption, game.getIsPublic());
     }
 
     @Test
@@ -66,7 +68,7 @@ public class CardLogicTest {
         expectedInput.add(userInput);
 
         CardLogic.addCaption(userInput, userId, mockedUploader, expectedCard, game);
-        verify(mockedUploader, never()).addCaptions(null);
+        verify(mockedUploader, never()).addCaptions(null, false);
     }
 
     @Test
