@@ -9,6 +9,10 @@ import java.util.Map;
  */
 public class User implements Person, Comparable<User> {
 
+    private UserMetadata metadata;
+    private UserPublicData publicData;
+    private UserPrivateData privateData;
+
     private String id;
     private String email;
     private String displayName;
@@ -24,6 +28,12 @@ public class User implements Person, Comparable<User> {
 
     //needed for firebase compatibility
     public User() {}
+
+    public User(UserMetadata metadata, UserPublicData publicData, UserPrivateData privateData) {
+        this.metadata = metadata;
+        this.publicData = publicData;
+        this.privateData = privateData;
+    }
 
     public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
         this.id = id;
