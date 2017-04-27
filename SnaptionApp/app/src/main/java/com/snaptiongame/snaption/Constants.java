@@ -110,36 +110,6 @@ public class Constants {
     public static final String EMAIL = "email";
     // END FIREBASE VARIABLES //
 
-    //ALL USER DATA PATHS for database redesign
-    //Path to root user metadata directory in Firebase
-    public static final String USERS_METADATA_PATH = "users/public/metadata";
-    //Path to specific user metadata directory in Firebase
-    public static final String USER_METADATA_PATH = "users/public/metadata/%s";
-    //Path to user's public data like friends, public game captions, and created public games
-    public static final String USER_PUBLIC_DATA_PATH = "users/public/data/%s";
-    //Path to user's data that is private
-    public static final String USER_PRIVATE_DATA_PATH = "users/private/%s";
-    //Path to user's friend's list
-    public static final String USER_FRIENDS_PATH = "users/public/data/%s/friends";
-    //Path to user's joined games
-    public static final String JOINED_GAMES_PATH = "users/private/%s/joinedGames";
-    //Path to user's private created games
-    public static final String PRIVATE_CREATED_GAMES_PATH = "users/private/%s/createdGames";
-    //Path to user's public created games
-    public static final String PUBLIC_CREATED_GAMES_PATH = "users/public/data/%s/createdGames";
-    //Path to user's private created captions
-    public static final String PRIVATE_CREATED_CAPTIONS_PATH = "users/private/%s/captions";
-    //Path to user's public created captions
-    public static final String PUBLIC_CREATED_CAPTIONS_PATH = "users/public/data/%s/captions";
-    // Complete path to a specific private game a user has created
-    public static final String USER_PRIVATE_GAME_PATH = "users/%s/privateGames/%s";
-    // Path to the user's notification ID
-    public static final String _USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
-    // Path to the user's isAndroid boolean
-    public static final String _USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
-    // Path to the user's lowercase display name
-    public static final String SEARCH_NAME = "searchName";
-
     //ALL GAME DATA PATHS for database redesign
     public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
     public static final String GAMES_METADATA_PATH = "games/%s/metadata";
