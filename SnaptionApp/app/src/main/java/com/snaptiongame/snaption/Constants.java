@@ -115,6 +115,10 @@ public class Constants {
     public static final String GAMES_METADATA_PATH = "games/%s/metadata";
     //Path to specific game's metadata with configurable access
     public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
+    //Path to metadata with configurable access
+    public static final String GAMES_DATA_PATH = "games/%s/data";
+    //Path to specific game's metadata with configurable access
+    public static final String GAME_DATA_PATH = "games/%s/data/%s";
     //PUBLIC
     //Path to public root game metadata directory in Firebase
     public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";

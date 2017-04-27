@@ -15,17 +15,21 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.snaptiongame.snaption.Constants.*;
 import static com.snaptiongame.snaption.Constants.GAMES_METADATA_PATH;
-import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
+import static com.snaptiongame.snaption.Constants.PRIVATE_CREATED_GAMES_PATH;
+import static com.snaptiongame.snaption.Constants.PUBLIC_CREATED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
@@ -95,12 +99,21 @@ public class FirebaseUploader implements Uploader {
     private void addCompletedGameObj(Game game) {
         // Add game object to games table
         String gameId = game.getId();
-        DatabaseReference gamesRef = database.getReference(String.format(GAME_PATH, gameId));
-        gamesRef.setValue(game);
+        String access = game.getIsPublic() ? "public" : "private";
+        GameMetaData gameMetaData = game.getMetaData();
+        GameData gameData = game.getData();
+
+        DatabaseReference metaDataRef = database.getReference(
+                String.format(GAME_METADATA_PATH, access, gameId));
+        metaDataRef.setValue(gameMetaData);
+
+        DatabaseReference dataRef = database.getReference(
+                String.format(GAME_DATA_PATH, access, gameId));
+        dataRef.setValue(gameData);
         // Add gameId to user's createdGames map
         addGameToUserCreatedGames(game);
         // Add gameId to all players' privateGames map
-        addGameToPlayerPrivateGames(game);
+        addGameToPlayerJoinedGames(game);
         //notify players if there are any
         if (game.getPlayers() != null) {
             notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
@@ -135,9 +148,9 @@ public class FirebaseUploader implements Uploader {
     }
 
     @Override
-    public String getNewGameKey() {
-        //String access = isPublic ? "public" : "private";
-        String gamesFolderPath = String.format(GAMES_PUBLIC_METADATA_PATH);
+    public String getNewGameKey(boolean isPublic) {
+        String access = isPublic ? "public" : "private";
+        String gamesFolderPath = String.format(GAMES_METADATA_PATH, access);
         DatabaseReference gamesFolderRef = database.getReference(gamesFolderPath);
         return gamesFolderRef.push().getKey();
     }
@@ -151,20 +164,24 @@ public class FirebaseUploader implements Uploader {
     private void addGameToUserCreatedGames(Game game) {
         final String gameId = game.getId();
         String userId = game.getPickerId();
-        DatabaseReference userRef = database.getReference(String.format(USER_CREATED_GAME_PATH, userId, gameId));
+        String gamePath = game.getIsPublic() ? PUBLIC_CREATED_GAMES_PATH : PRIVATE_CREATED_GAMES_PATH;
+        DatabaseReference userRef = database.getReference(String.format(gamePath, userId, gameId));
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
         userRef.setValue(1);
     }
 
-    private void addGameToPlayerPrivateGames(Game game) {
+    private void addGameToPlayerJoinedGames(Game game) {
         String gameId = game.getId();
         Set<String> ids = game.getPlayers().keySet();
+        String access = game.getIsPublic() ? "public" : "private";
+
         // add the game to the picker's private games map
-        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPickerId(), gameId))
-                .setValue(1);
+        database.getReference(String.format(JOINED_GAMES_PATH, game.getPickerId(), gameId))
+                .setValue(access);
         // add the game to each of the player's private games map
         for (String id : ids) {
-            database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
+            database.getReference(String.format(JOINED_GAMES_PATH, id, gameId))
+                    .setValue(access);
         }
     }
 
@@ -228,9 +245,9 @@ public class FirebaseUploader implements Uploader {
                     uploadUserPhoto(user, photo);
                 } else {
                     //update notificationId every login
-                    uploadObject(String.format(Constants.USER_NOTIFICATION_PATH, user.getId()), user.getNotificationId());
+                    uploadObject(String.format(USER_NOTIFICATION_PATH, user.getId()), user.getNotificationId());
                     //now the user is logged in on firebase
-                    uploadObject(String.format(Constants.USER_IS_ANDROID_PATH, user.getId()), user.getIsAndroid());
+                    uploadObject(String.format(USER_IS_ANDROID_PATH, user.getId()), user.getIsAndroid());
                 }
                 //notify user has been added or found
                 listener.onData(data);
@@ -312,8 +329,8 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         String userId = FirebaseResourceManager.getUserId();
 
-        childUpdates.put(String.format(Constants.GAME_PLAYER_PATH, gameId, userId), 1);
-        childUpdates.put(String.format(Constants.USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
+        childUpdates.put(String.format(GAME_PLAYER_PATH, gameId, userId), 1);
+        childUpdates.put(String.format(USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

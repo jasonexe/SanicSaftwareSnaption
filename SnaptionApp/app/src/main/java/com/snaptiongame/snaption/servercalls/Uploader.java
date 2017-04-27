@@ -43,9 +43,11 @@ public interface Uploader {
 
     /**
      * Create a new key from backend to use as a Game's identity
+     *
+     * @param isPublic What accessibility the game has
      * @return a string representing a key so that it can be found later
      */
-    public String getNewGameKey();
+    public String getNewGameKey(boolean isPublic);
 
     /**
      * Responsible for:

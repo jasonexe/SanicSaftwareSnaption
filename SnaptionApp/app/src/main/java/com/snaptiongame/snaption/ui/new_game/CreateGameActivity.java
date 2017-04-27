@@ -174,12 +174,12 @@ public class CreateGameActivity extends AppCompatActivity {
                 buttonUpload.setClickable(false);
                 boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
-                    Toast.makeText(CreateGameActivity.this, "You must pick an image.",
+                    Toast.makeText(CreateGameActivity.this, R.string.pick_an_image,
                             Toast.LENGTH_LONG).show();
                 }
                 else if (!radioPrivate.isChecked() && !radioPublic.isChecked()) {
                     Toast.makeText(CreateGameActivity.this,
-                            "You must choose whether the game is public or private.",
+                            R.string.choose_public_or_private,
                             Toast.LENGTH_LONG).show();
                 }
                 else if (!radioAdult.isChecked() && !radioEveryone.isChecked()) {
@@ -188,7 +188,7 @@ public class CreateGameActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
                 else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
-                    Toast.makeText(CreateGameActivity.this, "You must select a day in the future.",
+                    Toast.makeText(CreateGameActivity.this, R.string.pick_future_date,
                             Toast.LENGTH_LONG).show();
                 }
                 else {
@@ -203,7 +203,7 @@ public class CreateGameActivity extends AppCompatActivity {
                     endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
                     //Generate unique key for Games
 
-                    String gameId = uploader.getNewGameKey();
+                    String gameId = uploader.getNewGameKey(isPublic);
                     if (!alreadyExisting) {
                         imageData = getImageFromUri(imageUri);
 
@@ -218,8 +218,9 @@ public class CreateGameActivity extends AppCompatActivity {
                         // If the photo does exist, addGame but without the data
                         GameData data = new GameData(friends, null);
                         String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
-                        GameMetaData metaData = new GameMetaData(gameId, FirebaseResourceManager.getUserId(),
-                                imagePath, tags, isPublic, endDate);
+                        GameMetaData metaData = new GameMetaData(gameId,
+                                FirebaseResourceManager.getUserId(), imagePath, tags, isPublic,
+                                endDate);
                         Game game = new Game(data, metaData);
 
                         uploader.addGame(game);
@@ -265,7 +266,7 @@ public class CreateGameActivity extends AppCompatActivity {
         //Gets the content from the imageview
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.choose_image_from)), 8);
     }
 
     @OnClick(R.id.text_date)
@@ -354,7 +355,7 @@ public class CreateGameActivity extends AppCompatActivity {
             loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             loadingDialog.setProgress(0);
             loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
-            loadingDialog.setMessage("Uploading photo");
+            loadingDialog.setMessage(getString(R.string.uploading_photo));
             loadingDialog.setMax((int) maxBytes/progressDivisor);
             //Display progress dialog
             loadingDialog.show();
