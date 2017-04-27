@@ -109,6 +109,8 @@ public class Constants {
     public static final String SEARCH_NAME = "searchName";
 
     //ALL GAME DATA PATHS for database redesign
+    public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
+    public static final String GAMES_METADATA_PATH = "games/%s/metadata";
     //PUBLIC
     //Path to public root game metadata directory in Firebase
     public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";

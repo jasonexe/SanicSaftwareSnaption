@@ -1,5 +1,7 @@
 package com.snaptiongame.snaption.models;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,7 +34,7 @@ public class Game implements Serializable {
      * @param data The object containing the players and captions
      * @param metaData The object containing all other information about the game
      */
-    public Game(GameData data, GameMetaData metaData) {
+    public Game(@NonNull GameData data, @NonNull GameMetaData metaData) {
         this.data = data;
         this.metaData = metaData;
     }
