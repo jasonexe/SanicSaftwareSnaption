@@ -64,16 +64,16 @@ public class WallViewAdapterTest {
         mockStatic(FirebaseResourceManager.class);
         games = new ArrayList<>();
         games.add(game1);
-        Map<String, Integer> votes = new HashMap<>();
-        votes.put("id1", 0);
-        votes.put("id2", 0);
+        Map<String, Integer> upvotes = new HashMap<>();
+        upvotes.put("id1", 0);
+        upvotes.put("id2", 0);
         when(game1.getId()).thenReturn("game1_id");
         when(game1.getIsOpen()).thenReturn(true);
         when(game1.getImagePath()).thenReturn("game1_image_path");
         when(game1.getIsPublic()).thenReturn(true);
-        when(game1.getPicker()).thenReturn("game1_picker");
+        when(game1.getPickerId()).thenReturn("game1_picker");
         when(game1.getTopCaption()).thenReturn(caption1);
-        when(game1.getVotes()).thenReturn(votes);
+        when(game1.getUpvotes()).thenReturn(upvotes);
         when(caption1.retrieveCaptionText()).thenReturn(new SpannableStringBuilder("caption text"));
     }
 

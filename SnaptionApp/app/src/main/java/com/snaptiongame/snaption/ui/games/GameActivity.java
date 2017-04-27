@@ -326,7 +326,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void setupButtonDisplay(Game game) {
         // When this is initially called, setup the button with current data
-        final String pickerId = game.getPicker();
+        final String pickerId = game.getPickerId();
         if (game.getPlayers() == null) {
             determineButtonDisplay(pickerId, null);
         } else {
@@ -420,7 +420,7 @@ public class GameActivity extends HomeAppCompatActivity {
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
     private void setupPickerName(final Game game) {
-        String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
+        String userPath = FirebaseResourceManager.getUserPath(game.getPickerId());
         FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
             @Override
             public void onData(User user) {
@@ -430,7 +430,7 @@ public class GameActivity extends HomeAppCompatActivity {
                     pickerPhoto.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPicker());
+                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPickerId());
                         }
                     });
                 }

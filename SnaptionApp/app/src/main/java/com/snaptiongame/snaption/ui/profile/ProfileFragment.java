@@ -153,7 +153,7 @@ public class ProfileFragment extends Fragment {
         int numCapUpvotes = 0;
         if(user.getCaptions() != null) {
             for(Caption caption : user.getCaptions().values()) {
-                numCapUpvotes += caption.retrieveNumVotes();
+                numCapUpvotes += caption.retrieveNumUpvotes();
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));

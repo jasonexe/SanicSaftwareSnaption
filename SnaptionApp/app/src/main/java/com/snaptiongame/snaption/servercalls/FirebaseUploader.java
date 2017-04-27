@@ -149,7 +149,7 @@ public class FirebaseUploader implements Uploader {
 
     private void addGameToUserCreatedGames(Game game) {
         final String gameId = game.getId();
-        String userId = game.getPicker();
+        String userId = game.getPickerId();
         DatabaseReference userRef = database.getReference(String.format(USER_CREATED_GAME_PATH, userId, gameId));
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
         userRef.setValue(1);
@@ -159,7 +159,7 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         Set<String> ids = game.getPlayers().keySet();
         // add the game to the picker's private games map
-        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
+        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPickerId(), gameId))
                 .setValue(1);
         // add the game to each of the player's private games map
         for (String id : ids) {

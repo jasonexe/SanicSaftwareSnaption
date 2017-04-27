@@ -74,12 +74,12 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPickerId()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
 
-        Map<String, Integer> upvoters = game.getVotes();
+        Map<String, Integer> upvoters = game.getUpvotes();
         if(upvoters != null) {
             setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseResourceManager.getUserId()), false);
         } else {
@@ -297,20 +297,20 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         this.notifyItemRangeChanged(startPos, newGames.size());
     }
 
-    public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
+    public void gameChanged(int changedIndex, Map<String, Integer> newUpvotes) {
         Game newGame = items.get(changedIndex);
-        Map<String, Integer> oldVotes = newGame.getVotes();
-        newGame.setVotes(newVotes);
+        Map<String, Integer> oldUpvotes = newGame.getUpvotes();
+        newGame.setUpvotes(newUpvotes);
         WallViewHolder holder = itemNumToHolder.get(changedIndex);
 
         if(holder != null) {
-            if (newVotes == null) {
+            if (newUpvotes == null) {
                 setUpvoteView(holder, newGame, 0, false, false);
             } else {
                 String userId = FirebaseResourceManager.getUserId();
-                boolean hasUpvoted = newVotes.containsKey(userId);
-                boolean hasUpvotedPrior = oldVotes != null && oldVotes.containsKey(userId);
-                setUpvoteView(holder, newGame, newVotes.size(), hasUpvoted, hasUpvoted
+                boolean hasUpvoted = newUpvotes.containsKey(userId);
+                boolean hasUpvotedPrior = oldUpvotes != null && oldUpvotes.containsKey(userId);
+                setUpvoteView(holder, newGame, newUpvotes.size(), hasUpvoted, hasUpvoted
                         && !hasUpvotedPrior);
             }
         }

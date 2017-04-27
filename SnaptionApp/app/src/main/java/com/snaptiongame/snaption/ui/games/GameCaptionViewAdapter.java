@@ -260,10 +260,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
         holder.captionText.setText(caption.retrieveCaptionText());
         // Set the display to reflect the status of the caption
-        if (caption.votes != null) {
-            Map votes = caption.votes;
-            setUpvoteView(holder, caption, votes.size(),
-                    votes.containsKey(FirebaseResourceManager.getUserId()));
+        if (caption.upvotes != null) {
+            Map upvotes = caption.upvotes;
+            setUpvoteView(holder, caption, upvotes.size(),
+                    upvotes.containsKey(FirebaseResourceManager.getUserId()));
         }
         else {
             setUpvoteView(holder, caption, 0, false);

@@ -28,6 +28,8 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
@@ -71,7 +73,7 @@ public class CreateGameActivity extends AppCompatActivity {
     private Uploader uploader;
 
     private Uri imageUri;
-    private Map<String, Integer> categories;
+    private Map<String, Integer> tags;
     private String maturityRating;
     private boolean isPublic;
     private long endDate;
@@ -168,7 +170,7 @@ public class CreateGameActivity extends AppCompatActivity {
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] data = null;
+                byte[] imageData = null;
                 buttonUpload.setClickable(false);
                 boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
@@ -197,20 +199,27 @@ public class CreateGameActivity extends AppCompatActivity {
                         // TODO if/when inviting is also supported, handle when a Friend is added
                         friends.put(friend.getId(), 1);
                     }
-                    categories = getCategoriesFromText(categoryInput.getText().toString());
+                    tags = getTagsFromText(categoryInput.getText().toString());
                     endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
                     //Generate unique key for Games
 
                     String gameId = uploader.getNewGameKey();
-                    if(!alreadyExisting) {
-                        data = getImageFromUri(imageUri);
-                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                                friends, categories, isPublic, endDate, maturityRating);
-                        uploader.addGame(game, data, new UploaderDialog());
+                    if (!alreadyExisting) {
+                        imageData = getImageFromUri(imageUri);
+
+                        GameData data = new GameData(friends, null);
+                        GameMetaData metaData = new GameMetaData(FirebaseResourceManager.getUserId(),
+                                gameId + ".jpg", tags, isPublic, endDate);
+                        Game game = new Game(gameId, data, metaData);
+
+                        uploader.addGame(game, imageData, new UploaderDialog());
                     } else {
                         // If the photo does exist, addGame but without the data
-                        Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                friends, categories, isPublic, endDate, maturityRating);
+                        GameData data = new GameData(friends, null);
+                        GameMetaData metaData = new GameMetaData(FirebaseResourceManager.getUserId(),
+                                gameId + ".jpg", tags, isPublic, endDate);
+                        Game game = new Game(gameId, data, metaData);
+
                         uploader.addGame(game);
                         backToMain();
                     }
@@ -429,18 +438,18 @@ public class CreateGameActivity extends AppCompatActivity {
      * @param text - The text to parse with comma delimiters
      * @return A list of strings not containing repeats or empty strings
      */
-    private Map<String, Integer> getCategoriesFromText(String text) {
-        Map<String, Integer> categories = new HashMap<>();
+    private Map<String, Integer> getTagsFromText(String text) {
+        Map<String, Integer> tags = new HashMap<>();
         text = text.toLowerCase();
         String[] list = text.split(",");
 
         for (String input : list) {
             String potentialCategory = input.trim();
             if (!TextUtils.isEmpty(potentialCategory)) {
-                categories.put(potentialCategory, 1);
+                tags.put(potentialCategory, 1);
             }
         }
-        return categories;
+        return tags;
     }
 
     private DatePickerDialog.OnDateSetListener myDateListener = new
