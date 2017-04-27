@@ -203,7 +203,7 @@ public class CreateGameActivity extends AppCompatActivity {
                     endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
                     //Generate unique key for Games
 
-                    String gameId = uploader.getNewGameKey(isPublic);
+                    String gameId = uploader.getNewGameKey();
                     if (!alreadyExisting) {
                         imageData = getImageFromUri(imageUri);
 
