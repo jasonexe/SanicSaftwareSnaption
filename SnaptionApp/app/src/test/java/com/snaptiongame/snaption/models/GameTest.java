@@ -90,43 +90,22 @@ public class GameTest {
         assertTrue(game1.getIsPublic());
     }
 
-    /*@Test
+    @Test
     public void verifySetUpvotes() {
-        Map<String, Integer> players = new HashMap<>();
-        players.put("player1", 1);
-        players.put("player2", 1);
-        Map<String, Integer> tags = new HashMap<>();
-        tags.put("lol", 1);
-        tags.put("kitten", 1);
-        long end = 1000;
-        long start = 500;
-        Game game = new Game("me", "you", "images/", players, tags, true, end, start, "G");
-
-        Map<String, Integer> upvotes1 = new HashMap<>();
         upvotes1.put("1", 1);
         upvotes1.put("2", 1);
 
-        game.setUpvotes(upvotes1);
-        assertEquals(upvotes1, game.getUpvotes());
+        game1.setUpvotes(upvotes1);
+        assertEquals(upvotes1, game1.getUpvotes());
     }
 
     @Test
-    public void verifyIsOpen() {
-        Map<String, Integer> players = new HashMap<>();
-        players.put("player1", 1);
-        players.put("player2", 1);
-        Map<String, Integer> tags = new HashMap<>();
-        tags.put("lol", 1);
-        tags.put("kitten", 1);
-        long end = Calendar.getInstance().getTimeInMillis();
-        long start = 500;
-        Game game = new Game("me", "you", "images/", players, tags, true, end, start, "G");
-
-        game.closeGame();
-        assertFalse(game.getIsOpen());
+    public void verifySetImagePath() {
+        game1.setImagePath("image");
+        assertEquals("image", game1.getImagePath());
     }
 
-    @Test
+    /*@Test
     public void verifyGetTopCaption() {
         List<String> userInput1 = new ArrayList<>();
         Card testCard1 = new Card("text");
