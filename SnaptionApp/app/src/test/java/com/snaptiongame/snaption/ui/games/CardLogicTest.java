@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.ui.games;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
 import org.junit.Test;
@@ -35,7 +36,8 @@ public class CardLogicTest {
         String userId = "testUserId";
         String cardText = "testCard %s";
         String cardId = "testCardId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
+        GameMetaData gameMetaData = new GameMetaData(gameId, "a", "images/", null, true, 1000, 500);
+        Game game = new Game(null, gameMetaData);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = new Card(cardText, cardId);
         expectedInput.add(userInput);
@@ -57,7 +59,8 @@ public class CardLogicTest {
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
         String userId = "testUserId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, "mature");
+        GameMetaData gameMetaData = new GameMetaData("1", "a", "images/", null, true, 1000, 500);
+        Game game = new Game(null, gameMetaData);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = null;
         expectedInput.add(userInput);
