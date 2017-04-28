@@ -160,8 +160,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
             }
-            ft.replace(R.id.fragment_container, newFragment);
-            ft.commit();
+            ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
         }
     }
