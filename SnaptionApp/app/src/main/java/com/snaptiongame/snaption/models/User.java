@@ -30,7 +30,7 @@ public class User implements Person, Comparable<User> {
     public User(String id, String email, String displayName, String notificationId,
                 String facebookId, String imagePath, Map<String, Integer> friends,
                 Map<String, Integer> games, Map<String, Caption> captions,
-                Map<String, Integer> blockedUsers, Map<String, String> joinedGames) {
+                Map<String, String> joinedGames) {
         this(id, email, displayName, notificationId, facebookId, imagePath);
         publicData = new UserPublicData(captions, games, friends);
         privateData = new UserPrivateData(captions, games, joinedGames);
@@ -123,25 +123,35 @@ public class User implements Person, Comparable<User> {
         metadata.setDisplayName(displayName);
     }
 
-    public int retrieveCaptionCount() {
+    public int getTotalCaptionCount() {
         int captionCount = 0;
-        Map captions = publicData.getCaptions();
-        if (captions != null) {
-            captionCount = captions.size();
+        //get public and private
+        Map pubCaptions = publicData.getCaptions();
+        Map privateCaptions = privateData.getCaptions();
+        if (pubCaptions != null) {
+            captionCount += pubCaptions.size();
+        }
+        if (privateCaptions != null) {
+            captionCount += privateCaptions.size();
         }
         return captionCount;
     }
 
-    public int retrieveCreatedGameCount() {
+    public int getTotalCreatedGamesCount() {
         int gameCount = 0;
-        Map createdGames = publicData.getCreatedGames();
-        if (createdGames != null) {
-            gameCount = createdGames.size();
+        //get public and private games
+        Map publicCreatedGames = publicData.getCreatedGames();
+        Map privateCreatedGames = publicData.getCreatedGames();
+        if (publicCreatedGames != null) {
+            gameCount += publicCreatedGames.size();
+        }
+        if (privateCreatedGames != null) {
+            gameCount += privateCreatedGames.size();
         }
         return gameCount;
     }
 
-    public int retrieveFriendsCount() {
+    public int getFriendCount() {
         int friendCount = 0;
         Map friends = publicData.getFriends();
         if(friends != null) {
@@ -152,10 +162,7 @@ public class User implements Person, Comparable<User> {
 
     @Override
     public boolean equals(Object other) {
-        if (other == null) {
-            return false;
-        }
-        return other.getClass() == getClass() && ((User) other).getId().equals(metadata.getId());
+        return other != null && other.getClass() == getClass() && ((User) other).getId().equals(metadata.getId());
     }
 
     @Override

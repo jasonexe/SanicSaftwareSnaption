@@ -95,8 +95,6 @@ public class FirebaseUploader implements Uploader {
         gamesRef.setValue(game);
         // Add gameId to user's createdGames map
         addGameToUserCreatedGames(game);
-        // Add gameId to all players' privateGames map
-        addGameToPlayerPrivateGames(game);
         //notify players if there are any
         if (game.getPlayers() != null) {
             notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
@@ -147,25 +145,6 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference userRef = database.getReference(String.format(USER_CREATED_GAME_PATH, userId, gameId));
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
         userRef.setValue(1);
-    }
-
-    private void addGameToPlayerPrivateGames(Game game) {
-        String gameId = game.getId();
-        Set<String> ids = game.getPlayers().keySet();
-
-        String pickerPath;
-        if (game.getIsPublic()) {
-            pickerPath = Constants.USER_PUBLIC_CREATED_GAMES_PATH;
-        } else {
-            pickerPath = Constants.USER_PRIVATE_CREATED_GAMES_PATH;
-        }
-        // add the game to the picker's private games map
-        database.getReference(String.format(pickerPath, game.getPicker(), gameId))
-                .setValue(1);
-        // add the game to each of the player's private games map
-        for (String id : ids) {
-            database.getReference(String.format(Constants.USER_PRIVATE_JOINED_GAMES_PATH, id, gameId)).setValue(1);
-        }
     }
 
     private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
@@ -311,7 +290,6 @@ public class FirebaseUploader implements Uploader {
         String userId = FirebaseUserResourceManager.getUserId();
 
         childUpdates.put(String.format(Constants.GAME_PLAYER_PATH, gameId, userId), 1);
-        childUpdates.put(String.format(Constants.USER_PRIVATE_JOINED_GAME_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

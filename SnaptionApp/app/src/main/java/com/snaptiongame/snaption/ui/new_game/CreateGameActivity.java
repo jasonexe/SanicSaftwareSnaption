@@ -294,7 +294,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 public void onData(Map<String, Integer> friends) {
                     if (friends != null) {
                         // load each friend
-                        FirebaseUserResourceManager.loadUsers(friends, new ResourceListener<UserMetadata>() {
+                        FirebaseUserResourceManager.getUsersMetadataByIds(friends, new ResourceListener<UserMetadata>() {
                             @Override
                             public void onData(UserMetadata user) {
                                 if (user != null) {

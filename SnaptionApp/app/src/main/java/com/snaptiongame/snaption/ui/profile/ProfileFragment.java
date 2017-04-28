@@ -147,9 +147,9 @@ public class ProfileFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
-        gamesCreated.setText(String.valueOf(user.retrieveCreatedGameCount()));
-        captionsCreated.setText(String.valueOf(user.retrieveCaptionCount()));
-        friendsMade.setText(String.valueOf(user.retrieveFriendsCount()));
+        gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
+        captionsCreated.setText(String.valueOf(user.getTotalCaptionCount()));
+        friendsMade.setText(String.valueOf(user.getFriendCount()));
 
         int numCapUpvotes = 0;
         if(user.getPublicCaptions() != null) {

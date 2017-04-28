@@ -42,9 +42,6 @@ public class UserTest {
         captions = new HashMap<>();
         captions.put("caption1", new Caption());
         captions.put("caption2", new Caption());
-        blockedUsers = new HashMap<>();
-        blockedUsers.put("enemy1", 1);
-        blockedUsers.put("enemy2", 1);
         privateGames = new HashMap<>();
         privateGames.put("game1", "private");
         privateGames.put("game2", "private");
@@ -54,7 +51,7 @@ public class UserTest {
                 "notificationId", "facebookId", "imagePath");
         user3 = new User("id", "email", "displayName",
                 "notificationId", "facebookId", "imagePath",
-                friends, games, captions, blockedUsers, privateGames);
+                friends, games, captions, privateGames);
         user4 = new User("id2", "email", "displayName",
                 "notificationId", "facebookId", "imagePath");
         user5 = new User("id2", "email", "displayName",
@@ -123,22 +120,22 @@ public class UserTest {
 
     @Test
     public void testRetrieveFriendsCount() {
-        assertEquals(0, user1.retrieveFriendsCount());
-        assertEquals(2, user3.retrieveFriendsCount());
+        assertEquals(0, user1.getFriendCount());
+        assertEquals(2, user3.getFriendCount());
     }
 
     @Test
     public void testRetrieveCaptionCount() {
-        assertEquals(0, user1.retrieveCaptionCount());
-        assertEquals(2, user3.retrieveCaptionCount());
-        assertEquals(2, user3.retrieveCaptionCount());
+        assertEquals(0, user1.getTotalCaptionCount());
+        assertEquals(4, user3.getTotalCaptionCount());
+        assertEquals(4, user3.getTotalCaptionCount());
     }
 
     @Test
     public void testRetrieveCreatedGameCount() {
-        assertEquals(0, user1.retrieveCreatedGameCount());
-        assertEquals(2, user3.retrieveCreatedGameCount());
-        assertEquals(2, user3.retrieveCreatedGameCount());
+        assertEquals(0, user1.getTotalCreatedGamesCount());
+        assertEquals(4, user3.getTotalCreatedGamesCount());
+        assertEquals(4, user3.getTotalCreatedGamesCount());
     }
 
     @Test

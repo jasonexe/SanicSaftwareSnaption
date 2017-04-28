@@ -258,22 +258,6 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     }
 
     /**
-     * Loads a map of users. This will most often be used to retrieve the friends of a user
-     *
-     * @param uids Map of user ids
-     * @param listener ResourceListener the users are returned to
-     */
-    public static void loadUsers(Map<String, Integer> uids, ResourceListener<UserMetadata> listener) {
-        for (String uid : uids.keySet()) {
-            String friend = String.format(Constants.USER_METADATA_PATH, uid);
-            // ensure the user id is a valid one to avoid errors
-            if (validFirebasePath(friend)) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(friend, listener);
-            }
-        }
-    }
-
-    /**
      * Retrieves a list of Friends, representing the Facebook friends that have logged
      * into Snaption of the given User, and returns the list of
      * Friends to the given ResourceListener. The friendsFilter is used to filter out all users
