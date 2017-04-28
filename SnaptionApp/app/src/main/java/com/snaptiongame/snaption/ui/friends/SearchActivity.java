@@ -57,7 +57,7 @@ public class SearchActivity extends HomeAppCompatActivity {
         public void onData(List<UserMetadata> userList) {
             users.addAll(userList);
             // query Firebase for Users based on e-mail only after this query is finished
-            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, emailListener);
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.EMAIL, emailListener);
         }
 
         @Override

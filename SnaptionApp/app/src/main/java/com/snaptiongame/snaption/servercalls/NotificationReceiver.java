@@ -13,6 +13,7 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
 import java.util.Map;
@@ -67,9 +68,10 @@ public class NotificationReceiver extends FirebaseMessagingService {
             @Override
             public void onData(final Game data) {
                 //after getting game, must get user
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, senderUserId), new ResourceListener<User>() {
+                FirebaseUserResourceManager.getUserMetadataById(String.format(Constants.USER_METADATA_PATH, senderUserId),
+                        new ResourceListener<UserMetadata>() {
                     @Override
-                    public void onData(User user) {
+                    public void onData(UserMetadata user) {
                         //ensure the user and game were found before sending notification
                         if (data != null && user != null) {
                             sendNotification(data, user);
@@ -78,7 +80,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
                     @Override
                     public Class getDataType() {
-                        return User.class;
+                        return UserMetadata.class;
                     }
                 });
             }
@@ -94,7 +96,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void sendNotification(Game game, User user) {
+    private void sendNotification(Game game, UserMetadata user) {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

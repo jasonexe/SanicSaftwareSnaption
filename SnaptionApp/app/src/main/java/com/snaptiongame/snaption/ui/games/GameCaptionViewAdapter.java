@@ -230,18 +230,12 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 FirebaseUploader.removeUpvote(
                         String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
                                 caption.getId(), FirebaseUserResourceManager.getUserId()), listener);
-                FirebaseUploader.removeUpvote(
-                        String.format(Constants.USER_CAPTIONS_UPVOTE_PATH, caption.getUserId(),
-                                caption.getId(), FirebaseUserResourceManager.getUserId()), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
                 FirebaseUploader.addUpvote(
                         String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
                             caption.getId(), FirebaseUserResourceManager.getUserId()), listener);
-                FirebaseUploader.addUpvote(String.format(Constants.USER_CAPTIONS_UPVOTE_PATH,
-                        caption.getUserId(), caption.getId(), FirebaseUserResourceManager.getUserId()),
-                        listener);
             }
         }
     }

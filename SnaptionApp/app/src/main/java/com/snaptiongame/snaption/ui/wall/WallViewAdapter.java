@@ -21,6 +21,7 @@ import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
@@ -75,7 +76,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, String.format(Constants.USER_METADATA_PATH, game.getPicker()));
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
@@ -196,7 +197,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         if (game.getTopCaption() != null) {
             holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
+            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_METADATA_PATH, game.getTopCaption().getUserId()));
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
@@ -255,9 +256,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         // ensure the user id is a valid one to avoid errors
         if (validFirebasePath(userPath)) {
             // display the name and profile picture if a valid user is obtained from the user id
-            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            FirebaseUserResourceManager.getUserMetadataById(FirebaseUserResourceManager.getUserId(), new ResourceListener<UserMetadata>() {
                 @Override
-                public void onData(final User user) {
+                public void onData(final UserMetadata user) {
                     // replace default is the User is valid
                     if (user != null) {
                         // if there is no photo path, don't display it, use a - instead
@@ -281,7 +282,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return UserMetadata.class;
                 }
             });
         }

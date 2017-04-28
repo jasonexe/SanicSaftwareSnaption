@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
@@ -18,7 +19,6 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import java.util.List;
 import java.util.Map;
 
-import static com.snaptiongame.snaption.Constants.FRIENDS_PATH;
 import static com.snaptiongame.snaption.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaption.servercalls.Uploader.UploadListener;
 
@@ -41,7 +41,7 @@ public class FriendsViewModel {
         if (providers.contains(FacebookAuthProvider.PROVIDER_ID)) {
             // retrieve user's friends to use for filtering out Facebook friends that are already
             // their friends
-            FirebaseResourceManager.retrieveStringMapNoUpdates(String.format(FRIENDS_PATH, user.getId()),
+            FirebaseResourceManager.retrieveStringMapNoUpdates(String.format(Constants.USER_FRIENDS_PATH, user.getId()),
                     new ResourceListener<Map<String, Integer>>() {
                 @Override
                 public void onData(Map<String, Integer> data) {
