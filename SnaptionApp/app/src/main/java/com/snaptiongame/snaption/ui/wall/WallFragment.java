@@ -78,7 +78,11 @@ public class WallFragment extends Fragment {
                     ResourceListener<Map<String, Integer>> gameListener =
                             getGameListener(gameVoteListeners.size());
                     FirebaseResourceManager manager = new FirebaseResourceManager();
-                    String upvotesPath = String.format(Constants.GAME_UPVOTES_PATH, curGame.getId());
+                    String upvotesPath = curGame.getIsPublic() ?
+                            String.format(Constants.GAME_PUBLIC_METADATA_UPVOTES_PATH,
+                                    curGame.getId()) :
+                            String.format(Constants.GAME_PRIVATE_METADATA_UPVOTES_PATH,
+                                    curGame.getId());
                     manager.retrieveMapWithUpdates(upvotesPath, gameListener);
                     gameVoteListeners.add(manager);
                 }

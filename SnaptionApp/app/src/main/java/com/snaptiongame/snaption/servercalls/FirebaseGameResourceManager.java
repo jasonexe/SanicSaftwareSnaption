@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.CREATION_DATE;
-import static com.snaptiongame.snaption.Constants.GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.JOINED_GAMES_PATH;
-import static com.snaptiongame.snaption.Constants.USER_PRIVATE_GAMES;
 
 /**
  * FirebaseGameResourceManager is used to retrieve game data from Firebase

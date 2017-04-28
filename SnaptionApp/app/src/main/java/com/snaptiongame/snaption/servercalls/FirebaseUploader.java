@@ -11,7 +11,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
@@ -23,17 +22,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.snaptiongame.snaption.Constants.*;
 import static com.snaptiongame.snaption.Constants.GAMES_METADATA_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTION_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYER_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYER_PATH;
+import static com.snaptiongame.snaption.Constants.JOINED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.PRIVATE_CREATED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.PUBLIC_CREATED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CAPTION_PATH;
-import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
+import static com.snaptiongame.snaption.Constants.USER_IS_ANDROID_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_PATH;
+import static com.snaptiongame.snaption.Constants.USER_PRIVATE_GAMES_PATH;
 
 /**
  * FirebaseUploader is used for uploading data to Firebase and updating values.
@@ -335,7 +338,10 @@ public class FirebaseUploader implements Uploader {
         String gameId = game.getId();
         String userId = FirebaseResourceManager.getUserId();
 
-        childUpdates.put(String.format(GAME_PLAYER_PATH, gameId, userId), 1);
+        String gameUserPath = game.getIsPublic() ?
+                String.format(GAME_PUBLIC_DATA_PLAYER_PATH, gameId, userId) :
+                String.format(GAME_PRIVATE_DATA_PLAYER_PATH, gameId, userId);
+        childUpdates.put(gameUserPath, 1);
         childUpdates.put(String.format(USER_PRIVATE_GAMES_PATH, userId, gameId), 1);
         database.getReference().updateChildren(childUpdates).addOnFailureListener(new OnFailureListener() {
             @Override

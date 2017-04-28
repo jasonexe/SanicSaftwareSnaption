@@ -164,8 +164,9 @@ public class FirebaseDeepLinkCreator {
         if(deepLink.contains("games")) {
             Class toSend = GameActivity.class;
             String gameId = deepLink.substring(deepLink.lastIndexOf("/") + 1);
+            String access = deepLink.substring(deepLink.indexOf("/"), deepLink.indexOf("games") - 1);
             DeepLinkInfo info = new DeepLinkInfo(toSend);
-            info.setIntentString(gameId);
+            info.setIntentString(access + "/" + gameId);
             return info;
         } else {
             return null;
@@ -188,7 +189,8 @@ public class FirebaseDeepLinkCreator {
         if(progressView != null) {
             progressView.setVisibility(View.VISIBLE);
         }
-        String linkDestination = LINK_BEGINNING + "/games/" + game.getId();
+        String access = game.getIsPublic() ? "/public" : "/private";
+        String linkDestination = LINK_BEGINNING + access + "/games/" + game.getId();
         // First, create the deep link to this specific game
         getDeepLink(linkDestination, new ResourceListener<String>() {
             @Override

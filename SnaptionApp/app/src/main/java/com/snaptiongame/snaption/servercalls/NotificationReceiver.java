@@ -50,6 +50,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         //if a data message was received
         if (data != null && data.size() > 0) {
             //create intent to open up game from remoteMessage info
+            //TODO get public/private
             gameId = data.get(GAME_ID_KEY);
             senderUserId = data.get(USER_ID_KEY);
             createNotification(gameId, senderUserId);

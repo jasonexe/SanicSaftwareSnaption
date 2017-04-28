@@ -130,6 +130,8 @@ public class Constants {
     public static final String GAME_PUBLIC_METADATA_PATH = "games/public/metadata/%s";
     //Path to specific public game map of upvotes
     public static final String GAME_PUBLIC_METADATA_UPVOTES_PATH = "games/public/metadata/%s/upvotes";
+    //Path to specific public game's specific upvote
+    public static final String GAME_PUBLIC_METADATA_UPVOTE_PATH = "games/public/metadata/%s/upvotes/%s";
     //Path to specific public game map of tags
     public static final String GAME_PUBLIC_METADATA_TAGS_PATH = "games/public/metadata/%s/tags";
     //Path to public root game data directory
@@ -142,8 +144,10 @@ public class Constants {
     public static final String GAME_PUBLIC_DATA_CAPTION_PATH = "games/public/data/%s/captions/%s";
     //Path to the public game's specific caption's card
     public static final String GAME_PUBLIC_DATA_CAPTION_CARD_PATH = "games/public/data/%s/captions/%s/card";
-    //Path to the private game's specific caption's map of upvotes
+    //Path to the public game's specific caption's map of upvotes
     public static final String GAME_PUBLIC_DATA_CAPTION_UPVOTES_PATH = "games/public/data/%s/captions/%s/upvotes";
+    //Path to the public game's specific caption's upvote
+    public static final String GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH = "games/public/data/%s/captions/%s/upvotes/%s";
     //Path to the public game's players
     public static final String GAME_PUBLIC_DATA_PLAYERS_PATH = "games/public/data/%s/players";
     //Path to the public game's specific player
@@ -155,6 +159,8 @@ public class Constants {
     public static final String GAME_PRIVATE_METADATA_PATH = "games/private/metadata/%s";
     //Path to specific private game map of upvotes
     public static final String GAME_PRIVATE_METADATA_UPVOTES_PATH = "games/private/metadata/%s/upvotes";
+    //Path to specific private game's specific upvote
+    public static final String GAME_PRIVATE_METADATA_UPVOTE_PATH = "games/private/metadata/%s/upvotes/%s";
     //Path to specific private game map of tags
     public static final String GAME_PRIVATE_METADATA_TAGS_PATH = "games/private/metadata/%s/tags";
     //Path to private root game data directory
@@ -169,6 +175,8 @@ public class Constants {
     public static final String GAME_PRIVATE_DATA_CAPTION_CARD_PATH = "games/private/data/%s/captions/%s/card";
     //Path to the private game's specific caption's map of upvotes
     public static final String GAME_PRIVATE_DATA_CAPTION_UPVOTES_PATH = "games/private/data/%s/captions/%s/upvotes";
+    //Path to the private game's specific caption's upvote
+    public static final String GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH = "games/private/data/%s/captions/%s/upvotes/%s";
     //Path to the private game's players
     public static final String GAME_PRIVATE_DATA_PLAYERS_PATH = "games/private/data/%s/players";
     //Path to the private game's specific player

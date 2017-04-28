@@ -38,6 +38,8 @@ import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
@@ -66,8 +68,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYERS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 import static com.snaptiongame.snaption.ui.games.CardLogic.addCaption;
@@ -82,6 +89,7 @@ import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromLis
  */
 public class GameActivity extends HomeAppCompatActivity {
     public static final String USE_GAME_ID = "useGameId";
+    public static final String USE_GAME_ACCESS = "useGameAccess";
     public static final String REFRESH_STRING = "refresh";
     public static final String BLANK_CARD = "__blank__";
     private final static String EMPTY_SIZE = "0";
@@ -218,57 +226,93 @@ public class GameActivity extends HomeAppCompatActivity {
             // postpone transition til image is loaded
             supportPostponeEnterTransition();
             setupGameElements(game);
-        } else if (startedIntent.hasExtra(USE_GAME_ID)) {
+        } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
             String gameId = startedIntent.getStringExtra(USE_GAME_ID);
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PATH, gameId),
-                    new ResourceListener<Game>() {
-                        @Override
-                        public void onData(Game data) {
-                            if (data != null) {
-                                setupGameElements(data);
-                            } else {
-                                System.err.println("Game activity was passed an incorrect gameId");
-                            }
-                        }
-
-                        @Override
-                        public Class getDataType() {
-                            return Game.class;
-                        }
-                    });
+            String access = startedIntent.getStringExtra(USE_GAME_ACCESS);
+            //Gets the metadata and data for the game and calls setupGameElements
+            retrieveGame(access, gameId);
         }
+    }
+
+    private void retrieveGame(String access, String gameId) {
+        retrieveGameMetaData(access, gameId);
+    }
+
+    private void retrieveGameMetaData(final String access, final String gameId) {
+        FirebaseResourceManager.retrieveSingleNoUpdates(
+            String.format(GAME_METADATA_PATH, access, gameId),
+            new ResourceListener<GameMetaData>() {
+                @Override
+                public void onData(GameMetaData metaData) {
+                    if (metaData != null) {
+                        retrieveGameData(access, gameId, metaData);
+                    }
+                    else {
+                        System.err.println("Game activity was passed an incorrect gameId");
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return GameMetaData.class;
+                }
+            }
+        );
+    }
+
+    private void retrieveGameData(final String access, final String gameId,
+                                  final GameMetaData metaData) {
+        FirebaseResourceManager.retrieveSingleNoUpdates(
+            String.format(GAME_METADATA_PATH, access, gameId), new ResourceListener<GameData>() {
+                @Override
+                public void onData(GameData data) {
+                    if (data != null) {
+                        Game game = new Game(data, metaData);
+                        setupGameElements(game);
+                    }
+                    else {
+                        System.err.println("Game activity was passed an incorrect gameId");
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return GameData.class;
+                }
+            }
+        );
     }
 
     private void setupGameElements(Game game) {
         this.game = game;
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
-                new ResourceListener<Bitmap>() {
-                    @Override
-                    public void onData(final Bitmap bitmap) {
-                        if (bitmap != null) {
-                            // remove the progress bar
-                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
-                                    .setBehavior(null);
-                            progressBar.setVisibility(View.GONE);
-                            // add a new behavior to the image view
-                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
-                                    .setBehavior(minimizeImageBehavior);
-                            // start transition now that image is loaded
-                            supportStartPostponedEnterTransition();
-                            // animate the image color swatch
-                            animateBitmapColorSwatch(bitmap);
-                        }
+            new ResourceListener<Bitmap>() {
+                @Override
+                public void onData(final Bitmap bitmap) {
+                    if (bitmap != null) {
+                        // remove the progress bar
+                        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                .setBehavior(null);
+                        progressBar.setVisibility(View.GONE);
+                        // add a new behavior to the image view
+                        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                        ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
+                                .setBehavior(minimizeImageBehavior);
+                        // start transition now that image is loaded
+                        supportStartPostponedEnterTransition();
+                        // animate the image color swatch
+                        animateBitmapColorSwatch(bitmap);
                     }
+                }
 
-                    @Override
-                    public Class getDataType() {
-                        return Boolean.class;
-                    }
-                });
+                @Override
+                public Class getDataType() {
+                    return Boolean.class;
+                }
+            });
         initLoginManager();
         setupButtonDisplay(game);
         setupCaptionList(game);
@@ -334,8 +378,11 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
-        joinedGameManager.retrieveMapWithUpdates(String.format(Constants.GAME_PLAYERS_PATH,
-                game.getId()), new ResourceListener<Map<String, Object>>() {
+        String gamePlayersPath = game.getIsPublic() ?
+                String.format(GAME_PUBLIC_DATA_PLAYERS_PATH, game.getId()) :
+                String.format(GAME_PRIVATE_DATA_PLAYERS_PATH, game.getId());
+        joinedGameManager.retrieveMapWithUpdates(gamePlayersPath,
+                new ResourceListener<Map<String, Object>>() {
             @Override
             public void onData(Map<String, Object> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
@@ -397,10 +444,10 @@ public class GameActivity extends HomeAppCompatActivity {
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
         } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -460,8 +507,10 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
-        commentManager.addChildListener(String.format(GAME_CAPTIONS_PATH, game.getId()),
-                captionListener);
+        String gameCaptionsPath = game.getIsPublic() ?
+                String.format(GAME_PUBLIC_DATA_CAPTIONS_PATH, game.getId()) :
+                String.format(GAME_PRIVATE_DATA_CAPTIONS_PATH, game.getId());
+        commentManager.addChildListener(gameCaptionsPath, captionListener);
     }
 
     @Override

@@ -34,6 +34,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_METADATA_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_UPVOTE_PATH;
 import static com.snaptiongame.snaption.servercalls.FirebaseResourceManager.validFirebasePath;
 import static com.snaptiongame.snaption.ui.profile.ProfileActivity.*;
 
@@ -341,17 +345,18 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         };
 
         if (game != null) {
+            String upvotePath = game.getIsPublic() ?
+                    String.format(GAME_PUBLIC_METADATA_UPVOTE_PATH, game.getId(),
+                            FirebaseResourceManager.getUserId()) :
+                    String.format(GAME_PRIVATE_METADATA_UPVOTE_PATH, game.getId(),
+                            FirebaseResourceManager.getUserId());
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(
-                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(upvotePath, listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(
-                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(upvotePath, listener);
             }
         }
     }
