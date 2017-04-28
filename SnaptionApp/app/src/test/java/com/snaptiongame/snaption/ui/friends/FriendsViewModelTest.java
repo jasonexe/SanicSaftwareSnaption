@@ -52,7 +52,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
-@SuppressStaticInitializationFor("com.snaptiongame.snaption.servercalls.FirebaseResourceManager")
+@SuppressStaticInitializationFor({"com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager","com.snaptiongame.snaption.servercalls.FirebaseResourceManager"})
 @PrepareForTest(FirebaseResourceManager.class)
 public class FriendsViewModelTest {
     private static final String FB_PROVIDER_LABEL = "Facebook friends on Snaption";
@@ -61,7 +61,7 @@ public class FriendsViewModelTest {
     private static final String ADD_FRIEND_FAIL = "Problem adding Brittany as your friend.";
     private static final String ADD_FRIEND_ALREADY_EXISTS = "Brittany is already your friend.";
     private static final String TEST_SNAPTION_ID = "snaption123456789";
-    private static final String FRIENDS_PATH = "users/snaption123456789/friends";
+    private static final String FRIENDS_PATH = "users/public/data/snaption123456789/friends";
     private static final String TEST_FB_ID = "123456789";
     private static final String TEST_FRIEND_NAME = "Brittany";
     private FriendsViewModel viewModel;
@@ -89,7 +89,7 @@ public class FriendsViewModelTest {
     public void testGetFbProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
-        PowerMockito.mockStatic(FirebaseResourceManager.class);
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(FB_PROVIDER_LABEL,
@@ -100,7 +100,7 @@ public class FriendsViewModelTest {
     public void testGetGoogleProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(GoogleAuthProvider.PROVIDER_ID);
-        PowerMockito.mockStatic(FirebaseResourceManager.class);
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(GOOGLE_PROVIDER_LABEL,
@@ -128,6 +128,7 @@ public class FriendsViewModelTest {
     public void testGetFbProviderFriends() {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         PowerMockito.mockStatic(FirebaseResourceManager.class);
         BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
@@ -143,7 +144,7 @@ public class FriendsViewModelTest {
                     FirebaseResourceManager.class, "retrieveStringMapNoUpdates",
                     pathCaptor.capture(), friendsListListenerCaptor.capture());
             doNothing().when(
-                    FirebaseResourceManager.class, "getFacebookFriends", userCaptor.capture(),
+                    FirebaseUserResourceManager.class, "getFacebookFriends", userCaptor.capture(),
                     friendsListCaptor.capture(), listenerCaptor.capture());
         } catch (Exception ex) {
             ex.printStackTrace();
