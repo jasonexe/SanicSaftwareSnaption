@@ -12,6 +12,8 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
@@ -39,6 +41,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
     public static final String GAME_ID_KEY = "gameId";
     public static final String USER_ID_KEY = "userId";
+    public static final String GAME_ACCESS_KEY = "gameAccess";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -46,6 +49,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         String gameId = null;
         String senderUserId = null;
+        String access = null;
 
         //if a data message was received
         if (data != null && data.size() > 0) {
@@ -53,7 +57,9 @@ public class NotificationReceiver extends FirebaseMessagingService {
             //TODO get public/private
             gameId = data.get(GAME_ID_KEY);
             senderUserId = data.get(USER_ID_KEY);
-            createNotification(gameId, senderUserId);
+            access = data.get(GAME_ACCESS_KEY);
+
+            createNotification(gameId, senderUserId, access);
         }
 
         //if a notification was received
@@ -62,36 +68,48 @@ public class NotificationReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void createNotification(String gameId, final String senderUserId) {
+    private void createNotification(final String gameId, final String senderUserId, final String access) {
         //gets given game and given user to populate notification
-        ResourceListener<Game> gameListener = new ResourceListener<Game>() {
+        ResourceListener<GameMetaData> gameListener = new ResourceListener<GameMetaData>() {
             @Override
-            public void onData(final Game data) {
-                //after getting game, must get user
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, senderUserId), new ResourceListener<User>() {
+            public void onData(final GameMetaData metaData) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_DATA_PATH, access, gameId), new ResourceListener<GameData>() {
                     @Override
-                    public void onData(User user) {
-                        //ensure the user and game were found before sending notification
-                        if (data != null && user != null) {
-                            sendNotification(data, user);
-                        }
-                    }
+                    public void onData(final GameData gameData) {
+                        //after getting game, must get user
+                        FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, senderUserId), new ResourceListener<User>() {
+                            @Override
+                            public void onData(User user) {
+                                Game data = new Game(gameData, metaData);
+                                //ensure the user and game were found before sending notification
+                                if (data != null && user != null) {
+                                    sendNotification(data, user);
+                                }
+                            }
 
+                            @Override
+                            public Class getDataType() {
+                                return User.class;
+                            }
+                        });
+                    }
                     @Override
                     public Class getDataType() {
-                        return User.class;
+                        return GameData.class;
                     }
+
                 });
             }
 
             @Override
             public Class getDataType() {
-                return Game.class;
+                return GameMetaData.class;
             }
         };
         //checking to make sure this data was in notification
         if (gameId != null && senderUserId != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_METADATA_PATH,
+                    access, gameId), gameListener);
         }
     }
 

@@ -46,9 +46,10 @@ public class FirebaseNotificationSender {
      * @param from the user sending the invite
      * @param gameId the id of the game they are invited to
      */
-    public static void sendGameCreationNotification(final User to, String from, final String gameId) {
+    public static void sendGameCreationNotification(final User to, String from, final String gameId,
+                                                    final String access) {
         if (to.getIsAndroid()) {
-            JSONObject json = buildJsonAndroid(gameId, to);
+            JSONObject json = buildJsonAndroid(gameId, to, access);
             //send them a data payload
             sendNotification(json);
         }
@@ -58,7 +59,7 @@ public class FirebaseNotificationSender {
                     new ResourceListener<User>() {
                         @Override
                         public void onData(User inviter) {
-                            JSONObject json = buildJsonIOS(gameId, to, inviter);
+                            JSONObject json = buildJsonIOS(gameId, to, inviter, access);
                             //send them a notification payload
                             sendNotification(json);
                         }
@@ -71,13 +72,15 @@ public class FirebaseNotificationSender {
         }
     }
 
-    private static JSONObject buildJsonAndroid(String gameId, User to) {
+    private static JSONObject buildJsonAndroid(String gameId, User to, String access) {
         JSONObject json = new JSONObject();
         try {
             json.put(JSON_TO, to.getNotificationId());
             JSONObject data = new JSONObject();
             data.put(NotificationReceiver.GAME_ID_KEY, gameId);
             data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
+            data.put(NotificationReceiver.GAME_ACCESS_KEY, access);
+
             json.put(JSON_DATA, data);
             return json;
         } catch (JSONException err) {
@@ -87,7 +90,7 @@ public class FirebaseNotificationSender {
         return json;
     }
 
-    private static JSONObject buildJsonIOS(String gameId, User to, User from) {
+    private static JSONObject buildJsonIOS(String gameId, User to, User from, String access) {
         //build notification key-value
         JSONObject notification = new JSONObject();
         JSONObject json = new JSONObject();
@@ -96,6 +99,7 @@ public class FirebaseNotificationSender {
             json.put(JSON_TO, to.getNotificationId());
             notification.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
             notification.put(NotificationReceiver.GAME_ID_KEY, gameId);
+            notification.put(NotificationReceiver.GAME_ACCESS_KEY, access);
             //add title and body to notification
             notification.put(JSON_BODY, String.format(IOS_NOTIFICATION_BODY, from.getDisplayName()));
             notification.put(JSON_TITLE, IOS_NOTIFICATION_TITLE);

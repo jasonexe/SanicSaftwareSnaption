@@ -120,11 +120,12 @@ public class FirebaseUploader implements Uploader {
         addGameToPlayerJoinedGames(game);
         //notify players if there are any
         if (game.getPlayers() != null) {
-            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
+            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet(), access);
         }
     }
 
-    private void notifyPlayersGameCreated(final String gameId, final Set<String> players) {
+    private void notifyPlayersGameCreated(final String gameId, final Set<String> players,
+                                          final String access) {
 
         final String pickerId = FirebaseResourceManager.getUserId();
         //listener once you get a user to send notification
@@ -132,7 +133,7 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onData(User receiver) {
                 if (receiver != null) {
-                    FirebaseNotificationSender.sendGameCreationNotification(receiver, pickerId, gameId);
+                    FirebaseNotificationSender.sendGameCreationNotification(receiver, pickerId, gameId, access);
                 }
             }
             @Override
