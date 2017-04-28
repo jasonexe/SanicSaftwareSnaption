@@ -1,5 +1,7 @@
 package com.snaptiongame.snaption.models;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,82 +15,80 @@ public class User implements Person, Comparable<User> {
     private UserPublicData publicData;
     private UserPrivateData privateData;
 
-    private String id;
-    private String email;
-    private String displayName;
-    private boolean isAndroid;
-    private Map<String, Integer> friends;
-    private Map<String, Integer> createdGames;
-    private Map<String, Caption> captions;
-    private String notificationId;
-    private String facebookId;
-    private String imagePath;
-    private Map<String, Integer> blockedUsers; // Ids of users this user has blocked
-    private Map<String, Integer> privateGames; // Private games this user was invited to
-
-    //needed for firebase compatibility
-    public User() {}
-
     public User(UserMetadata metadata, UserPublicData publicData, UserPrivateData privateData) {
-        this.metadata = metadata;
-        this.publicData = publicData;
-        this.privateData = privateData;
+        this.metadata = new UserMetadata(metadata);
+        this.publicData = new UserPublicData(publicData);
+        this.privateData = new UserPrivateData(privateData);
     }
 
     public User(String id, String email, String displayName, String notificationId, String facebookId, String imagePath) {
-        this.id = id;
-        this.email = email;
-        this.displayName = displayName;
-        this.notificationId = notificationId;
-        this.facebookId = facebookId;
-        this.imagePath = imagePath;
-        isAndroid = true;
-
-        friends = null;
-        createdGames = null;
-        captions = null;
-        blockedUsers = null;
-        privateGames = null;
+        metadata = new UserMetadata(displayName, email, imagePath, notificationId, facebookId, id);
+        publicData = new UserPublicData(null, null, null);
+        privateData = new UserPrivateData(null, null, null);
     }
 
     public User(String id, String email, String displayName, String notificationId,
                 String facebookId, String imagePath, Map<String, Integer> friends,
                 Map<String, Integer> games, Map<String, Caption> captions,
-                Map<String, Integer> blockedUsers, Map<String, Integer> privateGames) {
+                Map<String, Integer> blockedUsers, Map<String, String> joinedGames) {
         this(id, email, displayName, notificationId, facebookId, imagePath);
-        this.friends = friends;
-        this.createdGames = games;
-        this.captions = captions;
-        this.blockedUsers = blockedUsers;
-        this.privateGames = privateGames;
+        publicData = new UserPublicData(captions, games, friends);
+        privateData = new UserPrivateData(captions, games, joinedGames);
     }
 
     public Map<String, Integer> getFriends() {
-            return friends;
+            return publicData.getFriends();
     }
 
-    public Map<String, Integer> getBlockedUsers() {
-        return blockedUsers;
+    public Map<String, String> getJoinedGames() {
+        return privateData.getJoinedGames();
     }
 
-    public Map<String, Integer> getPrivateGames() {
-        return privateGames;
+    public Map<String, Integer> getCreatedPublicGames() {
+        return publicData.getCreatedGames();
     }
 
-    public Map<String, Integer> getCreatedGames() {
-        return createdGames;
+    public Map<String, Integer> getCreatedPrivateGames() {
+        return privateData.getCreatedGames();
     }
 
-    public Map<String, Caption> getCaptions() {
+    public Map<String, Caption> getPublicCaptions() {
+        return publicData.getCaptions();
+    }
+
+    public Map<String, Caption> getPrivateCaptions() {
+        return privateData.getCaptions();
+    }
+
+    public List<Caption> getAllCaptions() {
+        Map pubCaptionMap = getPublicCaptions();
+        Map privateCaptionMap = getPrivateCaptions();
+        List<Caption> captions = new ArrayList<>();
+        if (pubCaptionMap != null) {
+            captions.addAll(pubCaptionMap.values());
+        }
+        if (privateCaptionMap != null) {
+            captions.addAll(privateCaptionMap.values());
+        }
+        return captions;
+    }
+
+    public List<Caption> getAllPublicCaptions() {
+        Map pubCaptionMap = getPublicCaptions();
+        List<Caption> captions = new ArrayList<>();
+        if (pubCaptionMap != null) {
+            captions.addAll(pubCaptionMap.values());
+        }
         return captions;
     }
 
     public String getDisplayName() {
-        return displayName;
+        return metadata.getDisplayName();
     }
 
     public String getLowercaseDisplayName() {
         String lowerName = null;
+        String displayName = metadata.getDisplayName();
         if (displayName != null) {
             lowerName = displayName.toLowerCase();
         }
@@ -96,30 +96,34 @@ public class User implements Person, Comparable<User> {
     }
 
     public String getEmail() {
-        return email;
+        return metadata.getEmail();
     }
 
     public String getFacebookId() {
-        return facebookId;
+        return metadata.getFacebookId();
     }
 
     public String getId() {
-        return id;
+        return metadata.getId();
     }
 
     public String getNotificationId() {
-        return notificationId;
+        return metadata.getNotificationId();
     }
 
     public String getImagePath() {
-        return imagePath;
+        return metadata.getImagePath();
     }
 
     public boolean getIsAndroid() {
-        return isAndroid;
+        return metadata.getIsAndroid();
     }
 
-    public void setIsAndroid(boolean android) {
+    public void setDisplayName(String displayName) {
+        metadata.setDisplayName(displayName);
+    }
+
+    /*public void setIsAndroid(boolean android) {
         isAndroid = android;
     }
 
@@ -131,9 +135,7 @@ public class User implements Person, Comparable<User> {
         this.email = email;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
+
 
     public void setFriends(Map<String, Integer> friends) {
         this.friends = friends;
@@ -170,10 +172,11 @@ public class User implements Person, Comparable<User> {
     public void setLowercaseDisplayName(String name) {
         // NoOp, lowercase display name is based on the normal display name. At least we don't
         // get errors anymore
-    }
+    }*/
 
     public int retrieveCaptionCount() {
         int captionCount = 0;
+        Map captions = publicData.getCaptions();
         if (captions != null) {
             captionCount = captions.size();
         }
@@ -182,6 +185,7 @@ public class User implements Person, Comparable<User> {
 
     public int retrieveCreatedGameCount() {
         int gameCount = 0;
+        Map createdGames = publicData.getCreatedGames();
         if (createdGames != null) {
             gameCount = createdGames.size();
         }
@@ -190,6 +194,7 @@ public class User implements Person, Comparable<User> {
 
     public int retrieveFriendsCount() {
         int friendCount = 0;
+        Map friends = publicData.getFriends();
         if(friends != null) {
             friendCount = friends.size();
         }
@@ -201,14 +206,14 @@ public class User implements Person, Comparable<User> {
         if (other == null) {
             return false;
         }
-        return other.getClass() == getClass() && ((User) other).id.equals(id);
+        return other.getClass() == getClass() && ((User) other).getId().equals(metadata.getId());
     }
 
     @Override
     public int compareTo(User other) {
         int result = getLowercaseDisplayName().compareTo(other.getLowercaseDisplayName());
         if (result == 0) {
-            result = email.compareTo(other.getEmail());
+            result = getEmail().compareTo(other.getEmail());
         }
         return result;
     }

@@ -22,6 +22,14 @@ public class UserPrivateData {
         this.joinedGames = joinedGames;
     }
 
+    public UserPrivateData(UserPrivateData other) {
+        if (other != null) {
+            this.captions = other.captions;
+            this.createdGames = other.createdGames;
+            this.joinedGames = other.joinedGames;
+        }
+    }
+
     public Map<String, Caption> getCaptions() {
         return captions;
     }

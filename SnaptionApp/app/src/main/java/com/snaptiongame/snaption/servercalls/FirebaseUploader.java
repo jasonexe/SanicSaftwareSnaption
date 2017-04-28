@@ -55,7 +55,6 @@ public class FirebaseUploader implements Uploader {
         myRef.removeValue();
     }
 
-
     public FirebaseUploader() {
 
     }
@@ -220,7 +219,7 @@ public class FirebaseUploader implements Uploader {
     @Override
     public void addUser(final UserMetadata user, final byte[] photo, final ResourceListener<UserMetadata> listener) {
         //check if User already exists in Database
-        FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_METADATA_PATH, user.getId()), new ResourceListener<UserMetadata>() {
+        FirebaseUserResourceManager.getUserMetadataById(user.getId(), new ResourceListener<UserMetadata>() {
             @Override
             public void onData(UserMetadata data) {
                 //if User does not exist

@@ -76,7 +76,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, null, String.format(Constants.USER_METADATA_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, game.getPicker());
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
@@ -197,7 +197,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         if (game.getTopCaption() != null) {
             holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_METADATA_PATH, game.getTopCaption().getUserId()));
+            displayUser(holder.captionerName, holder.captionerPhoto, game.getTopCaption().getUserId());
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
@@ -244,9 +244,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * Displays the profile picture and username of a valid User. Shows the default if invalid
      * @param username the TextView from the holder, for either the Picker or Captioner's name
      * @param photo the ImageView from the holder, for either the Picker or Captioner's photo
-     * @param userPath The path to the desired User
+     * @param userId The id of the current user
      */
-    private void displayUser(final TextView username, final ImageView photo, String userPath) {
+    private void displayUser(final TextView username, final ImageView photo, String userId) {
         // remove this portion if firebase is guaranteed to not have invalid users
         username.setText(" ");
         if (photo != null) {
@@ -254,9 +254,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
 
         // ensure the user id is a valid one to avoid errors
-        if (validFirebasePath(userPath)) {
+        if (FirebaseUserResourceManager.isValidUser(userId)) {
             // display the name and profile picture if a valid user is obtained from the user id
-            FirebaseUserResourceManager.getUserMetadataById(FirebaseUserResourceManager.getUserId(), new ResourceListener<UserMetadata>() {
+            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
                 @Override
                 public void onData(final UserMetadata user) {
                     // replace default is the User is valid

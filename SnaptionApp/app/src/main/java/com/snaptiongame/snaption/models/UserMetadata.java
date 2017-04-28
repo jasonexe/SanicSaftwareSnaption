@@ -28,6 +28,18 @@ public class UserMetadata implements Person{
         isAndroid = true;
     }
 
+    public UserMetadata(UserMetadata other) {
+        if (other != null) {
+            this.displayName = other.displayName;
+            this.email = other.email;
+            this.imagePath = other.imagePath;
+            this.notificationId = other.notificationId;
+            this.facebookId = other.facebookId;
+            this.id = other.id;
+            isAndroid = true;
+        }
+    }
+
     public String getDisplayName() {
         return displayName;
     }

@@ -250,7 +250,7 @@ public class LoginManager {
                 downloadPhoto(String.format(FACEBOOK_IMAGE_URL, facebookId));
             }
             //create and upload User to Firebase
-            UserMetadata user = new UserMetadata(id, email, displayName, notificationId, facebookId, imagePath);
+            UserMetadata user = new UserMetadata(displayName, email, imagePath, notificationId, facebookId, id);
             uploader.addUser(user, profilePhoto, new ResourceListener<UserMetadata>() {
                 @Override
                 public void onData(UserMetadata data) {

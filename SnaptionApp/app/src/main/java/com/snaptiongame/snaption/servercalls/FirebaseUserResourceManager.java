@@ -50,6 +50,11 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
         return userPath;
     }
 
+    public static boolean isValidUser(String id) {
+        String path = getUserPath(id);
+        return validFirebasePath(path);
+    }
+
     /**
      * Gets the direct path to the user metadata table in the database
      * @param id The ID of the user whose path to find

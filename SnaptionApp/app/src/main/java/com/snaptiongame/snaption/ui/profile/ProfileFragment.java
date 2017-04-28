@@ -152,8 +152,8 @@ public class ProfileFragment extends Fragment {
         friendsMade.setText(String.valueOf(user.retrieveFriendsCount()));
 
         int numCapUpvotes = 0;
-        if(user.getCaptions() != null) {
-            for(Caption caption : user.getCaptions().values()) {
+        if(user.getPublicCaptions() != null) {
+            for(Caption caption : user.getPublicCaptions().values()) {
                 numCapUpvotes += caption.retrieveNumVotes();
             }
         }
@@ -169,21 +169,16 @@ public class ProfileFragment extends Fragment {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(view.getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
         captionsListView.setLayoutManager(captionViewManager);
-        Map<String, Caption> mapUserCaptions = user.getCaptions();
-        captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
-        if (mapUserCaptions != null) {
-            if (isUser) {
-                captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
-            }
-            else {
-                filterCaptions(new ArrayList<>(mapUserCaptions.values()), new CaptionFilterListener() {
-                    @Override
-                    public void captionFiltered(Caption caption) {
-                        captionsAdapter.addCaption(caption);
-                    }
-                });
-            }
+        List<Caption> captions = new ArrayList<>();
+        if (isUser) {
+            //get public and private captions
+            captions = user.getAllCaptions();
         }
+        else {
+            //get private games only
+            captions = user.getAllPublicCaptions();
+        }
+        captionsAdapter = new ProfileCaptionsAdapter(captions);
         captionsListView.setAdapter(captionsAdapter);
     }
 
@@ -220,7 +215,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void getUserGames(User user) {
-        Map<String, Integer> gameIds = user.getCreatedGames();
+        Map<String, Integer> gameIds = user.getCreatedPublicGames();
         //if User has any games
         if (gameIds != null) {
             //for each gameId in user's game list
