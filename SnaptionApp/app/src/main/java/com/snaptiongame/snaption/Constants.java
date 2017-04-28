@@ -48,13 +48,22 @@ public class Constants {
     public static final String USER_PRIVATE_CREATED_GAMES_PATH = USER_PRIVATE_DATA_PATH + "/createdGames";
     //Path to user's private captions
     public static final String USER_PRIVATE_CAPTIONS_PATH = USER_PRIVATE_DATA_PATH + "/captions";
+
+    //Key name of lowercase display name
+    public static final String SEARCH_NAME = "searchName";
+    //Key name for facebookId
+    public static final String USER_FACEBOOK_ID = "facebookId";
+    // Key name for the user's email
+    public static final String EMAIL = "email";
     // Path to the user's notification ID
     public static final String USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
     // Path to the user's isAndroid boolean
     public static final String USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
-    // Path to the user's lowercase display name
-    public static final String SEARCH_NAME = "searchName";
-    public static final String USER_FACEBOOK_ID = "facebookId";
+    // Path to user's displayName
+    public static final String USER_DISPLAY_NAME_PATH = USER_METADATA_PATH + "/displayName";
+    // Path to user's searchName
+    public static final String USER_SEARCH_NAME_PATH = USER_METADATA_PATH + "/" + SEARCH_NAME;
+
 
     // Path to map of all games
     public static final String GAMES_PATH = "games/";
@@ -86,8 +95,7 @@ public class Constants {
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the game's creation date
     public static final String CREATION_DATE = "creationDate";
-    // Path to the user's email
-    public static final String EMAIL = "email";
+
     // END FIREBASE VARIABLES //
 
     // Notification ID used in intents that have notifications

@@ -6,7 +6,7 @@ package com.snaptiongame.snaption.models;
  * Created by austinrobarts on 4/22/17.
  */
 
-public class UserMetadata implements Person{
+public class UserMetadata implements Person, Comparable<UserMetadata> {
 
     private String displayName;
     private String email;
@@ -102,5 +102,14 @@ public class UserMetadata implements Person{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public int compareTo(UserMetadata other) {
+        int result = getSearchName().compareTo(other.getSearchName());
+        if (result == 0) {
+            result = getEmail().compareTo(other.getEmail());
+        }
+        return result;
     }
 }

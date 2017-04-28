@@ -172,7 +172,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     }
 
     public void getUserFriendsWithUpdates(String id, ResourceListener<Map<String, Integer>> listener) {
-        firebase.retrieveSingleWithUpdates(String.format(Constants.USER_FRIENDS_PATH, id), listener);
+        firebase.retrieveMapWithUpdates(String.format(Constants.USER_FRIENDS_PATH, id), listener);
     }
 
     /**

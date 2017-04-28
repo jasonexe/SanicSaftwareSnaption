@@ -37,11 +37,7 @@ import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 
 public class FirebaseUploader implements Uploader {
 
-    private static final String USERS_PATH = "users";
     private static final String GAMES_PATH = "games";
-    private static final String FRIENDS_PATH = "users/%s/friends";
-    private static final String USERNAME_PATH = "users/%s/displayName";
-    private static final String LOWERCASE_USERNAME_PATH = "users/%s/lowercaseDisplayName";
 
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
 
@@ -352,8 +348,8 @@ public class FirebaseUploader implements Uploader {
     }
 
     public static void updateDisplayName(String newName, String userId) {
-        uploadObject(String.format(USERNAME_PATH, userId), newName);
-        uploadObject(String.format(LOWERCASE_USERNAME_PATH, userId), newName.toLowerCase());
+        uploadObject(String.format(Constants.USER_DISPLAY_NAME_PATH, userId), newName);
+        uploadObject(String.format(Constants.USER_SEARCH_NAME_PATH, userId), newName.toLowerCase());
     }
 
     /**
@@ -378,7 +374,7 @@ public class FirebaseUploader implements Uploader {
      * @param listener
      */
     private void addFriendToHashMap(String userId, String friendId, DatabaseReference.CompletionListener listener) {
-        DatabaseReference userFriendsRef = database.getReference().child(String.format(FRIENDS_PATH, userId));
+        DatabaseReference userFriendsRef = database.getReference().child(String.format(Constants.USER_FRIENDS_PATH, userId));
         DatabaseReference friendRef = userFriendsRef.child(friendId);
         friendRef.setValue(1, listener);
     }

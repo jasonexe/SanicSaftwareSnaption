@@ -74,6 +74,6 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
 
     public void addSingleItem(UserMetadata user) {
         friends.add(user);
-        notifyItemInserted(friends.size() - 1);
+        notifyDataSetChanged();
     }
 }

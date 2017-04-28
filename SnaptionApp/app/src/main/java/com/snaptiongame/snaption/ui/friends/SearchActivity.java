@@ -55,7 +55,8 @@ public class SearchActivity extends HomeAppCompatActivity {
     private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
         @Override
         public void onData(List<UserMetadata> userList) {
-            users.addAll(userList);
+            if (userList != null)
+                users.addAll(userList);
             // query Firebase for Users based on e-mail only after this query is finished
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.EMAIL, emailListener);
         }
@@ -70,7 +71,8 @@ public class SearchActivity extends HomeAppCompatActivity {
     private ResourceListener<List<UserMetadata>> emailListener = new ResourceListener<List<UserMetadata>>() {
         @Override
         public void onData(List<UserMetadata> userList) {
-            users.addAll(userList);
+            if (userList != null)
+                users.addAll(userList);
             // display the list of Users after getting the remaining ones
             displayUsers();
         }

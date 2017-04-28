@@ -40,7 +40,6 @@ public class FriendsFragment extends Fragment {
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
 
-    private FirebaseResourceManager firebase = new FirebaseResourceManager();
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
@@ -73,7 +72,7 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        firebase.removeListener();
+        userFirebase.removeListener();
     }
 
     @Override
