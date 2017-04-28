@@ -164,7 +164,7 @@ public class FirebaseDeepLinkCreator {
         if(deepLink.contains("games")) {
             Class toSend = GameActivity.class;
             String gameId = deepLink.substring(deepLink.lastIndexOf("/") + 1);
-            String access = deepLink.substring(deepLink.indexOf("/"), deepLink.indexOf("games") - 1);
+            String access = deepLink.substring(deepLink.indexOf(".com/") + 5, deepLink.indexOf("games") - 1);
             DeepLinkInfo info = new DeepLinkInfo(toSend);
             info.setIntentString(access + "/" + gameId);
             return info;
