@@ -239,9 +239,9 @@ public class CreateGameActivity extends AppCompatActivity {
             }
         } else {
             // If the photo does exist, addGame but without the data
-            // TODO figure out a better way to do this... will have to pull the game probably.
+            // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
             Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                                friends, categories, isPublic, endDate);
+                                friends, categories, isPublic, endDate, 1);
             uploader.addGame(game);
             backToMain();
         }
