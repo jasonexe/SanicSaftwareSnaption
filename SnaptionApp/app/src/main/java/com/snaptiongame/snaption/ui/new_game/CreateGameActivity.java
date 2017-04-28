@@ -61,9 +61,6 @@ import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
  */
 
 public class CreateGameActivity extends AppCompatActivity {
-    // TODO display friends to invite
-    private static final String MATURE = "mature";
-    private static final String PG = "PG";
     private static final int FRIENDS_LIST_MIN_HEIGHT = 0;
     private static final int FRIENDS_LIST_MAX_HEIGHT = 250;
     private static final long FRIENDS_ANIMATION_DURATION = 400;
@@ -74,7 +71,6 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private Uri imageUri;
     private Map<String, Integer> categories;
-    private String maturityRating;
     private boolean isPublic;
     private long endDate;
     private Calendar calendar;
@@ -106,12 +102,6 @@ public class CreateGameActivity extends AppCompatActivity {
 
     @BindView(R.id.radio_public)
     protected RadioButton radioPublic;
-
-    @BindView(R.id.radio_everyone)
-    protected RadioButton radioEveryone;
-
-    @BindView(R.id.radio_adult)
-    protected RadioButton radioAdult;
 
     @BindView(R.id.category_input)
     protected EditText categoryInput;
@@ -181,11 +171,6 @@ public class CreateGameActivity extends AppCompatActivity {
                             "You must choose whether the game is public or private.",
                             Toast.LENGTH_LONG).show();
                 }
-                else if (!radioAdult.isChecked() && !radioEveryone.isChecked()) {
-                    Toast.makeText(CreateGameActivity.this,
-                            "You must choose who the game is appropriate for.",
-                            Toast.LENGTH_LONG).show();
-                }
                 else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
                     Toast.makeText(CreateGameActivity.this, "You must select a day in the future.",
                             Toast.LENGTH_LONG).show();
@@ -222,19 +207,6 @@ public class CreateGameActivity extends AppCompatActivity {
             }
         });
 
-        radioEveryone.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                maturityRating = PG;
-            }
-        });
-
-        radioAdult.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                maturityRating = MATURE;
-            }
-        });
         setupFriendsViews();
     }
 
@@ -259,7 +231,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 UploaderDialog dialog = new UploaderDialog();
                 double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
                 Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
-                        friends, categories, isPublic, endDate, maturityRating, aspectRatio);
+                        friends, categories, isPublic, endDate, aspectRatio);
                 uploader.addGame(game, data, aspectRatio, dialog);
             } catch (Exception e) {
                 Toast.makeText(CreateGameActivity.this, "Error, file not found",
@@ -269,7 +241,7 @@ public class CreateGameActivity extends AppCompatActivity {
             // If the photo does exist, addGame but without the data
             // TODO figure out a better way to do this... will have to pull the game probably.
             Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
-                    friends, categories, isPublic, endDate, maturityRating, 1);
+                                friends, categories, isPublic, endDate);
             uploader.addGame(game);
             backToMain();
         }

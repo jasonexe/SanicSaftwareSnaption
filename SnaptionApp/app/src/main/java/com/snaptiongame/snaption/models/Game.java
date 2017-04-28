@@ -3,7 +3,6 @@ package com.snaptiongame.snaption.models;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ public class Game implements Serializable {
     private Map<String, Integer> players; //The list of players in the private game
     private long endDate; //When the game ends
     private long creationDate; //When the game was created
-    private String maturityRating; //The maturity rating of the game
     private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
     private Map<String, Integer> votes; //The list of votes
@@ -47,11 +45,9 @@ public class Game implements Serializable {
      * @param isPublic Whether the game is available to the public
      * @param endDate The time when the game ends
      * @param creationDate The time when the game was started
-     * @param maturityRating The maturity rating of the card
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
-                Map<String, Integer> categories, boolean isPublic, long endDate, long creationDate,
-                String maturityRating, double imageAspectRatio) {
+                Map<String, Integer> categories, boolean isPublic, long endDate, long creationDate, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -60,7 +56,6 @@ public class Game implements Serializable {
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
-        this.maturityRating = maturityRating;
         this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
@@ -79,10 +74,9 @@ public class Game implements Serializable {
      * @param categories The list of categories that the game belongs to
      * @param isPublic Whether the game is available to the public
      * @param endDate The time when the game ends
-     * @param maturityRating The maturity rating of the card
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
-                Map<String, Integer> categories, boolean isPublic, long endDate, String maturityRating, double imageAspectRatio) {
+                Map<String, Integer> categories, boolean isPublic, long endDate, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -90,7 +84,6 @@ public class Game implements Serializable {
         this.categories = new HashMap<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
-        this.maturityRating = maturityRating;
         this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
@@ -258,15 +251,6 @@ public class Game implements Serializable {
      */
     public long getCreationDate() {
         return creationDate;
-    }
-
-    /**
-     * Returns the maturity rating for the game.
-     *
-     * @return The maturity rating for the game
-     */
-    public String getMaturityRating() {
-        return maturityRating;
     }
 
     /**
