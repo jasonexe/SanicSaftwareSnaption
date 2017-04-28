@@ -169,7 +169,7 @@ public class UserTest {
 
     @Test
     public void testIsAndroid() {
-        assertEquals(false, user1.getIsAndroid());
+        assertEquals(true, user1.getIsAndroid());
         assertEquals(true, user2.getIsAndroid());
         assertEquals(true, user3.getIsAndroid());
     }

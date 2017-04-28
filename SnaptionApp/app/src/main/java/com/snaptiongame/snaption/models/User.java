@@ -123,57 +123,6 @@ public class User implements Person, Comparable<User> {
         metadata.setDisplayName(displayName);
     }
 
-    /*public void setIsAndroid(boolean android) {
-        isAndroid = android;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-
-
-    public void setFriends(Map<String, Integer> friends) {
-        this.friends = friends;
-    }
-
-    public void setCreatedGames(Map<String, Integer> games) {
-        this.createdGames = games;
-    }
-
-    public void setCaptions(Map<String, Caption> captions) {
-        this.captions = captions;
-    }
-
-    public void setPrivateGames(Map<String, Integer> privateGames) {
-        this.privateGames = privateGames;
-    }
-
-    public void setBlockedUsers(Map<String, Integer> blockedUsers) {
-        this.blockedUsers = blockedUsers;
-    }
-
-    public void setNotificationId(String notificationId) {
-        this.notificationId = notificationId;
-    }
-
-    public void setFacebookId(String facebookId) {
-        this.facebookId = facebookId;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
-
-    public void setLowercaseDisplayName(String name) {
-        // NoOp, lowercase display name is based on the normal display name. At least we don't
-        // get errors anymore
-    }*/
-
     public int retrieveCaptionCount() {
         int captionCount = 0;
         Map captions = publicData.getCaptions();
