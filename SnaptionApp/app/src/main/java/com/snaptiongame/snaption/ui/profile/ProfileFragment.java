@@ -192,6 +192,7 @@ public class ProfileFragment extends Fragment {
 
     private void filterCaptions(List<Caption> captions, final CaptionFilterListener filterListener) {
         // filter out captions of private games if needed
+        //TODO figure out how to get correct path for captions
         for (final Caption caption : captions) {
             FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH,
                     caption.gameId), new ResourceListener<Game>() {
@@ -219,6 +220,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void getUserGames(User user) {
+        //TODO figure out how to get games from user
         Map<String, Integer> gameIds = user.getCreatedGames();
         //if User has any games
         if (gameIds != null) {

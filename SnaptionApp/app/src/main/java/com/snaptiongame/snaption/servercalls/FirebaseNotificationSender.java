@@ -15,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.snaptiongame.snaption.Constants.*;
+
 /**
  * Created by austinrobarts on 3/8/17.
  */
@@ -55,7 +57,7 @@ public class FirebaseNotificationSender {
         }
         else { //if iOS user
             //get user so we can display name in notification
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, from),
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, from),
                     new ResourceListener<User>() {
                         @Override
                         public void onData(User inviter) {

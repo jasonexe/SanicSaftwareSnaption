@@ -68,9 +68,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTIONS_PATH;
