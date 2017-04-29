@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
-import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
@@ -55,7 +54,9 @@ public class WallFragment extends Fragment {
         return new ResourceListener<Map<String, Integer>>() {
             @Override
             public void onData(Map<String, Integer> data) {
-                wallAdapter.gameChanged(gameNum, data);
+                if (isVisible() || !isRemoving()) {
+                    wallAdapter.gameChanged(gameNum, data);
+                }
             }
 
             @Override
@@ -70,33 +71,34 @@ public class WallFragment extends Fragment {
     private ResourceListener<List<GameMetaData>> listener = new ResourceListener<List<GameMetaData>>() {
         @Override
         public void onData(List<GameMetaData> games) {
-            if(games == null) {
-                Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error),
-                        Snackbar.LENGTH_LONG).show();
-            } else {
-                for (GameMetaData curGame : games) {
-                    ResourceListener<Map<String, Integer>> gameListener =
-                            getGameListener(gameVoteListeners.size());
-                    FirebaseResourceManager manager = new FirebaseResourceManager();
-                    String upvotesPath = curGame.getIsPublic() ?
-                            String.format(Constants.GAME_PUBLIC_METADATA_UPVOTES_PATH,
-                                    curGame.getId()) :
-                            String.format(Constants.GAME_PRIVATE_METADATA_UPVOTES_PATH,
-                                    curGame.getId());
-                    manager.retrieveMapWithUpdates(upvotesPath, gameListener);
-                    gameVoteListeners.add(manager);
+            if (isVisible() || !isRemoving()) {
+                if (games == null) {
+                    Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
+                } else {
+                    for (GameMetaData curGame : games) {
+                        ResourceListener<Map<String, Integer>> gameListener =
+                                getGameListener(gameVoteListeners.size());
+                        FirebaseResourceManager manager = new FirebaseResourceManager();
+                        String upvotesPath = curGame.getIsPublic() ?
+                                String.format(Constants.GAME_PUBLIC_METADATA_UPVOTES_PATH,
+                                        curGame.getId()) :
+                                String.format(Constants.GAME_PRIVATE_METADATA_UPVOTES_PATH,
+                                        curGame.getId());
+                        manager.retrieveMapWithUpdates(upvotesPath, gameListener);
+                        gameVoteListeners.add(manager);
+                    }
                 }
-            }
-            wallAdapter.addItems(games);
-            isLoading = false;
-            if (refreshLayout != null) {
-                refreshLayout.setRefreshing(false);
+                wallAdapter.addItems(games);
+                isLoading = false;
+                if (refreshLayout != null) {
+                    refreshLayout.setRefreshing(false);
+                }
             }
         }
 
         @Override
         public Class getDataType() {
-            return Game.class;
+            return GameMetaData.class;
         }
     };
     private GameResourceManager resourceManager;
@@ -192,18 +194,22 @@ public class WallFragment extends Fragment {
     }
 
     private void loadMoreGames() {
-        isLoading = true;
-        if (wallAdapter.getItemCount() == 0) {
-            refreshLayout.setRefreshing(true);
+        if (isVisible() || !isRemoving()) {
+            isLoading = true;
+            if (wallAdapter.getItemCount() == 0 && refreshLayout != null) {
+                refreshLayout.setRefreshing(true);
+            }
+            resourceManager.retrieveGames();
         }
-        resourceManager.retrieveGames();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         refreshLayout.setRefreshing(false);
+        refreshLayout.setEnabled(false);
         clearListeners();
+        wallAdapter.clearItems();
         unbinder.unbind();
     }
 

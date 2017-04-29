@@ -15,6 +15,7 @@ public class Game implements Serializable {
     private GameData data; //The object containing the players and captions
     private GameMetaData metaData; //The object containing all other information about the game
 
+
     /**
      * Default constructor.
      */
@@ -189,4 +190,14 @@ public class Game implements Serializable {
     public Caption getTopCaption() {
         return metaData.getTopCaption();
     }
+
+    /**
+     * Returns the aspect ratio for the image.
+     *
+     * @return the aspect ratio for the image
+     */
+    public double getImageAspectRatio() {
+        return metaData.getImageAspectRatio();
+    }
+
 }

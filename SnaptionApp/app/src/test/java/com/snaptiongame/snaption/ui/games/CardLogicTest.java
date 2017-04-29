@@ -37,7 +37,8 @@ public class CardLogicTest {
         String userId = "testUserId";
         String cardText = "testCard %s";
         String cardId = "testCardId";
-        GameMetaData gameMetaData = new GameMetaData(gameId, "a", "images/", null, true, 1000, 500);
+
+        GameMetaData gameMetaData = new GameMetaData(gameId, "a", "images/", null, true, 1000, 500, 1.0);
         GameData gameData = new GameData();
         Game game = new Game(gameData, gameMetaData);
         List<String> expectedInput = new ArrayList<>();
@@ -61,8 +62,10 @@ public class CardLogicTest {
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
         String userId = "testUserId";
-        GameMetaData gameMetaData = new GameMetaData("1", "a", "images/", null, true, 1000, 500);
+
+        GameMetaData gameMetaData = new GameMetaData("1", "a", "images/", null, true, 1000, 500, 1.0);
         Game game = new Game(null, gameMetaData);
+
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = null;
         expectedInput.add(userInput);

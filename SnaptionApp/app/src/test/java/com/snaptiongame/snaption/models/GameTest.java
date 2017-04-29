@@ -5,8 +5,6 @@ package com.snaptiongame.snaption.models;
  * @author Cameron Geehr
  */
 
-import com.snaptiongame.snaption.testobjects.TestCaption;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,13 +19,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GameTest {
-    GameMetaData gameMetaData1, gameMetaData2, gameMetaData3;
-    GameData data1, data2, data3;
-    Game game1, game2, game3;
-    Map<String, Integer> players1, players2, players3;
-    Map<String, Integer> tags1, tags2, tags3;
-    Map<String, Integer> upvotes1, upvotes2, upvotes3;
-    Map<String, Caption> captions1, captions2, captions3;
+    private GameMetaData gameMetaData1, gameMetaData2, gameMetaData3;
+    private GameData data1, data2, data3;
+    private Game game1, game2, game3;
+    private Map<String, Integer> players1, players2, players3;
+    private Map<String, Integer> tags1, tags2, tags3;
+    private Map<String, Integer> upvotes1, upvotes2, upvotes3;
+    private Map<String, Caption> captions1, captions2, captions3;
 
     @Before
     public void setup() {
@@ -49,9 +47,9 @@ public class GameTest {
 
         String imagePath = "images/";
 
-        gameMetaData1 = new GameMetaData("1", "a", imagePath, tags1, true, 1000, 500);
-        gameMetaData2 = new GameMetaData("2", "b", imagePath, tags2, true, 2000, 500);
-        gameMetaData3 = new GameMetaData("3", "c", imagePath, tags3, true, Long.MAX_VALUE);
+        gameMetaData1 = new GameMetaData("1", "a", imagePath, tags1, true, 1000, 500, 1.0);
+        gameMetaData2 = new GameMetaData("2", "b", imagePath, tags2, true, 2000, 500, 1.0);
+        gameMetaData3 = new GameMetaData("3", "c", imagePath, tags3, true, Long.MAX_VALUE, 1.0);
 
         data1 = new GameData(players1, captions1);
         data2 = new GameData(players2, captions2);
@@ -91,6 +89,7 @@ public class GameTest {
         assertTrue(game3.isOpen());
         for (String key : players1.keySet()) {
             assertTrue(game1.getPlayers().containsKey(key));
+
         }
         assertTrue(game1.getTags().equals(tags1));
         assertTrue(game1.getIsPublic());
@@ -98,6 +97,8 @@ public class GameTest {
         assertEquals(gameMetaData1.getCreationDate(), game1.getMetaData().getCreationDate());
         captions1.put("1", caption);
         assertEquals(data1.getCaptions(), game1.getData().getCaptions());
+
+        assertEquals(1.0, gameMetaData1.getImageAspectRatio(), .00001);
     }
 
     @Test

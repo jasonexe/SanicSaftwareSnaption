@@ -24,6 +24,7 @@ public class GameMetaData implements Serializable {
     private boolean isPublic; //Whether the game is viewable to to the public
     private long endDate; //When the game ends
     private long creationDate; //When the game was created
+    private double imageAspectRatio; //The aspect ratio of the image
 
     /**
      * Default constructor for Firebase.
@@ -42,7 +43,7 @@ public class GameMetaData implements Serializable {
      * @param creationDate When the game was created
      */
     public GameMetaData(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
-                        boolean isPublic, long endDate, long creationDate) {
+                        boolean isPublic, long endDate, long creationDate, double imageAspectRatio) {
         this.gameId = gameId;
         this.pickerId = pickerId;
         this.imagePath = imagePath;
@@ -50,6 +51,7 @@ public class GameMetaData implements Serializable {
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
+        this.imageAspectRatio = imageAspectRatio;
     }
 
     /**
@@ -63,10 +65,10 @@ public class GameMetaData implements Serializable {
      * @param endDate When the game ends
      */
     public GameMetaData(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
-                        boolean isPublic, long endDate) {
+                        boolean isPublic, long endDate, double imageAspectRatio) {
         //Calls the other constructor with creationDate calculated
         this(gameId, pickerId, imagePath, tags, isPublic, endDate,
-                Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND);
+                Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND, imageAspectRatio);
     }
 
     public String getId() {
@@ -109,6 +111,10 @@ public class GameMetaData implements Serializable {
 
     public long getCreationDate() {
         return creationDate;
+    }
+
+    public double getImageAspectRatio() {
+        return imageAspectRatio;
     }
 
     public boolean isOpen() {

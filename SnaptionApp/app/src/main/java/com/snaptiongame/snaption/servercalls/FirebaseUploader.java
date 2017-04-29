@@ -1,5 +1,8 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -9,6 +12,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.snaptiongame.snaption.models.Caption;
@@ -22,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.snaptiongame.snaption.Constants.ASPECT_RATIO_KEY;
 import static com.snaptiongame.snaption.Constants.GAMES_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTION_PATH;
@@ -79,12 +84,13 @@ public class FirebaseUploader implements Uploader {
     /**
      * Call this if the game needs to be uploaded
      * @param game The game to upload. Its image path should be just the name of the file.
-     * @param photo Byte array of photo
+     * @param data Compressed byte array of the photo
+     * @param aspectRatio The aspect ratio of the photo
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
-    public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
-        uploadPhoto(game, photo, uploadCallback);
+    public void addGame(Game game, byte[] data, double aspectRatio, UploadDialogInterface uploadCallback) {
+        uploadPhoto(game, data, aspectRatio, uploadCallback);
         addCompletedGameObj(game);
     }
 
@@ -192,14 +198,18 @@ public class FirebaseUploader implements Uploader {
         }
     }
 
-    private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
-        // Upload photo to storage
+    private void uploadPhoto(Game game, byte[] data, double aspectRatio, final UploadDialogInterface uploadCallback) {
+
+        StorageMetadata imageMetadata = new StorageMetadata.Builder()
+                .setCustomMetadata(ASPECT_RATIO_KEY, Double.toString(aspectRatio))
+                .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
-        UploadTask uploadTask = imageLoc.putBytes(photo);
+
+        UploadTask uploadTask = imageLoc.putBytes(data, imageMetadata);
         //Creating the progress dialog
-        uploadCallback.onStartUpload(photo.length);
+
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -217,6 +227,7 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                 uploadCallback.onUploadProgress(taskSnapshot.getBytesTransferred());
+                uploadCallback.onStartUpload(taskSnapshot.getTotalByteCount());
                 //Display progress as it updates
             }
         });
@@ -410,5 +421,4 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference friendRef = userFriendsRef.child(friendId);
         friendRef.setValue(1, listener);
     }
-
 }
