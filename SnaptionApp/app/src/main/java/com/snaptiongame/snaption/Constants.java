@@ -32,42 +32,43 @@ public class Constants {
     public static final String USER_METADATA_PATH = "users/public/metadata/%s";
     //Path to user's public data like friends, public game captions, and created public games
     public static final String USER_PUBLIC_DATA_PATH = "users/public/data/%s";
+    //Path to user's friend's list
+    public static final String USER_FRIENDS_PATH = USER_PUBLIC_DATA_PATH + "/friends";
+    //Path to user's public created games
+    public static final String USER_PUBLIC_CREATED_GAMES_PATH = USER_PUBLIC_DATA_PATH + "/createdGames";
+    //Path to user's public captions
+    public static final String USER_PUBLIC_CAPTIONS_PATH = USER_PUBLIC_DATA_PATH + "/captions";
     //Path to user's data that is private
     public static final String USER_PRIVATE_DATA_PATH = "users/private/%s";
-    //Path to user's friend's list
-    public static final String USER_FRIENDS_PATH = "users/public/data/%s/friends";
-    //Path to user's joined games
-    public static final String JOINED_GAMES_PATH = "users/private/%s/joinedGames";
+    //Path to user's joined games public and private
+    public static final String USER_PRIVATE_JOINED_GAMES_PATH = USER_PRIVATE_DATA_PATH + "/joinedGames";
+    //Path to user's joined games public and private
+    public static final String USER_PRIVATE_JOINED_GAME_PATH = USER_PRIVATE_DATA_PATH + "/joinedGames/%s";
     //Path to user's private created games
-    public static final String PRIVATE_CREATED_GAMES_PATH = "users/private/%s/createdGames";
-    //Path to user's public created games
-    public static final String PUBLIC_CREATED_GAMES_PATH = "users/public/data/%s/createdGames";
-    //Path to user's private created captions
-    public static final String PRIVATE_CREATED_CAPTIONS_PATH = "users/private/%s/captions";
-    //Path to user's public created captions
-    public static final String PUBLIC_CREATED_CAPTIONS_PATH = "users/public/data/%s/captions";
-    // Complete path to a specific private game a user has created
-    public static final String USER_PRIVATE_GAME_PATH = "users/private/%s/privateGames/%s";
-    // Path to the user's notification ID
-    public static final String _USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
-    // Path to the user's isAndroid boolean
-    public static final String _USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
-    // Path to the user's lowercase display name
+    public static final String USER_PRIVATE_CREATED_GAMES_PATH = USER_PRIVATE_DATA_PATH + "/createdGames";
+    //Path to user's private captions
+    public static final String USER_PRIVATE_CAPTIONS_PATH = USER_PRIVATE_DATA_PATH + "/captions";
+
+    //Key name of lowercase display name
     public static final String SEARCH_NAME = "searchName";
+    //Key name for facebookId
+    public static final String USER_FACEBOOK_ID = "facebookId";
+    // Key name for the user's email
+    public static final String EMAIL = "email";
+    // Path to the user's notification ID
+    public static final String USER_NOTIFICATION_PATH = USER_METADATA_PATH + "/notificationId";
+    // Path to the user's isAndroid boolean
+    public static final String USER_IS_ANDROID_PATH = USER_METADATA_PATH + "/isAndroid";
+    // Path to user's displayName
+    public static final String USER_DISPLAY_NAME_PATH = USER_METADATA_PATH + "/displayName";
+    // Path to user's searchName
+    public static final String USER_SEARCH_NAME_PATH = USER_METADATA_PATH + "/" + SEARCH_NAME;
 
 
-    // Path to root users map in Firebase
-    public static final String USERS_PATH = "users";
-    // Path to a specific user in Firebase
-    public static final String USER_PATH = "users/%s";
     // Path to map of all games
     public static final String GAMES_PATH = "games/";
     // Path to root of games in Firebase
     public static final String GAME_PATH = "games/%s";
-    // Path to user's friends list in Firebase
-    public static final String FRIENDS_PATH = "users/%s/friends";
-    // Path to a user's private games list in Firebase
-    public static final String USER_PRIVATE_GAMES = "users/%s/privateGames";
     // Path to root of cards in Firebase
     public static final String CARDS_DIRECTORY = "cards_%s/%s";
     // Path to the list of players in a game in Firebase
@@ -78,14 +79,10 @@ public class Constants {
     public static final String USER_CREATED_GAME_PATH =  "users/%s/createdGames/%s";
     // Name of the images folder in storage
     public static final String STORAGE_IMAGE_PATH = "images/%s";
-    // Path to a specific caption in a user
-    public static final String USER_CAPTION_PATH = "users/%s/captions/%s";
     // Path to a specific caption in a game
     public static final String GAME_CAPTION_PATH = "games/%s/captions/%s";
     // Path to the map of captions in a game
     public static final String GAME_CAPTIONS_PATH = "games/%s/captions/";
-    // Complete path to a specific user that voted
-    public static final String USER_CAPTIONS_UPVOTE_PATH = "users/%s/captions/%s/votes/%s";
     // Complete path to a specific user that voted in a game's caption
     public static final String GAME_CAPTIONS_UPVOTE_PATH = "games/%s/captions/%s/votes/%s";
     // Path to all the upvotes in a game's caption
@@ -94,20 +91,11 @@ public class Constants {
     public static final String GAME_UPVOTE_PATH = "games/%s/votes/%s";
     // Path to all upvotes that the game has
     public static final String GAME_UPVOTES_PATH = "games/%s/votes/";
-    // Complete path to a specific private game a user has created
-    public static final String USER_PRIVATE_GAMES_PATH = "users/%s/privateGames/%s";
-    // Path to the user's notification ID
-    public static final String USER_NOTIFICATION_PATH = "users/%s/notificationId";
-    // Path to the user's isAndroid boolean
-    public static final String USER_IS_ANDROID_PATH = "users/%s/isAndroid";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
-    // Path to the user's lowercase display name
-    public static final String USER_NAME = "lowercaseDisplayName";
     // Path to the game's creation date
     public static final String CREATION_DATE = "creationDate";
-    // Path to the user's email
-    public static final String EMAIL = "email";
+
     // END FIREBASE VARIABLES //
 
     // Notification ID used in intents that have notifications

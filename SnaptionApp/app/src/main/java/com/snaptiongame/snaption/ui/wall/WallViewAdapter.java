@@ -21,8 +21,10 @@ import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
@@ -75,14 +77,14 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         final Game game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, null, String.format(Constants.USER_PATH, game.getPicker()));
+        displayUser(holder.pickerName, null, game.getPicker());
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
 
         Map<String, Integer> upvoters = game.getVotes();
         if(upvoters != null) {
-            setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseResourceManager.getUserId()), false);
+            setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseUserResourceManager.getUserId()), false);
         } else {
             setUpvoteView(holder, game, 0, false, false);
         }
@@ -113,7 +115,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             @Override
             public boolean onLongClick(final View view) {
                 //if the user is logged in
-                if (FirebaseResourceManager.getUserId() != null) {
+                if (FirebaseUserResourceManager.getUserId() != null) {
                     // If they want to create a game from this one, start the create game intent
                     // with this game's image path
                     FirebaseResourceManager.getImageURI(imagePath, new ResourceListener<Uri>() {
@@ -180,7 +182,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             public void onClick(View v) {
                 // Check if user is logged in before letting them upvote. If not logged in, display
                 // login dialog.
-                if (FirebaseResourceManager.getUserId() == null) {
+                if (FirebaseUserResourceManager.getUserId() == null) {
                     ((MainSnaptionActivity) context).loginDialog.show();
                 }
                 else {
@@ -196,7 +198,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         if (game.getTopCaption() != null) {
             holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayUser(holder.captionerName, holder.captionerPhoto, String.format(Constants.USER_PATH, game.getTopCaption().getUserId()));
+            displayUser(holder.captionerName, holder.captionerPhoto, game.getTopCaption().getUserId());
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
@@ -243,9 +245,9 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * Displays the profile picture and username of a valid User. Shows the default if invalid
      * @param username the TextView from the holder, for either the Picker or Captioner's name
      * @param photo the ImageView from the holder, for either the Picker or Captioner's photo
-     * @param userPath The path to the desired User
+     * @param userId The id of the current user
      */
-    private void displayUser(final TextView username, final ImageView photo, String userPath) {
+    private void displayUser(final TextView username, final ImageView photo, String userId) {
         // remove this portion if firebase is guaranteed to not have invalid users
         username.setText(" ");
         if (photo != null) {
@@ -253,11 +255,11 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
 
         // ensure the user id is a valid one to avoid errors
-        if (validFirebasePath(userPath)) {
+        if (FirebaseUserResourceManager.isValidUser(userId)) {
             // display the name and profile picture if a valid user is obtained from the user id
-            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
                 @Override
-                public void onData(final User user) {
+                public void onData(final UserMetadata user) {
                     // replace default is the User is valid
                     if (user != null) {
                         // if there is no photo path, don't display it, use a - instead
@@ -281,7 +283,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return UserMetadata.class;
                 }
             });
         }
@@ -308,7 +310,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             if (newVotes == null) {
                 setUpvoteView(holder, newGame, 0, false, false);
             } else {
-                String userId = FirebaseResourceManager.getUserId();
+                String userId = FirebaseUserResourceManager.getUserId();
                 boolean hasUpvoted = newVotes.containsKey(userId);
                 boolean hasUpvotedPrior = oldVotes != null && oldVotes.containsKey(userId);
                 setUpvoteView(holder, newGame, newVotes.size(), hasUpvoted, hasUpvoted
@@ -344,13 +346,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             if (hasUpvoted) {
                 FirebaseUploader.removeUpvote(
                         String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseResourceManager.getUserId()), listener);
+                                FirebaseUserResourceManager.getUserId()), listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
                 FirebaseUploader.addUpvote(
                         String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseResourceManager.getUserId()), listener);
+                                FirebaseUserResourceManager.getUserId()), listener);
             }
         }
     }

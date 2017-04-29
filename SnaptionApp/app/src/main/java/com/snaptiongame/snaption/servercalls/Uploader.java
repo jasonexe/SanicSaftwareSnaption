@@ -7,6 +7,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 /**
  * This is a generic interface to provide structure for our backend solution
@@ -73,7 +74,7 @@ public interface Uploader {
      * @param user
      * @param photo
      */
-    public void addUser(User user, byte[] photo, ResourceListener<User> listener);
+    public void addUser(UserMetadata user, byte[] photo, ResourceListener<UserMetadata> listener);
 
     /**
      * Responsible for adding the friend to the user's friends list and adding the user to the
@@ -82,5 +83,5 @@ public interface Uploader {
      * @param user
      * @param friend
      */
-    public void addFriend(User user, Friend friend, UploadListener listener);
+    public void addFriend(UserMetadata user, Friend friend, UploadListener listener);
 }
