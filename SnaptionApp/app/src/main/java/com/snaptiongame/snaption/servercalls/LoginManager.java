@@ -37,6 +37,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 import org.apache.commons.io.IOUtils;
 
@@ -249,16 +250,16 @@ public class LoginManager {
                 downloadPhoto(String.format(FACEBOOK_IMAGE_URL, facebookId));
             }
             //create and upload User to Firebase
-            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            uploader.addUser(user, profilePhoto, new ResourceListener<User>() {
+            UserMetadata user = new UserMetadata(displayName, email, imagePath, notificationId, facebookId, id);
+            uploader.addUser(user, profilePhoto, new ResourceListener<UserMetadata>() {
                 @Override
-                public void onData(User data) {
+                public void onData(UserMetadata data) {
                     listener.onLoginComplete();
                 }
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return UserMetadata.class;
                 }
             });
         }

@@ -9,12 +9,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.snaptiongame.snaption.Constants;
-import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetaData;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +20,7 @@ import java.util.Map;
 import static com.snaptiongame.snaption.Constants.CREATION_DATE;
 import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
-import static com.snaptiongame.snaption.Constants.JOINED_GAMES_PATH;
+
 
 /**
  * FirebaseGameResourceManager is used to retrieve game data from Firebase
@@ -60,7 +58,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         this.privateLimit = privateLimit;
         this.listener = listener;
         this.gameType = gameType;
-        userId = FirebaseResourceManager.getUserId();
+        userId = FirebaseUserResourceManager.getUserId();
     }
 
     public void retrieveGames() {
@@ -186,7 +184,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     private void retrieveUserPrivateGames() {
-        String privatePath = String.format(JOINED_GAMES_PATH, userId);
+        String privatePath = String.format(Constants.USER_PRIVATE_JOINED_GAMES_PATH, userId);
         Query query = database.getReference(privatePath).orderByPriority();
 
         if (retrievedOnce) {

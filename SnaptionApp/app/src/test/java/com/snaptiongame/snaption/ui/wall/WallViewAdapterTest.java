@@ -9,6 +9,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
 import org.junit.Before;
@@ -42,7 +43,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, manifest = "src/main/AndroidManifest.xml", sdk = 21)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
-@SuppressStaticInitializationFor("com.snaptiongame.snaption.servercalls.FirebaseResourceManager")
+@SuppressStaticInitializationFor({"com.snaptiongame.snaption.servercalls.FirebaseResourceManager", "com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager"})
 @PrepareForTest(FirebaseResourceManager.class)
 public class WallViewAdapterTest {
     WallViewAdapter adapter;
@@ -63,6 +64,7 @@ public class WallViewAdapterTest {
     public void setup() {
         initMocks(this);
         mockStatic(FirebaseResourceManager.class);
+        mockStatic(FirebaseUserResourceManager.class);
         games = new ArrayList<>();
         games.add(game1);
         Map<String, Integer> upvotes = new HashMap<>();

@@ -5,8 +5,10 @@ import com.google.firebase.auth.FirebaseAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
@@ -50,7 +52,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = "src/main/AndroidManifest.xml", sdk = 21)
 @PowerMockIgnore({ "org.mockito.*", "org.robolectric.*", "android.*" })
-@SuppressStaticInitializationFor("com.snaptiongame.snaption.servercalls.FirebaseResourceManager")
+@SuppressStaticInitializationFor({"com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager","com.snaptiongame.snaption.servercalls.FirebaseResourceManager"})
 @PrepareForTest(FirebaseResourceManager.class)
 public class FriendsViewModelTest {
     private static final String FB_PROVIDER_LABEL = "Facebook friends on Snaption";
@@ -59,7 +61,7 @@ public class FriendsViewModelTest {
     private static final String ADD_FRIEND_FAIL = "Problem adding Brittany as your friend.";
     private static final String ADD_FRIEND_ALREADY_EXISTS = "Brittany is already your friend.";
     private static final String TEST_SNAPTION_ID = "snaption123456789";
-    private static final String FRIENDS_PATH = "users/snaption123456789/friends";
+    private static final String FRIENDS_PATH = "users/public/data/snaption123456789/friends";
     private static final String TEST_FB_ID = "123456789";
     private static final String TEST_FRIEND_NAME = "Brittany";
     private FriendsViewModel viewModel;
@@ -67,7 +69,7 @@ public class FriendsViewModelTest {
     @Rule
     public PowerMockRule rule = new PowerMockRule();
     @Mock
-    private User user;
+    private UserMetadata user;
     @Mock
     private Friend friend;
     @Mock
@@ -87,8 +89,8 @@ public class FriendsViewModelTest {
     public void testGetFbProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
-        PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(FB_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
@@ -98,8 +100,8 @@ public class FriendsViewModelTest {
     public void testGetGoogleProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(GoogleAuthProvider.PROVIDER_ID);
-        PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         assertEquals(GOOGLE_PROVIDER_LABEL,
                 viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
@@ -126,8 +128,9 @@ public class FriendsViewModelTest {
     public void testGetFbProviderFriends() {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
+        PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         PowerMockito.mockStatic(FirebaseResourceManager.class);
-        BDDMockito.given(FirebaseResourceManager.getProviders())
+        BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
         when(user.getFacebookId()).thenReturn(TEST_FB_ID);
         when(user.getId()).thenReturn(TEST_SNAPTION_ID);
@@ -141,7 +144,7 @@ public class FriendsViewModelTest {
                     FirebaseResourceManager.class, "retrieveStringMapNoUpdates",
                     pathCaptor.capture(), friendsListListenerCaptor.capture());
             doNothing().when(
-                    FirebaseResourceManager.class, "getFacebookFriends", userCaptor.capture(),
+                    FirebaseUserResourceManager.class, "getFacebookFriends", userCaptor.capture(),
                     friendsListCaptor.capture(), listenerCaptor.capture());
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -78,6 +78,11 @@
                 android:value="com.snaptiongame.snaption.MainSnaptionActivity"/>
         </activity>
 
+        <activity
+            android:name="com.snaptiongame.snaption.ui.games.PhotoZoomActivity"
+            android:theme="@style/AppTheme.NoActionBar.Transparent"
+            android:screenOrientation="portrait" />
+
         <activity android:name="com.snaptiongame.snaption.ui.friends.SearchActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_search" >

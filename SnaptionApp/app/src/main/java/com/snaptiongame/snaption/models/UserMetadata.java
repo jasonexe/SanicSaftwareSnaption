@@ -6,7 +6,7 @@ package com.snaptiongame.snaption.models;
  * Created by austinrobarts on 4/22/17.
  */
 
-public class UserMetadata {
+public class UserMetadata implements Person, Comparable<UserMetadata> {
 
     private String displayName;
     private String email;
@@ -26,6 +26,18 @@ public class UserMetadata {
         this.facebookId = facebookId;
         this.id = id;
         isAndroid = true;
+    }
+
+    public UserMetadata(UserMetadata other) {
+        if (other != null) {
+            this.displayName = other.displayName;
+            this.email = other.email;
+            this.imagePath = other.imagePath;
+            this.notificationId = other.notificationId;
+            this.facebookId = other.facebookId;
+            this.id = other.id;
+            isAndroid = true;
+        }
     }
 
     public String getDisplayName() {
@@ -90,5 +102,14 @@ public class UserMetadata {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public int compareTo(UserMetadata other) {
+        int result = getSearchName().compareTo(other.getSearchName());
+        if (result == 0) {
+            result = getEmail().compareTo(other.getEmail());
+        }
+        return result;
     }
 }

@@ -10,9 +10,10 @@ import android.widget.Toast;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
@@ -39,9 +40,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private List<Caption> items;
     private LoginDialog loginDialog;
     private ProfileActivityCreator profileMaker;
-    private User unknownUser = new User(UNKNOWN_USER_ID, null, null, null, null, null);
+    private UserMetadata unknownUser = new UserMetadata(UNKNOWN_USER_ID, null, null, null, null, null);
     private boolean isPublic;
-    private Map<String, User> userMap = new HashMap<>(); // Map from userIds to User
+    private Map<String, UserMetadata> userMap = new HashMap<>(); // Map from userIds to User
 
     // BEGIN PRIVATE CLASSES //
 
@@ -67,7 +68,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         public void onClick(View upvote) {
             // Check if user is logged in before letting them upvote. If not logged in, display
             // login dialog.
-            if (FirebaseResourceManager.getUserId() == null) {
+            if (FirebaseUserResourceManager.getUserId() == null) {
                 loginDialog.show();
             }
             else {
@@ -113,10 +114,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         if (userMap.containsKey(userId)) {
             setCaptionerView(userMap.get(userId), holder);
         } else {
-            String userPath = FirebaseResourceManager.getUserPath(finalCaption.getUserId());
-            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+            String userPath = FirebaseUserResourceManager.getUserPath(finalCaption.getUserId());
+            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
                 @Override
-                public void onData(User user) {
+                public void onData(UserMetadata user) {
                     // if the user could not be found, set user to unknown user
                     if (user == null) {
                         user = unknownUser;
@@ -127,7 +128,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return UserMetadata.class;
                 }
             });
         }
@@ -227,9 +228,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         if (caption != null) {
             String upvotePath = isPublic ?
                     String.format(GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
-                            caption.getId(), FirebaseResourceManager.getUserId()) :
+                            caption.getId(), FirebaseUserResourceManager.getUserId()) :
                     String.format(GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
-                            caption.getId(), FirebaseResourceManager.getUserId());
+                            caption.getId(), FirebaseUserResourceManager.getUserId());
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
                 FirebaseUploader.removeUpvote(upvotePath, listener);
@@ -260,7 +261,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         if (caption.upvotes != null) {
             Map upvotes = caption.upvotes;
             setUpvoteView(holder, caption, upvotes.size(),
-                    upvotes.containsKey(FirebaseResourceManager.getUserId()));
+                    upvotes.containsKey(FirebaseUserResourceManager.getUserId()));
         }
         else {
             setUpvoteView(holder, caption, 0, false);
@@ -290,7 +291,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param captioner The user who made the caption
      * @param holder The view holder containing the caption information
      */
-    private void setCaptionerView(final User captioner, CaptionViewHolder holder) {
+    private void setCaptionerView(final UserMetadata captioner, CaptionViewHolder holder) {
         if (captioner != null) {
             // Set the default captioner info if unknown user
             if (captioner.equals(unknownUser)) {

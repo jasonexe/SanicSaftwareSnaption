@@ -32,9 +32,10 @@ import com.snaptiongame.snaption.models.GameData;
 import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
-import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
@@ -232,9 +233,10 @@ public class CreateGameActivity extends AppCompatActivity {
                 GameData gameData = new GameData(friends, null);
                 String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
                 GameMetaData metaData = new GameMetaData(gameId,
-                        FirebaseResourceManager.getUserId(), imagePath, tags, isPublic,
+                        FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
                         endDate, aspectRatio);
                 Game game = new Game(gameData, metaData);
+
                 uploader.addGame(game, data, aspectRatio, dialog);
             } catch (Exception e) {
                 Toast.makeText(CreateGameActivity.this, "Error, file not found",
@@ -246,9 +248,10 @@ public class CreateGameActivity extends AppCompatActivity {
             GameData gameData = new GameData(friends, null);
             String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
             GameMetaData metaData = new GameMetaData(gameId,
-                    FirebaseResourceManager.getUserId(), imagePath, tags, isPublic,
+                    FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
                     endDate, 1);
             Game game = new Game(gameData, metaData);
+
             uploader.addGame(game);
             backToMain();
         }
@@ -302,16 +305,16 @@ public class CreateGameActivity extends AppCompatActivity {
     }
 
     private void loadFriends() {
-        String userPath = FirebaseResourceManager.getUserPath();
-        if (userPath != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+        String userId = FirebaseUserResourceManager.getUserId();
+        if (userId != null) {
+            FirebaseUserResourceManager.getUserFriends(userId, new ResourceListener<Map<String, Integer>>() {
                 @Override
-                public void onData(User user) {
-                    if (user != null && user.getFriends() != null) {
+                public void onData(Map<String, Integer> friends) {
+                    if (friends != null) {
                         // load each friend
-                        FirebaseResourceManager.loadUsers(user.getFriends(), new ResourceListener<User>() {
+                        FirebaseUserResourceManager.getUsersMetadataByIds(friends, new ResourceListener<UserMetadata>() {
                             @Override
-                            public void onData(User user) {
+                            public void onData(UserMetadata user) {
                                 if (user != null) {
                                     if (friendsListAdapter.getItemCount() == 0) {
                                         showFriends();
@@ -322,7 +325,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
                             @Override
                             public Class getDataType() {
-                                return User.class;
+                                return UserMetadata.class;
                             }
                         });
                     }

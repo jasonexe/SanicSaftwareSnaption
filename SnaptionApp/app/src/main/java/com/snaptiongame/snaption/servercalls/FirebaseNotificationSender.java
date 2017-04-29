@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.firebase.crash.FirebaseCrash;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,8 +49,8 @@ public class FirebaseNotificationSender {
      * @param from the user sending the invite
      * @param gameId the id of the game they are invited to
      */
-    public static void sendGameCreationNotification(final User to, String from, final String gameId,
-                                                    final String access) {
+    public static void sendGameCreationNotification(final UserMetadata to, String from, final String gameId,
+        final String access) {
         if (to.getIsAndroid()) {
             JSONObject json = buildJsonAndroid(gameId, to, access);
             //send them a data payload
@@ -57,10 +58,9 @@ public class FirebaseNotificationSender {
         }
         else { //if iOS user
             //get user so we can display name in notification
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(USER_PATH, from),
-                    new ResourceListener<User>() {
+            FirebaseUserResourceManager.getUserMetadataById(from, new ResourceListener<UserMetadata>() {
                         @Override
-                        public void onData(User inviter) {
+                        public void onData(UserMetadata inviter) {
                             JSONObject json = buildJsonIOS(gameId, to, inviter, access);
                             //send them a notification payload
                             sendNotification(json);
@@ -68,21 +68,20 @@ public class FirebaseNotificationSender {
 
                         @Override
                         public Class getDataType() {
-                            return User.class;
+                            return UserMetadata.class;
                         }
                     });
         }
     }
 
-    private static JSONObject buildJsonAndroid(String gameId, User to, String access) {
+    private static JSONObject buildJsonAndroid(String gameId, UserMetadata to, String access) {
         JSONObject json = new JSONObject();
         try {
             json.put(JSON_TO, to.getNotificationId());
             JSONObject data = new JSONObject();
             data.put(NotificationReceiver.GAME_ID_KEY, gameId);
-            data.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
             data.put(NotificationReceiver.GAME_ACCESS_KEY, access);
-
+            data.put(NotificationReceiver.USER_ID_KEY, FirebaseUserResourceManager.getUserId());
             json.put(JSON_DATA, data);
             return json;
         } catch (JSONException err) {
@@ -92,14 +91,14 @@ public class FirebaseNotificationSender {
         return json;
     }
 
-    private static JSONObject buildJsonIOS(String gameId, User to, User from, String access) {
+    private static JSONObject buildJsonIOS(String gameId, UserMetadata to, UserMetadata from, String access) {
         //build notification key-value
         JSONObject notification = new JSONObject();
         JSONObject json = new JSONObject();
         try {
             //add gameId and userId to notification
             json.put(JSON_TO, to.getNotificationId());
-            notification.put(NotificationReceiver.USER_ID_KEY, FirebaseResourceManager.getUserId());
+            notification.put(NotificationReceiver.USER_ID_KEY, FirebaseUserResourceManager.getUserId());
             notification.put(NotificationReceiver.GAME_ID_KEY, gameId);
             notification.put(NotificationReceiver.GAME_ACCESS_KEY, access);
             //add title and body to notification

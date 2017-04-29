@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,10 +42,12 @@ import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameData;
 import com.snaptiongame.snaption.models.GameMetaData;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
@@ -397,7 +400,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void determineButtonDisplay(String pickerId, Set<String> players) {
-        String thisUser = FirebaseResourceManager.getUserId();
+        String thisUser = FirebaseUserResourceManager.getUserId();
         // If they're not logged in, just show join game
         if (thisUser == null) {
             setJoinGameIsVisible(true);
@@ -465,10 +468,9 @@ public class GameActivity extends HomeAppCompatActivity {
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
     private void setupPickerName(final Game game) {
-        String userPath = FirebaseResourceManager.getUserPath(game.getPickerId());
-        FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUserMetadataById(game.getPickerId(), new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User user) {
+            public void onData(UserMetadata user) {
                 if (user != null) {
                     pickerName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
@@ -483,7 +485,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }
@@ -518,10 +520,20 @@ public class GameActivity extends HomeAppCompatActivity {
         joinedGameManager.removeListener();
     }
 
+    @OnClick (R.id.image_view)
+    public void onClickGameImage() {
+        Intent photoZoomIntent = new Intent(this, PhotoZoomActivity.class);
+        photoZoomIntent.putExtra(PhotoZoomActivity.PHOTO_PATH, game.getImagePath());
+        photoZoomIntent.putExtra(PhotoZoomActivity.TRANSITION_NAME, game.getId());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                imageView, game.getId());
+        startActivity(photoZoomIntent, options.toBundle());
+    }
+
     @OnClick(R.id.fab)
     public void displayCardOptions() {
         //if the user is logged in they can caption
-        if (FirebaseResourceManager.getUserId() != null) {
+        if (FirebaseUserResourceManager.getUserId() != null) {
             toggleVisibility(captionCardsList);
             //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
             if (cardInputView.getVisibility() == View.VISIBLE) {
@@ -538,7 +550,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.join_game_button)
     public void joinGame() {
-        if (FirebaseResourceManager.getUserId() == null) {
+        if (FirebaseUserResourceManager.getUserId() == null) {
             loginDialog.show();
             return;
         }
@@ -653,7 +665,7 @@ public class GameActivity extends HomeAppCompatActivity {
             Uploader uploader = new FirebaseUploader();
             // Game will be a class variable probs
             Game game = this.game;
-            addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
+            addCaption(userInput, FirebaseUserResourceManager.getUserId(), uploader, curUserCard, game);
             toggleVisibility(cardInputView);
             toggleVisibility(captionCardsList);
             hideKeyboard();
