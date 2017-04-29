@@ -53,6 +53,7 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ColorUtilities;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -248,8 +249,8 @@ public class GameActivity extends HomeAppCompatActivity {
         // TODO get actual image aspect ratio
         double imageAspectRatio = 1.6;
         Resources res = getResources();
-        final int imageHeight = calculateImageHeight(res.getDisplayMetrics().widthPixels,
-                imageAspectRatio, res.getDisplayMetrics().heightPixels * MAX_IMAGE_HEIGHT_PERCENT);
+        final int imageHeight = ViewUtilities.calculateViewHeight(imageAspectRatio,
+                res.getDisplayMetrics().widthPixels, res.getDisplayMetrics().heightPixels * MAX_IMAGE_HEIGHT_PERCENT);
         progressBar.getLayoutParams().height = imageHeight;
         minimizeImageBehavior.updateViewMaxHeight(imageHeight);
         imageView.getLayoutParams().height = imageHeight;
@@ -286,15 +287,6 @@ public class GameActivity extends HomeAppCompatActivity {
         setupPickerName(game);
         setupCaptionCardView();
         startCommentManager(game);
-    }
-
-    public static int calculateImageHeight(int phoneWidthPx, double imageAspectRatio,
-                                           double maxHeightPx) {
-        int imageHeight = (int) (phoneWidthPx / imageAspectRatio);
-        if (imageHeight > maxHeightPx) {
-            imageHeight = (int) maxHeightPx;
-        }
-        return imageHeight;
     }
 
     private void animateBitmapColorSwatch(final Bitmap bitmap) {
