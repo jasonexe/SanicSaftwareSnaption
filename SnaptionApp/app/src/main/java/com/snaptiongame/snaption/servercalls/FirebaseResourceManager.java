@@ -95,53 +95,6 @@ public class FirebaseResourceManager {
     }
 
     /**
-     * Gets the direct path to the user table in the database
-     * @return a string path from the root node to current user
-     */
-    /*public static String getUserPath() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userPath = null;
-        if (user != null)
-            userPath = String.format(Constants.USER_PATH, user.getUid());
-        return userPath;
-    }*/
-
-    /**
-     * Gets the direct path to the user table in the database
-     * @param id The ID of the user whose path to find
-     * @return a string path from the root node to current user
-     */
-    /*public static String getUserPath(String id) {
-        return String.format(Constants.USER_PATH, id);
-    }*/
-
-    /**
-     * Get the user id of the current user
-     * @return a string key to the user table
-     */
-    /*public static String getUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String id = null;
-        if (user != null) {
-            id = user.getUid();
-        }
-        return id;
-    }*/
-
-    /**
-     * Gets the list of providers that the current user's account is associated with.
-     * @return the list of providers the user's account is associated with
-     */
-    /*public static List<String> getProviders() {
-        List<String> providers = new ArrayList<String>();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            providers = currentUser.getProviders();
-        }
-        return providers;
-    }*/
-
-    /**
      * Set up a listener to receive an object at a specified path without a connection
      * for future data changes
      * @param path the path to the object requested from Firebase
