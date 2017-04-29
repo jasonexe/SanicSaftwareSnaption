@@ -31,6 +31,8 @@ import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYER_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYER_PATH;
+import static com.snaptiongame.snaption.Constants.PRIVATE;
+import static com.snaptiongame.snaption.Constants.PUBLIC;
 import static com.snaptiongame.snaption.Constants.USER_DISPLAY_NAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_FRIENDS_PATH;
 import static com.snaptiongame.snaption.Constants.USER_IS_ANDROID_PATH;
@@ -101,7 +103,7 @@ public class FirebaseUploader implements Uploader {
     private void addCompletedGameObj(Game game) {
         // Add game object to games table
         String gameId = game.getId();
-        String access = game.getIsPublic() ? "public" : "private";
+        String access = game.getIsPublic() ? PUBLIC : PRIVATE;
         GameMetadata gameMetadata = game.getMetaData();
         GameData gameData = game.getData();
 
@@ -113,10 +115,6 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference dataRef = database.getReference(
                 String.format(GAME_DATA_PATH, access, gameId));
         dataRef.setValue(gameData);
-        // Add gameId to user's createdGames map
-        addGameToUserCreatedGames(game);
-        // Add gameId to all players' privateGames map
-        addGameToPlayerJoinedGames(game);
         //notify players if there are any
         if (game.getPlayers() != null) {
             notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet(), access);
@@ -152,7 +150,7 @@ public class FirebaseUploader implements Uploader {
 
     @Override
     public String getNewGameKey(boolean isPublic) {
-        String access = isPublic ? "public" : "private";
+        String access = isPublic ? PUBLIC : PRIVATE;
         String gamesFolderPath = String.format(GAMES_METADATA_PATH, access);
         DatabaseReference gamesFolderRef = database.getReference(gamesFolderPath);
         return gamesFolderRef.push().getKey();
@@ -160,34 +158,10 @@ public class FirebaseUploader implements Uploader {
 
     @Override
     public String getNewCaptionKey(Game game) {
-        String access = game.getIsPublic() ? "public" : "private";
+        String access = game.getIsPublic() ? PUBLIC : PRIVATE;
         String captionsFolderPath = String.format(GAME_DATA_CAPTIONS_PATH, access, game.getId());
         DatabaseReference captionFolderRef = database.getReference(captionsFolderPath);
         return captionFolderRef.push().getKey();
-    }
-
-    private void addGameToUserCreatedGames(Game game) {
-        final String gameId = game.getId();
-        String userId = game.getPickerId();
-        String gamePath = game.getIsPublic() ? USER_PUBLIC_CREATED_GAMES_PATH : USER_PRIVATE_CREATED_GAMES_PATH;
-        DatabaseReference userRef = database.getReference(String.format(gamePath, userId, gameId));
-        //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
-        userRef.setValue(1);
-    }
-
-    private void addGameToPlayerJoinedGames(Game game) {
-        String gameId = game.getId();
-        Set<String> ids = game.getPlayers().keySet();
-        String access = game.getIsPublic() ? "public" : "private";
-
-        // add the game to the picker's private games map
-        database.getReference(String.format(USER_PRIVATE_JOINED_GAME_PATH, game.getPickerId(), gameId))
-                .setValue(access);
-        // add the game to each of the player's private games map
-        for (String id : ids) {
-            database.getReference(String.format(USER_PRIVATE_JOINED_GAME_PATH, id, gameId))
-                    .setValue(access);
-        }
     }
 
     private void uploadPhoto(Game game, byte[] data, double aspectRatio, final UploadDialogInterface uploadCallback) {
@@ -236,7 +210,7 @@ public class FirebaseUploader implements Uploader {
         String gameId = caption.getGameId();
         String userId = caption.getUserId();
         String captId = caption.getId();
-        String access = isPublic ? "public" : "private";
+        String access = isPublic ? PUBLIC : PRIVATE;
 
         String gameCaptionPath = String.format(GAME_DATA_CAPTION_PATH, access, gameId, captId);
         uploadObject(gameCaptionPath, caption);

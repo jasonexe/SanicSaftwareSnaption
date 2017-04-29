@@ -1,11 +1,15 @@
 package com.snaptiongame.snaption.models;
 
+import com.snaptiongame.snaption.Constants;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.PRIVATE;
+import static com.snaptiongame.snaption.Constants.PUBLIC;
 import static junit.framework.Assert.assertEquals;
 
 /**
@@ -26,8 +30,8 @@ public class UserPrivateDataTest {
         captions.put("c1", new Caption());
         createdGames.put("g1", 1);
         createdGames.put("g2", 1);
-        joinedGames.put("f1", "private");
-        joinedGames.put("f2", "public");
+        joinedGames.put("f1", PRIVATE);
+        joinedGames.put("f2", PUBLIC);
 
         emptyData = new UserPrivateData();
         nullData = new UserPrivateData(null, null, null);
@@ -60,7 +64,7 @@ public class UserPrivateDataTest {
         captions.put("c1", new Caption());
         captions.put("c2", new Caption());
         createdGames.put("g1", 1);
-        joinedGames.put("f1", "private");
+        joinedGames.put("f1", PRIVATE);
 
         filledData.setCaptions(captions);
         assertEquals(2, filledData.getCaptions().size());

@@ -56,7 +56,7 @@ public class DeepLinkTests {
     @Test
     public void InterpretDeepLinkWithGame() {
         String expectedId = "gameId";
-        String expectedAccess = "public";
+        String expectedAccess = Constants.PUBLIC;
         FirebaseDeepLinkCreator.DeepLinkInfo info =
                 FirebaseDeepLinkCreator.interpretDeepLinkString("https://snaptiongame.com/" +
                         expectedAccess + "/games/" + expectedId);

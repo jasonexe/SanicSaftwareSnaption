@@ -63,6 +63,8 @@ public class Constants {
     public static final String USER_DISPLAY_NAME_PATH = USER_METADATA_PATH + "/displayName";
     // Path to user's searchName
     public static final String USER_SEARCH_NAME_PATH = USER_METADATA_PATH + "/" + SEARCH_NAME;
+    public static final String PUBLIC = "public";
+    public static final String PRIVATE = "private";
 
 
     // Path to root of cards in Firebase
