@@ -172,8 +172,7 @@
         android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
-
-        <android.support.v7.widget.Toolbar
+        <com.snaptiongame.snaption.ui.games.NonClickableToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
