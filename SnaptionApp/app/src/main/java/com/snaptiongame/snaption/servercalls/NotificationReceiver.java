@@ -13,7 +13,7 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameData;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
@@ -71,9 +71,9 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
     private void createNotification(final String gameId, final String senderUserId, final String access) {
         //gets given game and given user to populate notification
-        ResourceListener<GameMetaData> gameListener = new ResourceListener<GameMetaData>() {
+        ResourceListener<GameMetadata> gameListener = new ResourceListener<GameMetadata>() {
             @Override
-            public void onData(final GameMetaData metaData) {
+            public void onData(final GameMetadata metaData) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_DATA_PATH, access, gameId), new ResourceListener<GameData>() {
                     @Override
                     public void onData(final GameData gameData) {
@@ -105,7 +105,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
             @Override
             public Class getDataType() {
-                return GameMetaData.class;
+                return GameMetadata.class;
             }
         };
         //checking to make sure this data was in notification

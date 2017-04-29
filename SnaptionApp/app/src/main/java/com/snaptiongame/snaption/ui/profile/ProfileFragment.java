@@ -183,32 +183,6 @@ public class ProfileFragment extends Fragment {
         captionsListView.setAdapter(captionsAdapter);
     }
 
-    private interface CaptionFilterListener {
-        void captionFiltered(Caption caption);
-    }
-
-    private void filterCaptions(List<Caption> captions, final CaptionFilterListener filterListener) {
-        // filter out captions of private games if needed
-        //TODO figure out how to get correct path for captions
-        for (final Caption caption : captions) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PATH,
-                    caption.gameId), new ResourceListener<Game>() {
-                @Override
-                public void onData(Game data) {
-                    // filter out captions of private games if needed
-                    if (canDisplayGame(data, isUser)) {
-                        filterListener.captionFiltered(caption);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Game.class;
-                }
-            });
-        }
-    }
-
     private boolean canDisplayGame(Game game, boolean isUser) {
         return game != null && (isUser ||
                 game.getIsPublic() ||

@@ -13,7 +13,7 @@ import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
  * @author Cameron Geehr
  */
 
-public class GameMetaData implements Serializable {
+public class GameMetadata implements Serializable {
 
     private String gameId; //The ID of the game
     private String pickerId; //The ID of the picker
@@ -29,7 +29,7 @@ public class GameMetaData implements Serializable {
     /**
      * Default constructor for Firebase.
      */
-    public GameMetaData() {}
+    public GameMetadata() {}
 
     /**
      * Constructor with creationDate to test with dependency injection.
@@ -41,8 +41,9 @@ public class GameMetaData implements Serializable {
      * @param isPublic Whether the game is viewable to to the public
      * @param endDate When the game ends
      * @param creationDate When the game was created
+     * @param imageAspectRatio The aspect ratio for the image
      */
-    public GameMetaData(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
+    public GameMetadata(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
                         boolean isPublic, long endDate, long creationDate, double imageAspectRatio) {
         this.gameId = gameId;
         this.pickerId = pickerId;
@@ -63,8 +64,9 @@ public class GameMetaData implements Serializable {
      * @param tags The map of tags of the image
      * @param isPublic Whether the game is viewable to to the public
      * @param endDate When the game ends
+     * @param imageAspectRatio The aspect ratio for the image
      */
-    public GameMetaData(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
+    public GameMetadata(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
                         boolean isPublic, long endDate, double imageAspectRatio) {
         //Calls the other constructor with creationDate calculated
         this(gameId, pickerId, imagePath, tags, isPublic, endDate,

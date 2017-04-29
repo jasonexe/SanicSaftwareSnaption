@@ -9,7 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.snaptiongame.snaption.Constants;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +30,8 @@ import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 
 public class FirebaseGameResourceManager implements GameResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private ResourceListener<List<GameMetaData>> listener;
-    private List<GameMetaData> privateGames;
+    private ResourceListener<List<GameMetadata>> listener;
+    private List<GameMetadata> privateGames;
     private int publicLimit;
     private int privateLimit;
 
@@ -53,7 +53,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
      * @param listener A ResourceListener for retrieving a List of games
      * @param gameType Enum describing if you want mixed games, only private, or only public
      */
-    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<GameMetaData>> listener, GameType gameType) {
+    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<GameMetadata>> listener, GameType gameType) {
         this.publicLimit = publicLimit;
         this.privateLimit = privateLimit;
         this.listener = listener;
@@ -85,14 +85,14 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean continued = false;
-                List<GameMetaData> data = new ArrayList<>();
+                List<GameMetadata> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     // Since we're using the first game's creation date and key, this boolean is
                     // to track if they have been set yet.
                     boolean gotFirst = false; 
                     for (DataSnapshot snapshot : snapshots) {
-                        GameMetaData curGame = (GameMetaData) snapshot.getValue(listener.getDataType());
+                        GameMetadata curGame = (GameMetadata) snapshot.getValue(listener.getDataType());
                         if(!gotFirst) {
                             lastRetrievedCreationDate = curGame.getCreationDate();
                             lastRetrievedKey = snapshot.getKey();
@@ -155,13 +155,13 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<GameMetaData> data = new ArrayList<>();
+                List<GameMetadata> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
                         lastRetrievedPriority = snapshot.getPriority();
                         lastRetrievedKey = snapshot.getKey();
-                        data.add((GameMetaData) snapshot.getValue(listener.getDataType()));
+                        data.add((GameMetadata) snapshot.getValue(listener.getDataType()));
                     }
                     if (retrievedOnce) {
                         if (data.size() > 0) {
@@ -262,7 +262,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    privateGames.add(dataSnapshot.getValue(GameMetaData.class));
+                    privateGames.add(dataSnapshot.getValue(GameMetadata.class));
                     keys.remove(0);
                     convertIdsToGamesHelper(keys, gameIds);
                 }

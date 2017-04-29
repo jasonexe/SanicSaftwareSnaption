@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseGameResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.GameResourceManager;
@@ -68,14 +68,14 @@ public class WallFragment extends Fragment {
 
     private GameType gameType;
 
-    private ResourceListener<List<GameMetaData>> listener = new ResourceListener<List<GameMetaData>>() {
+    private ResourceListener<List<GameMetadata>> listener = new ResourceListener<List<GameMetadata>>() {
         @Override
-        public void onData(List<GameMetaData> games) {
+        public void onData(List<GameMetadata> games) {
             if (isVisible() || !isRemoving()) {
                 if (games == null) {
                     Snackbar.make(wallListView, wallListView.getResources().getString(R.string.private_game_error), Snackbar.LENGTH_LONG).show();
                 } else {
-                    for (GameMetaData curGame : games) {
+                    for (GameMetadata curGame : games) {
                         ResourceListener<Map<String, Integer>> gameListener =
                                 getGameListener(gameVoteListeners.size());
                         FirebaseResourceManager manager = new FirebaseResourceManager();
@@ -98,7 +98,7 @@ public class WallFragment extends Fragment {
 
         @Override
         public Class getDataType() {
-            return GameMetaData.class;
+            return GameMetadata.class;
         }
     };
     private GameResourceManager resourceManager;
@@ -177,11 +177,11 @@ public class WallFragment extends Fragment {
                 StaggeredGridLayoutManager.VERTICAL);
         wallListView.setLayoutManager(manager);
         wallListView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
-        wallAdapter = new WallViewAdapter(new ArrayList<GameMetaData>(),
+        wallAdapter = new WallViewAdapter(new ArrayList<GameMetadata>(),
                 ProfileActivity.getProfileActivityCreator(getContext()));
         wallAdapter.setOnClickGamePhotoListener(new WallViewAdapter.OnClickGamePhotoListener() {
             @Override
-            public void onClickGamePhoto(View view, GameMetaData game) {
+            public void onClickGamePhoto(View view, GameMetadata game) {
                 // start game activity with shared image transition
                 Intent createGameIntent = new Intent(getActivity(), GameActivity.class);
                 createGameIntent.putExtra(Constants.GAME, game);

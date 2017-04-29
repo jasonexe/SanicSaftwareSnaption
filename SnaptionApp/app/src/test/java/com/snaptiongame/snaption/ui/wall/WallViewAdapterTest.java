@@ -6,8 +6,7 @@ import android.widget.LinearLayout;
 
 import com.snaptiongame.snaption.BuildConfig;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Game;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
@@ -47,14 +46,14 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(FirebaseResourceManager.class)
 public class WallViewAdapterTest {
     WallViewAdapter adapter;
-    List<GameMetaData> games;
+    List<GameMetadata> games;
 
     @Rule
     public PowerMockRule rule = new PowerMockRule();
     @Mock
     ProfileActivity.ProfileActivityCreator mockCreator;
     @Mock
-    GameMetaData game1;
+    GameMetadata game1;
     @Mock
     Caption caption1;
     @Mock
@@ -96,7 +95,7 @@ public class WallViewAdapterTest {
     public void addItemsTest() {
         createAdapter();
         assertEquals(1, adapter.getItemCount());
-        List<GameMetaData> games = new ArrayList<>();
+        List<GameMetadata> games = new ArrayList<>();
         games.add(game1);
         games.add(game1);
         adapter.addItems(games);

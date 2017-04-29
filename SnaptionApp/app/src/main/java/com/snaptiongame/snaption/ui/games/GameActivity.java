@@ -40,8 +40,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameData;
-import com.snaptiongame.snaption.models.GameMetaData;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
@@ -244,9 +243,9 @@ public class GameActivity extends HomeAppCompatActivity {
     private void retrieveGameMetaData(final String access, final String gameId) {
         FirebaseResourceManager.retrieveSingleNoUpdates(
             String.format(GAME_METADATA_PATH, access, gameId),
-            new ResourceListener<GameMetaData>() {
+            new ResourceListener<GameMetadata>() {
                 @Override
-                public void onData(GameMetaData metaData) {
+                public void onData(GameMetadata metaData) {
                     if (metaData != null) {
                         retrieveGameData(access, gameId, metaData);
                     }
@@ -257,14 +256,14 @@ public class GameActivity extends HomeAppCompatActivity {
 
                 @Override
                 public Class getDataType() {
-                    return GameMetaData.class;
+                    return GameMetadata.class;
                 }
             }
         );
     }
 
     private void retrieveGameData(final String access, final String gameId,
-                                  final GameMetaData metaData) {
+                                  final GameMetadata metaData) {
         FirebaseResourceManager.retrieveSingleNoUpdates(
             String.format(GAME_METADATA_PATH, access, gameId), new ResourceListener<GameData>() {
                 @Override

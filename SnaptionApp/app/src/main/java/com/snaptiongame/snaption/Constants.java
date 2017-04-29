@@ -65,32 +65,10 @@ public class Constants {
     public static final String USER_SEARCH_NAME_PATH = USER_METADATA_PATH + "/" + SEARCH_NAME;
 
 
-    // Path to map of all games
-    public static final String GAMES_PATH = "games/";
-    // Path to root of games in Firebase
-    public static final String GAME_PATH = "games/%s";
     // Path to root of cards in Firebase
     public static final String CARDS_DIRECTORY = "cards_%s/%s";
-    // Path to the list of players in a game in Firebase
-    public static final String GAME_PLAYERS_PATH = "games/%s/players";
-    // Path to a player in a game
-    public static final String GAME_PLAYER_PATH = "games/%s/players/%s";
-    // Name of the table in a user that contains their created games
-    public static final String USER_CREATED_GAME_PATH =  "users/%s/createdGames/%s";
     // Name of the images folder in storage
     public static final String STORAGE_IMAGE_PATH = "images/%s";
-    // Path to a specific caption in a game
-    public static final String GAME_CAPTION_PATH = "games/%s/captions/%s";
-    // Path to the map of captions in a game
-    public static final String GAME_CAPTIONS_PATH = "games/%s/captions/";
-    // Complete path to a specific user that voted in a game's caption
-    public static final String GAME_CAPTIONS_UPVOTE_PATH = "games/%s/captions/%s/votes/%s";
-    // Path to all the upvotes in a game's caption
-    public static final String GAME_CAPTIONS_UPVOTES_PATH = "games/%s/captions/%s/votes/";
-    // Complete path to a specific user that voted a game
-    public static final String GAME_UPVOTE_PATH = "games/%s/votes/%s";
-    // Path to all upvotes that the game has
-    public static final String GAME_UPVOTES_PATH = "games/%s/votes/";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the game's creation date
@@ -174,7 +152,7 @@ public class Constants {
     //Path to the base tags directory
     public static final String TAGS_PATH = "tags";
     //Path to a specific tag name's map of gameIds
-    public static final String TAG_PATH = "tags/%s";
+    public static final String TAG_GAMES_PATH = "tags/%s";
     //Path to a tag name's specific gameId
     public static final String TAG_GAME_PATH = "tags/%s/%s";
 

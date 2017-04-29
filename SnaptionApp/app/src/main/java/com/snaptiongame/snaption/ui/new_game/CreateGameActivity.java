@@ -29,7 +29,7 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameData;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
@@ -232,7 +232,7 @@ public class CreateGameActivity extends AppCompatActivity {
                 double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
                 GameData gameData = new GameData(friends, null);
                 String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
-                GameMetaData metaData = new GameMetaData(gameId,
+                GameMetadata metaData = new GameMetadata(gameId,
                         FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
                         endDate, aspectRatio);
                 Game game = new Game(gameData, metaData);
@@ -247,7 +247,7 @@ public class CreateGameActivity extends AppCompatActivity {
             // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
             GameData gameData = new GameData(friends, null);
             String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
-            GameMetaData metaData = new GameMetaData(gameId,
+            GameMetadata metaData = new GameMetadata(gameId,
                     FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
                     endDate, 1);
             Game game = new Game(gameData, metaData);

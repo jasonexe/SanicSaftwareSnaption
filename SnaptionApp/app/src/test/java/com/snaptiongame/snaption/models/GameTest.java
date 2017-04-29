@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GameTest {
-    private GameMetaData gameMetaData1, gameMetaData2, gameMetaData3;
+    private GameMetadata gameMetadata1, gameMetadata2, gameMetadata3;
     private GameData data1, data2, data3;
     private Game game1, game2, game3;
     private Map<String, Integer> players1, players2, players3;
@@ -47,17 +47,17 @@ public class GameTest {
 
         String imagePath = "images/";
 
-        gameMetaData1 = new GameMetaData("1", "a", imagePath, tags1, true, 1000, 500, 1.0);
-        gameMetaData2 = new GameMetaData("2", "b", imagePath, tags2, true, 2000, 500, 1.0);
-        gameMetaData3 = new GameMetaData("3", "c", imagePath, tags3, true, Long.MAX_VALUE, 1.0);
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, 1000, 500, 1.0);
+        gameMetadata2 = new GameMetadata("2", "b", imagePath, tags2, true, 2000, 500, 1.0);
+        gameMetadata3 = new GameMetadata("3", "c", imagePath, tags3, true, Long.MAX_VALUE, 1.0);
 
         data1 = new GameData(players1, captions1);
         data2 = new GameData(players2, captions2);
         data3 = new GameData(players3, captions3);
 
-        game1 = new Game(data1, gameMetaData1);
-        game2 = new Game(data2, gameMetaData2);
-        game3 = new Game(data3, gameMetaData3);
+        game1 = new Game(data1, gameMetadata1);
+        game2 = new Game(data2, gameMetadata2);
+        game3 = new Game(data3, gameMetadata3);
     }
 
     @Test
@@ -94,11 +94,11 @@ public class GameTest {
         assertTrue(game1.getTags().equals(tags1));
         assertTrue(game1.getIsPublic());
 
-        assertEquals(gameMetaData1.getCreationDate(), game1.getMetaData().getCreationDate());
+        assertEquals(gameMetadata1.getCreationDate(), game1.getMetaData().getCreationDate());
         captions1.put("1", caption);
         assertEquals(data1.getCaptions(), game1.getData().getCaptions());
 
-        assertEquals(1.0, gameMetaData1.getImageAspectRatio(), .00001);
+        assertEquals(1.0, gameMetadata1.getImageAspectRatio(), .00001);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class GameTest {
 
     @Test
     public void verifyTagsNull() {
-        GameMetaData metaData = new GameMetaData();
+        GameMetadata metaData = new GameMetadata();
         GameData gameData = new GameData();
         Game game = new Game(gameData, metaData);
         assertNull(game.getTags());
@@ -155,7 +155,7 @@ public class GameTest {
 
     @Test
     public void verifyPlayersNull() {
-        GameMetaData metaData = new GameMetaData();
+        GameMetadata metaData = new GameMetadata();
         GameData gameData = new GameData();
         Game game = new Game(gameData, metaData);
         assertNull(game.getPlayers());
@@ -163,7 +163,7 @@ public class GameTest {
 
     @Test
     public void verifyUpvotesNull() {
-        GameMetaData metaData = new GameMetaData();
+        GameMetadata metaData = new GameMetadata();
         GameData gameData = new GameData();
         Game game = new Game(gameData, metaData);
         assertNull(game.getUpvotes());
@@ -171,7 +171,7 @@ public class GameTest {
 
     @Test
     public void verifyCaptionsNull() {
-        GameMetaData metaData = new GameMetaData();
+        GameMetadata metaData = new GameMetadata();
         GameData gameData = new GameData();
         Game game = new Game(gameData, metaData);
         assertNull(game.getCaptions());

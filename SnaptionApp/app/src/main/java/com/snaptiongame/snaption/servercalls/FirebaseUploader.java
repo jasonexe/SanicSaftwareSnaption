@@ -16,7 +16,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameData;
-import com.snaptiongame.snaption.models.GameMetaData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 
 import java.util.HashMap;
@@ -102,13 +102,13 @@ public class FirebaseUploader implements Uploader {
         // Add game object to games table
         String gameId = game.getId();
         String access = game.getIsPublic() ? "public" : "private";
-        GameMetaData gameMetaData = game.getMetaData();
+        GameMetadata gameMetadata = game.getMetaData();
         GameData gameData = game.getData();
 
         //Upload the game's metadata
         DatabaseReference metaDataRef = database.getReference(
                 String.format(GAME_METADATA_PATH, access, gameId));
-        metaDataRef.setValue(gameMetaData);
+        metaDataRef.setValue(gameMetadata);
         //Upload the game's data
         DatabaseReference dataRef = database.getReference(
                 String.format(GAME_DATA_PATH, access, gameId));

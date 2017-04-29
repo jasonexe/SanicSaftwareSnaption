@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class Game implements Serializable {
     private GameData data; //The object containing the players and captions
-    private GameMetaData metaData; //The object containing all other information about the game
+    private GameMetadata metaData; //The object containing all other information about the game
 
 
     /**
@@ -27,7 +27,7 @@ public class Game implements Serializable {
      * @param data The object containing the players and captions
      * @param metaData The object containing all other information about the game
      */
-    public Game(@NonNull GameData data, @NonNull GameMetaData metaData) {
+    public Game(@NonNull GameData data, @NonNull GameMetadata metaData) {
         this.data = data;
         this.metaData = metaData;
     }
@@ -77,7 +77,7 @@ public class Game implements Serializable {
      *
      * @return The object containing all other information about the game
      */
-    public GameMetaData getMetaData() {
+    public GameMetadata getMetaData() {
         return metaData;
     }
 
