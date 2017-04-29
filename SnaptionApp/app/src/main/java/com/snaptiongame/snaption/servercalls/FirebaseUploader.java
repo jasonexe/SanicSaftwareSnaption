@@ -1,5 +1,8 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -9,6 +12,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.snaptiongame.snaption.Constants;
@@ -18,16 +22,24 @@ import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static android.R.attr.bitmap;
+import static android.R.attr.data;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
+import static com.snaptiongame.snaption.Constants.USER_PATH;
+import static com.snaptiongame.snaption.R.id.photo;
 
 /**
  * FirebaseUploader is used for uploading data to Firebase and updating values.
@@ -67,13 +79,14 @@ public class FirebaseUploader implements Uploader {
     /**
      * Call this if the game needs to be uploaded
      * @param game The game to upload. Its image path should be just the name of the file.
-     * @param photo Byte array of photo
+     * @param data Compressed byte array of the photo
+     * @param aspectRatio The aspect ratio of the photo
      * @param uploadCallback interface to call that activates the upload dialog
      */
     @Override
-    public void addGame(Game game, byte[] photo, UploadDialogInterface uploadCallback) {
+    public void addGame(Game game, byte[] data, double aspectRatio, UploadDialogInterface uploadCallback) {
         game.setImagePath(String.format(Constants.STORAGE_IMAGE_PATH, game.getId()));
-        uploadPhoto(game, photo, uploadCallback);
+        uploadPhoto(game, data, aspectRatio, uploadCallback);
         addCompletedGameObj(game);
     }
 
@@ -147,14 +160,30 @@ public class FirebaseUploader implements Uploader {
         userRef.setValue(1);
     }
 
-    private void uploadPhoto(Game game, byte[] photo, final UploadDialogInterface uploadCallback) {
-        // Upload photo to storage
+    private void addGameToPlayerPrivateGames(Game game) {
+        String gameId = game.getId();
+        Set<String> ids = game.getPlayers().keySet();
+        // add the game to the picker's private games map
+        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
+                .setValue(1);
+        // add the game to each of the player's private games map
+        for (String id : ids) {
+            database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
+        }
+    }
+
+    private void uploadPhoto(Game game, byte[] data, double aspectRatio, final UploadDialogInterface uploadCallback) {
+
+        StorageMetadata imageMetadata = new StorageMetadata.Builder()
+                .setCustomMetadata(Constants.ASPECT_RATIO_KEY, Double.toString(aspectRatio))
+                .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
                 .child(game.getImagePath());
-        UploadTask uploadTask = imageLoc.putBytes(photo);
+
+        UploadTask uploadTask = imageLoc.putBytes(data, imageMetadata);
         //Creating the progress dialog
-        uploadCallback.onStartUpload(photo.length);
+
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
@@ -172,6 +201,7 @@ public class FirebaseUploader implements Uploader {
             @Override
             public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                 uploadCallback.onUploadProgress(taskSnapshot.getBytesTransferred());
+                uploadCallback.onStartUpload(taskSnapshot.getTotalByteCount());
                 //Display progress as it updates
             }
         });

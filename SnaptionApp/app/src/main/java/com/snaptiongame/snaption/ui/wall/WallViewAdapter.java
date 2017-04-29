@@ -71,6 +71,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         void onClickGamePhoto(View view, Game game);
     }
 
+    // TODO use aspect ratio here to size the view
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         final Game game = items.get(position);

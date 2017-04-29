@@ -32,8 +32,8 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end);
-        Game game1 = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, 1);
+        Game game1 = new Game("me", "you", "images/", players, categories, true, end, start, 1);
         //Nothing should be learned about empty constructor other than it doesn't crash
         Game game2 = new Game();
 
@@ -62,7 +62,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
 
         assertEquals(0, game.getCaptions().size());
 
@@ -84,7 +84,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
 
         assertFalse(game.getPlayers().containsKey("player3"));
         game.addPlayer("player3");
@@ -103,7 +103,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
 
         game.setWinner("winner");
         assertEquals("winner", game.getWinner());
@@ -119,8 +119,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
-
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
         game.setImagePath("image");
         assertEquals("image", game.getImagePath());
     }
@@ -135,7 +134,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
 
         Map<String, Integer> votes1 = new HashMap<>();
         votes1.put("1", 1);
@@ -155,8 +154,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = Calendar.getInstance().getTimeInMillis();
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
-
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
         game.closeGame();
         assertFalse(game.getIsOpen());
     }
@@ -179,7 +177,7 @@ public class GameTest {
         categories.put("kitten", 1);
         long end = 1000;
         long start = 500;
-        Game game = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1 );
 
         //test empty caption list
         assertNull(game.getTopCaption());
@@ -190,7 +188,7 @@ public class GameTest {
         assertEquals(caption1, game.getTopCaption());
 
         //test different amount of upvotes
-        Game game1 = new Game("me", "you", "images/", players, categories, true, end, start);
+        Game game1 = new Game("me", "you", "images/", players, categories, true, end, start, 1);
         Map<String, Integer> votes1 = new HashMap<>();
         Map<String, Integer> votes2 = new HashMap<>();
         votes1.put("1", 1);
@@ -204,7 +202,7 @@ public class GameTest {
 
         //test winner selected
         Game game2 = new Game("me", "you", "images/", players, categories, true, Long.MAX_VALUE,
-                start);
+                start, 1);
         caption1.votes = votes1;
         game2.addCaption(caption1.getId(), caption1);
         game2.addCaption(caption2.getId(), caption2);

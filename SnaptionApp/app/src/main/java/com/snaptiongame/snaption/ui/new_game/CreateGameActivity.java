@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -37,9 +39,9 @@ import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
+import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -160,7 +162,6 @@ public class CreateGameActivity extends AppCompatActivity {
         buttonUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                byte[] data = null;
                 buttonUpload.setClickable(false);
                 boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
@@ -178,28 +179,16 @@ public class CreateGameActivity extends AppCompatActivity {
                 }
                 else {
                     shouldUploadBeClickable = false;
-                    Map<String, Integer> friends = new HashMap<>();
-                    List<Person> addedFriends =  gameFriendsAdapter.getPersons();
-                    for (Person friend : addedFriends) {
-                        // TODO if/when inviting is also supported, handle when a Friend is added
-                        friends.put(friend.getId(), 1);
-                    }
-                    categories = getCategoriesFromText(categoryInput.getText().toString());
-                    endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
-                    //Generate unique key for Games
-
-                    String gameId = uploader.getNewGameKey();
                     if(!alreadyExisting) {
-                        data = getImageFromUri(imageUri);
-                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), gameId + ".jpg",
-                                friends, categories, isPublic, endDate);
-                        uploader.addGame(game, data, new UploaderDialog());
+                        try {
+                            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
+                            new ImageCompressTask().execute(fd);
+                        } catch (Exception e) {
+                            Toast.makeText(CreateGameActivity.this, "Error, file not found",
+                                    Toast.LENGTH_LONG).show();
+                        }
                     } else {
-                        // If the photo does exist, addGame but without the data
-                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), existingPhotoPath,
-                                friends, categories, isPublic, endDate);
-                        uploader.addGame(game);
-                        backToMain();
+                        uploadGame(null);
                     }
                 }
                 buttonUpload.setClickable(shouldUploadBeClickable);
@@ -222,6 +211,72 @@ public class CreateGameActivity extends AppCompatActivity {
 
         setupFriendsViews();
     }
+
+    // Set data = to null if game already exists
+    private void uploadGame(byte[] data) {
+        Map<String, Integer> friends = new HashMap<>();
+        List<Person> addedFriends =  gameFriendsAdapter.getPersons();
+        for (Person friend : addedFriends) {
+            // TODO if/when inviting is also supported, handle when a Friend is added
+            friends.put(friend.getId(), 1);
+        }
+        categories = getCategoriesFromText(categoryInput.getText().toString());
+        endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
+        //Generate unique key for Games
+
+                    String gameId = uploader.getNewGameKey();
+                    if(!alreadyExisting) {
+                        data = getImageFromUri(imageUri);
+                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), gameId + ".jpg",
+                                friends, categories, isPublic, endDate);
+                        uploader.addGame(game, data, new UploaderDialog());
+                    } else {
+                        // If the photo does exist, addGame but without the data
+                        Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), existingPhotoPath,
+                                friends, categories, isPublic, endDate);
+                        uploader.addGame(game);
+                        backToMain();
+                    }
+                }
+                buttonUpload.setClickable(shouldUploadBeClickable);
+            }
+        });
+        String gameId = uploader.getNewGameKey();
+        // Data should always be null if the game already exists. If the game doesn't exist (and is
+        // being pulled from the user's device) then data should be populated.
+        if(!alreadyExisting && data != null) {
+            try {
+                ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(imageUri, "r");
+                UploaderDialog dialog = new UploaderDialog();
+                double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
+                Game game = new Game(gameId, FirebaseResourceManager.getUserId(), gameId + ".jpg",
+                        friends, categories, isPublic, endDate, aspectRatio);
+                uploader.addGame(game, data, aspectRatio, dialog);
+            } catch (Exception e) {
+                Toast.makeText(CreateGameActivity.this, "Error, file not found",
+                        Toast.LENGTH_LONG).show();
+            }
+        } else {
+            // If the photo does exist, addGame but without the data
+            // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
+            Game game = new Game(gameId, FirebaseResourceManager.getUserId(), existingPhotoPath,
+                                friends, categories, isPublic, endDate, 1);
+            uploader.addGame(game);
+            backToMain();
+        }
+    }
+
+    private ProgressDialog showConvertProgress() {
+        ProgressDialog convertDialog = new ProgressDialog(CreateGameActivity.this);
+        convertDialog.setIndeterminate(true);
+        convertDialog.setMessage(getString(R.string.converting));
+        convertDialog.setCanceledOnTouchOutside(false);
+        //Display progress dialog
+        convertDialog.show();
+        return convertDialog;
+    }
+
+
 
     @OnClick(R.id.add_photo_layout)
     public void onClickAddPhoto() {
@@ -308,19 +363,24 @@ public class CreateGameActivity extends AppCompatActivity {
 
     private class UploaderDialog implements  FirebaseUploader.UploadDialogInterface {
         int progressDivisor = 1000; // This converts from bytes to whatever units you want.
+        boolean started = false;
         // IE 1000 = display with kilobytes
 
         ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
         @Override
         public void onStartUpload(long maxBytes) {
-            loadingDialog.setIndeterminate(false);
-            loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            loadingDialog.setProgress(0);
-            loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
-            loadingDialog.setMessage("Uploading photo");
-            loadingDialog.setMax((int) maxBytes/progressDivisor);
-            //Display progress dialog
-            loadingDialog.show();
+            if(!started) {
+                started = true;
+                loadingDialog.setIndeterminate(false);
+                loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                loadingDialog.setCanceledOnTouchOutside(false);
+                loadingDialog.setProgress(0);
+                loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
+                loadingDialog.setMessage("Uploading photo");
+                loadingDialog.setMax((int) maxBytes/progressDivisor);
+                //Display progress dialog
+                loadingDialog.show();
+            }
         }
 
         @Override
@@ -369,32 +429,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private void setImageFromUrl(Uri uri) {
         Glide.with(CreateGameActivity.this).load(uri).into(imageView);
         addPhotoLayout.setBackground(null);
-    }
-
-    /**
-     * Takes the image from a uri and converts it into a byte array for uploading.
-     *
-     * @param imageUri - The location of the image in the device
-     * @return A byte array containing the data from the image
-     */
-    private byte[] getImageFromUri(Uri imageUri) {
-        byte[] data = null;
-
-        try {
-            InputStream stream = getContentResolver().openInputStream(imageUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-            baos.close();
-        }
-        catch (IOException e) {
-            FirebaseReporter.reportException(e, "Couldn't find photo after user selected it");
-            e.printStackTrace();
-        }
-        return data;
     }
 
     /**
@@ -447,6 +481,28 @@ public class CreateGameActivity extends AppCompatActivity {
     private void showDate(Calendar calendar) {
         //TODO have configurable for spanish dates based on locale
         dateView.setText(new SimpleDateFormat("MM/dd/yy").format(calendar.getTime()));
+    }
+
+    private class ImageCompressTask extends AsyncTask<ParcelFileDescriptor, Integer, byte[]> {
+        ProgressDialog convertingDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            convertingDialog = showConvertProgress();
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            convertingDialog.dismiss();
+            uploadGame(bytes);
+
+        }
+
+        @Override
+        protected byte[] doInBackground(ParcelFileDescriptor... pfds) {
+            return BitmapConverter.decodeSampledBitmapFromStream(pfds[0], Constants.MAX_IMAGE_UPLOAD_WIDTH, Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+        }
     }
 
 }

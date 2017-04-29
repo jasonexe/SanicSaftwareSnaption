@@ -32,6 +32,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
@@ -219,6 +220,7 @@ public class FirebaseResourceManager {
     public static void loadImageIntoView(final String imagePath, final ImageView imageView,
                                          final ResourceListener<Bitmap> listener) {
         StorageReference ref = storage.child(imagePath);
+
         try {
             Glide.with(imageView.getContext())
                     .using(imageLoader)
