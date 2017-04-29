@@ -55,11 +55,14 @@ public class DeepLinkTests {
 
     @Test
     public void InterpretDeepLinkWithGame() {
-        String expectedId = "public/gameId";
+        String expectedId = "gameId";
+        String expectedAccess = "public";
         FirebaseDeepLinkCreator.DeepLinkInfo info =
-                FirebaseDeepLinkCreator.interpretDeepLinkString("https://snaptiongame.com/public/games/" + expectedId);
+                FirebaseDeepLinkCreator.interpretDeepLinkString("https://snaptiongame.com/" +
+                        expectedAccess + "/games/" + expectedId);
         assertEquals(GameActivity.class, info.getClassForIntent());
         assertEquals(expectedId, info.getIntentString());
+        assertEquals(expectedAccess, info.getAccessString());
     }
 
 }

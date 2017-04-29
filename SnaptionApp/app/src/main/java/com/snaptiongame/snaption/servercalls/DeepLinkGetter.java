@@ -69,9 +69,10 @@ public class DeepLinkGetter {
             if(toLaunch == GameActivity.class) {
                 Intent launchIntent = new Intent(activity, toLaunch);
                 String intentString = info.getIntentString();
+                String accessString = info.getAccessString();
                 launchIntent.putExtra(USE_GAME_ID,
-                        intentString.substring(intentString.indexOf("/") + 1));
-                launchIntent.putExtra(USE_GAME_ACCESS, intentString.substring(0, intentString.indexOf("/")));
+                        intentString);
+                launchIntent.putExtra(USE_GAME_ACCESS, accessString);
                 activity.startActivity(launchIntent);
             }
         }
