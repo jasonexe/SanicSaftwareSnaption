@@ -213,7 +213,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 }
                 if (retrievedOnce) {
                     if (gameIds.size() > 0) {
-                        gameIds.remove(0);
+                        List<String> keys = new ArrayList<>(gameIds.keySet());
+                        gameIds.remove(keys.get(0));
                     }
                 }
                 else {
