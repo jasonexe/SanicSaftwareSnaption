@@ -90,9 +90,9 @@ public class CaptionTest {
         assertEquals("3", caption1.getUserId());
         assertEquals(testCard1, caption1.getCard());
         assertEquals(userInput1, caption1.getUserInput());
-        assertEquals(new HashMap<String, Integer>(), caption1.getVotes());
+        assertEquals(new HashMap<String, Integer>(), caption1.getUpvotes());
         //can't run retrieveCaptionText because SpannableStringBuilder can't be used in tests
-        assertEquals(0, caption1.retrieveNumVotes());
+        assertEquals(0, caption1.retrieveNumUpvotes());
         assertEquals(caption1.getId(), caption1.toString());
         assertTrue(caption1.equals(caption2));
         assertFalse(caption1.equals(null));
@@ -133,11 +133,11 @@ public class CaptionTest {
         userInput1.add("4");
         userInput1.add("5");
         Caption caption1 = new Caption("1", "2", "3", testCard1, userInput1);
-        Map<String, Integer> votes1 = new HashMap<>();
-        votes1.put("1", 1);
-        caption1.votes = votes1;
+        Map<String, Integer> upvotes1 = new HashMap<>();
+        upvotes1.put("1", 1);
+        caption1.upvotes = upvotes1;
 
-        assertEquals(1, caption1.retrieveNumVotes());
+        assertEquals(1, caption1.retrieveNumUpvotes());
 
         List<String> userInput2 = new ArrayList<>();
         Card testCard2 = TestCard.getTestCardSingleInput();
@@ -145,17 +145,17 @@ public class CaptionTest {
         userInput1.add("4");
         userInput1.add("5");
         Caption caption2 = new Caption("2", "3", "4", testCard1, userInput1);
-        caption2.votes = null;
-        assertEquals(0, caption2.retrieveNumVotes());
+        caption2.upvotes = null;
+        assertEquals(0, caption2.retrieveNumUpvotes());
 
-        //test fewer votes
+        //test fewer upvotes
         assertTrue(caption1.compareTo(caption2) < 0);
-        //test more votes
+        //test more upvotes
         assertTrue(caption2.compareTo(caption1) > 0);
-        //test same votes with less id
-        caption2.votes = votes1;
+        //test same upvotes with less id
+        caption2.upvotes = upvotes1;
         assertTrue(caption1.compareTo(caption2) < 0);
-        //test same votes with more id
+        //test same upvotes with more id
         assertTrue(caption2.compareTo(caption1) > 0);
     }
 

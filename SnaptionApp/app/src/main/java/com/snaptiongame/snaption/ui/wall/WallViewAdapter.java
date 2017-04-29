@@ -19,8 +19,7 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
-import com.snaptiongame.snaption.models.Game;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -28,7 +27,6 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
-import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.text.NumberFormat;
@@ -36,7 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.snaptiongame.snaption.servercalls.FirebaseResourceManager.validFirebasePath;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_METADATA_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_UPVOTE_PATH;
+import static com.snaptiongame.snaption.ui.profile.ProfileActivity.*;
 
 /**
  * The adapter for Games to be displayed in the wall's recyclerview.
@@ -50,12 +50,12 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     private static final int UPVOTE_ANIM_DIST = 40;
     private static final int UPVOTE_ANIM_DURATION = 800;
     private static final float UPVOTE_ANIM_SCALE = 0.5f;
-    private List<Game> items;
+    private List<GameMetadata> items;
     private Map<Integer, WallViewHolder> itemNumToHolder;
-    private ProfileActivity.ProfileActivityCreator profileMaker;
+    private ProfileActivityCreator profileMaker;
     private OnClickGamePhotoListener onClickGamePhotoListener;
 
-    public WallViewAdapter(List<Game> items, ProfileActivity.ProfileActivityCreator profileMaker) {
+    public WallViewAdapter(List<GameMetadata> items, ProfileActivityCreator profileMaker) {
         this.items = items;
         this.profileMaker = profileMaker;
         itemNumToHolder = new HashMap<>();
@@ -68,21 +68,21 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     }
 
     public interface OnClickGamePhotoListener {
-        void onClickGamePhoto(View view, Game game);
+        void onClickGamePhoto(View view, GameMetadata game);
     }
 
     // TODO use aspect ratio here to size the view
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
-        final Game game = items.get(position);
+        final GameMetadata game = items.get(position);
 
         // display the Picker of the game, the one who created it
-        displayUser(holder.pickerName, null, game.getPicker());
+        displayUser(holder.pickerName, null, game.getPickerId());
 
         // ensure the game has a top caption before displaying the caption and the captioner
         displayCaption(holder, game);
 
-        Map<String, Integer> upvoters = game.getVotes();
+        Map<String, Integer> upvoters = game.getUpvotes();
         if(upvoters != null) {
             setUpvoteView(holder, game, upvoters.size(), upvoters.containsKey(FirebaseUserResourceManager.getUserId()), false);
         } else {
@@ -171,7 +171,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param hasUpvoted whether the user has upvoted the game
      * @param animate whether the upvote icon should show a "ghost" animation
      */
-    private void setUpvoteView(WallViewHolder holder, final Game game, int numUpvotes,
+    private void setUpvoteView(WallViewHolder holder, final GameMetadata game, int numUpvotes,
                                final boolean hasUpvoted, boolean animate) {
         // Set upvoteCountText to be the the number of upvotes;
         holder.upvoteCountText.setText(NumberFormat.getInstance().format(numUpvotes));
@@ -194,7 +194,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         setUpvoteIcon(holder, hasUpvoted, animate);
     }
 
-    private void displayCaption(WallViewHolder holder, Game game) {
+    private void displayCaption(WallViewHolder holder, GameMetadata game) {
         if (game.getTopCaption() != null) {
             holder.captionerLayout.setVisibility(TextView.VISIBLE);
             holder.captionText.setText(game.getTopCaption().retrieveCaptionText());
@@ -213,15 +213,15 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param holder The viewholder containing the caption text
      * @param game The game object being referenced
      */
-    private void setCaptionTextStyle(WallViewHolder holder, Game game) {
-        if (!game.getIsPublic() && !game.getIsOpen()) {
+    private void setCaptionTextStyle(WallViewHolder holder, GameMetadata game) {
+        if (!game.getIsPublic() && !game.isOpen()) {
             // If private and closed, bold italic
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.BOLD_ITALIC);
-        } else if (game.getIsOpen() && game.getIsPublic()) {
+        } else if (game.isOpen() && game.getIsPublic()) {
             // If open and public, normal
             holder.captionText.setTypeface(Typeface.create(holder.captionText.getTypeface(),
                     Typeface.NORMAL), Typeface.NORMAL);
-        } else if (!game.getIsOpen()) {
+        } else if (!game.isOpen()) {
             // If just closed, bold
             holder.captionText.setTypeface(holder.captionText.getTypeface(), Typeface.BOLD);
         } else {
@@ -294,26 +294,26 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      *
      * @param newGames a list of games to add
      */
-    public void addItems(List<Game> newGames) {
+    public void addItems(List<GameMetadata> newGames) {
         int startPos = items.size();
         items.addAll(newGames);
         this.notifyItemRangeChanged(startPos, newGames.size());
     }
 
-    public void gameChanged(int changedIndex, Map<String, Integer> newVotes) {
-        Game newGame = items.get(changedIndex);
-        Map<String, Integer> oldVotes = newGame.getVotes();
-        newGame.setVotes(newVotes);
+    public void gameChanged(int changedIndex, Map<String, Integer> newUpvotes) {
+        GameMetadata newGame = items.get(changedIndex);
+        Map<String, Integer> oldUpvotes = newGame.getUpvotes();
+        newGame.setUpvotes(newUpvotes);
         WallViewHolder holder = itemNumToHolder.get(changedIndex);
 
         if(holder != null) {
-            if (newVotes == null) {
+            if (newUpvotes == null) {
                 setUpvoteView(holder, newGame, 0, false, false);
             } else {
                 String userId = FirebaseUserResourceManager.getUserId();
-                boolean hasUpvoted = newVotes.containsKey(userId);
-                boolean hasUpvotedPrior = oldVotes != null && oldVotes.containsKey(userId);
-                setUpvoteView(holder, newGame, newVotes.size(), hasUpvoted, hasUpvoted
+                boolean hasUpvoted = newUpvotes.containsKey(userId);
+                boolean hasUpvotedPrior = oldUpvotes != null && oldUpvotes.containsKey(userId);
+                setUpvoteView(holder, newGame, newUpvotes.size(), hasUpvoted, hasUpvoted
                         && !hasUpvotedPrior);
             }
         }
@@ -326,7 +326,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
      * @param game The game object being affected
      * @param hasUpvoted Whether the user has previously upvoted this game
      */
-    private void handleClickUpvote(final Context context, Game game,
+    private void handleClickUpvote(final Context context, GameMetadata game,
                                    boolean hasUpvoted) {
         // Listens to see if anything went wrong
         Uploader.UploadListener listener = new Uploader.UploadListener() {
@@ -342,17 +342,18 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         };
 
         if (game != null) {
+            String upvotePath = game.getIsPublic() ?
+                    String.format(GAME_PUBLIC_METADATA_UPVOTE_PATH, game.getId(),
+                            FirebaseUserResourceManager.getUserId()) :
+                    String.format(GAME_PRIVATE_METADATA_UPVOTE_PATH, game.getId(),
+                            FirebaseUserResourceManager.getUserId());
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(
-                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseUserResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(upvotePath, listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(
-                        String.format(Constants.GAME_UPVOTE_PATH, game.getId(),
-                                FirebaseUserResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(upvotePath, listener);
             }
         }
     }

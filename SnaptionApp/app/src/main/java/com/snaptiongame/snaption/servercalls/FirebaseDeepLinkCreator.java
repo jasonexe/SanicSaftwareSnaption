@@ -49,6 +49,8 @@ public class FirebaseDeepLinkCreator {
 
     static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyAa9WDzfmNN5j3i8jn0smpHkZypMmxFCMI";
     static final String LINK_KEY = "longDynamicLink";
+    static final String GAMES = "games";
+    static final String URL_END = ".com/";
 
     // Our app's firebase dynamic link domain
     private static final String DYNAMIC_LINK_DOMAIN = "https://ba63n.app.goo.gl/";
@@ -74,6 +76,7 @@ public class FirebaseDeepLinkCreator {
     public static class DeepLinkInfo {
         private Class classForIntent;
         private String intentString;
+        private String accessString;
 
         public DeepLinkInfo(Class classForIntent) {
             this.classForIntent = classForIntent;
@@ -87,9 +90,16 @@ public class FirebaseDeepLinkCreator {
             return classForIntent;
         }
 
-
         public String getIntentString() {
             return intentString;
+        }
+
+        public void setAccessString(String accessString) {
+            this.accessString = accessString;
+        }
+
+        public String getAccessString() {
+            return accessString;
         }
     }
 
@@ -161,11 +171,14 @@ public class FirebaseDeepLinkCreator {
     @Nullable
     public static DeepLinkInfo interpretDeepLinkString(String deepLink) {
         // If it has "games" in the url, it'll be a deep link with the game ID as the last thing
-        if(deepLink.contains("games")) {
+        if(deepLink.contains(GAMES)) {
             Class toSend = GameActivity.class;
             String gameId = deepLink.substring(deepLink.lastIndexOf("/") + 1);
+            String access = deepLink.substring(deepLink.indexOf(URL_END) + URL_END.length(),
+                    deepLink.indexOf(GAMES) - 1);
             DeepLinkInfo info = new DeepLinkInfo(toSend);
             info.setIntentString(gameId);
+            info.setAccessString(access);
             return info;
         } else {
             return null;
@@ -188,7 +201,8 @@ public class FirebaseDeepLinkCreator {
         if(progressView != null) {
             progressView.setVisibility(View.VISIBLE);
         }
-        String linkDestination = LINK_BEGINNING + "/games/" + game.getId();
+        String access = game.getIsPublic() ? "/public" : "/private";
+        String linkDestination = LINK_BEGINNING + access + "/games/" + game.getId();
         // First, create the deep link to this specific game
         getDeepLink(linkDestination, new ResourceListener<String>() {
             @Override

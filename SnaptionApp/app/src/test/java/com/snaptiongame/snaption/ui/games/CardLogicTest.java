@@ -3,6 +3,8 @@ package com.snaptiongame.snaption.ui.games;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.Uploader;
 
 import org.junit.Test;
@@ -35,7 +37,10 @@ public class CardLogicTest {
         String userId = "testUserId";
         String cardText = "testCard %s";
         String cardId = "testCardId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, 1);
+
+        GameMetadata gameMetadata = new GameMetadata(gameId, "a", "images/", null, true, 1000, 500, 1.0);
+        GameData gameData = new GameData();
+        Game game = new Game(gameData, gameMetadata);
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = new Card(cardText, cardId);
         expectedInput.add(userInput);
@@ -43,10 +48,10 @@ public class CardLogicTest {
                 expectedCard, expectedInput);
 
         Uploader mockedUploader = mock(Uploader.class);
-        when(mockedUploader.getNewCaptionKey(gameId)).thenReturn(captionId);
+        when(mockedUploader.getNewCaptionKey(game)).thenReturn(captionId);
         CardLogic.addCaption(userInput, userId, mockedUploader, expectedCard, game);
 
-        verify(mockedUploader).addCaptions(correctCaption);
+        verify(mockedUploader).addCaptions(correctCaption, game.getIsPublic());
     }
 
     @Test
@@ -57,13 +62,16 @@ public class CardLogicTest {
         String gameId = "-Kbqjvc3cVKVPtcmTr6A";
         String userInput = "Test Input";
         String userId = "testUserId";
-        Game game = new Game(gameId, "", "", emptyMap, empty, true, 0, 0, 1);
+
+        GameMetadata gameMetadata = new GameMetadata("1", "a", "images/", null, true, 1000, 500, 1.0);
+        Game game = new Game(null, gameMetadata);
+
         List<String> expectedInput = new ArrayList<>();
         Card expectedCard = null;
         expectedInput.add(userInput);
 
         CardLogic.addCaption(userInput, userId, mockedUploader, expectedCard, game);
-        verify(mockedUploader, never()).addCaptions(null);
+        verify(mockedUploader, never()).addCaptions(null, false);
     }
 
     @Test

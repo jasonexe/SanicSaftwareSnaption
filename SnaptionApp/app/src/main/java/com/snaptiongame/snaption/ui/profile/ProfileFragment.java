@@ -47,6 +47,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.snaptiongame.snaption.Constants.*;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -55,7 +56,6 @@ public class ProfileFragment extends Fragment {
 
     public static final String USER_ID_ARG = "userId";
 
-    private static final String GAME_DIRECTORY = "games";
     private static final int IMAGE_PICK_CODE = 8;
     private boolean isEditing;
 
@@ -152,9 +152,10 @@ public class ProfileFragment extends Fragment {
         friendsMade.setText(String.valueOf(user.getFriendCount()));
 
         int numCapUpvotes = 0;
+
         if(user.getPublicCaptions() != null) {
             for(Caption caption : user.getPublicCaptions().values()) {
-                numCapUpvotes += caption.retrieveNumVotes();
+                numCapUpvotes += caption.retrieveNumUpvotes();
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
@@ -182,31 +183,6 @@ public class ProfileFragment extends Fragment {
         captionsListView.setAdapter(captionsAdapter);
     }
 
-    private interface CaptionFilterListener {
-        void captionFiltered(Caption caption);
-    }
-
-    private void filterCaptions(List<Caption> captions, final CaptionFilterListener filterListener) {
-        // filter out captions of private games if needed
-        for (final Caption caption : captions) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH,
-                    caption.gameId), new ResourceListener<Game>() {
-                @Override
-                public void onData(Game data) {
-                    // filter out captions of private games if needed
-                    if (canDisplayGame(data, isUser)) {
-                        filterListener.captionFiltered(caption);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Game.class;
-                }
-            });
-        }
-    }
-
     private boolean canDisplayGame(Game game, boolean isUser) {
         return game != null && (isUser ||
                 game.getIsPublic() ||
@@ -220,7 +196,7 @@ public class ProfileFragment extends Fragment {
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds.keySet()) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PUBLIC_METADATA_PATH, gameId), gameListener);
             }
         }
     }

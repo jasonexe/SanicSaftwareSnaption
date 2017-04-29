@@ -3,8 +3,6 @@ package com.snaptiongame.snaption.ui.new_game;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,11 +28,12 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
-import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -42,8 +41,6 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,7 +69,7 @@ public class CreateGameActivity extends AppCompatActivity {
     private Uploader uploader;
 
     private Uri imageUri;
-    private Map<String, Integer> categories;
+    private Map<String, Integer> tags;
     private boolean isPublic;
     private long endDate;
     private Calendar calendar;
@@ -165,21 +162,22 @@ public class CreateGameActivity extends AppCompatActivity {
                 buttonUpload.setClickable(false);
                 boolean shouldUploadBeClickable = true;
                 if (imageUri == null) {
-                    Toast.makeText(CreateGameActivity.this, "You must pick an image.",
+                    Toast.makeText(CreateGameActivity.this, R.string.pick_an_image,
                             Toast.LENGTH_LONG).show();
                 }
                 else if (!radioPrivate.isChecked() && !radioPublic.isChecked()) {
                     Toast.makeText(CreateGameActivity.this,
-                            "You must choose whether the game is public or private.",
+                            R.string.choose_public_or_private,
                             Toast.LENGTH_LONG).show();
                 }
                 else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
-                    Toast.makeText(CreateGameActivity.this, "You must select a day in the future.",
+                    Toast.makeText(CreateGameActivity.this, R.string.pick_future_date,
                             Toast.LENGTH_LONG).show();
                 }
                 else {
                     shouldUploadBeClickable = false;
-                    if(!alreadyExisting) {
+
+                    if (!alreadyExisting) {
                         try {
                             ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(imageUri, "r");
                             new ImageCompressTask().execute(fd);
@@ -220,20 +218,25 @@ public class CreateGameActivity extends AppCompatActivity {
             // TODO if/when inviting is also supported, handle when a Friend is added
             friends.put(friend.getId(), 1);
         }
-        categories = getCategoriesFromText(categoryInput.getText().toString());
+        tags = getTagsFromText(categoryInput.getText().toString());
         endDate = calendar.getTimeInMillis() / MILLIS_PER_SECOND;
         //Generate unique key for Games
 
-        String gameId = uploader.getNewGameKey();
+        String gameId = uploader.getNewGameKey(isPublic);
         // Data should always be null if the game already exists. If the game doesn't exist (and is
         // being pulled from the user's device) then data should be populated.
-        if(!alreadyExisting && data != null) {
+        if (!alreadyExisting && data != null) {
             try {
                 ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(imageUri, "r");
                 UploaderDialog dialog = new UploaderDialog();
                 double aspectRatio = BitmapConverter.getFileDescriptorAspectRatio(pfd);
-                Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), gameId + ".jpg",
-                        friends, categories, isPublic, endDate, aspectRatio);
+                GameData gameData = new GameData(friends, null);
+                String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
+                GameMetadata metaData = new GameMetadata(gameId,
+                        FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
+                        endDate, aspectRatio);
+                Game game = new Game(gameData, metaData);
+
                 uploader.addGame(game, data, aspectRatio, dialog);
             } catch (Exception e) {
                 Toast.makeText(CreateGameActivity.this, "Error, file not found",
@@ -242,8 +245,13 @@ public class CreateGameActivity extends AppCompatActivity {
         } else {
             // If the photo does exist, addGame but without the data
             // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
-            Game game = new Game(gameId, FirebaseUserResourceManager.getUserId(), existingPhotoPath,
-                    friends, categories, isPublic, endDate, 1);
+            GameData gameData = new GameData(friends, null);
+            String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
+            GameMetadata metaData = new GameMetadata(gameId,
+                    FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
+                    endDate, 1);
+            Game game = new Game(gameData, metaData);
+
             uploader.addGame(game);
             backToMain();
         }
@@ -266,7 +274,7 @@ public class CreateGameActivity extends AppCompatActivity {
         //Gets the content from the imageview
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Choose Image from..."), 8);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.choose_image_from)), 8);
     }
 
     @OnClick(R.id.text_date)
@@ -352,14 +360,14 @@ public class CreateGameActivity extends AppCompatActivity {
         ProgressDialog loadingDialog = new ProgressDialog(CreateGameActivity.this);
         @Override
         public void onStartUpload(long maxBytes) {
-            if(!started) {
+            if (!started) {
                 started = true;
                 loadingDialog.setIndeterminate(false);
                 loadingDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 loadingDialog.setCanceledOnTouchOutside(false);
                 loadingDialog.setProgress(0);
                 loadingDialog.setProgressNumberFormat("%1dKB/%2dKB");
-                loadingDialog.setMessage("Uploading photo");
+                loadingDialog.setMessage(getString(R.string.uploading_photo));
                 loadingDialog.setMax((int) maxBytes/progressDivisor);
                 //Display progress dialog
                 loadingDialog.show();
@@ -420,18 +428,18 @@ public class CreateGameActivity extends AppCompatActivity {
      * @param text - The text to parse with comma delimiters
      * @return A list of strings not containing repeats or empty strings
      */
-    private Map<String, Integer> getCategoriesFromText(String text) {
-        Map<String, Integer> categories = new HashMap<>();
+    private Map<String, Integer> getTagsFromText(String text) {
+        Map<String, Integer> tags = new HashMap<>();
         text = text.toLowerCase();
         String[] list = text.split(",");
 
         for (String input : list) {
             String potentialCategory = input.trim();
             if (!TextUtils.isEmpty(potentialCategory)) {
-                categories.put(potentialCategory, 1);
+                tags.put(potentialCategory, 1);
             }
         }
-        return categories;
+        return tags;
     }
 
     private DatePickerDialog.OnDateSetListener myDateListener = new

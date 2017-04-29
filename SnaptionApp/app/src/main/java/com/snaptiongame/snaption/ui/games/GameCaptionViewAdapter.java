@@ -8,10 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -19,17 +17,16 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
-import com.snaptiongame.snaption.ui.profile.ProfileActivity;
+import com.snaptiongame.snaption.ui.profile.ProfileActivity.ProfileActivityCreator;
 
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import static com.snaptiongame.snaption.Constants.GAME_CAPTION_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -42,8 +39,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private static final String UNKNOWN_USER_ID = "unknown";
     private List<Caption> items;
     private LoginDialog loginDialog;
-    private ProfileActivity.ProfileActivityCreator profileMaker;
+    private ProfileActivityCreator profileMaker;
     private UserMetadata unknownUser = new UserMetadata(UNKNOWN_USER_ID, null, null, null, null, null);
+    private boolean isPublic;
     private Map<String, UserMetadata> userMap = new HashMap<>(); // Map from userIds to User
 
     // BEGIN PRIVATE CLASSES //
@@ -88,13 +86,16 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      *
      * @param items The list of Captions to build the views from
      * @param loginDialog The dialog to display when the user needs to log in
+     * @param profileMaker
+     * @param isPublic Whether the game is public or private
      */
     public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog,
-                                  ProfileActivity.ProfileActivityCreator profileMaker) {
+                                  ProfileActivityCreator profileMaker, boolean isPublic) {
         this.items = items;
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
         this.profileMaker = profileMaker;
+        this.isPublic = isPublic;
     }
 
     /**
@@ -225,17 +226,18 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         };
 
         if (caption != null) {
+            String upvotePath = isPublic ?
+                    String.format(GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
+                            caption.getId(), FirebaseUserResourceManager.getUserId()) :
+                    String.format(GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
+                            caption.getId(), FirebaseUserResourceManager.getUserId());
             // Remove the upvote if the user has upvoted
             if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(
-                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
-                                caption.getId(), FirebaseUserResourceManager.getUserId()), listener);
+                FirebaseUploader.removeUpvote(upvotePath, listener);
             }
             // Add the upvote if the user hasn't upvoted
             else {
-                FirebaseUploader.addUpvote(
-                        String.format(Constants.GAME_CAPTIONS_UPVOTE_PATH, caption.getGameId(),
-                            caption.getId(), FirebaseUserResourceManager.getUserId()), listener);
+                FirebaseUploader.addUpvote(upvotePath, listener);
             }
         }
     }
@@ -256,10 +258,10 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
         holder.captionText.setText(caption.retrieveCaptionText());
         // Set the display to reflect the status of the caption
-        if (caption.votes != null) {
-            Map votes = caption.votes;
-            setUpvoteView(holder, caption, votes.size(),
-                    votes.containsKey(FirebaseUserResourceManager.getUserId()));
+        if (caption.upvotes != null) {
+            Map upvotes = caption.upvotes;
+            setUpvoteView(holder, caption, upvotes.size(),
+                    upvotes.containsKey(FirebaseUserResourceManager.getUserId()));
         }
         else {
             setUpvoteView(holder, caption, 0, false);
