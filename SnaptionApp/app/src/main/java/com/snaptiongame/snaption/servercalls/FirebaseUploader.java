@@ -38,7 +38,6 @@ import static com.snaptiongame.snaption.Constants.GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_CREATED_GAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
-import static com.snaptiongame.snaption.Constants.USER_PATH;
 import static com.snaptiongame.snaption.R.id.photo;
 
 /**
@@ -158,18 +157,6 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference userRef = database.getReference(String.format(USER_CREATED_GAME_PATH, userId, gameId));
         //Also see blog https://firebase.googleblog.com/2014/04/best-practices-arrays-in-firebase.html
         userRef.setValue(1);
-    }
-
-    private void addGameToPlayerPrivateGames(Game game) {
-        String gameId = game.getId();
-        Set<String> ids = game.getPlayers().keySet();
-        // add the game to the picker's private games map
-        database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, game.getPicker(), gameId))
-                .setValue(1);
-        // add the game to each of the player's private games map
-        for (String id : ids) {
-            database.getReference(String.format(Constants.USER_PRIVATE_GAMES_PATH, id, gameId)).setValue(1);
-        }
     }
 
     private void uploadPhoto(Game game, byte[] data, double aspectRatio, final UploadDialogInterface uploadCallback) {
