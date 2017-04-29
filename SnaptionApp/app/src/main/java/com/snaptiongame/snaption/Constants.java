@@ -114,6 +114,10 @@ public class Constants {
     public static final int DEEP_LINK_GOOGLE_ID = 1;
     public static final int NUM_CARDS_IN_HAND = 10;
     public static final int GOOGLE_LOGIN_RC = 13; //request code used for Google Login Intent
+    public static final String ASPECT_RATIO_KEY = "AspectRatio";
     public static final int MILLIS_PER_SECOND = 1000;
+    public static final int COMPRESSION_VALUE = 80;
+    public static final int MAX_IMAGE_UPLOAD_WIDTH = 1920;
+    public static final int MAX_IMAGE_UPLOAD_HEIGHT = 1080;
 
 }

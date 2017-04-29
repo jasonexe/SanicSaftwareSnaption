@@ -27,6 +27,7 @@ public class Game implements Serializable {
     private Map<String, Integer> categories; //The list of categories
     private String winner; //The id of the winning caption
     private Map<String, Integer> votes; //The list of votes
+    private double imageAspectRatio;
 
     /**
      * Default constructor.
@@ -46,8 +47,7 @@ public class Game implements Serializable {
      * @param creationDate The time when the game was started
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
-                Map<String, Integer> categories, boolean isPublic, long endDate,
-                long creationDate) {
+                Map<String, Integer> categories, boolean isPublic, long endDate, long creationDate, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -56,6 +56,7 @@ public class Game implements Serializable {
         this.isPublic = isPublic;
         this.endDate = endDate;
         this.creationDate = creationDate;
+        this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
         votes = new HashMap<>();
@@ -75,7 +76,7 @@ public class Game implements Serializable {
      * @param endDate The time when the game ends
      */
     public Game(String id, String picker, String imagePath, Map<String, Integer> players,
-                Map<String, Integer> categories, boolean isPublic, long endDate) {
+                Map<String, Integer> categories, boolean isPublic, long endDate, double imageAspectRatio) {
         this.id = id;
         this.picker = picker;
         this.imagePath = imagePath;
@@ -83,12 +84,17 @@ public class Game implements Serializable {
         this.categories = new HashMap<>(categories);
         this.isPublic = isPublic;
         this.endDate = endDate;
+        this.imageAspectRatio = imageAspectRatio;
 
         captions = new HashMap<>();
         votes = new HashMap<>();
         isOpen = true;
         creationDate = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND;
         winner = "";
+    }
+
+    public double getImageAspectRatio() {
+        return imageAspectRatio;
     }
 
     /**
