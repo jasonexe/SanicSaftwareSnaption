@@ -56,7 +56,6 @@ public class ProfileFragment extends Fragment {
 
     public static final String USER_ID_ARG = "userId";
 
-    private static final String GAME_DIRECTORY = "games";
     private static final int IMAGE_PICK_CODE = 8;
     private boolean isEditing;
 
