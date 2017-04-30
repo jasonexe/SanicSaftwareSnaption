@@ -290,10 +290,8 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
 
         // set the progress bar and image view height using the image aspect ratio
-        // TODO get actual image aspect ratio
-        double imageAspectRatio = 1.6;
         Resources res = getResources();
-        final int imageHeight = ViewUtilities.calculateViewHeight(imageAspectRatio,
+        final int imageHeight = ViewUtilities.calculateViewHeight(game.getImageAspectRatio(),
                 res.getDisplayMetrics().widthPixels, res.getDisplayMetrics().heightPixels * MAX_IMAGE_HEIGHT_PERCENT);
         progressBar.getLayoutParams().height = imageHeight;
         minimizeImageBehavior.updateViewMaxHeight(imageHeight);
