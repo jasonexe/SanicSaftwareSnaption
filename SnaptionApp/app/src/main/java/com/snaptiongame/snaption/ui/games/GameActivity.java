@@ -77,6 +77,8 @@ import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTIONS_PATH
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+import static com.snaptiongame.snaption.Constants.PRIVATE;
+import static com.snaptiongame.snaption.Constants.PUBLIC;
 import static com.snaptiongame.snaption.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromList;
 
@@ -220,12 +222,12 @@ public class GameActivity extends HomeAppCompatActivity {
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
         if (startedIntent.hasExtra(Constants.GAME)) {
-            game = (Game) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
+            GameMetadata metadata = (GameMetadata) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             // set the shared transition view name
             ViewCompat.setTransitionName(imageView, game.getId());
             // postpone transition til image is loaded
             supportPostponeEnterTransition();
-            setupGameElements(game);
+            retrieveGameData(metadata.getIsPublic() ? PUBLIC : PRIVATE, metadata.getId(), metadata);
         } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
@@ -234,6 +236,7 @@ public class GameActivity extends HomeAppCompatActivity {
             //Gets the metadata and data for the game and calls setupGameElements
             retrieveGame(access, gameId);
         }
+
     }
 
     private void retrieveGame(String access, String gameId) {

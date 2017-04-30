@@ -74,35 +74,24 @@ public class NotificationReceiver extends FirebaseMessagingService {
         ResourceListener<GameMetadata> gameListener = new ResourceListener<GameMetadata>() {
             @Override
             public void onData(final GameMetadata metaData) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_DATA_PATH, access, gameId), new ResourceListener<GameData>() {
-                    @Override
-                    public void onData(final GameData gameData) {
-                        //after getting game, must get user
-                        FirebaseUserResourceManager.getUserMetadataById(String.format(Constants.USER_METADATA_PATH, senderUserId),
-                                new ResourceListener<UserMetadata>() {
-                                    @Override
-                                    public void onData(UserMetadata user) {
-                                        //ensure the user and game were found before sending notification
-                                        Game data = new Game(gameData, metaData);
-                                        if (data != null && user != null) {
-                                            sendNotification(data, user);
-                                        }
-                                    }
+                //after getting game, must get user
+                FirebaseUserResourceManager.getUserMetadataById(String.format(Constants.USER_METADATA_PATH, senderUserId),
+                    new ResourceListener<UserMetadata>() {
+                        @Override
+                        public void onData(UserMetadata user) {
+                            //ensure the user and game were found before sending notification
+                            if (metaData != null && user != null) {
+                                sendNotification(metaData, user);
+                            }
+                        }
 
-                                    @Override
-                                    public Class getDataType() {
-                                        return UserMetadata.class;
-                                    }
-                                });
-                    }
+                        @Override
+                        public Class getDataType() {
+                            return UserMetadata.class;
+                        }
+                    });
 
-                    @Override
-                    public Class getDataType() {
-                        return GameData.class;
-                    }
-                });
             }
-
             @Override
             public Class getDataType() {
                 return GameMetadata.class;
@@ -115,7 +104,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void sendNotification(Game game, UserMetadata user) {
+    private void sendNotification(GameMetadata game, UserMetadata user) {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

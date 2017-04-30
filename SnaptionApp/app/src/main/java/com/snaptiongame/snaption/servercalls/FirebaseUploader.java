@@ -38,9 +38,6 @@ import static com.snaptiongame.snaption.Constants.USER_FRIENDS_PATH;
 import static com.snaptiongame.snaption.Constants.USER_IS_ANDROID_PATH;
 import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_METADATA_PATH;
-import static com.snaptiongame.snaption.Constants.USER_PRIVATE_CREATED_GAMES_PATH;
-import static com.snaptiongame.snaption.Constants.USER_PRIVATE_JOINED_GAME_PATH;
-import static com.snaptiongame.snaption.Constants.USER_PUBLIC_CREATED_GAMES_PATH;
 import static com.snaptiongame.snaption.Constants.USER_SEARCH_NAME_PATH;
 
 /**
