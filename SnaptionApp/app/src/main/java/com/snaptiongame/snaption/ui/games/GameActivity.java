@@ -72,6 +72,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYERS_PATH;
@@ -79,6 +80,8 @@ import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTIONS_PATH
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+import static com.snaptiongame.snaption.Constants.PRIVATE;
+import static com.snaptiongame.snaption.Constants.PUBLIC;
 import static com.snaptiongame.snaption.ui.games.CardLogic.addCaption;
 import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromList;
 
@@ -223,10 +226,12 @@ public class GameActivity extends HomeAppCompatActivity {
         Intent startedIntent = getIntent();
         // If started from the wall, we'll have been sent the Game object, so can use that for stuff
         if (startedIntent.hasExtra(Constants.GAME)) {
-            game = (Game) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
+            GameMetadata metadata = (GameMetadata) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             // set the shared transition view name
-            ViewCompat.setTransitionName(imageView, game.getId());
-            setupGameElements(game);
+            ViewCompat.setTransitionName(imageView, metadata.getId());
+            // postpone transition til image is loaded
+            setupGameMetadataElements(metadata);
+            retrieveGameData(metadata.getIsPublic() ? PUBLIC : PRIVATE, metadata.getId(), metadata);
         } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
@@ -235,6 +240,7 @@ public class GameActivity extends HomeAppCompatActivity {
             //Gets the metadata and data for the game and calls setupGameElements
             retrieveGame(access, gameId);
         }
+
     }
 
     private void retrieveGame(String access, String gameId) {
@@ -246,9 +252,10 @@ public class GameActivity extends HomeAppCompatActivity {
             String.format(GAME_METADATA_PATH, access, gameId),
             new ResourceListener<GameMetadata>() {
                 @Override
-                public void onData(GameMetadata metaData) {
-                    if (metaData != null) {
-                        retrieveGameData(access, gameId, metaData);
+                public void onData(GameMetadata metadata) {
+                    if (metadata != null) {
+                        setupGameMetadataElements(metadata);
+                        retrieveGameData(access, gameId, metadata);
                     }
                     else {
                         System.err.println("Game activity was passed an incorrect gameId");
@@ -266,15 +273,16 @@ public class GameActivity extends HomeAppCompatActivity {
     private void retrieveGameData(final String access, final String gameId,
                                   final GameMetadata metaData) {
         FirebaseResourceManager.retrieveSingleNoUpdates(
-            String.format(GAME_METADATA_PATH, access, gameId), new ResourceListener<GameData>() {
+            String.format(GAME_DATA_PATH, access, gameId), new ResourceListener<GameData>() {
                 @Override
                 public void onData(GameData data) {
                     if (data != null) {
                         Game game = new Game(data, metaData);
                         setupGameElements(game);
-                    }
-                    else {
-                        System.err.println("Game activity was passed an incorrect gameId");
+                    } else {
+                        GameData emptyData = new GameData();
+                        Game game = new Game(emptyData, metaData);
+                        setupGameElements(game);
                     }
                 }
 
@@ -288,49 +296,56 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void setupGameElements(Game game) {
         this.game = game;
+        setupButtonDisplay(game);
+        setupCaptionList(game);
+    }
 
+    private void loadPhoto(GameMetadata metadata) {
         // set the progress bar and image view height using the image aspect ratio
         Resources res = getResources();
-        final int imageHeight = ViewUtilities.calculateViewHeight(game.getImageAspectRatio(),
+        final int imageHeight = ViewUtilities.calculateViewHeight(metadata.getImageAspectRatio(),
                 res.getDisplayMetrics().widthPixels, res.getDisplayMetrics().heightPixels * MAX_IMAGE_HEIGHT_PERCENT);
         progressBar.getLayoutParams().height = imageHeight;
         minimizeImageBehavior.updateViewMaxHeight(imageHeight);
         imageView.getLayoutParams().height = imageHeight;
-
-        photoPath = game.getImagePath();
+        photoPath = metadata.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
-            new ResourceListener<Bitmap>() {
-                @Override
-                public void onData(final Bitmap bitmap) {
-                    if (bitmap != null) {
-                        // remove the progress bar
-                        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
-                                .setBehavior(null);
-                        progressBar.setVisibility(View.GONE);
-                        // add a new behavior to the image view
-                        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
-                                imageHeight);
-                        ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
-                                .setBehavior(minimizeImageBehavior);
-                        // start transition now that image is loaded
-                        supportStartPostponedEnterTransition();
-                        // animate the image color swatch
-                        animateBitmapColorSwatch(bitmap);
+                new ResourceListener<Bitmap>() {
+                    @Override
+                    public void onData(final Bitmap bitmap) {
+                        if (bitmap != null) {
+                            // remove the progress bar
+                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                    .setBehavior(null);
+                            progressBar.setVisibility(View.GONE);
+                            // add a new behavior to the image view
+                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
+                                    imageHeight);
+                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
+                                    .setBehavior(minimizeImageBehavior);
+                            // start transition now that image is loaded
+                            supportStartPostponedEnterTransition();
+                            // animate the image color swatch
+                            animateBitmapColorSwatch(bitmap);
+                        }
                     }
-                }
 
-                @Override
-                public Class getDataType() {
-                    return Boolean.class;
-                }
-            });
+                    @Override
+                    public Class getDataType() {
+                        return Boolean.class;
+                    }
+                });
+
+    }
+
+    private void setupGameMetadataElements(GameMetadata metadata) {
+        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+        loadPhoto(metadata);
         initLoginManager();
-        setupButtonDisplay(game);
-        setupCaptionList(game);
-        setupEndDate(game);
-        setupPickerName(game);
+        setupEndDate(metadata);
+        setupPickerName(metadata);
         setupCaptionCardView();
-        startCommentManager(game);
+        startCommentManager(metadata);
     }
 
     private void animateBitmapColorSwatch(final Bitmap bitmap) {
@@ -475,12 +490,11 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
-        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
         captionListView.addOnScrollListener(scrollFabHider);
     }
 
     // Displays the date that the game will end underneath the picture
-    private void setupEndDate(Game game) {
+    private void setupEndDate(GameMetadata game) {
         Calendar calendar = Calendar.getInstance();
         // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
         calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
@@ -490,7 +504,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName(final Game game) {
+    private void setupPickerName(final GameMetadata game) {
         FirebaseUserResourceManager.getUserMetadataById(game.getPickerId(), new ResourceListener<UserMetadata>() {
             @Override
             public void onData(UserMetadata user) {
@@ -528,7 +542,7 @@ public class GameActivity extends HomeAppCompatActivity {
         populateCards(Constants.DEFAULT_PACK);
     }
 
-    private void startCommentManager(Game game) {
+    private void startCommentManager(GameMetadata game) {
         commentManager = new FirebaseResourceManager();
         String gameCaptionsPath = game.getIsPublic() ?
                 String.format(GAME_PUBLIC_DATA_CAPTIONS_PATH, game.getId()) :
@@ -539,8 +553,10 @@ public class GameActivity extends HomeAppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        commentManager.removeListener();
-        joinedGameManager.removeListener();
+        if (commentManager != null && joinedGameManager != null) {
+            commentManager.removeListener();
+            joinedGameManager.removeListener();
+        }
     }
 
     @OnClick (R.id.image_view)

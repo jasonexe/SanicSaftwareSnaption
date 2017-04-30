@@ -24,11 +24,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
@@ -90,18 +89,17 @@ public class ProfileFragment extends Fragment {
     private User thisUser;
     private FloatingActionButton fab;
     private boolean isUser;
-    private ResourceListener gameListener = new ResourceListener<Game>() {
+    private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
         @Override
-        public void onData(Game data) {
+        public void onData(GameMetadata data) {
             // filter out private games if needed
-            if (canDisplayGame(data, isUser)) {
-                gameAdapter.addGame(data);
-            }
+            //TODO get private games for user
+            gameAdapter.addGame(data);
         }
 
         @Override
         public Class getDataType() {
-            return Game.class;
+            return GameMetadata.class;
         }
     };
 
@@ -122,7 +120,7 @@ public class ProfileFragment extends Fragment {
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         gameListView.setLayoutManager(gameViewManager);
-        gameAdapter = new ProfileGamesAdapter(new ArrayList<Game>());
+        gameAdapter = new ProfileGamesAdapter(new ArrayList<GameMetadata>());
         gameListView.setAdapter(gameAdapter);
 
         //if the user is logged in
@@ -183,12 +181,12 @@ public class ProfileFragment extends Fragment {
         captionsListView.setAdapter(captionsAdapter);
     }
 
-    private boolean canDisplayGame(Game game, boolean isUser) {
+    /*private boolean canDisplayGame(GameMetadata game, boolean isUser) {
         return game != null && (isUser ||
                 game.getIsPublic() ||
                 FirebaseUserResourceManager.getUserId() != null && game.getPlayers() != null &&
                         game.getPlayers().containsKey(FirebaseUserResourceManager.getUserId()));
-    }
+    }*/
 
     private void getUserGames(User user) {
         Map<String, Integer> gameIds = user.getCreatedPublicGames();
