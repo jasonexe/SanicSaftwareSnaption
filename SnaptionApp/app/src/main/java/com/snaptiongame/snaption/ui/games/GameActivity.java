@@ -293,37 +293,38 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void setupGameElements(Game game) {
         this.game = game;
-        photoPath = game.getImagePath();
-        FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
-            new ResourceListener<Bitmap>() {
-                @Override
-                public void onData(final Bitmap bitmap) {
-                    if (bitmap != null) {
-                        // remove the progress bar
-                        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
-                                .setBehavior(null);
-                        progressBar.setVisibility(View.GONE);
-                        // add a new behavior to the image view
-                        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
-                        ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
-                                .setBehavior(minimizeImageBehavior);
-                        // start transition now that image is loaded
-                        supportStartPostponedEnterTransition();
-                        // animate the image color swatch
-                        animateBitmapColorSwatch(bitmap);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Boolean.class;
-                }
-            });
         setupButtonDisplay(game);
         setupCaptionList(game);
     }
 
     private void setupGameMetadataElements(GameMetadata metadata) {
+        photoPath = metadata.getImagePath();
+        FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
+                new ResourceListener<Bitmap>() {
+                    @Override
+                    public void onData(final Bitmap bitmap) {
+                        if (bitmap != null) {
+                            // remove the progress bar
+                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                    .setBehavior(null);
+                            progressBar.setVisibility(View.GONE);
+                            // add a new behavior to the image view
+                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
+                                    .setBehavior(minimizeImageBehavior);
+                            // start transition now that image is loaded
+                            supportStartPostponedEnterTransition();
+                            // animate the image color swatch
+                            animateBitmapColorSwatch(bitmap);
+                        }
+                    }
+
+                    @Override
+                    public Class getDataType() {
+                        return Boolean.class;
+                    }
+                });
+
         initLoginManager();
         setupEndDate(metadata);
         setupPickerName(metadata);
