@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
@@ -56,6 +57,7 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ColorUtilities;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -101,6 +103,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private static final int ROTATION_TIME = 600;
     private static final float FAB_ROTATION = 135f;
     private static final long BITMAP_ANIM_DURATION = 1000L;
+    private static final float MAX_IMAGE_HEIGHT_PERCENT = 0.5f;
     private List<Card> allCards = null;
     private List<Card> handCards = null;
     private Card curUserCard = null;
@@ -227,7 +230,6 @@ public class GameActivity extends HomeAppCompatActivity {
             // set the shared transition view name
             ViewCompat.setTransitionName(imageView, metadata.getId());
             // postpone transition til image is loaded
-            supportPostponeEnterTransition();
             setupGameMetadataElements(metadata);
             retrieveGameData(metadata.getIsPublic() ? PUBLIC : PRIVATE, metadata.getId(), metadata);
         } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
@@ -277,9 +279,10 @@ public class GameActivity extends HomeAppCompatActivity {
                     if (data != null) {
                         Game game = new Game(data, metaData);
                         setupGameElements(game);
-                    }
-                    else {
-                        System.err.println("Game activity was passed an incorrect gameId");
+                    } else {
+                        GameData emptyData = new GameData();
+                        Game game = new Game(emptyData, metaData);
+                        setupGameElements(game);
                     }
                 }
 
@@ -297,9 +300,14 @@ public class GameActivity extends HomeAppCompatActivity {
         setupCaptionList(game);
     }
 
-    private void setupGameMetadataElements(GameMetadata metadata) {
-        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
-
+    private void loadPhoto(GameMetadata metadata) {
+        // set the progress bar and image view height using the image aspect ratio
+        Resources res = getResources();
+        final int imageHeight = ViewUtilities.calculateViewHeight(metadata.getImageAspectRatio(),
+                res.getDisplayMetrics().widthPixels, res.getDisplayMetrics().heightPixels * MAX_IMAGE_HEIGHT_PERCENT);
+        progressBar.getLayoutParams().height = imageHeight;
+        minimizeImageBehavior.updateViewMaxHeight(imageHeight);
+        imageView.getLayoutParams().height = imageHeight;
         photoPath = metadata.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
                 new ResourceListener<Bitmap>() {
@@ -311,7 +319,8 @@ public class GameActivity extends HomeAppCompatActivity {
                                     .setBehavior(null);
                             progressBar.setVisibility(View.GONE);
                             // add a new behavior to the image view
-                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout);
+                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
+                                    imageHeight);
                             ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
                                     .setBehavior(minimizeImageBehavior);
                             // start transition now that image is loaded
@@ -327,6 +336,11 @@ public class GameActivity extends HomeAppCompatActivity {
                     }
                 });
 
+    }
+
+    private void setupGameMetadataElements(GameMetadata metadata) {
+        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+        loadPhoto(metadata);
         initLoginManager();
         setupEndDate(metadata);
         setupPickerName(metadata);
@@ -349,7 +363,7 @@ public class GameActivity extends HomeAppCompatActivity {
                                             setupHomeArrow(arrowColor);
                                         }
                                     });
-                            // animate the color change of the status bar and image
+                            // animate the status bar color to the generated color
                             ValueAnimator statusBarColorAnim = ValueAnimator.ofArgb(
                                     getWindow().getStatusBarColor(), color);
                             statusBarColorAnim.addUpdateListener(new ValueAnimator
@@ -358,13 +372,27 @@ public class GameActivity extends HomeAppCompatActivity {
                                 public void onAnimationUpdate(ValueAnimator animation) {
                                     int transitionColor = (int) animation.getAnimatedValue();
                                     getWindow().setStatusBarColor(transitionColor);
-                                    imageView.setBackgroundColor(transitionColor);
                                 }
                             });
                             statusBarColorAnim.setDuration(BITMAP_ANIM_DURATION);
                             statusBarColorAnim.setInterpolator(AnimationUtils.loadInterpolator(GameActivity.this,
                                     android.R.interpolator.fast_out_slow_in));
+                            // animate the image background color to the generated color
+                            ValueAnimator imageColorAnim = ValueAnimator.ofArgb(
+                                    android.R.color.white, color);
+                            imageColorAnim.addUpdateListener(new ValueAnimator
+                                    .AnimatorUpdateListener() {
+                                @Override
+                                public void onAnimationUpdate(ValueAnimator animation) {
+                                    int transitionColor = (int) animation.getAnimatedValue();
+                                    imageView.setBackgroundColor(transitionColor);
+                                }
+                            });
+                            imageColorAnim.setDuration(BITMAP_ANIM_DURATION);
+                            imageColorAnim.setInterpolator(AnimationUtils.loadInterpolator(GameActivity.this,
+                                    android.R.interpolator.fast_out_slow_in));
                             statusBarColorAnim.start();
+                            imageColorAnim.start();
                         }
                     });
         }
@@ -525,8 +553,10 @@ public class GameActivity extends HomeAppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        commentManager.removeListener();
-        joinedGameManager.removeListener();
+        if (commentManager != null && joinedGameManager != null) {
+            commentManager.removeListener();
+            joinedGameManager.removeListener();
+        }
     }
 
     @OnClick (R.id.image_view)
