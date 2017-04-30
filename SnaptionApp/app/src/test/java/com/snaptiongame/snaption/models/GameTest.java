@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -30,7 +31,7 @@ public class GameTest {
         Map<String, Integer> categories = new HashMap<>();
         categories.put("lol", 1);
         categories.put("kitten", 1);
-        long end = 1000;
+        long end = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND + 10;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, 1);
         Game game1 = new Game("me", "you", "images/", players, categories, true, end, start, 1);
@@ -152,7 +153,7 @@ public class GameTest {
         Map<String, Integer> categories = new HashMap<>();
         categories.put("lol", 1);
         categories.put("kitten", 1);
-        long end = Calendar.getInstance().getTimeInMillis();
+        long end = Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND - 10;
         long start = 500;
         Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
         game.closeGame();
@@ -235,5 +236,52 @@ public class GameTest {
     public void verifyCaptionsNull() {
         Game game = new Game();
         assertNull(game.getCaptions());
+    }
+
+    @Test
+    public void verifyTimeRemaining() {
+        Map<String, Integer> players = new HashMap<>();
+        players.put("player1", 1);
+        players.put("player2", 1);
+        Map<String, Integer> categories = new HashMap<>();
+        categories.put("lol", 1);
+        categories.put("kitten", 1);
+        long end = 60;
+        long start = 100;
+        Game game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("1 minute remaining", game.remainingTime(0));
+        end = 40;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("0 minutes remaining", game.remainingTime(0));
+        end = 3599;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("59 minutes remaining", game.remainingTime(0));
+        end = 3598;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("59 minutes remaining", game.remainingTime(0));
+        end = 3000;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("50 minutes remaining", game.remainingTime(0));
+        end = 3600;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("1 hour remaining", game.remainingTime(0));
+        end = 3660;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("1 hour remaining", game.remainingTime(0));
+        end = 86399;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("23 hours remaining", game.remainingTime(0));
+        end = 72000;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("20 hours remaining", game.remainingTime(0));
+        end = 86400;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("1 day remaining", game.remainingTime(0));
+        end = 86440;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("1 day remaining", game.remainingTime(0));
+        end = 4320000;
+        game = new Game("me", "you", "images/", players, categories, true, end, start, 1);
+        assertEquals("50 days remaining", game.remainingTime(0));
     }
 }

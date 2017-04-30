@@ -414,11 +414,19 @@ public class GameActivity extends HomeAppCompatActivity {
     // Displays the date that the game will end underneath the picture
     private void setupEndDate(Game game) {
         Calendar calendar = Calendar.getInstance();
-        // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
-        calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
-        endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
-                .format(calendar.getTime()));
+        // display when the game ended when closed
+        if(!game.getIsOpen()) {
+            // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
+            calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
+            endDate.setText(new SimpleDateFormat("MM/dd/yy", Locale.getDefault())
+                    .format(calendar.getTime()));
+        }
+        else {
+            endDate.setText(game.remainingTime(calendar.getTimeInMillis()));
+        }
     }
+
+
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
