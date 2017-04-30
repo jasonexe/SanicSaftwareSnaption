@@ -168,7 +168,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     }
 
     public static void getUserFriends(String id, ResourceListener<Map<String, Integer>> listener) {
-        retrieveSingleNoUpdates(String.format(Constants.USER_FRIENDS_PATH, id), listener);
+        retrieveStringMapNoUpdates(String.format(Constants.USER_FRIENDS_PATH, id), listener);
     }
 
     public void getUserFriendsWithUpdates(String id, ResourceListener<Map<String, Integer>> listener) {

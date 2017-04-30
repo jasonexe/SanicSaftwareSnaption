@@ -336,7 +336,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return Map.class;
                 }
             });
         }
