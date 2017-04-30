@@ -224,9 +224,10 @@ public class GameActivity extends HomeAppCompatActivity {
         if (startedIntent.hasExtra(Constants.GAME)) {
             GameMetadata metadata = (GameMetadata) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             // set the shared transition view name
-            ViewCompat.setTransitionName(imageView, game.getId());
+            ViewCompat.setTransitionName(imageView, metadata.getId());
             // postpone transition til image is loaded
             supportPostponeEnterTransition();
+            setupGameMetadataElements(metadata);
             retrieveGameData(metadata.getIsPublic() ? PUBLIC : PRIVATE, metadata.getId(), metadata);
         } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
@@ -316,15 +317,17 @@ public class GameActivity extends HomeAppCompatActivity {
                     return Boolean.class;
                 }
             });
-        initLoginManager();
         setupButtonDisplay(game);
         setupCaptionList(game);
-        setupEndDate(game);
-        setupPickerName(game);
-        setupCaptionCardView();
-        startCommentManager(game);
     }
 
+    private void setupGameMetadataElements(GameMetadata metadata) {
+        initLoginManager();
+        setupEndDate(metadata);
+        setupPickerName(metadata);
+        setupCaptionCardView();
+        startCommentManager(metadata);
+    }
 
     private void animateBitmapColorSwatch(final Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -459,7 +462,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     // Displays the date that the game will end underneath the picture
-    private void setupEndDate(Game game) {
+    private void setupEndDate(GameMetadata game) {
         Calendar calendar = Calendar.getInstance();
         // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
         calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
@@ -469,7 +472,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
-    private void setupPickerName(final Game game) {
+    private void setupPickerName(final GameMetadata game) {
         FirebaseUserResourceManager.getUserMetadataById(game.getPickerId(), new ResourceListener<UserMetadata>() {
             @Override
             public void onData(UserMetadata user) {
@@ -507,7 +510,7 @@ public class GameActivity extends HomeAppCompatActivity {
         populateCards(Constants.DEFAULT_PACK);
     }
 
-    private void startCommentManager(Game game) {
+    private void startCommentManager(GameMetadata game) {
         commentManager = new FirebaseResourceManager();
         String gameCaptionsPath = game.getIsPublic() ?
                 String.format(GAME_PUBLIC_DATA_CAPTIONS_PATH, game.getId()) :
