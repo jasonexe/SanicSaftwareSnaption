@@ -298,6 +298,8 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void setupGameMetadataElements(GameMetadata metadata) {
+        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
+
         photoPath = metadata.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
                 new ResourceListener<Bitmap>() {
@@ -460,7 +462,6 @@ public class GameActivity extends HomeAppCompatActivity {
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
-        scrollFabHider = new ScrollFabHider(fab, ScrollFabHider.BIG_HIDE_THRESHOLD);
         captionListView.addOnScrollListener(scrollFabHider);
     }
 
