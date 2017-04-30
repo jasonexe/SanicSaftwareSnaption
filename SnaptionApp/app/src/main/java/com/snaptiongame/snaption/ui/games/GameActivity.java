@@ -14,6 +14,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,11 +40,14 @@ import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
 import com.snaptiongame.snaption.models.Game;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetadata;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
@@ -68,8 +72,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaption.Constants.GAME_CAPTIONS_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYERS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTIONS_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 import static com.snaptiongame.snaption.ui.games.CardLogic.addCaption;
@@ -84,6 +91,7 @@ import static com.snaptiongame.snaption.ui.games.CardLogic.getRandomCardsFromLis
  */
 public class GameActivity extends HomeAppCompatActivity {
     public static final String USE_GAME_ID = "useGameId";
+    public static final String USE_GAME_ACCESS = "useGameAccess";
     public static final String REFRESH_STRING = "refresh";
     public static final String BLANK_CARD = "__blank__";
     private final static String EMPTY_SIZE = "0";
@@ -219,27 +227,63 @@ public class GameActivity extends HomeAppCompatActivity {
             // set the shared transition view name
             ViewCompat.setTransitionName(imageView, game.getId());
             setupGameElements(game);
-        } else if (startedIntent.hasExtra(USE_GAME_ID)) {
+        } else if (startedIntent.hasExtra(USE_GAME_ID) && startedIntent.hasExtra(USE_GAME_ACCESS)) {
             // If we were started via deep link, we'll only have the game ID. Have to pull
             // from firebase
             String gameId = startedIntent.getStringExtra(USE_GAME_ID);
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PATH, gameId),
-                    new ResourceListener<Game>() {
-                        @Override
-                        public void onData(Game data) {
-                            if (data != null) {
-                                setupGameElements(data);
-                            } else {
-                                System.err.println("Game activity was passed an incorrect gameId");
-                            }
-                        }
-
-                        @Override
-                        public Class getDataType() {
-                            return Game.class;
-                        }
-                    });
+            String access = startedIntent.getStringExtra(USE_GAME_ACCESS);
+            //Gets the metadata and data for the game and calls setupGameElements
+            retrieveGame(access, gameId);
         }
+    }
+
+    private void retrieveGame(String access, String gameId) {
+        retrieveGameMetaData(access, gameId);
+    }
+
+    private void retrieveGameMetaData(final String access, final String gameId) {
+        FirebaseResourceManager.retrieveSingleNoUpdates(
+            String.format(GAME_METADATA_PATH, access, gameId),
+            new ResourceListener<GameMetadata>() {
+                @Override
+                public void onData(GameMetadata metaData) {
+                    if (metaData != null) {
+                        retrieveGameData(access, gameId, metaData);
+                    }
+                    else {
+                        System.err.println("Game activity was passed an incorrect gameId");
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return GameMetadata.class;
+                }
+            }
+        );
+    }
+
+    private void retrieveGameData(final String access, final String gameId,
+                                  final GameMetadata metaData) {
+        FirebaseResourceManager.retrieveSingleNoUpdates(
+            String.format(GAME_METADATA_PATH, access, gameId), new ResourceListener<GameData>() {
+                @Override
+                public void onData(GameData data) {
+                    if (data != null) {
+                        Game game = new Game(data, metaData);
+                        setupGameElements(game);
+                    }
+                    else {
+                        System.err.println("Game activity was passed an incorrect gameId");
+                    }
+                }
+
+                @Override
+                public Class getDataType() {
+                    return GameData.class;
+                }
+            }
+        );
     }
 
     private void setupGameElements(Game game) {
@@ -257,29 +301,31 @@ public class GameActivity extends HomeAppCompatActivity {
 
         photoPath = game.getImagePath();
         FirebaseResourceManager.loadImageIntoView(photoPath, imageView,
-                new ResourceListener<Bitmap>() {
-                    @Override
-                    public void onData(final Bitmap bitmap) {
-                        if (bitmap != null) {
-                            // remove the progress bar
-                            ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
-                                    .setBehavior(null);
-                            progressBar.setVisibility(View.GONE);
-                            // add a new behavior to the image view
-                            minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
-                                    imageHeight);
-                            ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
-                                    .setBehavior(minimizeImageBehavior);
-                            // animate the image color swatch
-                            animateBitmapColorSwatch(bitmap);
-                        }
+            new ResourceListener<Bitmap>() {
+                @Override
+                public void onData(final Bitmap bitmap) {
+                    if (bitmap != null) {
+                        // remove the progress bar
+                        ((CoordinatorLayout.LayoutParams) progressBar.getLayoutParams())
+                                .setBehavior(null);
+                        progressBar.setVisibility(View.GONE);
+                        // add a new behavior to the image view
+                        minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
+                                imageHeight);
+                        ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
+                                .setBehavior(minimizeImageBehavior);
+                        // start transition now that image is loaded
+                        supportStartPostponedEnterTransition();
+                        // animate the image color swatch
+                        animateBitmapColorSwatch(bitmap);
                     }
+                }
 
-                    @Override
-                    public Class getDataType() {
-                        return Boolean.class;
-                    }
-                });
+                @Override
+                public Class getDataType() {
+                    return Boolean.class;
+                }
+            });
         initLoginManager();
         setupButtonDisplay(game);
         setupCaptionList(game);
@@ -350,7 +396,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void setupButtonDisplay(Game game) {
         // When this is initially called, setup the button with current data
-        final String pickerId = game.getPicker();
+        final String pickerId = game.getPickerId();
         if (game.getPlayers() == null) {
             determineButtonDisplay(pickerId, null);
         } else {
@@ -358,8 +404,11 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         joinedGameManager = new FirebaseResourceManager();
         // setup a listener for when player joins the game
-        joinedGameManager.retrieveMapWithUpdates(String.format(Constants.GAME_PLAYERS_PATH,
-                game.getId()), new ResourceListener<Map<String, Object>>() {
+        String gamePlayersPath = game.getIsPublic() ?
+                String.format(GAME_PUBLIC_DATA_PLAYERS_PATH, game.getId()) :
+                String.format(GAME_PRIVATE_DATA_PLAYERS_PATH, game.getId());
+        joinedGameManager.retrieveMapWithUpdates(gamePlayersPath,
+                new ResourceListener<Map<String, Object>>() {
             @Override
             public void onData(Map<String, Object> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
@@ -376,7 +425,7 @@ public class GameActivity extends HomeAppCompatActivity {
     }
 
     private void determineButtonDisplay(String pickerId, Set<String> players) {
-        String thisUser = FirebaseResourceManager.getUserId();
+        String thisUser = FirebaseUserResourceManager.getUserId();
         // If they're not logged in, just show join game
         if (thisUser == null) {
             setJoinGameIsVisible(true);
@@ -421,10 +470,10 @@ public class GameActivity extends HomeAppCompatActivity {
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
         } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this));
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
@@ -444,17 +493,16 @@ public class GameActivity extends HomeAppCompatActivity {
     // Displays the name of the picture underneath the picture, and
     // also displays the picker's profile photo.
     private void setupPickerName(final Game game) {
-        String userPath = FirebaseResourceManager.getUserPath(game.getPicker());
-        FirebaseResourceManager.retrieveSingleNoUpdates(userPath, new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUserMetadataById(game.getPickerId(), new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User user) {
+            public void onData(UserMetadata user) {
                 if (user != null) {
                     pickerName.setText(user.getDisplayName());
                     FirebaseResourceManager.loadImageIntoView(user.getImagePath(), pickerPhoto);
                     pickerPhoto.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPicker());
+                            ProfileActivity.getProfileActivityCreator(GameActivity.this).create(game.getPickerId());
                         }
                     });
                 }
@@ -462,7 +510,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }
@@ -484,8 +532,10 @@ public class GameActivity extends HomeAppCompatActivity {
 
     private void startCommentManager(Game game) {
         commentManager = new FirebaseResourceManager();
-        commentManager.addChildListener(String.format(GAME_CAPTIONS_PATH, game.getId()),
-                captionListener);
+        String gameCaptionsPath = game.getIsPublic() ?
+                String.format(GAME_PUBLIC_DATA_CAPTIONS_PATH, game.getId()) :
+                String.format(GAME_PRIVATE_DATA_CAPTIONS_PATH, game.getId());
+        commentManager.addChildListener(gameCaptionsPath, captionListener);
     }
 
     @Override
@@ -495,10 +545,20 @@ public class GameActivity extends HomeAppCompatActivity {
         joinedGameManager.removeListener();
     }
 
+    @OnClick (R.id.image_view)
+    public void onClickGameImage() {
+        Intent photoZoomIntent = new Intent(this, PhotoZoomActivity.class);
+        photoZoomIntent.putExtra(PhotoZoomActivity.PHOTO_PATH, game.getImagePath());
+        photoZoomIntent.putExtra(PhotoZoomActivity.TRANSITION_NAME, game.getId());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                imageView, game.getId());
+        startActivity(photoZoomIntent, options.toBundle());
+    }
+
     @OnClick(R.id.fab)
     public void displayCardOptions() {
         //if the user is logged in they can caption
-        if (FirebaseResourceManager.getUserId() != null) {
+        if (FirebaseUserResourceManager.getUserId() != null) {
             toggleVisibility(captionCardsList);
             //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
             if (cardInputView.getVisibility() == View.VISIBLE) {
@@ -515,7 +575,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.join_game_button)
     public void joinGame() {
-        if (FirebaseResourceManager.getUserId() == null) {
+        if (FirebaseUserResourceManager.getUserId() == null) {
             loginDialog.show();
             return;
         }
@@ -630,7 +690,7 @@ public class GameActivity extends HomeAppCompatActivity {
             Uploader uploader = new FirebaseUploader();
             // Game will be a class variable probs
             Game game = this.game;
-            addCaption(userInput, FirebaseResourceManager.getUserId(), uploader, curUserCard, game);
+            addCaption(userInput, FirebaseUserResourceManager.getUserId(), uploader, curUserCard, game);
             toggleVisibility(cardInputView);
             toggleVisibility(captionCardsList);
             hideKeyboard();

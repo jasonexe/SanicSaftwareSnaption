@@ -35,7 +35,7 @@ public class FirebaseTests{
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.snaptiongame.snaptionapp", appContext.getPackageName());
+        assertEquals("com.snaptiongame.snaption", appContext.getPackageName());
     }
 
     //This asserts both uploads and download work. Kind of.

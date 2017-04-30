@@ -1,9 +1,13 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
+
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 /**
  * This is a generic interface to provide structure for our backend solution
@@ -32,7 +36,7 @@ public interface Uploader {
      * @param game
      * @param photo
      */
-    public void addGame(Game game, byte[] photo,
+    public void addGame(Game game, byte[] data, double aspectRatio,
                         FirebaseUploader.UploadDialogInterface uploadCallback);
 
     /**
@@ -43,9 +47,11 @@ public interface Uploader {
 
     /**
      * Create a new key from backend to use as a Game's identity
+     *
+     * @param isPublic What accessibility the game has
      * @return a string representing a key so that it can be found later
      */
-    public String getNewGameKey();
+    public String getNewGameKey(boolean isPublic);
 
     /**
      * Responsible for:
@@ -54,15 +60,16 @@ public interface Uploader {
      *  adds caption to the user captions list
      *
      * @param caption
+     * @param isPublic
      */
-    public void addCaptions(Caption caption);
+    public void addCaptions(Caption caption, boolean isPublic);
 
     /**
      * Create a new key from backend to use as a Caption's identity
-     * @param gameId The Id of the game that the caption will be in.
+     * @param game The game the caption will be in.
      * @return a string representing a key so that it can be found later
      */
-    public String getNewCaptionKey(String gameId);
+    public String getNewCaptionKey(Game game);
     /**
      * Responsible for:
      *  uploading profile picture
@@ -70,7 +77,7 @@ public interface Uploader {
      * @param user
      * @param photo
      */
-    public void addUser(User user, byte[] photo, ResourceListener<User> listener);
+    public void addUser(UserMetadata user, byte[] photo, ResourceListener<UserMetadata> listener);
 
     /**
      * Responsible for adding the friend to the user's friends list and adding the user to the
@@ -79,5 +86,5 @@ public interface Uploader {
      * @param user
      * @param friend
      */
-    public void addFriend(User user, Friend friend, UploadListener listener);
+    public void addFriend(UserMetadata user, Friend friend, UploadListener listener);
 }

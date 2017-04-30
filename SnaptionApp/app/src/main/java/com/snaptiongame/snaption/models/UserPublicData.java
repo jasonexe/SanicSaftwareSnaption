@@ -22,6 +22,14 @@ public class UserPublicData {
         this.friends = friends;
     }
 
+    public UserPublicData(UserPublicData other) {
+        if (other != null) {
+            this.captions = other.captions;
+            this.createdGames = other.createdGames;
+            this.friends = other.friends;
+        }
+    }
+
     public Map<String, Caption> getCaptions() {
         return captions;
     }

@@ -73,10 +73,16 @@
     <string name="total_caption_upvote_text">Upvotes:</string>
     <string name="friends_with_colon">Friends:</string>
     <string name="make_own_caption_prompt">Make your own caption!</string>
+    <string name="converting">Converting...</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
     <string name="close_nav_drawer">Close navigation drawer</string>
     <string name="user_profile_photo">User profile photo</string>
     <string name="title_activity_caption">CaptionActivity</string>
+    <string name="choose_image_from">Choose Image from...</string>
+    <string name="uploading_photo">Uploading photo</string>
+    <string name="pick_an_image">You must pick an image.</string>
+    <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
+    <string name="pick_future_date">You must select a day in the future.</string>
 </resources>

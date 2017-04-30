@@ -14,7 +14,9 @@ import android.widget.TextView;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
@@ -38,7 +40,7 @@ public class FriendsFragment extends Fragment {
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
 
-    private FirebaseResourceManager firebase = new FirebaseResourceManager();
+    private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
 
@@ -70,7 +72,7 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        firebase.removeListener();
+        userFirebase.removeListener();
     }
 
     @Override
@@ -83,16 +85,17 @@ public class FriendsFragment extends Fragment {
      * Populates the friends list with your current snaption friends.
      */
     private void populateFriends() {
-        if (FirebaseResourceManager.getUserPath() != null) {
-            firebase.retrieveSingleWithUpdates(FirebaseResourceManager.getUserPath(), new ResourceListener<User>() {
+        final String userId = FirebaseUserResourceManager.getUserId();
+        if (FirebaseUserResourceManager.getUserId() != null) {
+            userFirebase.getUserFriendsWithUpdates(userId, new ResourceListener<Map<String, Integer>>() {
                 @Override
-                public void onData(User user) {
-                    if (user != null && user.getFriends() != null) {
+                public void onData(Map<String, Integer> userIds) {
+                    if (userIds != null) {
                         friendNotice.setVisibility(View.GONE);
-                        List<User> users = new ArrayList<>();
+                        List<UserMetadata> users = new ArrayList<>();
                         friendsListAdapter = new FriendsListAdapter(users, ProfileActivity.getProfileActivityCreator(getContext()));
                         friendsListView.setAdapter(friendsListAdapter);
-                        loadUsers(user.getFriends());
+                        loadUsers(userIds);
                     }
                     else {
                         friendNotice.setVisibility(View.VISIBLE);
@@ -102,16 +105,16 @@ public class FriendsFragment extends Fragment {
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return Map.class;
                 }
             });
         }
     }
 
     private void loadUsers(Map<String, Integer> uids) {
-        FirebaseResourceManager.loadUsers(uids, new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUsersMetadataByIds(uids, new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User user) {
+            public void onData(UserMetadata user) {
                 if (user != null) {
                     friendsListAdapter.addSingleItem(user);
                 }
@@ -119,7 +122,7 @@ public class FriendsFragment extends Fragment {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }

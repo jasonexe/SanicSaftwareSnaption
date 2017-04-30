@@ -20,8 +20,10 @@ import com.facebook.share.widget.AppInviteDialog;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
@@ -137,10 +139,10 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     @SuppressWarnings("ResourceType")
     private void initializeViewModel() {
-        FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUserMetadataById(FirebaseUserResourceManager.getUserId(),
+                new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User user) {
+            public void onData(UserMetadata user) {
                 if (user != null) {
                     viewModel = new FriendsViewModel(user, uploader);
                     setLoginProviderFriendsLabel();
