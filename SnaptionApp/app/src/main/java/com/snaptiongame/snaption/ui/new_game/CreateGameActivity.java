@@ -44,6 +44,7 @@ import com.snaptiongame.snaption.utilities.ViewUtilities;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,8 @@ public class CreateGameActivity extends AppCompatActivity {
     private static final int FRIENDS_LIST_MAX_HEIGHT = 250;
     private static final long FRIENDS_ANIMATION_DURATION = 400;
     private static final int DEFAULT_DAYS_AHEAD = 5;
+    private static final int MILLIS_IN_DAY = 86400000;
+    private static final int MAX_END_DAY_COUNT = 14;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -460,8 +463,12 @@ public class CreateGameActivity extends AppCompatActivity {
      * Displays the datepicker dialog to allow the user to input the date.
      */
     public void setDate() {
-        new DatePickerDialog(this, myDateListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DATE)).show();
+        DatePickerDialog dateDialog = new DatePickerDialog(this, myDateListener,
+                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE));
+        //set the date limits so user cannot pick a date outside of game scope
+        dateDialog.getDatePicker().setMinDate(System.currentTimeMillis() + MILLIS_IN_DAY);
+        dateDialog.getDatePicker().setMaxDate(System.currentTimeMillis() + (MILLIS_IN_DAY * MAX_END_DAY_COUNT));
+        dateDialog.show();
     }
     
     /**
