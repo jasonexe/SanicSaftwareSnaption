@@ -39,7 +39,7 @@ public class Constants {
     //Path to user's public captions
     public static final String USER_PUBLIC_CAPTIONS_PATH = USER_PUBLIC_DATA_PATH + "/captions";
     //Path to user's data that is private
-    public static final String USER_PRIVATE_DATA_PATH = "users/private/%s";
+    public static final String USER_PRIVATE_DATA_PATH = "users/private/data/%s";
     //Path to user's joined games public and private
     public static final String USER_PRIVATE_JOINED_GAMES_PATH = USER_PRIVATE_DATA_PATH + "/joinedGames";
     //Path to user's joined games public and private
