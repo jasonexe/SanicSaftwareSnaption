@@ -38,12 +38,12 @@ public class CardLogic {
         // Should never be null, but ya can't be too sure
         if (curCard != null) {
             String gameId = game.getId();
-            String captionId = uploader.getNewCaptionKey(gameId);
+            String captionId = uploader.getNewCaptionKey(game);
             List<String> allInput = new ArrayList<>();
             allInput.add(userInput);
             Caption userCaption = new Caption(captionId, gameId,
                     userId, curCard, allInput);
-            uploader.addCaptions(userCaption);
+            uploader.addCaptions(userCaption, game.getIsPublic());
         }
     }
 }

@@ -17,6 +17,7 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
+import static com.snaptiongame.snaption.ui.games.GameActivity.USE_GAME_ACCESS;
 import static com.snaptiongame.snaption.ui.games.GameActivity.USE_GAME_ID;
 
 /**
@@ -67,7 +68,11 @@ public class DeepLinkGetter {
             Class toLaunch = info.getClassForIntent();
             if(toLaunch == GameActivity.class) {
                 Intent launchIntent = new Intent(activity, toLaunch);
-                launchIntent.putExtra(USE_GAME_ID, info.getIntentString());
+                String intentString = info.getIntentString();
+                String accessString = info.getAccessString();
+                launchIntent.putExtra(USE_GAME_ID,
+                        intentString);
+                launchIntent.putExtra(USE_GAME_ACCESS, accessString);
                 activity.startActivity(launchIntent);
             }
         }

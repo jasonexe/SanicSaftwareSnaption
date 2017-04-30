@@ -9,14 +9,18 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.snaptiongame.snaption.Constants;
-import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameMetadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.CREATION_DATE;
-import static com.snaptiongame.snaption.Constants.GAMES_PATH;
+import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
+
 
 /**
  * FirebaseGameResourceManager is used to retrieve game data from Firebase
@@ -26,8 +30,8 @@ import static com.snaptiongame.snaption.Constants.GAMES_PATH;
 
 public class FirebaseGameResourceManager implements GameResourceManager {
     private static FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private ResourceListener<List<Game>> listener;
-    private List<Game> privateGames;
+    private ResourceListener<List<GameMetadata>> listener;
+    private List<GameMetadata> privateGames;
     private int publicLimit;
     private int privateLimit;
 
@@ -49,7 +53,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
      * @param listener A ResourceListener for retrieving a List of games
      * @param gameType Enum describing if you want mixed games, only private, or only public
      */
-    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<Game>> listener, GameType gameType) {
+    public FirebaseGameResourceManager(int publicLimit, int privateLimit, ResourceListener<List<GameMetadata>> listener, GameType gameType) {
         this.publicLimit = publicLimit;
         this.privateLimit = privateLimit;
         this.listener = listener;
@@ -71,8 +75,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
     // This method retrieves games in the order they are created, from newest to oldest
     private void retrieveBottomPublicGames() {
-        Query query = database.getReference(GAMES_PATH).orderByChild(CREATION_DATE);
-        if(retrievedOnce) {
+        Query query = database.getReference(Constants.GAMES_PUBLIC_METADATA_PATH).orderByChild(CREATION_DATE);
+        if (retrievedOnce) {
             query = query.limitToLast(publicLimit).endAt((long) lastRetrievedCreationDate, lastRetrievedKey);
         } else {
             query = query.limitToLast(publicLimit);
@@ -81,14 +85,14 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean continued = false;
-                List<Game> data = new ArrayList<>();
+                List<GameMetadata> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     // Since we're using the first game's creation date and key, this boolean is
                     // to track if they have been set yet.
                     boolean gotFirst = false; 
                     for (DataSnapshot snapshot : snapshots) {
-                        Game curGame = (Game) snapshot.getValue(listener.getDataType());
+                        GameMetadata curGame = (GameMetadata) snapshot.getValue(listener.getDataType());
                         if(!gotFirst) {
                             lastRetrievedCreationDate = curGame.getCreationDate();
                             lastRetrievedKey = snapshot.getKey();
@@ -132,7 +136,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
     }
 
     private void retrievePublicGamesByPriority() {
-        Query query = database.getReference(GAMES_PATH).orderByPriority();
+        Query query = database.getReference(GAMES_PUBLIC_METADATA_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
@@ -151,13 +155,13 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<Game> data = new ArrayList<>();
+                List<GameMetadata> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
                         lastRetrievedPriority = snapshot.getPriority();
                         lastRetrievedKey = snapshot.getKey();
-                        data.add((Game) snapshot.getValue(listener.getDataType()));
+                        data.add((GameMetadata) snapshot.getValue(listener.getDataType()));
                     }
                     if (retrievedOnce) {
                         if (data.size() > 0) {
@@ -173,7 +177,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePublicGamesByPriority - " + databaseError.toString());
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(),
+                        "retrievePublicGamesByPriority - " + databaseError.toString());
             }
         });
     }
@@ -199,56 +204,72 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<String> gameIds = new ArrayList<>();
+                Map<String, String> gameIds = new LinkedHashMap<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 for (DataSnapshot snapshot : snapshots) {
                     lastRetrievedPriority = snapshot.getPriority();
                     lastRetrievedKey = snapshot.getKey();
-                    gameIds.add(lastRetrievedKey);
+                    gameIds.put(lastRetrievedKey, (String)snapshot.getValue());
                 }
                 if (retrievedOnce) {
                     if (gameIds.size() > 0) {
-                        gameIds.remove(0);
+                        List<String> keys = new ArrayList<>(gameIds.keySet());
+                        gameIds.remove(keys.get(0));
                     }
                 }
                 else {
                     retrievedOnce = true;
                 }
+                //Take the game id map and convert them to games
                 convertIdsToGames(gameIds);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(FirebaseGameResourceManager.class.getSimpleName(), "retrievePrivateGamesByPriority - " + databaseError.toString());
+                Log.e(FirebaseGameResourceManager.class.getSimpleName(),
+                        "retrievePrivateGamesByPriority - " + databaseError.toString());
                 FirebaseReporter.reportException(null, "Error getting private database info");
                 listener.onData(null);
             }
         });
     }
 
-    private void convertIdsToGames(List<String> gameIds) {
+    /**
+     * Takes a map of game IDs and their accessibility strings and converts them to a list of games.
+     *
+     * @param gameIds A map of game IDs and their accessibility strings
+     */
+    private void convertIdsToGames(Map<String, String> gameIds) {
         privateGames = new ArrayList<>();
-        convertIdsToGamesHelper(gameIds);
+        convertIdsToGamesHelper(new ArrayList<>(gameIds.keySet()), gameIds);
     }
 
-    private void convertIdsToGamesHelper(final List<String> gameIds) {
+    /**
+     * A recursive function to help convert the map of game ids to a list of games. It removes a key
+     * for each iteration.
+     *
+     * @param keys A list of game IDs
+     * @param gameIds A map of game IDs and their accessibility strings
+     */
+    private void convertIdsToGamesHelper(final List<String> keys, final Map<String, String> gameIds) {
         // If this is last game, don't recursive
-        if (gameIds.size() == 0) {
+        if (keys.size() == 0) {
             listener.onData(privateGames);
         } else {
-            DatabaseReference gameRef = database.getReference(String.format(Constants.GAME_PATH, gameIds.get(0)));
+            //Create a path from the accessibility and the game id
+            String gamePath = String.format(GAME_METADATA_PATH,
+                    gameIds.get(keys.get(0)), keys.get(0));
+            DatabaseReference gameRef = database.getReference(gamePath);
             gameRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    privateGames.add(dataSnapshot.getValue(Game.class));
-                    gameIds.remove(0);
-                    convertIdsToGamesHelper(gameIds);
+                    privateGames.add(dataSnapshot.getValue(GameMetadata.class));
+                    keys.remove(0);
+                    convertIdsToGamesHelper(keys, gameIds);
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
+                public void onCancelled(DatabaseError databaseError) {}
             });
         }
     }

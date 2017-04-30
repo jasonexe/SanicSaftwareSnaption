@@ -39,7 +39,7 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
                 view.getContext().startActivity(gamePageIntent);
             }
         });
-        holder.captionUpvotes.setText(String.valueOf(curCaption.retrieveNumVotes()));
+        holder.captionUpvotes.setText(String.valueOf(curCaption.retrieveNumUpvotes()));
         // Make sure it's visible. Gone by default so that the cards in the game don't need to change.
         holder.captionUpvotes.setVisibility(View.VISIBLE);
     }
