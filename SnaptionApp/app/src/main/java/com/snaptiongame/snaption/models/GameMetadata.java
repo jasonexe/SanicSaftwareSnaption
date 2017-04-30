@@ -15,7 +15,7 @@ import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 public class GameMetadata implements Serializable {
 
-    private String gameId; //The ID of the game
+    private String id; //The ID of the game
     private String pickerId; //The ID of the picker
     private String imagePath; //The path of the image on Firebase
     private Map<String, Integer> tags; //The map of tags of the image
@@ -34,7 +34,7 @@ public class GameMetadata implements Serializable {
     /**
      * Constructor with creationDate to test with dependency injection.
      *
-     * @param gameId The ID of the game
+     * @param id The ID of the game
      * @param pickerId The ID of the picker
      * @param imagePath The image path in firebase
      * @param tags The map of tags of the image
@@ -43,9 +43,9 @@ public class GameMetadata implements Serializable {
      * @param creationDate When the game was created
      * @param imageAspectRatio The aspect ratio for the image
      */
-    public GameMetadata(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
+    public GameMetadata(String id, String pickerId, String imagePath, Map<String, Integer> tags,
                         boolean isPublic, long endDate, long creationDate, double imageAspectRatio) {
-        this.gameId = gameId;
+        this.id = id;
         this.pickerId = pickerId;
         this.imagePath = imagePath;
         this.tags = tags;
@@ -58,7 +58,7 @@ public class GameMetadata implements Serializable {
     /**
      * Normal constructor with all fields but creationDate.
      *
-     * @param gameId The ID of the game
+     * @param id The ID of the game
      * @param pickerId The ID of the picker
      * @param imagePath The image path in firebase
      * @param tags The map of tags of the image
@@ -66,15 +66,15 @@ public class GameMetadata implements Serializable {
      * @param endDate When the game ends
      * @param imageAspectRatio The aspect ratio for the image
      */
-    public GameMetadata(String gameId, String pickerId, String imagePath, Map<String, Integer> tags,
+    public GameMetadata(String id, String pickerId, String imagePath, Map<String, Integer> tags,
                         boolean isPublic, long endDate, double imageAspectRatio) {
         //Calls the other constructor with creationDate calculated
-        this(gameId, pickerId, imagePath, tags, isPublic, endDate,
+        this(id, pickerId, imagePath, tags, isPublic, endDate,
                 Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND, imageAspectRatio);
     }
 
     public String getId() {
-        return gameId;
+        return id;
     }
 
     public String getPickerId() {

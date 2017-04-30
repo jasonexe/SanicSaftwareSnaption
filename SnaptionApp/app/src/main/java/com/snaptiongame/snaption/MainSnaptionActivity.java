@@ -14,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +28,6 @@ import android.widget.TextView;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.DeepLinkGetter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
@@ -63,6 +63,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected BottomNavigationView bottomNavigationView;
     @BindView(R.id.fab)
     protected FloatingActionButton fab;
+    protected View navDrawerPhotoContainer;
     protected ImageView navDrawerPhoto;
     protected TextView navDrawerName;
     protected TextView navDrawerEmail;
@@ -292,6 +293,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
+        navDrawerPhotoContainer = ButterKnife.findById(navigationHeaderView, R.id.photo_container);
         navDrawerPhoto = ButterKnife.findById(navigationHeaderView, R.id.user_photo);
         navDrawerName = ButterKnife.findById(navigationHeaderView, R.id.user_name);
         navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
@@ -330,12 +332,15 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         navDrawerEmail.setText(user.getEmail());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
         //set user info to visible now they are logged in
-        navDrawerPhoto.setVisibility(View.VISIBLE);
+        navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);
         navDrawerEmail.setVisibility(View.VISIBLE);
         //set logged in only options to visible
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+        //change log option item drawable to logout drawable
+        navigationView.getMenu().findItem(R.id.log_option).setIcon(ContextCompat
+                .getDrawable(this, R.drawable.logout));
         //add the my feed menu item if it is not already there
         MenuItem myFeedItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
         if (myFeedItem == null) {
@@ -355,12 +360,15 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
     private void removeUserInfoFromNavDrawer() {
         //hide elements because user is logged out
-        navDrawerPhoto.setVisibility(View.INVISIBLE);
-        navDrawerName.setVisibility(View.INVISIBLE);
-        navDrawerEmail.setVisibility(View.INVISIBLE);
+        navDrawerEmail.setVisibility(View.GONE);
+        navDrawerName.setVisibility(View.GONE);
+        navDrawerPhotoContainer.setVisibility(View.GONE);
         //set logged in only options to hidden
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+        //change log option item drawable to login drawable
+        navigationView.getMenu().findItem(R.id.log_option).setIcon(ContextCompat
+                .getDrawable(this, R.drawable.login));
         //remove the my feed menu item
         bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
         //if on the wall, update the menu item
