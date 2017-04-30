@@ -5,7 +5,15 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.DAYS;
+import static com.snaptiongame.snaption.Constants.HOURS;
+import static com.snaptiongame.snaption.Constants.HOURS_PER_DAY;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+import static com.snaptiongame.snaption.Constants.MINUTES;
+import static com.snaptiongame.snaption.Constants.MINUTES_PER_HOUR;
+import static com.snaptiongame.snaption.Constants.REMAINING;
+import static com.snaptiongame.snaption.Constants.SECONDS_PER_MINUTE;
+import static com.snaptiongame.snaption.Constants.SINGULAR;
 
 /**
  * Class containing all basic game information, and fits Firebase data structure.
@@ -129,5 +137,34 @@ public class GameMetadata implements Serializable {
 
     public void setTopCaption(Caption topCaption) {
         this.topCaption = topCaption;
+    }
+
+
+    /**
+     * Gets the remaining time compared with the inputted date and the endDate of this Game.
+     * @param curTime the current date to compare with.
+     * @return the remaining Days, Hours, or Minutes in a formatted String
+     */
+    public String remainingTime(long curTime) {
+        // gets the difference between the dates and converts it to minutes
+        long diff = (endDate * MILLIS_PER_SECOND - curTime) / (SECONDS_PER_MINUTE * MILLIS_PER_SECOND);
+        String result = diff % MINUTES_PER_HOUR + MINUTES;
+        diff /= MINUTES_PER_HOUR;
+        // use hours instead if it's longer than 60 minutes
+        if (diff != 0) {
+            result = diff % HOURS_PER_DAY + HOURS;
+            diff /= HOURS_PER_DAY;
+            // use days instead if it's longer than 24 hours
+            if (diff != 0) {
+                result = diff + DAYS;
+            }
+        }
+
+        // show that it is plural if applicable
+        if (!result.startsWith(SINGULAR)) {
+            result += 's';
+        }
+        result += REMAINING;
+        return result.toString();
     }
 }
