@@ -165,6 +165,6 @@ public class GameMetadata implements Serializable {
             result += 's';
         }
         result += REMAINING;
-        return result.toString();
+        return result;
     }
 }

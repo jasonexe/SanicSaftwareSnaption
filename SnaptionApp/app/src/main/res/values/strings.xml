@@ -22,7 +22,7 @@
     <string name="set_end_date">Select the game end date.</string>
     <string name="games_created">Games Made:</string>
     <string name="captions_created">Captions:</string>
-    <string name="end_date">End date</string>
+    <string name="end_date">\'Ended on: \'MM/dd/yy</string>
     <string name="privacy">Privacy</string>
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>

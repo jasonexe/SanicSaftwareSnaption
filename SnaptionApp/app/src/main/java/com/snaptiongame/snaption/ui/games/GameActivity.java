@@ -500,7 +500,7 @@ public class GameActivity extends HomeAppCompatActivity {
         if(!game.isOpen()) {
             // Multiply end date by 1,000 because the dates in firebase are in seconds, not ms
             calendar.setTimeInMillis(game.getEndDate() * MILLIS_PER_SECOND);
-            endDate.setText(new SimpleDateFormat("'Ended on: 'MM/dd/yy", Locale.getDefault())
+            endDate.setText(new SimpleDateFormat(getResources().getString(R.string.end_date), Locale.getDefault())
                     .format(calendar.getTime()));
         }
         else {
