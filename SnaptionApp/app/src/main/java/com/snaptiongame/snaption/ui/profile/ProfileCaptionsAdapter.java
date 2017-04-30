@@ -6,12 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
 import java.util.List;
 
+import static com.snaptiongame.snaption.ui.games.GameActivity.USE_GAME_ACCESS;
 import static com.snaptiongame.snaption.ui.games.GameActivity.USE_GAME_ID;
 
 /**
@@ -30,12 +32,14 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
     public void onBindViewHolder(ProfileCaptionsViewHolder holder, int position) {
         Caption curCaption = captions.get(position);
         final String gameId = curCaption.getGameId();
+        final String access = Constants.PUBLIC;
         holder.captionText.setText(curCaption.retrieveCaptionText());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {;
                 Intent gamePageIntent = new Intent(view.getContext(), GameActivity.class);
                 gamePageIntent.putExtra(USE_GAME_ID, gameId);
+                gamePageIntent.putExtra(USE_GAME_ACCESS, access);
                 view.getContext().startActivity(gamePageIntent);
             }
         });

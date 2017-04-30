@@ -70,6 +70,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYERS_PATH;
@@ -249,9 +250,10 @@ public class GameActivity extends HomeAppCompatActivity {
             String.format(GAME_METADATA_PATH, access, gameId),
             new ResourceListener<GameMetadata>() {
                 @Override
-                public void onData(GameMetadata metaData) {
-                    if (metaData != null) {
-                        retrieveGameData(access, gameId, metaData);
+                public void onData(GameMetadata metadata) {
+                    if (metadata != null) {
+                        setupGameMetadataElements(metadata);
+                        retrieveGameData(access, gameId, metadata);
                     }
                     else {
                         System.err.println("Game activity was passed an incorrect gameId");
@@ -269,7 +271,7 @@ public class GameActivity extends HomeAppCompatActivity {
     private void retrieveGameData(final String access, final String gameId,
                                   final GameMetadata metaData) {
         FirebaseResourceManager.retrieveSingleNoUpdates(
-            String.format(GAME_METADATA_PATH, access, gameId), new ResourceListener<GameData>() {
+            String.format(GAME_DATA_PATH, access, gameId), new ResourceListener<GameData>() {
                 @Override
                 public void onData(GameData data) {
                     if (data != null) {
