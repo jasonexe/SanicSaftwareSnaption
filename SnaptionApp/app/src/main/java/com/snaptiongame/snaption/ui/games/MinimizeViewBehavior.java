@@ -16,7 +16,7 @@ import android.widget.LinearLayout;
  */
 public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private static final float MIN_PERCENT_HEIGHT = 0.5f;
-    private double maxViewHeightPx = -1;
+    private double maxViewHeightPx;
     private static final String STATUS_BAR_HEIGHT_RES = "status_bar_height";
     private static final String DIMEN_RES = "dimen";
     private static final String ANDROID_RES = "android";
