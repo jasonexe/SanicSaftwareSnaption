@@ -224,7 +224,7 @@ public class GameActivity extends HomeAppCompatActivity {
         if (startedIntent.hasExtra(Constants.GAME)) {
             GameMetadata metadata = (GameMetadata) getIntent().getSerializableExtra(Constants.GAME); //Obtaining data
             // set the shared transition view name
-            ViewCompat.setTransitionName(imageView, game.getId());
+            ViewCompat.setTransitionName(imageView, metadata.getId());
             // postpone transition til image is loaded
             supportPostponeEnterTransition();
             retrieveGameData(metadata.getIsPublic() ? PUBLIC : PRIVATE, metadata.getId(), metadata);
