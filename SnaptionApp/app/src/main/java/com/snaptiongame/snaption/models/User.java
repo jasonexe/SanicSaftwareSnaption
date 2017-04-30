@@ -141,7 +141,7 @@ public class User implements Person, Comparable<User> {
         int gameCount = 0;
         //get public and private games
         Map publicCreatedGames = publicData.getCreatedGames();
-        Map privateCreatedGames = publicData.getCreatedGames();
+        Map privateCreatedGames = privateData.getCreatedGames();
         if (publicCreatedGames != null) {
             gameCount += publicCreatedGames.size();
         }
