@@ -504,7 +504,15 @@ public class GameActivity extends HomeAppCompatActivity {
                     .format(calendar.getTime()));
         }
         else {
-            endDate.setText(game.remainingTime(calendar.getTimeInMillis()));
+            // remainingTime returns as an array to have the first element be the value
+            // and to have the second element be an R.string id, to avoid passing in Contexts
+            int[] format = game.remainingTime(calendar.getTimeInMillis());
+            String toShow = format[0] + " " + getResources().getString(format[1]);
+            // indicator to include the "s" for plural
+            if (format[0] != 1) {
+                toShow += getResources().getString(R.string.plural);
+            }
+            endDate.setText(toShow + " " + getResources().getString(R.string.remain));
         }
     }
 

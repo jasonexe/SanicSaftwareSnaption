@@ -9,11 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+import com.snaptiongame.snaption.R;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -189,40 +190,61 @@ public class GameTest {
         String imagePath = "images/";
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
         data1 = new GameData(players1, captions1);
+        int[] format = {1, R.string.minutes};
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
 
-        assertEquals("1 minute remaining", gameMetadata1.remainingTime(0));
         end = 40;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("0 minutes remaining", gameMetadata1.remainingTime(0));
+        format[0] = 0;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 3599;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("59 minutes remaining", gameMetadata1.remainingTime(0));
+        format[0] = 59;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 3598;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("59 minutes remaining", gameMetadata1.remainingTime(0));
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 3000;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("50 minutes remaining", gameMetadata1.remainingTime(0));
+        format[0] = 50;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 3600;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("1 hour remaining", gameMetadata1.remainingTime(0));
+        format[0] = 1;
+        format[1] = R.string.hours;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 3660;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("1 hour remaining", gameMetadata1.remainingTime(0));
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 86399;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("23 hours remaining", gameMetadata1.remainingTime(0));
+        format[0] = 23;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 72000;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("20 hours remaining", gameMetadata1.remainingTime(0));
+        format[0] = 20;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 86400;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("1 day remaining", gameMetadata1.remainingTime(0));
+        format[0] = 1;
+        format[1] = R.string.days;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 86440;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("1 day remaining", gameMetadata1.remainingTime(0));
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
         end = 4320000;
         gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
-        assertEquals("50 days remaining", gameMetadata1.remainingTime(0));
+        format[0] = 50;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
     }
 }

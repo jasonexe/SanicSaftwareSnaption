@@ -170,10 +170,4 @@ public class Constants {
     public static final int COMPRESSION_VALUE = 80;
     public static final int MAX_IMAGE_UPLOAD_WIDTH = 1920;
     public static final int MAX_IMAGE_UPLOAD_HEIGHT = 1080;
-    // constants for building the String for time remaining
-    public static final String HOURS = " hour";
-    public static final String MINUTES = " minute";
-    public static final String DAYS = " day";
-    public static final String REMAINING = " remaining";
-    public static final String SINGULAR = "1 ";
 }
