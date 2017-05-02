@@ -64,17 +64,22 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
     @Override
     public WallViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_game_item, parent, false);
-        return new WallViewHolder(view);
+        WallViewHolder holder = new WallViewHolder(view);
+        holder.photo.setMaxImageHeight(parent.getContext().getResources()
+                .getDimension(R.dimen.max_wall_image_height));
+        return holder;
     }
 
     public interface OnClickGamePhotoListener {
         void onClickGamePhoto(View view, GameMetadata game);
     }
 
-    // TODO use aspect ratio here to size the view
     @Override
     public void onBindViewHolder(final WallViewHolder holder, int position) {
         final GameMetadata game = items.get(position);
+
+        // set the height of the game photo with the image aspect ratio
+        holder.photo.setImageAspectRatio(game.getImageAspectRatio());
 
         // display the Picker of the game, the one who created it
         displayUser(holder.pickerName, null, game.getPickerId());

@@ -20,7 +20,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.picker_name)
     public TextView pickerName;
     @BindView(R.id.photo)
-    public ImageView photo;
+    public AspectRatioImageView photo;
     @BindView(R.id.caption_text)
     public TextView captionText;
     @BindView(R.id.captioner_container)
