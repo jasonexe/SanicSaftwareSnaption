@@ -1,8 +1,6 @@
 package com.snaptiongame.snaption.ui.wall;
 
 import android.text.SpannableStringBuilder;
-import android.view.View;
-import android.widget.LinearLayout;
 
 import com.snaptiongame.snaption.BuildConfig;
 import com.snaptiongame.snaption.models.Caption;
@@ -21,7 +19,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
@@ -30,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -100,19 +96,5 @@ public class WallViewAdapterTest {
         games.add(game1);
         adapter.addItems(games);
         assertEquals(3, adapter.getItemCount());
-    }
-
-    @Test
-    public void onBindViewHolderTest() {
-        // tests populating a wall view holder with a game a public, open game with two upvotes and
-        // a top caption
-        createAdapter();
-        wallViewHolder = adapter.onCreateViewHolder(new LinearLayout(RuntimeEnvironment.application), 0);
-        adapter.onBindViewHolder(wallViewHolder, 0);
-        assertEquals("2", wallViewHolder.upvoteCountText.getText());
-        assertEquals(View.VISIBLE, wallViewHolder.captionerLayout.getVisibility());
-        assertEquals("caption text", wallViewHolder.captionText.getText().toString());
-        assertFalse(wallViewHolder.captionText.getTypeface().isBold());
-        assertFalse(wallViewHolder.captionText.getTypeface().isItalic());
     }
 }
