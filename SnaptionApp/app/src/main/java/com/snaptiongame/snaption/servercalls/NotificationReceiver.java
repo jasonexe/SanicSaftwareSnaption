@@ -38,7 +38,6 @@ import static com.snaptiongame.snaption.Constants.*;
  *
  * Created by austinrobarts on 2/28/17.
  */
-
 public class NotificationReceiver extends FirebaseMessagingService {
 
     public static final String GAME_ID_KEY = "gameId";
@@ -75,7 +74,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
             @Override
             public void onData(final GameMetadata metaData) {
                 //after getting game, must get user
-                FirebaseUserResourceManager.getUserMetadataById(String.format(Constants.USER_METADATA_PATH, senderUserId),
+                FirebaseUserResourceManager.getUserMetadataById(senderUserId,
                     new ResourceListener<UserMetadata>() {
                         @Override
                         public void onData(UserMetadata user) {
