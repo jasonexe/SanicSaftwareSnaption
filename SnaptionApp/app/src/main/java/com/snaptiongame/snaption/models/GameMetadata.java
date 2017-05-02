@@ -1,11 +1,16 @@
 package com.snaptiongame.snaption.models;
 
+import com.snaptiongame.snaption.R;
+
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.snaptiongame.snaption.Constants.HOURS_PER_DAY;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
+import static com.snaptiongame.snaption.Constants.MINUTES_PER_HOUR;
+import static com.snaptiongame.snaption.Constants.SECONDS_PER_MINUTE;
 
 /**
  * Class containing all basic game information, and fits Firebase data structure.
@@ -129,5 +134,32 @@ public class GameMetadata implements Serializable {
 
     public void setTopCaption(Caption topCaption) {
         this.topCaption = topCaption;
+    }
+
+
+    /**
+     * Gets the remaining time compared with the inputted date and the endDate of this Game.
+     * @param curTime the current date to compare with.
+     * @return the remaining Days/Hours/Minutes value, followed by the string resource id
+     */
+    public int[] remainingTime(long curTime) {
+        int[] result = new int[2];
+        // gets the difference between the dates and converts it to minutes
+        long diff = (endDate * MILLIS_PER_SECOND - curTime) / (SECONDS_PER_MINUTE * MILLIS_PER_SECOND);
+        result[0] = (int)diff % MINUTES_PER_HOUR;
+        result[1] = R.string.minutes;
+        diff /= MINUTES_PER_HOUR;
+        // use hours instead if it's longer than 60 minutes
+        if (diff != 0) {
+            result[0] = (int)diff % HOURS_PER_DAY;
+            result[1] = R.string.hours;
+            diff /= HOURS_PER_DAY;
+            // use days instead if it's longer than 24 hours
+            if (diff != 0) {
+                result[0] = (int)diff;
+                result[1] = R.string.days;
+            }
+        }
+        return result;
     }
 }

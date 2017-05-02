@@ -9,10 +9,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.snaptiongame.snaption.R;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -175,5 +177,74 @@ public class GameTest {
         GameData gameData = new GameData();
         Game game = new Game(gameData, metaData);
         assertNull(game.getCaptions());
+    }
+
+    @Test
+    public void verifyTimeRemaining() {
+        players1 = new HashMap<>();
+        tags1 = new HashMap<>();
+        upvotes1 = new HashMap<>();
+        captions1 = new HashMap<>();
+        int end = 60;
+        int start = 10;
+        String imagePath = "images/";
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        data1 = new GameData(players1, captions1);
+        int[] format = {1, R.string.minutes};
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 40;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 0;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 3599;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 59;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 3598;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 3000;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 50;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 3600;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 1;
+        format[1] = R.string.hours;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 3660;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 86399;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 23;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 72000;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 20;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 86400;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 1;
+        format[1] = R.string.days;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 86440;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
+
+        end = 4320000;
+        gameMetadata1 = new GameMetadata("1", "a", imagePath, tags1, true, end, start, 1.0);
+        format[0] = 50;
+        assertTrue(Arrays.equals(format, gameMetadata1.remainingTime(0)));
     }
 }
