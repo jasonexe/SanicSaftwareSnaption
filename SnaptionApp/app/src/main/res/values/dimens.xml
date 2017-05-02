@@ -8,5 +8,5 @@
     <dimen name="nav_header_height">200dp</dimen>
     <dimen name="user_nav_photo_size">88dp</dimen>
     <dimen name="user_nav_photo_radius">44dp</dimen>
-    <dimen name="max_wall_image_height">400dp</dimen>
+    <dimen name="max_wall_image_height">600dp</dimen>
 </resources>
