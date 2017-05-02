@@ -8,11 +8,12 @@
     android:paddingBottom="32dp"
     android:clipChildren="false">
 
-    <ImageView
+    <com.snaptiongame.snaption.ui.wall.AspectRatioImageView
         android:id="@+id/photo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="150dp"
+        android:layout_centerHorizontal="true"
         android:adjustViewBounds="true"
         android:background="@drawable/rounded_corners"/>
 
