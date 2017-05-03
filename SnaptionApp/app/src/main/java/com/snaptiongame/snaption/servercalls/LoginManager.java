@@ -253,7 +253,6 @@ public class LoginManager {
             //establish fields needed for constructor
             String id = fbUser.getUid();
             String imagePath = PHOTOS_FOLDER + id;
-            //String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             String notificationId = FirebaseInstanceId.getInstance().getToken();
 
