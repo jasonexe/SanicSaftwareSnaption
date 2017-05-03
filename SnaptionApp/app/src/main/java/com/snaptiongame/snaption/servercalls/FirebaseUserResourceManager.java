@@ -193,7 +193,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
      * @param listener ResourceListener the user is returned to
      */
     public static void getUserMetadataByFacebookId(final String facebookId, final ResourceListener<UserMetadata> listener) {
-        Query query = database.getReference(Constants.USER_METADATA_PATH).orderByChild(Constants.USER_FACEBOOK_ID)
+        Query query = database.getReference(Constants.USERS_METADATA_PATH).orderByChild(Constants.USER_FACEBOOK_ID)
                 .equalTo(facebookId);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
