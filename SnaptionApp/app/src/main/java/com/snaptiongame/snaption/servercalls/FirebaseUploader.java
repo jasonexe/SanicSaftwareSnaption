@@ -113,9 +113,10 @@ public class FirebaseUploader implements Uploader {
                 String.format(GAME_DATA_PATH, access, gameId));
         dataRef.setValue(gameData);
         //notify players if there are any
-        if (game.getPlayers() != null) {
-            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet(), access);
-        }
+        //TODO: once we verify firebase functions does notifications well we can remove this and FirebaseNotificationSender
+        /*if (game.getPlayers() != null) {
+            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
+        }*/
     }
 
     private void notifyPlayersGameCreated(final String gameId, final Set<String> players,
