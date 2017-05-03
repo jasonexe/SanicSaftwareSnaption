@@ -47,6 +47,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import static android.R.attr.id;
+import static com.snaptiongame.snaption.Constants.EMAIL;
+import static com.snaptiongame.snaption.Constants.FIELDS;
 
 /**
  * Handles logging in and logging out of Facebook and Google and connecting these services with
@@ -339,10 +341,12 @@ public class LoginManager {
                         Log.v("LoginActivity", response.toString());
                         // Application code
                         try {
-                            String email = object.getString("email");
+                            String email = object.getString(EMAIL);
                             uploadUser(token.getUserId(), email);
                             loginAuthCallback.onSuccess();
                         } catch (JSONException e) {
+                            FirebaseReporter.reportException(e, "Failed to get email from Facebook" +
+                                    "JSON request");
                             e.printStackTrace();
                         }
                     }
@@ -364,7 +368,7 @@ public class LoginManager {
                         if (task.isSuccessful()) {
                             GraphRequest request = getFacebookEmailRequest(token);
                             Bundle parameters = new Bundle();
-                            parameters.putString("fields", "email");
+                            parameters.putString(FIELDS, EMAIL);
                             request.setParameters(parameters);
                             request.executeAsync();
                         }
