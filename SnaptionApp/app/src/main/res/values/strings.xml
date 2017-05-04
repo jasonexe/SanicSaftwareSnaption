@@ -9,6 +9,7 @@
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>
     <string name="snaption_wall">Snaption Wall</string>
+    <string name="feedback_text">Give Feedback</string>string>
     <string name="profile">Profile</string>
     <string name="game_public">Public</string>
     <string name="game_private">Private</string>
@@ -21,7 +22,7 @@
     <string name="set_end_date">Select the game end date.</string>
     <string name="games_created">Games Made:</string>
     <string name="captions_created">Captions:</string>
-    <string name="end_date">End date</string>
+    <string name="end_date">\'Ended on: \'MM/dd/yy</string>
     <string name="privacy">Privacy</string>
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>
@@ -71,10 +72,22 @@
     <string name="popular">Popular</string>
     <string name="total_caption_upvote_text">Upvotes:</string>
     <string name="friends_with_colon">Friends:</string>
+    <string name="make_own_caption_prompt">Make your own caption!</string>
+    <string name="converting">Converting...</string>
+    <string name="hours">hour</string>
+    <string name="minutes">minute</string>
+    <string name="days">day</string>
+    <string name="remain">remaining</string>
+    <string name="plural">s</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
     <string name="close_nav_drawer">Close navigation drawer</string>
     <string name="user_profile_photo">User profile photo</string>
     <string name="title_activity_caption">CaptionActivity</string>
+    <string name="choose_image_from">Choose Image from...</string>
+    <string name="uploading_photo">Uploading photo</string>
+    <string name="pick_an_image">You must pick an image.</string>
+    <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
+    <string name="pick_future_date">You must select a day in the future.</string>
 </resources>

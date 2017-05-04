@@ -16,9 +16,7 @@ import android.widget.LinearLayout;
  */
 public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private static final float MIN_PERCENT_HEIGHT = 0.5f;
-    private static final float MAX_VIEW_HEIGHT_PERCENT = 0.5f;
-    private float maxViewHeightPx;
-    private int maxViewHeight = -1;
+    private double maxViewHeightPx;
     private static final String STATUS_BAR_HEIGHT_RES = "status_bar_height";
     private static final String DIMEN_RES = "dimen";
     private static final String ANDROID_RES = "android";
@@ -26,13 +24,17 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private int appBarHeight = -1;
     private int statusBarHeight = -1;
 
-
-
     public MinimizeViewBehavior() {}
 
     public MinimizeViewBehavior(LinearLayout viewBelowView) {
         this.viewBelowView = viewBelowView;
     }
+
+    public MinimizeViewBehavior(LinearLayout viewBelowView, double maxViewHeightPx) {
+        this.viewBelowView = viewBelowView;
+        updateViewMaxHeight(maxViewHeightPx);
+    }
+
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) {
         return dependency instanceof AppBarLayout;
@@ -47,23 +49,19 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
             Resources res = child.getResources();
             statusBarHeight = res.getDimensionPixelSize(res.getIdentifier(STATUS_BAR_HEIGHT_RES,
                     DIMEN_RES, ANDROID_RES));
-            maxViewHeightPx = res.getDisplayMetrics().heightPixels * MAX_VIEW_HEIGHT_PERCENT;
         }
 
         int[] location = new int[2];
         dependency.getLocationOnScreen(location);
         float dependencyY = location[1];
 
-        if (maxViewHeight <= 0 || child.getHeight() > maxViewHeightPx) {
-            updateViewMaxHeight(child.getHeight());
-        }
-        if (maxViewHeight > 0) {
+        if (maxViewHeightPx > 0) {
             float viewY = child.getY();
 
             // minimize/expand  view
             ViewGroup.LayoutParams lp = child.getLayoutParams();
-            int height = Math.round((maxViewHeight - maxViewHeight * MIN_PERCENT_HEIGHT) /
-                    appBarHeight * (dependencyY - statusBarHeight) + maxViewHeight);
+            int height = (int) ((maxViewHeightPx - maxViewHeightPx * MIN_PERCENT_HEIGHT) /
+                    appBarHeight * (dependencyY - statusBarHeight) + maxViewHeightPx);
             lp.height = height;
             child.setLayoutParams(lp);
 
@@ -75,13 +73,8 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         return true;
     }
 
-    public void updateViewMaxHeight(int maxViewHeight) {
-        if (maxViewHeight > maxViewHeightPx) {
-            this.maxViewHeight = Math.round(maxViewHeightPx);
-        }
-        else {
-            this.maxViewHeight = maxViewHeight;
-        }
-        viewBelowView.setPadding(0, 0, 0, Math.round(this.maxViewHeight * MIN_PERCENT_HEIGHT));
+    public void updateViewMaxHeight(double maxViewHeight) {
+        this.maxViewHeightPx = maxViewHeight;
+        viewBelowView.setPadding(0, 0, 0, (int) (this.maxViewHeightPx * MIN_PERCENT_HEIGHT));
     }
 }

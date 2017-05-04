@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
@@ -21,9 +22,9 @@ import java.util.List;
  */
 
 public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHolder> {
-    private List<Game> games;
+    private List<GameMetadata> games;
 
-    public ProfileGamesAdapter(List<Game> games) {
+    public ProfileGamesAdapter(List<GameMetadata> games) {
         this.games = games;
     }
 
@@ -36,7 +37,7 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
     @Override
     public void onBindViewHolder(final ProfileGameViewHolder holder, int position) {
         //get last item and show it first
-        final Game game = games.get(games.size() - 1 - position);
+        final GameMetadata game = games.get(games.size() - 1 - position);
         FirebaseResourceManager.loadImageIntoView(game.getImagePath(), holder.photo);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -58,7 +59,7 @@ public class ProfileGamesAdapter extends RecyclerView.Adapter<ProfileGameViewHol
         return games.size();
     }
 
-    public void addGame(Game game) {
+    public void addGame(GameMetadata game) {
         games.add(game);
         this.notifyDataSetChanged();
     }

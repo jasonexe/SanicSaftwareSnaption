@@ -26,11 +26,13 @@ public class Caption implements Serializable, Comparable<Caption> {
     public String gameId;   // The game the caption was made on
     public Card card;       // The card that was used for this caption.
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
-    public Map<String, Integer> votes; // List of users who have upvoted this caption
+    public Map<String, Integer> upvotes; // List of users who have upvoted this caption
     private User user;       // The user associated with the game, private to keep firebase out
 
     //Needed for firebase compatibility
     public Caption() {}
+
+    // TODO add an isPublic method
 
     // Used for dependency injection if you want a custom userId
     public Caption(String id, String gameId, String userId, Card card, List<String> userInput) {
@@ -39,7 +41,7 @@ public class Caption implements Serializable, Comparable<Caption> {
         this.userInput = new ArrayList<>(userInput);
         this.userId = userId;
         this.gameId = gameId;
-        votes = new HashMap<>();
+        upvotes = new HashMap<>();
     }
 
     public Caption(String id, String gameId, Card card, List<String> userInput) throws IllegalStateException{
@@ -56,15 +58,15 @@ public class Caption implements Serializable, Comparable<Caption> {
         } else {
             throw new IllegalStateException("User should be logged in when creating a caption");
         }
-        votes = new HashMap<>();
+        upvotes = new HashMap<>();
     }
 
     public Card getCard() {
         return card;
     }
 
-    public Map<String, Integer> getVotes() {
-        return votes;
+    public Map<String, Integer> getUpvotes() {
+        return upvotes;
     }
 
     public List<String> getUserInput() {
@@ -81,11 +83,11 @@ public class Caption implements Serializable, Comparable<Caption> {
         return userId;
     }
 
-    public int retrieveNumVotes() {
-        if (votes == null) {
+    public int retrieveNumUpvotes() {
+        if (upvotes == null) {
             return 0;
         } else {
-            return votes.size();
+            return upvotes.size();
         }
     }
 
@@ -141,20 +143,20 @@ public class Caption implements Serializable, Comparable<Caption> {
      * @return a comparison value
      */
     public int compareTo(Caption a) {
-        Map<String, Integer> aVotes = a.getVotes();
-        Map<String, Integer> bVotes = this.getVotes();
-        int aVotesSize = 0;
-        int bVotesSize = 0;
+        Map<String, Integer> aUpvotes = a.getUpvotes();
+        Map<String, Integer> bUpvotes = this.getUpvotes();
+        int aUpvotesSize = 0;
+        int bUpvotesSize = 0;
 
-        if (aVotes != null) {
-            aVotesSize = aVotes.size();
+        if (aUpvotes != null) {
+            aUpvotesSize = aUpvotes.size();
         }
-        if (bVotes != null) {
-            bVotesSize = bVotes.size();
+        if (bUpvotes != null) {
+            bUpvotesSize = bUpvotes.size();
         }
         // If there's a tie in the vote count it will sort based on date
-        return bVotesSize == aVotesSize ? this.getId().compareTo(a.getId()) :
-                aVotesSize - bVotesSize;
+        return bUpvotesSize == aUpvotesSize ? this.getId().compareTo(a.getId()) :
+                aUpvotesSize - bUpvotesSize;
     }
 
     /**

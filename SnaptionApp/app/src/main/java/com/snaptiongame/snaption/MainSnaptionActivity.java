@@ -3,6 +3,7 @@ package com.snaptiongame.snaption;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -26,10 +28,11 @@ import android.widget.TextView;
 import com.facebook.FacebookSdk;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.DeepLinkGetter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -49,6 +52,7 @@ import butterknife.OnClick;
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
 
 public class MainSnaptionActivity extends HomeAppCompatActivity {
+    private static final String survey_url = "https://docs.google.com/forms/d/e/1FAIpQLSerSw6piYc20yi64SVjM48n7MklEFrg4Nk-oS5oRhlz_uxxRA/viewform";
     @BindView(R.id.toolbar)
     protected Toolbar toolbar;
     @BindView(R.id.drawer_layout)
@@ -59,6 +63,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected BottomNavigationView bottomNavigationView;
     @BindView(R.id.fab)
     protected FloatingActionButton fab;
+    protected View navDrawerPhotoContainer;
     protected ImageView navDrawerPhoto;
     protected TextView navDrawerName;
     protected TextView navDrawerEmail;
@@ -66,7 +71,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     private LoginManager loginManager;
     public LoginDialog loginDialog;
     private ActionBarDrawerToggle mDrawerToggle;
-    private User currentUser;
+    private UserMetadata currentUser;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
     // Used for keeping track of if this Activity is paused -- needed so logging in from
@@ -102,6 +107,12 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             Fragment newFragment = null;
             switch (selectedItemId) {
+                case R.id.feedback_item:
+                    //provide survey for bug reporting and feature requests/reviews
+                    Uri uri = Uri.parse(survey_url);
+                    //go to the website for google form
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    break;
                 case R.id.wall_item:
                     MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
                     if (bottomNavMenuItem == null) {
@@ -114,7 +125,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.profile_item:
                     newFragment = new ProfileFragment();
                     Bundle args = new Bundle();
-                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseResourceManager.getUserId());
+                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
                     newFragment.setArguments(args);
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
@@ -152,8 +163,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
             }
-            ft.replace(R.id.fragment_container, newFragment);
-            ft.commit();
+            ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
         }
     }
@@ -283,19 +293,20 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
+        navDrawerPhotoContainer = ButterKnife.findById(navigationHeaderView, R.id.photo_container);
         navDrawerPhoto = ButterKnife.findById(navigationHeaderView, R.id.user_photo);
         navDrawerName = ButterKnife.findById(navigationHeaderView, R.id.user_name);
         navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
     }
 
     private void updateNavigationViews() {
-        if (FirebaseResourceManager.getUserPath() != null) {
+        String id = FirebaseUserResourceManager.getUserId();
+        if (id != null) {
             if (currentUser == null) {
                 //retrieve information from User table
-                FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                        new ResourceListener<User>() {
+                FirebaseUserResourceManager.getUserMetadataById(id, new ResourceListener<UserMetadata>() {
                             @Override
-                            public void onData(User user) {
+                            public void onData(UserMetadata user) {
                                 currentUser = user;
                                 if (user != null) {
                                     addUserInfoToNavDrawer(user);
@@ -306,7 +317,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
                             @Override
                             public Class getDataType() {
-                                return User.class;
+                                return UserMetadata.class;
                             }
                         });
             }
@@ -315,18 +326,21 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void addUserInfoToNavDrawer(User user) {
+    private void addUserInfoToNavDrawer(UserMetadata user) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
         //set user info to visible now they are logged in
-        navDrawerPhoto.setVisibility(View.VISIBLE);
+        navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);
         navDrawerEmail.setVisibility(View.VISIBLE);
         //set logged in only options to visible
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(true);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(true);
+        //change log option item drawable to logout drawable
+        navigationView.getMenu().findItem(R.id.log_option).setIcon(ContextCompat
+                .getDrawable(this, R.drawable.logout));
         //add the my feed menu item if it is not already there
         MenuItem myFeedItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
         if (myFeedItem == null) {
@@ -346,12 +360,15 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
     private void removeUserInfoFromNavDrawer() {
         //hide elements because user is logged out
-        navDrawerPhoto.setVisibility(View.INVISIBLE);
-        navDrawerName.setVisibility(View.INVISIBLE);
-        navDrawerEmail.setVisibility(View.INVISIBLE);
+        navDrawerEmail.setVisibility(View.GONE);
+        navDrawerName.setVisibility(View.GONE);
+        navDrawerPhotoContainer.setVisibility(View.GONE);
         //set logged in only options to hidden
         navigationView.getMenu().findItem(R.id.profile_item).setVisible(false);
         navigationView.getMenu().findItem(R.id.friends_item).setVisible(false);
+        //change log option item drawable to login drawable
+        navigationView.getMenu().findItem(R.id.log_option).setIcon(ContextCompat
+                .getDrawable(this, R.drawable.login));
         //remove the my feed menu item
         bottomNavigationView.getMenu().removeItem(R.id.my_feed_item);
         //if on the wall, update the menu item
@@ -366,7 +383,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     @OnClick(R.id.fab)
     public void onClickFab(View view) {
         if (currentNavDrawerMenuId == R.id.wall_item) {
-            if (FirebaseResourceManager.getUserId() != null) {
+            if (FirebaseUserResourceManager.getUserId() != null) {
                 Intent intent = new Intent(this, CreateGameActivity.class);
                 startActivity(intent);
             }

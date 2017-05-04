@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/wall_item"
-        android:title="@string/snaption_wall"
-        android:icon="@drawable/ic_dashboard_grey_400_18dp"/>
-    <item
-        android:id="@+id/profile_item"
-        android:title="@string/profile"
-        android:icon="@drawable/ic_account_circle_grey_400_18dp"/>
-    <item
-        android:id="@+id/friends_item"
-        android:title="@string/friends"
-        android:icon="@drawable/ic_supervisor_account_grey_400_18dp"/>
-    <group
-        android:menuCategory="container">
+    <group android:id="@+id/main_group">
+        <item
+            android:id="@+id/feedback_item"
+            android:icon="@drawable/ic_snaption"
+            android:title="@string/feedback_text" />
+        <item
+            android:id="@+id/wall_item"
+            android:icon="@drawable/ic_dashboard_grey_400_18dp"
+            android:title="@string/snaption_wall" />
+        <item
+            android:id="@+id/profile_item"
+            android:icon="@drawable/ic_account_circle_grey_400_18dp"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/friends_item"
+            android:icon="@drawable/ic_supervisor_account_grey_400_18dp"
+            android:title="@string/friends" />
+    </group>
+    <group android:id="@+id/login_logout_group">
         <item
             android:id="@+id/log_option"
-            android:title="@string/login"
-            android:icon="@drawable/ic_account_circle_grey_400_18dp"/>
+            android:icon="@drawable/login"
+            android:title="@string/login" />
     </group>
-
 </menu>

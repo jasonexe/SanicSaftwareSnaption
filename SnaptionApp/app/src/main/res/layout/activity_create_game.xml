@@ -37,7 +37,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginBottom="4dp"
             android:layout_marginTop="24dp"
-            android:text="@string/end_date" />
+            android:text="@string/set_end_date" />
 
         <TextView
             android:id="@+id/text_date"
@@ -81,35 +81,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/game_private"/>
-        </RadioGroup>
-
-        <TextView
-            android:id="@+id/maturity_rating_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="4dp"
-            android:layout_marginStart="16dp"
-            android:textAllCaps="true"
-            android:text="@string/content_rating" />
-
-        <RadioGroup
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/radio_everyone"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/game_everyone"/>
-            <RadioButton
-                android:id="@+id/radio_adult"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/game_adult"/>
         </RadioGroup>
 
         <TextView

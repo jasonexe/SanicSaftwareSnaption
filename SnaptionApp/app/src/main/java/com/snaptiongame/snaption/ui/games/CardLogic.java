@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 import static com.snaptiongame.snaption.Constants.NUM_CARDS_IN_HAND;
+import static com.snaptiongame.snaption.ui.games.GameActivity.BLANK_CARD;
 
 /**
  * Does any card logic needed, used by GameActivity
@@ -19,7 +20,7 @@ import static com.snaptiongame.snaption.Constants.NUM_CARDS_IN_HAND;
 public class CardLogic {
     public static List<Card> getRandomCardsFromList(List<Card> allCards, Random rand) {
         List<Card> forHand = new ArrayList<>();
-        for(int cardNum = 0; cardNum < NUM_CARDS_IN_HAND; cardNum += 1) {
+        for(int cardNum = 0; cardNum < NUM_CARDS_IN_HAND - 1; cardNum += 1) {
             Card potentialCard = allCards.get(rand.nextInt(allCards.size() - 1));
             if(!forHand.contains(potentialCard)) {
                 forHand.add(potentialCard);
@@ -37,12 +38,12 @@ public class CardLogic {
         // Should never be null, but ya can't be too sure
         if (curCard != null) {
             String gameId = game.getId();
-            String captionId = uploader.getNewCaptionKey(gameId);
+            String captionId = uploader.getNewCaptionKey(game);
             List<String> allInput = new ArrayList<>();
             allInput.add(userInput);
             Caption userCaption = new Caption(captionId, gameId,
                     userId, curCard, allInput);
-            uploader.addCaptions(userCaption);
+            uploader.addCaptions(userCaption, game.getIsPublic());
         }
     }
 }

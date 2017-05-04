@@ -19,9 +19,9 @@ import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
-import com.snaptiongame.snaption.models.User;
-import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
@@ -51,7 +51,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
     // Pre-generated deep link to the home screen, allows for tracking through firebase console
-    private String homescreenDeepLink = "https://ba63n.app.goo.gl/a10w";
+    private String homescreenDeepLink = "https://ba63n.app.goo.gl/yv6I";
 
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
@@ -137,10 +137,10 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
     @SuppressWarnings("ResourceType")
     private void initializeViewModel() {
-        FirebaseResourceManager.retrieveSingleNoUpdates(FirebaseResourceManager.getUserPath(),
-                new ResourceListener<User>() {
+        FirebaseUserResourceManager.getUserMetadataById(FirebaseUserResourceManager.getUserId(),
+                new ResourceListener<UserMetadata>() {
             @Override
-            public void onData(User user) {
+            public void onData(UserMetadata user) {
                 if (user != null) {
                     viewModel = new FriendsViewModel(user, uploader);
                     setLoginProviderFriendsLabel();
@@ -153,7 +153,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }

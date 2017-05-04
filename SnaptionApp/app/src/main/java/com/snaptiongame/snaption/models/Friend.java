@@ -30,11 +30,8 @@ public class Friend implements Person {
      *
      * @param user User to convert to a friend
      */
-    public Friend(User user) {
-        this.snaptionId = user.getId();
-        this.displayName = user.getDisplayName();
-        this.email = user.getEmail();
-        this.facebookId = user.getFacebookId();
+    public Friend(UserMetadata user) {
+        this(user.getId(), user.getDisplayName(), user.getEmail(), user.getFacebookId());
     }
 
     @Override

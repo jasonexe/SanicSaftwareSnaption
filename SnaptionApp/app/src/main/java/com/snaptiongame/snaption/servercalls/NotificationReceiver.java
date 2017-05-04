@@ -12,10 +12,14 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
-import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.GameData;
+import com.snaptiongame.snaption.models.GameMetadata;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.ui.games.GameActivity;
 
 import java.util.Map;
+
+import static com.snaptiongame.snaption.Constants.*;
 
 /**
  * All notifications will be received by this method except:
@@ -34,11 +38,11 @@ import java.util.Map;
  *
  * Created by austinrobarts on 2/28/17.
  */
-
 public class NotificationReceiver extends FirebaseMessagingService {
 
     public static final String GAME_ID_KEY = "gameId";
     public static final String USER_ID_KEY = "userId";
+    public static final String GAME_ACCESS_KEY = "gameAccess";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -46,13 +50,16 @@ public class NotificationReceiver extends FirebaseMessagingService {
         Map<String, String> data = remoteMessage.getData();
         String gameId = null;
         String senderUserId = null;
+        String access = null;
 
         //if a data message was received
         if (data != null && data.size() > 0) {
             //create intent to open up game from remoteMessage info
             gameId = data.get(GAME_ID_KEY);
             senderUserId = data.get(USER_ID_KEY);
-            createNotification(gameId, senderUserId);
+            access = data.get(GAME_ACCESS_KEY);
+
+            createNotification(gameId, senderUserId, access);
         }
 
         //if a notification was received
@@ -61,44 +68,46 @@ public class NotificationReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void createNotification(String gameId, final String senderUserId) {
+    private void createNotification(final String gameId, final String senderUserId, final String access) {
         //gets given game and given user to populate notification
-        ResourceListener<Game> gameListener = new ResourceListener<Game>() {
+        ResourceListener<GameMetadata> gameListener = new ResourceListener<GameMetadata>() {
             @Override
-            public void onData(final Game data) {
+            public void onData(final GameMetadata metaData) {
                 //after getting game, must get user
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, senderUserId), new ResourceListener<User>() {
-                    @Override
-                    public void onData(User user) {
-                        //ensure the user and game were found before sending notification
-                        if (data != null && user != null) {
-                            sendNotification(data, user);
+                FirebaseUserResourceManager.getUserMetadataById(senderUserId,
+                    new ResourceListener<UserMetadata>() {
+                        @Override
+                        public void onData(UserMetadata user) {
+                            //ensure the user and game were found before sending notification
+                            if (metaData != null && user != null) {
+                                sendNotification(metaData, user);
+                            }
                         }
-                    }
 
-                    @Override
-                    public Class getDataType() {
-                        return User.class;
-                    }
-                });
+                        @Override
+                        public Class getDataType() {
+                            return UserMetadata.class;
+                        }
+                    });
+
             }
-
             @Override
             public Class getDataType() {
-                return Game.class;
+                return GameMetadata.class;
             }
         };
         //checking to make sure this data was in notification
         if (gameId != null && senderUserId != null) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
+            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_METADATA_PATH,
+                    access, gameId), gameListener);
         }
     }
 
-    private void sendNotification(Game game, User user) {
+    private void sendNotification(GameMetadata game, UserMetadata user) {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(Constants.GAME, game);
+        intent.putExtra(GAME, game);
         //create fake history so back button goes to Wall
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
         stackBuilder.addParentStack(GameActivity.class);

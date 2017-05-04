@@ -2,6 +2,7 @@ package com.snaptiongame.snaption.servercalls;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -10,6 +11,8 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -37,8 +40,15 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static android.R.attr.id;
+import static com.snaptiongame.snaption.Constants.EMAIL;
+import static com.snaptiongame.snaption.Constants.FIELDS;
 
 /**
  * Handles logging in and logging out of Facebook and Google and connecting these services with
@@ -76,6 +86,7 @@ public class LoginManager {
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
             FirebaseUser changedUser = firebaseAuth.getCurrentUser();
             if(changedUser != null) {
+                String email = changedUser.getEmail();
                 if(changedUser.getProviders() != null && changedUser.getProviders().size() > 0) {
                     String facebookId = null;
                     // Check if they are facebook. If so, need to set facebook ID
@@ -90,7 +101,7 @@ public class LoginManager {
                     } else {
                         downloadPhoto(changedUser.getPhotoUrl().toString());
                     }
-                    uploadUser(facebookId);
+                    uploadUser(facebookId, email);
                 }
             }
         }
@@ -197,6 +208,8 @@ public class LoginManager {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
+            // TODO remove this after we confirm that it works (need keys)
+            System.out.println("Google email: " + acct.getEmail());
             loginToFirebase(acct);
         } else {
             resetGoogleApi();
@@ -233,14 +246,15 @@ public class LoginManager {
         }
     }
 
-    private void uploadUser(final String facebookId) {
+    private void uploadUser(String facebookId, String email) {
         FirebaseUser fbUser = auth.getCurrentUser();
         //make sure user is signed in before sending
-        if (fbUser != null) {
+        if (fbUser != null && email != null) {
+            // Updates email so that if we want to, we can call FirebaseUser.getEmail() and it'll work
+            fbUser.updateEmail(email);
             //establish fields needed for constructor
-            final String id = fbUser.getUid();
+            String id = fbUser.getUid();
             String imagePath = PHOTOS_FOLDER + id;
-            String email = fbUser.getEmail();
             String displayName = fbUser.getDisplayName();
             String notificationId = FirebaseInstanceId.getInstance().getToken();
 
@@ -249,16 +263,16 @@ public class LoginManager {
                 downloadPhoto(String.format(FACEBOOK_IMAGE_URL, facebookId));
             }
             //create and upload User to Firebase
-            User user = new User(id, email, displayName, notificationId, facebookId, imagePath);
-            uploader.addUser(user, profilePhoto, new ResourceListener<User>() {
+            UserMetadata user = new UserMetadata(displayName, email, imagePath, notificationId, facebookId, id);
+            uploader.addUser(user, profilePhoto, new ResourceListener<UserMetadata>() {
                 @Override
-                public void onData(User data) {
+                public void onData(UserMetadata data) {
                     listener.onLoginComplete();
                 }
 
                 @Override
                 public Class getDataType() {
-                    return User.class;
+                    return UserMetadata.class;
                 }
             });
         }
@@ -307,12 +321,33 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            uploadUser(null);
+                            uploadUser(null, acct.getEmail());
                             loginAuthCallback.onSuccess();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             loginAuthCallback.onError();
+                        }
+                    }
+                });
+    }
+
+    private GraphRequest getFacebookEmailRequest(final AccessToken token) {
+        return GraphRequest.newMeRequest(
+                token,
+                new GraphRequest.GraphJSONObjectCallback() {
+                    @Override
+                    public void onCompleted(JSONObject object, GraphResponse response) {
+                        Log.v("LoginActivity", response.toString());
+                        // Application code
+                        try {
+                            String email = object.getString(EMAIL);
+                            uploadUser(token.getUserId(), email);
+                            loginAuthCallback.onSuccess();
+                        } catch (JSONException e) {
+                            FirebaseReporter.reportException(e, "Failed to get email from Facebook" +
+                                    "JSON request");
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -331,8 +366,11 @@ public class LoginManager {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
                         if (task.isSuccessful()) {
-                            uploadUser(token.getUserId());
-                            loginAuthCallback.onSuccess();
+                            GraphRequest request = getFacebookEmailRequest(token);
+                            Bundle parameters = new Bundle();
+                            parameters.putString(FIELDS, EMAIL);
+                            request.setParameters(parameters);
+                            request.executeAsync();
                         }
                         else {
                             Log.w(TAG, "signInWithCredential", task.getException());

@@ -24,15 +24,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Game;
+import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
@@ -46,6 +46,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.snaptiongame.snaption.Constants.*;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -54,7 +55,6 @@ public class ProfileFragment extends Fragment {
 
     public static final String USER_ID_ARG = "userId";
 
-    private static final String GAME_DIRECTORY = "games";
     private static final int IMAGE_PICK_CODE = 8;
     private boolean isEditing;
 
@@ -89,18 +89,17 @@ public class ProfileFragment extends Fragment {
     private User thisUser;
     private FloatingActionButton fab;
     private boolean isUser;
-    private ResourceListener gameListener = new ResourceListener<Game>() {
+    private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
         @Override
-        public void onData(Game data) {
+        public void onData(GameMetadata data) {
             // filter out private games if needed
-            if (canDisplayGame(data, isUser)) {
-                gameAdapter.addGame(data);
-            }
+            //TODO get private games for user
+            gameAdapter.addGame(data);
         }
 
         @Override
         public Class getDataType() {
-            return Game.class;
+            return GameMetadata.class;
         }
     };
 
@@ -109,7 +108,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         String userId = getArguments().getString(ProfileFragment.USER_ID_ARG);
-        String currentUserId = FirebaseResourceManager.getUserId();
+        String currentUserId = FirebaseUserResourceManager.getUserId();
         isUser = currentUserId != null && currentUserId.equals(userId);
         isEditing = false;
         final View view = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -121,13 +120,13 @@ public class ProfileFragment extends Fragment {
         //set up all recycler view connections
         LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
         gameListView.setLayoutManager(gameViewManager);
-        gameAdapter = new ProfileGamesAdapter(new ArrayList<Game>());
+        gameAdapter = new ProfileGamesAdapter(new ArrayList<GameMetadata>());
         gameListView.setAdapter(gameAdapter);
 
         //if the user is logged in
         if (userId != null) {
             //retrieve information from User table
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.USER_PATH, userId), new ResourceListener<User>() {
+            FirebaseUserResourceManager.getUserById(userId, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
                     setupUserData(user, view);
@@ -146,14 +145,15 @@ public class ProfileFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
-        gamesCreated.setText(String.valueOf(user.retrieveCreatedGameCount()));
-        captionsCreated.setText(String.valueOf(user.retrieveCaptionCount()));
-        friendsMade.setText(String.valueOf(user.retrieveFriendsCount()));
+        gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
+        captionsCreated.setText(String.valueOf(user.getTotalCaptionCount()));
+        friendsMade.setText(String.valueOf(user.getFriendCount()));
 
         int numCapUpvotes = 0;
-        if(user.getCaptions() != null) {
-            for(Caption caption : user.getCaptions().values()) {
-                numCapUpvotes += caption.retrieveNumVotes();
+
+        if(user.getPublicCaptions() != null) {
+            for(Caption caption : user.getPublicCaptions().values()) {
+                numCapUpvotes += caption.retrieveNumUpvotes();
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
@@ -168,63 +168,33 @@ public class ProfileFragment extends Fragment {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(view.getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
         captionsListView.setLayoutManager(captionViewManager);
-        Map<String, Caption> mapUserCaptions = user.getCaptions();
-        captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<Caption>());
-        if (mapUserCaptions != null) {
-            if (isUser) {
-                captionsAdapter = new ProfileCaptionsAdapter(new ArrayList<>(mapUserCaptions.values()));
-            }
-            else {
-                filterCaptions(new ArrayList<>(mapUserCaptions.values()), new CaptionFilterListener() {
-                    @Override
-                    public void captionFiltered(Caption caption) {
-                        captionsAdapter.addCaption(caption);
-                    }
-                });
-            }
+        List<Caption> captions = new ArrayList<>();
+        if (isUser) {
+            //get public and private captions
+            captions = user.getAllCaptions();
         }
+        else {
+            //get private games only
+            captions = user.getAllPublicCaptions();
+        }
+        captionsAdapter = new ProfileCaptionsAdapter(captions);
         captionsListView.setAdapter(captionsAdapter);
     }
 
-    private interface CaptionFilterListener {
-        void captionFiltered(Caption caption);
-    }
-
-    private void filterCaptions(List<Caption> captions, final CaptionFilterListener filterListener) {
-        // filter out captions of private games if needed
-        for (final Caption caption : captions) {
-            FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH,
-                    caption.gameId), new ResourceListener<Game>() {
-                @Override
-                public void onData(Game data) {
-                    // filter out captions of private games if needed
-                    if (canDisplayGame(data, isUser)) {
-                        filterListener.captionFiltered(caption);
-                    }
-                }
-
-                @Override
-                public Class getDataType() {
-                    return Game.class;
-                }
-            });
-        }
-    }
-
-    private boolean canDisplayGame(Game game, boolean isUser) {
+    /*private boolean canDisplayGame(GameMetadata game, boolean isUser) {
         return game != null && (isUser ||
                 game.getIsPublic() ||
-                FirebaseResourceManager.getUserId() != null && game.getPlayers() != null &&
-                        game.getPlayers().containsKey(FirebaseResourceManager.getUserId()));
-    }
+                FirebaseUserResourceManager.getUserId() != null && game.getPlayers() != null &&
+                        game.getPlayers().containsKey(FirebaseUserResourceManager.getUserId()));
+    }*/
 
     private void getUserGames(User user) {
-        Map<String, Integer> gameIds = user.getCreatedGames();
+        Map<String, Integer> gameIds = user.getCreatedPublicGames();
         //if User has any games
         if (gameIds != null) {
             //for each gameId in user's game list
             for (String gameId : gameIds.keySet()) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(Constants.GAME_PATH, gameId), gameListener);
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PUBLIC_METADATA_PATH, gameId), gameListener);
             }
         }
     }
@@ -309,8 +279,8 @@ public class ProfileFragment extends Fragment {
     // Saves the name to firebase, also updates the name in the profile
     private void saveEditName() {
         // Firebase stuff here
-        String newText = profileEditName.getText().toString();
-        if (!newText.equals(thisUser.getDisplayName())) {
+        String newText = profileEditName.getText().toString().trim();
+        if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
             FirebaseUploader.updateDisplayName(newText, thisUser.getId());
             thisUser.setDisplayName(newText);
             userName.setText(newText);
@@ -328,7 +298,7 @@ public class ProfileFragment extends Fragment {
     private void saveProfilePic() {
         if(newPhoto != null) {
             clearGlideCache();
-            FirebaseUploader.uploadUserPhoto(thisUser, newPhoto);
+            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto);
             AlertDialog dialog = new AlertDialog.Builder(getContext())
                     .setMessage(getResources().getString(R.string.picture_change)).create();
             dialog.show();
