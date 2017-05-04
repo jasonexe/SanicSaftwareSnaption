@@ -33,11 +33,11 @@
             android:id="@+id/text_set_end_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:layout_marginStart="16dp"
             android:layout_marginBottom="4dp"
             android:layout_marginTop="24dp"
-            android:text="@string/end_date" />
+            android:text="@string/set_end_date" />
 
         <TextView
             android:id="@+id/text_date"
