@@ -19,9 +19,7 @@ import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
-import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -155,7 +153,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
             @Override
             public Class getDataType() {
-                return User.class;
+                return UserMetadata.class;
             }
         });
     }
