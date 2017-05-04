@@ -298,6 +298,7 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         setupButtonDisplay(game);
         setupCaptionList(game);
+        startCommentManager(game.getMetaData());
     }
 
     private void loadPhoto(GameMetadata metadata) {
@@ -345,7 +346,7 @@ public class GameActivity extends HomeAppCompatActivity {
         setupEndDate(metadata);
         setupPickerName(metadata);
         setupCaptionCardView();
-        startCommentManager(metadata);
+//        startCommentManager(metadata);
     }
 
     private void animateBitmapColorSwatch(final Bitmap bitmap) {
