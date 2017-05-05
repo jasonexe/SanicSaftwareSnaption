@@ -48,43 +48,6 @@ public class NotificationReceiver extends FirebaseMessagingService {
     public static final String USER_ID_KEY = "userId";
     public static final String GAME_ACCESS_KEY = "gameAccess";
 
-    private class GameEndNotification extends Service {
-        @Override
-        public void onCreate() {
-            Intent intent = new Intent(this, GameActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            //intent.putExtra(GAME, game);
-            //create fake history so back button goes to Wall
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
-            stackBuilder.addParentStack(GameActivity.class);
-            stackBuilder.addNextIntent(intent);
-            PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            //create notification
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                    .setSmallIcon(R.drawable.ic_snaption)
-                    .setContentTitle(getResources().getString(R.string.game_invite_notification_title))
-                    .setContentText("End game test")
-                    .setAutoCancel(true)
-                    .setDefaults(NotificationCompat.DEFAULT_ALL)
-                    .setContentIntent(pendingIntent)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                    .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(1 /* ID of notification */, notificationBuilder.build());
-
-        }
-
-        @Nullable
-        @Override
-        public IBinder onBind(Intent intent) {
-            return null;
-        }
-    }
-
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         //message received in foreground
@@ -171,9 +134,11 @@ public class NotificationReceiver extends FirebaseMessagingService {
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
         Intent endGameIntent = new Intent(this, GameEndNotification.class);
-        PendingIntent endGamePendingIntent = PendingIntent.getService(this, 0, endGameIntent, 0);
+        endGameIntent.putExtra("pickerName", user.getDisplayName());
+        endGameIntent.putExtra("game", game);
+        PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (1000*30), endGamePendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (1000*10), endGamePendingIntent);
     }
 }
