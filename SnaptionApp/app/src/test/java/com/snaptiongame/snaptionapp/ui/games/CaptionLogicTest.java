@@ -1,8 +1,8 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
-import com.snaptiongame.snaptionapp.models.Caption;
-import com.snaptiongame.snaptionapp.models.Card;
-import com.snaptiongame.snaptionapp.testobjects.TestCard;
+import com.snaptiongame.snaption.models.Caption;
+import com.snaptiongame.snaption.models.Card;
+
 
 import org.junit.Test;
 
@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Used to test logic for the captions.
