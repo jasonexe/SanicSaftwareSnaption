@@ -22,6 +22,8 @@ public class Constants {
     public static final String PHOTO_PATH = "currentPhotoPath";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
+    // Intent indicator that a picker name is given for notification
+    public static final String PICKER = "pickerName";
     // Intent indicator that the next strings are fields
     public static final String FIELDS = "fields";
 

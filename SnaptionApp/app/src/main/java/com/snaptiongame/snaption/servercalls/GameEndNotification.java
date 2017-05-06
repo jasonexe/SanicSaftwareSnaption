@@ -28,11 +28,12 @@ public class GameEndNotification extends BroadcastReceiver {
     public void onReceive(Context context, Intent delayedIntent) {
         Intent intent = new Intent(context, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //get picker's name from preferences
-        //get game Id from preferences
-        GameMetadata game = (GameMetadata)delayedIntent.getSerializableExtra(Constants.GAME);
-        String pickerName = delayedIntent.getStringExtra("pickerName");
-        intent.putExtra(Constants.GAME, game);
+
+        //get game Id from intent
+        String gameId = delayedIntent.getStringExtra(GameActivity.USE_GAME_ID);
+        //get picker's name from intent
+        String pickerName = delayedIntent.getStringExtra(Constants.PICKER);
+        intent.putExtra(GameActivity.USE_GAME_ID, gameId);
         //create fake history so back button goes to Wall
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(GameActivity.class);
@@ -43,16 +44,17 @@ public class GameEndNotification extends BroadcastReceiver {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_snaption)
                 .setContentTitle(context.getResources().getString(R.string.game_invite_notification_title))
-                .setContentText(pickerName +" game ended!")
+                .setContentText(String.format(context.getResources().getString(R.string.game_ended_notification), pickerName))
                 .setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .setContentIntent(pendingIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
+        //display notification to user screen
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(1 /* ID of notification */, notificationBuilder.build());
 
     }
 }

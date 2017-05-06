@@ -129,13 +129,15 @@ public class NotificationReceiver extends FirebaseMessagingService {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
+        //notify user that game was created
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
+        //create a timed notification to go off when the game has reached its end date
         Intent endGameIntent = new Intent(this, GameEndNotification.class);
-        endGameIntent.putExtra("pickerName", user.getDisplayName());
-        endGameIntent.putExtra("game", game);
+        endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
+        endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
         PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
