@@ -34,6 +34,7 @@ import com.snaptiongame.snaption.models.Person;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
+import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -175,6 +176,10 @@ public class CreateGameActivity extends AppCompatActivity {
                 }
                 else if (calendar.getTimeInMillis() <= Calendar.getInstance().getTimeInMillis()) {
                     Toast.makeText(CreateGameActivity.this, R.string.pick_future_date,
+                            Toast.LENGTH_LONG).show();
+                }
+                else if (!FirebaseResourceManager.validFirebasePath(categoryInput.getText().toString())) {
+                    Toast.makeText(CreateGameActivity.this, R.string.illegal_tag_text,
                             Toast.LENGTH_LONG).show();
                 }
                 else {
