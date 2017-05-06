@@ -173,9 +173,6 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.join_game_button)
     public Button joinGameButton;
 
-    @BindView(R.id.intent_load_progress)
-    public View progressSpinner;
-
     @BindView(R.id.coord_layout)
     protected CoordinatorLayout coordinatorLayout;
 
@@ -190,9 +187,6 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.progress_bar)
     public View progressBar;
-
-    @BindView(R.id.invite_to_current)
-    public Button inviteSnaptionFriends;
 
     private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
@@ -678,15 +672,11 @@ public class GameActivity extends HomeAppCompatActivity {
     public void createGameInvite() {
         Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
         String sampleCaption = getSampleCaption();
-        FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
-    }
+        AddToGameDialog dlg = new AddToGameDialog(this, game, bmp, sampleCaption);
 
-    @OnClick(R.id.invite_to_current)
-    public void popupFriendInvites() {
-        AddToGameDialog dlg = new AddToGameDialog(this, game);
-        dlg.setTitle("Testing again");
         dlg.show();
     }
+
 
     private String getSampleCaption() {
         Caption toReturn = game.getTopCaption();

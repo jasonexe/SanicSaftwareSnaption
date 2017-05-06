@@ -3,18 +3,22 @@ package com.snaptiongame.snaption.ui.games.add_friend_to_game;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
+import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -27,36 +31,45 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by Jason Krein on 5/5/2017.
  */
 
 public class AddToGameDialog extends AlertDialog {
-    @BindView(R.id.friend_notice)
-    TextView friendNotice;
 
     @BindView(R.id.friend_list)
     RecyclerView friendList;
 
-    private Activity activity;
+    @BindView(R.id.deep_link_button)
+    Button deepLinkButton;
+
+    @BindView(R.id.intent_load_progress)
+    public View progressSpinner;
+
+    private FragmentActivity activity;
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private AddFriendToGameAdapter addToGameAdapter;
     private Game gameData;
+    private Bitmap photoPreview;
+    private String sampleCaption;
     /**
      * Constructor used when AddToGameDialog must be set after construction
      * @param activity current activity where dialog will be displayed
      */
-    public AddToGameDialog(Activity activity, Game gameData) {
+    public AddToGameDialog(FragmentActivity activity, Game gameData, Bitmap bmp, String sampleCaption) {
         super(activity);
         this.activity = activity;
         this.gameData = gameData;
+        this.photoPreview = bmp;
+        this.sampleCaption = sampleCaption;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_friends);
+        setContentView(R.layout.dialog_game_invite);
         ButterKnife.bind(this);
         LinearLayoutManager friendsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         friendList.setLayoutManager(friendsViewManager);
@@ -67,6 +80,11 @@ public class AddToGameDialog extends AlertDialog {
     public void dismiss() {
         super.dismiss();
         userFirebase.removeListener();
+    }
+
+    @OnClick(R.id.deep_link_button)
+    public void createDeepLink() {
+        FirebaseDeepLinkCreator.createGameInviteIntent(activity, gameData, progressSpinner, photoPreview, sampleCaption);
     }
 
     /**
@@ -87,22 +105,11 @@ public class AddToGameDialog extends AlertDialog {
                                 userIds.remove(userId);
                             }
                         }
-                        System.out.println(userIds.size());
-                        if(userIds.size() == 0) {
-                            friendNotice.setVisibility(View.VISIBLE);
-                            friendNotice.setText(R.string.friends_in_game);
-                        } else {
-                            friendNotice.setVisibility(View.GONE);
-                            List<UserMetadata> users = new ArrayList<>();
-                            addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
-                            friendList.setAdapter(addToGameAdapter);
-                            System.out.println("loading users");
-                            loadUsers(userIds);
-                        }
-                    }
-                    else {
-                        friendNotice.setVisibility(View.VISIBLE);
-                        friendNotice.setText(R.string.empty_friends);
+                        List<UserMetadata> users = new ArrayList<>();
+                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
+                        friendList.setAdapter(addToGameAdapter);
+                        System.out.println("loading users");
+                        loadUsers(userIds);
                     }
                 }
 
