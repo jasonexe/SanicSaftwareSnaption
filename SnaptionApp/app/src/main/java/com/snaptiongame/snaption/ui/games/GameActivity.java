@@ -484,10 +484,12 @@ public class GameActivity extends HomeAppCompatActivity {
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
+                    game.getEndDate());
         } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
+                    game.getEndDate());
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
