@@ -27,7 +27,7 @@ import static com.snaptiongame.snaption.Constants.ASPECT_RATIO_KEY;
 import static com.snaptiongame.snaption.Constants.GAMES_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTIONS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_DATA_CAPTION_PATH;
-import static com.snaptiongame.snaption.Constants.GAME_DATA_PATH;
+import static com.snaptiongame.snaption.Constants.GAME_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYER_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYER_PATH;
@@ -36,8 +36,8 @@ import static com.snaptiongame.snaption.Constants.PUBLIC;
 import static com.snaptiongame.snaption.Constants.USER_DISPLAY_NAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_FRIENDS_PATH;
 import static com.snaptiongame.snaption.Constants.USER_IS_ANDROID_PATH;
-import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.USER_NOTIFICATION_PATH;
 import static com.snaptiongame.snaption.Constants.USER_SEARCH_NAME_PATH;
 
 /**
@@ -110,8 +110,8 @@ public class FirebaseUploader implements Uploader {
         metaDataRef.setValue(gameMetadata);
         //Upload the game's data
         DatabaseReference dataRef = database.getReference(
-                String.format(GAME_DATA_PATH, access, gameId));
-        dataRef.setValue(gameData);
+                String.format(GAME_DATA_PLAYERS_PATH, access, gameId));
+        dataRef.setValue(gameData.getPlayers());
         //notify players if there are any
         //TODO: once we verify firebase functions does notifications well we can remove this and FirebaseNotificationSender
         /*if (game.getPlayers() != null) {
