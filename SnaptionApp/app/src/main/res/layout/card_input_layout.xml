@@ -32,6 +32,7 @@
             android:layout_weight="1"
             android:textColor="#ffffff"
             android:background="#55ff6b9f"
+            android:imeOptions="actionDone"
             style="@style/Widget.AppCompat.AutoCompleteTextView"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 

@@ -1,6 +1,7 @@
 package com.snaptiongame.snaptionapp.ui.games;
 
-import com.snaptiongame.snaptionapp.models.Caption;
+
+import com.snaptiongame.snaption.models.Caption;
 
 import java.util.List;
 

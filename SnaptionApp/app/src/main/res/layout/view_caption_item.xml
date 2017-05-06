@@ -1,72 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/caption_display_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:paddingTop="8dp">
+    android:orientation="vertical">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        app:cardElevation="2dp"
-        android:id="@+id/captioner_photo_view"
-        app:cardCornerRadius="15dp"
-        android:layout_centerHorizontal="true"
-        android:innerRadius="0dp"
-        android:shape="ring"
-        android:thicknessRatio="1.9"
-        android:layout_alignParentStart="true">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp">
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/captioner_photo_view"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/captioner_photo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:id="@+id/captioner_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/captioner_photo_view"
+            android:layout_toStartOf="@+id/number_upvotes_text"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/captioner_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:gravity="center_vertical"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                tools:text="First Name Last Name" />
+
+            <TextView
+                android:id="@+id/caption_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                tools:text="Example of an example captio" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/number_upvotes_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@+id/upvote_icon"
+            tools:text="4" />
 
         <ImageView
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:id="@+id/captioner_photo"/>
-    </android.support.v7.widget.CardView>
+            android:id="@+id/upvote_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/thumb_up_outline" />
 
-    <TextView
-        android:id="@+id/captioner_name"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:textSize="12sp"
-        android:layout_toEndOf="@id/captioner_photo_view"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"/>
-
-    <ImageView
-        android:id="@+id/upvote_icon"
-        android:src="@drawable/thumb_up_outline"
-        android:layout_width="30dp"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="10dp"
-        android:layout_alignParentEnd="true"/>
-
-    <TextView
-        android:id="@+id/number_upvotes_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@id/upvote_icon"/>
-
-    <TextView
-        android:id="@+id/caption_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:layout_below="@id/captioner_photo_view"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"/>
+    </RelativeLayout>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/caption_text"
         android:id="@+id/black_line"
-        android:background="@android:color/darker_gray"/>
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/grey" />
 
-</RelativeLayout>
+</LinearLayout>

@@ -1,43 +1,27 @@
 {
   "project_info": {
-    "project_number": "917089676170",
-    "firebase_url": "https://vertical-prototype-81b3e.firebaseio.com",
-    "project_id": "vertical-prototype-81b3e",
-    "storage_bucket": "vertical-prototype-81b3e.appspot.com"
+    "project_number": "632492442551",
+    "firebase_url": "https://snaption-a6674.firebaseio.com",
+    "project_id": "snaption-a6674",
+    "storage_bucket": "snaption-a6674.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:917089676170:android:c32db780c43899a8",
+        "mobilesdk_app_id": "1:632492442551:android:d6e6fac8715db7a7",
         "android_client_info": {
-          "package_name": "com.snaptiongame.snaptionapp"
+          "package_name": "com.snaptiongame.snaption"
         }
       },
       "oauth_client": [
         {
-          "client_id": "917089676170-o2v12mijd6klihja7j46ncin0j3kictv.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.snaptiongame.snaptionapp",
-            "certificate_hash": "3EB354CD83D276B1F88151333827FED8C1A9A563"
-          }
-        },
-        {
-          "client_id": "917089676170-lrs7fmid3ihuqsi194qpikca135hlmns.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.snaptiongame.snaptionapp",
-            "certificate_hash": "10249B926E9A6BDE8D178D61DF6825DBE58F5C4C"
-          }
-        },
-        {
-          "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
+          "client_id": "632492442551-kg2l8jk748umvdqnbdgtpqoacd6d765m.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDW-0BOx3SPWYXu4MIfMq6_2-Es4Jttsj4"
+          "current_key": "AIzaSyB7AeEW7R14wHS2GDaRtGHQjH1U8m9Xczo"
         }
       ],
       "services": {
@@ -45,20 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "917089676170-k3rkp00eib280qk4sutrp4cthm3dklls.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "adf"
-              }
-            },
-            {
-              "client_id": "917089676170-2v0kivv03ng4423cua64btsbdqai33cg.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2
