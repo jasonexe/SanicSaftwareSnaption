@@ -136,11 +136,12 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
         //create a timed notification to go off when the game has reached its end date
         Intent endGameIntent = new Intent(this, GameEndNotification.class);
+        //store pickerName and gameId so notification can go to GameActivity
         endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
         endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
         PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (1000*10), endGamePendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, game.getEndDate() * MILLIS_PER_SECOND, endGamePendingIntent);
     }
 }
