@@ -300,7 +300,7 @@ public class FirebaseResourceManager {
      * @param path The path to be checked
      * @return True if the path does not contain any of the characters, false otherwise.
      */
-    public static boolean validFirebasePath(String path) {
+    public static boolean validFirebaseKey(String path) {
         Pattern pattern = Pattern.compile("[.#$\\[\\]/]");
         return !pattern.matcher(path).find();
     }
