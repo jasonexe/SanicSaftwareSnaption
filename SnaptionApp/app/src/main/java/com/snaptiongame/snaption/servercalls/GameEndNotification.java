@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.ui.games.GameActivity;
@@ -29,9 +30,9 @@ public class GameEndNotification extends BroadcastReceiver {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         //get picker's name from preferences
         //get game Id from preferences
-        GameMetadata game = (GameMetadata)delayedIntent.getSerializableExtra("game");
+        GameMetadata game = (GameMetadata)delayedIntent.getSerializableExtra(Constants.GAME);
         String pickerName = delayedIntent.getStringExtra("pickerName");
-        intent.putExtra("game", game);
+        intent.putExtra(Constants.GAME, game);
         //create fake history so back button goes to Wall
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(GameActivity.class);
