@@ -216,7 +216,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         // Check to see if the end date has passed on the game
         if (endDate < Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND) {
             Toast.makeText(upvoteIcon.getContext(),
-                    upvoteIcon.getContext().getResources().getString(R.string.end_date_passed),
+                    upvoteIcon.getContext().getResources().getString(R.string.end_date_passed_upvote),
                     Toast.LENGTH_SHORT).show();
         }
         // Otherwise register the vote
