@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.models;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Class containing all basic game information, and fits Firebase data structure.
@@ -37,6 +38,13 @@ public class GameData implements Serializable {
             return null;
         }
         return new HashMap<>(players);
+    }
+
+    public void addPlayer(String playerId) {
+        if(players == null) {
+            players = new TreeMap<>();
+        }
+        players.put(playerId, 1);
     }
 
     public void setCaptions(Map<String, Caption> captions) {

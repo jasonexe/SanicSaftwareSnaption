@@ -74,19 +74,31 @@ public class AddToGameDialog extends AlertDialog {
      */
     private void populateFriends() {
         final String userId = FirebaseUserResourceManager.getUserId();
-        if (FirebaseUserResourceManager.getUserId() != null) {
+        if (userId != null) {
+            System.out.println("Getting friends for: " + userId);
             userFirebase.getUserFriendsWithUpdates(userId, new ResourceListener<Map<String, Integer>>() {
                 @Override
                 public void onData(Map<String, Integer> userIds) {
+                    System.out.println("Friends are: " + userIds);
                     if (userIds != null) {
-                        for(String userId : gameData.getPlayers().keySet()) {
-                            userIds.remove(userId);
+                        System.out.println("Game data players: " + gameData.getPlayers());
+                        if(gameData.getPlayers() != null) {
+                            for(String userId : gameData.getPlayers().keySet()) {
+                                userIds.remove(userId);
+                            }
                         }
-                        friendNotice.setVisibility(View.GONE);
-                        List<UserMetadata> users = new ArrayList<>();
-                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData.getMetaData());
-                        friendList.setAdapter(addToGameAdapter);
-                        loadUsers(userIds);
+                        System.out.println(userIds.size());
+                        if(userIds.size() == 0) {
+                            friendNotice.setVisibility(View.VISIBLE);
+                            friendNotice.setText(R.string.friends_in_game);
+                        } else {
+                            friendNotice.setVisibility(View.GONE);
+                            List<UserMetadata> users = new ArrayList<>();
+                            addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
+                            friendList.setAdapter(addToGameAdapter);
+                            System.out.println("loading users");
+                            loadUsers(userIds);
+                        }
                     }
                     else {
                         friendNotice.setVisibility(View.VISIBLE);
@@ -107,6 +119,7 @@ public class AddToGameDialog extends AlertDialog {
             @Override
             public void onData(UserMetadata user) {
                 if (user != null) {
+                    System.out.println("Should add usesr");
                     addToGameAdapter.addSingleItem(user);
                 }
             }
