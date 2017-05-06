@@ -15,7 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by jason_000 on 5/6/2017.
+ * Created by Jason Krein on 5/6/2017.
  */
 
 public class ExistingGameFriendHolder extends RecyclerView.ViewHolder  {

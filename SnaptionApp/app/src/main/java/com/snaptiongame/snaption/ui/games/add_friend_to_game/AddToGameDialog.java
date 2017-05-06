@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.snaptiongame.snaption.R;
+import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
@@ -41,12 +42,12 @@ public class AddToGameDialog extends AlertDialog {
     private Activity activity;
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private AddFriendToGameAdapter addToGameAdapter;
-    private GameMetadata gameData;
+    private Game gameData;
     /**
      * Constructor used when AddToGameDialog must be set after construction
      * @param activity current activity where dialog will be displayed
      */
-    public AddToGameDialog(Activity activity, GameMetadata gameData) {
+    public AddToGameDialog(Activity activity, Game gameData) {
         super(activity);
         this.activity = activity;
         this.gameData = gameData;
@@ -78,10 +79,12 @@ public class AddToGameDialog extends AlertDialog {
                 @Override
                 public void onData(Map<String, Integer> userIds) {
                     if (userIds != null) {
-                        System.out.println("Got users");
+                        for(String userId : gameData.getPlayers().keySet()) {
+                            userIds.remove(userId);
+                        }
                         friendNotice.setVisibility(View.GONE);
                         List<UserMetadata> users = new ArrayList<>();
-                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
+                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData.getMetaData());
                         friendList.setAdapter(addToGameAdapter);
                         loadUsers(userIds);
                     }

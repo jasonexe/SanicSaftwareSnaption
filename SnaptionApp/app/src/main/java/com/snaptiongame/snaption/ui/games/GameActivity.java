@@ -682,7 +682,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.invite_to_current)
     public void popupFriendInvites() {
-        AddToGameDialog dlg = new AddToGameDialog(this, game.getMetaData());
+        AddToGameDialog dlg = new AddToGameDialog(this, game);
         dlg.setTitle("Testing again");
         dlg.show();
     }
