@@ -93,13 +93,10 @@ public class AddToGameDialog extends AlertDialog {
     private void populateFriends() {
         final String userId = FirebaseUserResourceManager.getUserId();
         if (userId != null) {
-            System.out.println("Getting friends for: " + userId);
             userFirebase.getUserFriendsWithUpdates(userId, new ResourceListener<Map<String, Integer>>() {
                 @Override
                 public void onData(Map<String, Integer> userIds) {
-                    System.out.println("Friends are: " + userIds);
                     if (userIds != null) {
-                        System.out.println("Game data players: " + gameData.getPlayers());
                         if(gameData.getPlayers() != null) {
                             for(String userId : gameData.getPlayers().keySet()) {
                                 userIds.remove(userId);
@@ -108,7 +105,6 @@ public class AddToGameDialog extends AlertDialog {
                         List<UserMetadata> users = new ArrayList<>();
                         addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
                         friendList.setAdapter(addToGameAdapter);
-                        System.out.println("loading users");
                         loadUsers(userIds);
                     }
                 }
@@ -126,7 +122,6 @@ public class AddToGameDialog extends AlertDialog {
             @Override
             public void onData(UserMetadata user) {
                 if (user != null) {
-                    System.out.println("Should add usesr");
                     addToGameAdapter.addSingleItem(user);
                 }
             }

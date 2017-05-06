@@ -64,9 +64,7 @@ public class AddFriendToGameAdapter extends RecyclerView.Adapter<ExistingGameFri
     }
 
     public void addSingleItem(UserMetadata metadata) {
-        System.out.println("Item added");
         friends.add(metadata);
-        notifyDataSetChanged();
-        //(this.friends.size() - 1);
+        notifyItemInserted(this.friends.size() - 1);
     }
 }
