@@ -345,7 +345,7 @@ public class GameActivity extends HomeAppCompatActivity {
         initLoginManager();
         setupEndDate(metadata);
         setupPickerName(metadata);
-        setupCaptionCardView();
+        setupCaptionCardView(metadata);
 //        startCommentManager(metadata);
     }
 
@@ -438,7 +438,7 @@ public class GameActivity extends HomeAppCompatActivity {
         });
         // Make the fab invisible if it's past the end date
         if (!game.isOpen()) {
-            fab.setVisibility(View.GONE);
+            fab.hide();
         }
     }
 
@@ -555,7 +555,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Downloads the possible cards for captions,
     // and sets up the recycler view for once the cards are downloaded
-    private void setupCaptionCardView() {
+    private void setupCaptionCardView(GameMetadata gameMetadata) {
         // Sees if user clicks check button
         editCaptionText.setOnEditorActionListener(enterListener);
         // Setup recycler view
@@ -564,7 +564,9 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
-        captionCardsList.addOnScrollListener(scrollFabHider);
+        if (gameMetadata.isOpen()) {
+            captionCardsList.addOnScrollListener(scrollFabHider);
+        }
         populateCards(Constants.DEFAULT_PACK);
     }
 
@@ -727,7 +729,9 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         // In case they click the fab too quick while scrolling in the caption cards, this will make
         // it not disappear forever
-        fab.show();
+        if (game.isOpen()) {
+            fab.show();
+        }
     }
 
     public void submit(String userInput) {
