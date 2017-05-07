@@ -142,7 +142,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupUserData(User user, View view) {
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));

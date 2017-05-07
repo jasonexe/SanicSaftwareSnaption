@@ -20,8 +20,10 @@
     <string name="category">Tags (Separate by commas)</string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
-    <string name="games_created">Games Made:</string>
-    <string name="captions_created">Captions:</string>
+    <string name="games_created">Games Created:</string>
+    <string name="games_created_text">Games Created</string>
+    <string name="captions_created_text">Captions Created</string>
+    <string name="captions_created">Captions Created:</string>
     <string name="end_date">\'Ended on: \'MM/dd/yy</string>
     <string name="privacy">Privacy</string>
     <string name="content_rating">Content rating</string>
