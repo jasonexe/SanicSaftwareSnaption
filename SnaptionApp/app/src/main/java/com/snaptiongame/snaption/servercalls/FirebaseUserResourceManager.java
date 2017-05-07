@@ -51,8 +51,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     }
 
     public static boolean isValidUser(String id) {
-        String path = getUserPath(id);
-        return validFirebaseKey(path);
+        return validFirebaseKey(id);
     }
 
     /**
