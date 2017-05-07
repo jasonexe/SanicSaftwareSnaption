@@ -57,17 +57,17 @@ public class FirebasePathTest {
 
     @Test
     public void testValidPath() {
-        assertTrue(FirebaseResourceManager.validFirebasePath("aBCd"));
-        assertTrue(FirebaseResourceManager.validFirebasePath("abcd123"));
-        assertTrue(FirebaseResourceManager.validFirebasePath("123"));
-        assertTrue(FirebaseResourceManager.validFirebasePath("123iop"));
+        assertTrue(FirebaseResourceManager.validFirebaseKey("aBCd"));
+        assertTrue(FirebaseResourceManager.validFirebaseKey("abcd123"));
+        assertTrue(FirebaseResourceManager.validFirebaseKey("123"));
+        assertTrue(FirebaseResourceManager.validFirebaseKey("123iop"));
     }
 
     @Test
     public void testInvalidPath() {
-        assertFalse(FirebaseResourceManager.validFirebasePath("ab.c"));
-        assertFalse(FirebaseResourceManager.validFirebasePath("$123"));
-        assertFalse(FirebaseResourceManager.validFirebasePath("[bbdd]"));
-        assertFalse(FirebaseResourceManager.validFirebasePath("$1.30"));
+        assertFalse(FirebaseResourceManager.validFirebaseKey("ab.c"));
+        assertFalse(FirebaseResourceManager.validFirebaseKey("$123"));
+        assertFalse(FirebaseResourceManager.validFirebaseKey("[bbdd]"));
+        assertFalse(FirebaseResourceManager.validFirebaseKey("$1.30"));
     }
 }
