@@ -10,7 +10,7 @@ public class HideFabOnScrollListener implements MinimizeViewBehavior.OnScrollLis
     private static final int SCROLL_LIMIT = 30;
 
     private FloatingActionButton fab;
-    private int scrollChange = 0;
+    private int scrollChange;
 
     public HideFabOnScrollListener(FloatingActionButton fab) {
         this.fab = fab;
