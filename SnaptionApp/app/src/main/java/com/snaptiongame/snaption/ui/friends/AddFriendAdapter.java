@@ -53,7 +53,7 @@ public class AddFriendAdapter extends RecyclerView.Adapter<PersonViewHolder> {
         holder.email.setText(friend.email);
         holder.email.setVisibility(TextUtils.isEmpty(friend.email) ? View.GONE : View.VISIBLE);
         FirebaseResourceManager.loadSmallFbPhotoIntoImageView(friend.facebookId, holder.photo);
-        holder.photo.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 profileMaker.create(friend.getId());
