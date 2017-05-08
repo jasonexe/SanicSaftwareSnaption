@@ -199,14 +199,14 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             @Override
             public void onEditUsername() {
                 currentUser = null;
-                updateNavigationViews();
+                updateNavigationViews(false);
 
             }
 
             @Override
             public void onEditPhoto() {
                 currentUser = null;
-                updateNavigationViews();
+                updateNavigationViews(true);
             }
         });
         return fragment;
@@ -258,13 +258,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             @Override
             public void onLoginComplete() {
                 if(!isPaused) {
-                    updateNavigationViews();
+                    updateNavigationViews(true);
                 }
             }
             @Override
             public void onLogoutComplete() {
                 switchFragments(R.id.wall_item);
-                updateNavigationViews();
+                updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
             @Override
@@ -318,7 +318,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
     }
 
-    private void updateNavigationViews() {
+    private void updateNavigationViews(final boolean loadPhoto) {
         String id = FirebaseUserResourceManager.getUserId();
         if (id != null) {
             if (currentUser == null) {
@@ -328,7 +328,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                             public void onData(UserMetadata user) {
                                 currentUser = user;
                                 if (user != null) {
-                                    addUserInfoToNavDrawer(user);
+                                    addUserInfoToNavDrawer(user, loadPhoto);
                                 } else {
                                     removeUserInfoFromNavDrawer();
                                 }
@@ -345,11 +345,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void addUserInfoToNavDrawer(UserMetadata user) {
+    private void addUserInfoToNavDrawer(UserMetadata user, boolean loadPhoto) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
-        FirebaseResourceManager.loadLimitedCacheImageIntoView(user.getImagePath(), navDrawerPhoto);
+        if (loadPhoto) {
+            FirebaseResourceManager.loadLimitedCacheImageIntoView(user.getImagePath(), navDrawerPhoto);
+        }
         //set user info to visible now they are logged in
         navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);
@@ -425,7 +427,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onResume() {
         super.onResume();
         isPaused = false;
-        updateNavigationViews();
+        updateNavigationViews(true);
     }
 
     @Override
