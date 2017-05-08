@@ -200,7 +200,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             public void onEditUsername() {
                 currentUser = null;
                 updateNavigationViews(false);
-
             }
 
             @Override
