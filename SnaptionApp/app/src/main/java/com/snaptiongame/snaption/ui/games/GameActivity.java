@@ -211,6 +211,25 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     };
 
+    private MinimizeViewBehavior.OnScrollListener onScrollListener = new MinimizeViewBehavior
+            .OnScrollListener() {
+        private static final int SCROLL_LIMIT = 30;
+        private int scrollChange = 0;
+        @Override
+        public void onScroll(int dy) {
+            // hide/show the fab when the scroll limit has been reached
+            scrollChange += dy;
+            if (scrollChange > SCROLL_LIMIT) {
+                scrollChange = 0;
+                fab.hide();
+            }
+            else if (scrollChange < -SCROLL_LIMIT) {
+                scrollChange = 0;
+                fab.show();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -321,7 +340,7 @@ public class GameActivity extends HomeAppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             // add a new behavior to the image view
                             minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
-                                    imageHeight);
+                                    imageHeight, onScrollListener);
                             ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
                                     .setBehavior(minimizeImageBehavior);
                             // start transition now that image is loaded
