@@ -123,7 +123,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
-                    newFragment = new ProfileFragment();
+                    newFragment = createProfileFragment();
                     Bundle args = new Bundle();
                     args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
                     newFragment.setArguments(args);
@@ -191,6 +191,25 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         } else {
             params.setScrollFlags(0);
         }
+    }
+
+    private Fragment createProfileFragment() {
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setUserInfoEditListener(new ProfileFragment.UserInfoEditListener() {
+            @Override
+            public void onEditUsername() {
+                currentUser = null;
+                updateNavigationViews();
+
+            }
+
+            @Override
+            public void onEditPhoto() {
+                currentUser = null;
+                updateNavigationViews();
+            }
+        });
+        return fragment;
     }
 
     private void logInOutItemSelected() {
@@ -330,7 +349,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
-        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+        FirebaseResourceManager.loadLimitedCacheImageIntoView(user.getImagePath(), navDrawerPhoto);
         //set user info to visible now they are logged in
         navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);

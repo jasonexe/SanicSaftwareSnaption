@@ -16,41 +16,24 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
-import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Card;
-import com.snaptiongame.snaption.models.Friend;
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.Constants;
+import com.snaptiongame.snaption.models.Card;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import static com.google.android.gms.internal.zzs.TAG;
 
 public class FirebaseResourceManager {
     private static final String SMALL_FB_PHOTO_REQUEST = "https://graph.facebook.com/%s/picture?type=small";
@@ -58,6 +41,7 @@ public class FirebaseResourceManager {
     private static final String FB_REQUEST_DATA = "data";
     private static final String FB_REQUEST_ID = "id";
     private static final String FB_ID_CHILD = "facebookId";
+    private static final long LIMITED_CACHE_TIME_MILLIS = 5000;
     protected static FirebaseDatabase database = FirebaseDatabase.getInstance();
     private static StorageReference storage = FirebaseStorage.getInstance().getReference();
     private static FirebaseImageLoader imageLoader = new FirebaseImageLoader();
@@ -210,6 +194,24 @@ public class FirebaseResourceManager {
     }
 
     /**
+     * Loads an image from Firebase into a given ImageView. A signature for a cached image is
+     * created every 5 seconds, limiting the cached image's lifetime.
+     *
+     * @param imagePath The image file path name
+     * @param imageView The ImageView in which the image should be loaded
+     */
+    public static void loadLimitedCacheImageIntoView(final String imagePath,
+                                                     final ImageView imageView) {
+        StorageReference ref = storage.child(imagePath);
+        Glide.with(imageView.getContext())
+                .using(new FirebaseImageLoader())
+                .load(ref)
+                .signature(new StringSignature(Long.toString(System.currentTimeMillis() /
+                        LIMITED_CACHE_TIME_MILLIS)))
+                .into(imageView);
+    }
+
+    /**
      * Loads an image from Firebase into a given ImageView.
      *
      * @param imagePath The image file path name
@@ -226,8 +228,6 @@ public class FirebaseResourceManager {
                     // Caches the full image to make reloading faster
                     .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                     .priority(Priority.IMMEDIATE)
-                    // Update signature every hour for profile picture changes.
-                    .signature(new StringSignature(Long.toString(System.currentTimeMillis() / (60 * 60 * 1000))))
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,

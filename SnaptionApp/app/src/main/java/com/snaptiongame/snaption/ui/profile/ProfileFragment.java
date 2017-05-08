@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,6 +33,7 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.snaptiongame.snaption.Constants.*;
+import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -102,6 +102,11 @@ public class ProfileFragment extends Fragment {
             return GameMetadata.class;
         }
     };
+    private UserInfoEditListener userInfoEditListener;
+    public interface UserInfoEditListener {
+        void onEditUsername();
+        void onEditPhoto();
+    }
 
     @Nullable
     @Override
@@ -281,7 +286,20 @@ public class ProfileFragment extends Fragment {
         // Firebase stuff here
         String newText = profileEditName.getText().toString().trim();
         if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
-            FirebaseUploader.updateDisplayName(newText, thisUser.getId());
+
+            FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
+                    new Uploader.UploadListener() {
+                @Override
+                public void onComplete() {
+                    if (userInfoEditListener != null) {
+                        userInfoEditListener.onEditUsername();
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {}
+            });
+
             thisUser.setDisplayName(newText);
             userName.setText(newText);
             ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
@@ -298,10 +316,18 @@ public class ProfileFragment extends Fragment {
     private void saveProfilePic() {
         if(newPhoto != null) {
             clearGlideCache();
-            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto);
-            AlertDialog dialog = new AlertDialog.Builder(getContext())
-                    .setMessage(getResources().getString(R.string.picture_change)).create();
-            dialog.show();
+            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
+                    new Uploader.UploadListener() {
+                @Override
+                public void onComplete() {
+                    if (userInfoEditListener != null) {
+                        userInfoEditListener.onEditPhoto();
+                    }
+                }
+
+                @Override
+                public void onError(String errorMessage) {}
+            });
         }
     }
 
@@ -363,5 +389,9 @@ public class ProfileFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+    }
+
+    public void setUserInfoEditListener(UserInfoEditListener listener) {
+        this.userInfoEditListener = listener;
     }
 }
