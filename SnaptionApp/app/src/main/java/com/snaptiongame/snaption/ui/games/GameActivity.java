@@ -190,6 +190,9 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.progress_bar)
     public View progressBar;
 
+    @BindView(R.id.leave_button)
+    public Button leaveButton;
+
     private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
         public void onNewData(Caption data) {
@@ -466,15 +469,21 @@ public class GameActivity extends HomeAppCompatActivity {
                 inviteFriendsButton.setVisibility(View.GONE);
             }
         }
+        // If they're the picker, they can't leave. Too bad so sad.
+        if(pickerId.equals(thisUser)) {
+            leaveButton.setVisibility(View.GONE);
+        }
     }
 
     private void setJoinGameIsVisible(boolean isVisible) {
         if (isVisible) {
             inviteFriendsButton.setVisibility(View.GONE);
             joinGameButton.setVisibility(View.VISIBLE);
+            leaveButton.setVisibility(View.GONE);
         } else {
             inviteFriendsButton.setVisibility(View.VISIBLE);
             joinGameButton.setVisibility(View.GONE);
+            leaveButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -619,6 +628,21 @@ public class GameActivity extends HomeAppCompatActivity {
             @Override
             public Class getDataType() {
                 return Exception.class;
+            }
+        });
+    }
+
+    @OnClick(R.id.leave_button)
+    public void leaveGame() {
+        FirebaseUploader.removeCurrentUserFromGame(game, new ResourceListener<Exception>() {
+            @Override
+            public void onData(Exception data) {
+                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
             }
         });
     }

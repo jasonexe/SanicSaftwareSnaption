@@ -115,15 +115,25 @@
                         android:layout_toStartOf="@id/captions_icon" />
 
                     <Button
+                        android:id="@+id/leave_button"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="16dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:layout_toEndOf="@id/text_date"
+                        android:layout_centerVertical="true"
+                        android:text="@string/leave_game"
+                        android:textColor="@color/colorPrimaryLight"/>
+
+                    <Button
                         android:id="@+id/invite_friends"
                         android:layout_width="wrap_content"
                         android:layout_height="16dp"
                         android:layout_gravity="center_horizontal"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true"
                         android:layout_toStartOf="@id/number_captions"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:text="@string/game_invite"
+                        android:text="invite"
                         android:textColor="@color/colorAccent"
                         android:visibility="gone" />
 
@@ -138,6 +148,8 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/join_game"
                         android:textColor="@color/colorAccent" />
+
+
 
                 </RelativeLayout>
             </LinearLayout>
