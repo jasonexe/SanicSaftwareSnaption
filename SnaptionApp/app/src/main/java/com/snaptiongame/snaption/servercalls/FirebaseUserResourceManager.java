@@ -51,8 +51,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     }
 
     public static boolean isValidUser(String id) {
-        String path = getUserPath(id);
-        return validFirebasePath(path);
+        return validFirebaseKey(id);
     }
 
     /**
@@ -151,7 +150,7 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
         for (String uid : uids.keySet()) {
             String friend = String.format(Constants.USER_METADATA_PATH, uid);
             // ensure the user id is a valid one to avoid errors
-            if (validFirebasePath(friend)) {
+            if (validFirebaseKey(uid)) {
                 getUserMetadataById(uid, listener);
             }
         }
