@@ -133,7 +133,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toStartOf="@id/number_captions"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:text="invite"
+                        android:text="@string/game_invite"
                         android:textColor="@color/colorAccent"
                         android:visibility="gone" />
 
