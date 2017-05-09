@@ -53,6 +53,7 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
+import com.snaptiongame.snaption.ui.games.add_friend_to_game.AddToGameDialog;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
@@ -189,6 +190,9 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @BindView(R.id.progress_bar)
     public View progressBar;
+
+    @BindView(R.id.invite_to_current)
+    public Button inviteSnaptionFriends;
 
     private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
@@ -675,6 +679,13 @@ public class GameActivity extends HomeAppCompatActivity {
         Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
         String sampleCaption = getSampleCaption();
         FirebaseDeepLinkCreator.createGameInviteIntent(this, game, progressSpinner, bmp, sampleCaption);
+    }
+
+    @OnClick(R.id.invite_to_current)
+    public void popupFriendInvites() {
+        AddToGameDialog dlg = new AddToGameDialog(this, game);
+        dlg.setTitle("Testing again");
+        dlg.show();
     }
 
     private String getSampleCaption() {
