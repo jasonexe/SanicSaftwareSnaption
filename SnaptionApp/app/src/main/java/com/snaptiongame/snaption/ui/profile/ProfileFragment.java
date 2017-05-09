@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -45,7 +44,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 
 /**
@@ -85,7 +83,7 @@ public class ProfileFragment extends Fragment {
     private ProfileGamesAdapter gameAdapter;
     private ProfileCaptionsAdapter captionsAdapter;
     private Drawable oldProfilePic;
-    private byte[] newPhoto;
+    private Uri newPhotoUri;
     private User thisUser;
     private FloatingActionButton fab;
     private boolean isUser;
@@ -283,14 +281,17 @@ public class ProfileFragment extends Fragment {
 
     // Saves the name to firebase, also updates the name in the profile
     private void saveEditName() {
+        final String newText = profileEditName.getText().toString().trim();
         // Firebase stuff here
-        String newText = profileEditName.getText().toString().trim();
         if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
+            userName.setText(newText);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
 
             FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
                     new Uploader.UploadListener() {
                 @Override
                 public void onComplete() {
+                    thisUser.setDisplayName(newText);
                     if (userInfoEditListener != null) {
                         userInfoEditListener.onEditUsername(null);
                     }
@@ -298,15 +299,14 @@ public class ProfileFragment extends Fragment {
 
                 @Override
                 public void onError(String errorMessage) {
+                    userName.setText(thisUser.getDisplayName());
+                    ((AppCompatActivity) getActivity()).getSupportActionBar()
+                            .setTitle(thisUser.getDisplayName());
                     if (userInfoEditListener != null) {
                         userInfoEditListener.onEditUsername(errorMessage);
                     }
                 }
             });
-
-            thisUser.setDisplayName(newText);
-            userName.setText(newText);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
         }
     }
 
@@ -318,7 +318,8 @@ public class ProfileFragment extends Fragment {
 
     // Saves the profile picture to firebase and keeps the updated one on the profile
     private void saveProfilePic() {
-        if(newPhoto != null) {
+        if(newPhotoUri != null) {
+            byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
             FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
                     new Uploader.UploadListener() {
                 @Override
@@ -330,24 +331,13 @@ public class ProfileFragment extends Fragment {
 
                 @Override
                 public void onError(String errorMessage) {
+                    FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
                     if (userInfoEditListener != null) {
                         userInfoEditListener.onEditPhoto(errorMessage);
                     }
                 }
             });
         }
-    }
-
-    private void clearGlideCache() {
-        AsyncTask clearGlideCache = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                Glide.get(getApplicationContext()).clearDiskCache();
-                return null;
-            }
-        };
-        clearGlideCache.execute();
-        Glide.get(getApplicationContext()).clearMemory();
     }
 
     private void editDisplayName() {
@@ -381,9 +371,8 @@ public class ProfileFragment extends Fragment {
 
         if(requestCode == IMAGE_PICK_CODE) {
             try {
-                Uri imageUri = data.getData();
-                Glide.with(ProfileFragment.this).load(imageUri).into(profile);
-                newPhoto = BitmapConverter.getImageFromUri(imageUri, getActivity());
+                newPhotoUri = data.getData();
+                Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");
                 e.printStackTrace();
