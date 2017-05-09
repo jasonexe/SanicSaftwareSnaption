@@ -79,6 +79,8 @@
     <string name="days">day</string>
     <string name="remain">remaining</string>
     <string name="plural">s</string>
+    <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
+    <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
     <string name="leave_game">Leave</string>
     <string name="problem_leaving">Sorry, we couldn't remove you from this game</string>
 
