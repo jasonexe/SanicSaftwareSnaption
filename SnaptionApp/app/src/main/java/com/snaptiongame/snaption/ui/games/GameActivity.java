@@ -637,7 +637,11 @@ public class GameActivity extends HomeAppCompatActivity {
         FirebaseUploader.removeCurrentUserFromGame(game, new ResourceListener<Exception>() {
             @Override
             public void onData(Exception data) {
-                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                if(data.getLocalizedMessage() != null) {
+                    Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(getCurrentFocus(), getString(R.string.problem_leaving), Snackbar.LENGTH_LONG).show();
+                }
             }
 
             @Override

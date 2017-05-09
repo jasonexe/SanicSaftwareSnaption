@@ -80,6 +80,7 @@
     <string name="remain">remaining</string>
     <string name="plural">s</string>
     <string name="leave_game">Leave</string>
+    <string name="problem_leaving">Sorry, we couldn't remove you from this game</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

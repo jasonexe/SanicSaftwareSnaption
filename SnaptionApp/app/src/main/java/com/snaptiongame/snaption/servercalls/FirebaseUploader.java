@@ -340,7 +340,7 @@ public class FirebaseUploader implements Uploader {
                 }
             });
         } else {
-            errDisplay.onData(new Exception("You can't leave a game if you aren't logged in!"));
+            errDisplay.onData(new Exception());
         }
     }
 
