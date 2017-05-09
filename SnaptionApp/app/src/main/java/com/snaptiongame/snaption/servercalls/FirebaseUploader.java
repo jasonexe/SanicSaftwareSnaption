@@ -263,6 +263,11 @@ public class FirebaseUploader implements Uploader {
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 listener.onComplete();
             }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                listener.onError(e.getMessage());
+            }
         });
     }
 
