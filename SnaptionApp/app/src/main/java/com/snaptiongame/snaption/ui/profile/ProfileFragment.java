@@ -104,8 +104,8 @@ public class ProfileFragment extends Fragment {
     };
     private UserInfoEditListener userInfoEditListener;
     public interface UserInfoEditListener {
-        void onEditUsername();
-        void onEditPhoto();
+        void onEditUsername(String error);
+        void onEditPhoto(String error);
     }
 
     @Nullable
@@ -292,12 +292,16 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onComplete() {
                     if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditUsername();
+                        userInfoEditListener.onEditUsername(null);
                     }
                 }
 
                 @Override
-                public void onError(String errorMessage) {}
+                public void onError(String errorMessage) {
+                    if (userInfoEditListener != null) {
+                        userInfoEditListener.onEditUsername(errorMessage);
+                    }
+                }
             });
 
             thisUser.setDisplayName(newText);
@@ -315,18 +319,21 @@ public class ProfileFragment extends Fragment {
     // Saves the profile picture to firebase and keeps the updated one on the profile
     private void saveProfilePic() {
         if(newPhoto != null) {
-            clearGlideCache();
             FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
                     new Uploader.UploadListener() {
                 @Override
                 public void onComplete() {
                     if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditPhoto();
+                        userInfoEditListener.onEditPhoto(null);
                     }
                 }
 
                 @Override
-                public void onError(String errorMessage) {}
+                public void onError(String errorMessage) {
+                    if (userInfoEditListener != null) {
+                        userInfoEditListener.onEditPhoto(errorMessage);
+                    }
+                }
             });
         }
     }
