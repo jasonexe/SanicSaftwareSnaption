@@ -1,6 +1,8 @@
 package com.snaptiongame.snaption.ui.profile;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Adapter;
 
 import com.google.firebase.auth.FirebaseUser;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.GameMetadata;
@@ -19,6 +22,7 @@ import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.ui.games.GameActivity;
 import com.snaptiongame.snaption.ui.wall.WallGridItemDecorator;
 import com.snaptiongame.snaption.ui.wall.WallViewAdapter;
 
@@ -115,6 +119,17 @@ public class ProfileTabFragment extends Fragment {
             recyclerView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
             wallViewAdapter = new WallViewAdapter(new ArrayList<GameMetadata>(),
                     ProfileActivity.getProfileActivityCreator(getContext()));
+            wallViewAdapter.setOnClickGamePhotoListener(new WallViewAdapter.OnClickGamePhotoListener() {
+                @Override
+                public void onClickGamePhoto(View view, GameMetadata game) {
+                    // start game activity with shared image transition
+                    Intent createGameIntent = new Intent(getActivity(), GameActivity.class);
+                    createGameIntent.putExtra(Constants.GAME, game);
+                    ActivityOptionsCompat options = ActivityOptionsCompat.
+                            makeSceneTransitionAnimation(getActivity(), view, game.getId());
+                    getActivity().startActivity(createGameIntent, options.toBundle());
+                }
+            });
             getUserGames(user);
             recyclerView.setAdapter(wallViewAdapter);
         }
