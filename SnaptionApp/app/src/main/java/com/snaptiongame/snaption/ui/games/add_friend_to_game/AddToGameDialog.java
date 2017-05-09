@@ -48,6 +48,9 @@ public class AddToGameDialog extends AlertDialog {
     @BindView(R.id.intent_load_progress)
     public View progressSpinner;
 
+    @BindView(R.id.all_friends_added_text)
+    public TextView allAddedText;
+
     private FragmentActivity activity;
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private AddFriendToGameAdapter addToGameAdapter;
@@ -103,8 +106,13 @@ public class AddToGameDialog extends AlertDialog {
                             }
                         }
                         List<UserMetadata> users = new ArrayList<>();
-                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData);
+                        addToGameAdapter = new AddFriendToGameAdapter(users, gameData, allAddedText);
                         friendList.setAdapter(addToGameAdapter);
+                        if(userIds.size() == 0) {
+                            allAddedText.setVisibility(View.VISIBLE);
+                        } else {
+                            allAddedText.setVisibility(View.GONE);
+                        }
                         loadUsers(userIds);
                     }
                 }

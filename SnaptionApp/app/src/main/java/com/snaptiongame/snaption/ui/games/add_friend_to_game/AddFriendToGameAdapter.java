@@ -23,10 +23,12 @@ import static com.snaptiongame.snaption.Constants.GAME_DATA_PLAYER_PATH;
 public class AddFriendToGameAdapter extends RecyclerView.Adapter<ExistingGameFriendHolder> {
     private List<UserMetadata> friends;
     private Game gameData;
+    private View addedText;
 
-    public AddFriendToGameAdapter(List<UserMetadata> friends, Game gameData) {
+    public AddFriendToGameAdapter(List<UserMetadata> friends, Game gameData, View addedText) {
         this.friends = friends;
         this.gameData = gameData;
+        this.addedText = addedText;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class AddFriendToGameAdapter extends RecyclerView.Adapter<ExistingGameFri
     }
 
     @Override
-    public void onBindViewHolder(ExistingGameFriendHolder holder, int position) {
+    public void onBindViewHolder(final ExistingGameFriendHolder holder, int position) {
         final UserMetadata curUser = friends.get(position);
         holder.email.setText(curUser.getEmail());
         holder.name.setText(curUser.getDisplayName());
@@ -53,6 +55,11 @@ public class AddFriendToGameAdapter extends RecyclerView.Adapter<ExistingGameFri
                 int playerIdx = friends.indexOf(curUser);
                 friends.remove(curUser);
                 notifyItemRemoved(playerIdx);
+                if(friends.size() == 0) {
+                    addedText.setVisibility(View.VISIBLE);
+                } else {
+                    addedText.setVisibility(View.GONE);
+                }
             }
         });
     }
