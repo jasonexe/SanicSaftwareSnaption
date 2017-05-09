@@ -140,9 +140,9 @@ public class NotificationReceiver extends FirebaseMessagingService {
         endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
         endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
         if (game.getIsPublic()) {
-            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PRIVATE);
-        } else {
             endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PUBLIC);
+        } else {
+            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PRIVATE);
         }
 
         PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);

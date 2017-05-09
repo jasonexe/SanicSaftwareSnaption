@@ -46,7 +46,7 @@ public class GameEndNotification extends BroadcastReceiver {
         //create notification
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_snaption)
-                .setContentTitle(context.getResources().getString(R.string.game_invite_notification_title))
+                .setContentTitle(context.getResources().getString(R.string.app_name))
                 .setContentText(String.format(context.getResources().getString(R.string.game_ended_notification), pickerName))
                 .setAutoCancel(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
