@@ -18,6 +18,7 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity.ProfileActivityCreator;
+import com.snaptiongame.snaptionapp.ui.games.CaptionLogic;
 
 import java.text.NumberFormat;
 import java.util.Collections;
@@ -141,7 +142,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             Caption captionInList = items.get(oldIndex);
             items.remove(oldIndex);
             updatedCaption.assignUser(captionInList.retrieveUser());
-            newIndex = insertCaption(updatedCaption);
+            newIndex = CaptionLogic.insertCaption(items, updatedCaption);
             // Check to see if the caption has moved or changed, and if it has
             // then animate its change
             if (oldIndex != newIndex) {
@@ -316,30 +317,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 });
             }
         }
-    }
-
-    /**
-     * Inserts the caption into the items list in the proper order.
-     *
-     * @param caption The caption to insert
-     */
-    private int insertCaption(Caption caption) {
-        int index = 0;
-        boolean added = false;
-
-        while (index < items.size() && !added) {
-            if (caption.compareTo(items.get(index)) < 0) {
-                items.add(index, caption);
-                added = true;
-            }
-            else {
-                index++;
-            }
-        }
-        if (!added) {
-            items.add(caption);
-        }
-        return index;
     }
 
 }
