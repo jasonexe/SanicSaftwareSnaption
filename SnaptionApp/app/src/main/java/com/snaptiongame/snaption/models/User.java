@@ -1,5 +1,6 @@
 package com.snaptiongame.snaption.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  *
  * @author Austin Robarts
  */
-public class User implements Person, Comparable<User> {
+public class User implements Person, Comparable<User>, Serializable {
 
     private UserMetadata metadata;
     private UserPublicData publicData;
