@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -44,6 +45,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
+import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 
 /**
@@ -330,6 +332,7 @@ public class ProfileFragment extends Fragment {
     private void saveProfilePic() {
         if(newPhotoUri != null) {
             byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
+            clearGlideCache();
             FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
                     new Uploader.UploadListener() {
                 @Override
@@ -348,6 +351,18 @@ public class ProfileFragment extends Fragment {
                 }
             });
         }
+    }
+
+    private void clearGlideCache() {
+        Glide.get(getApplicationContext()).clearMemory();
+        AsyncTask clearGlideCache = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+                Glide.get(getApplicationContext()).clearDiskCache();
+                return null;
+            }
+        };
+        clearGlideCache.execute();
     }
 
     private void editDisplayName() {
