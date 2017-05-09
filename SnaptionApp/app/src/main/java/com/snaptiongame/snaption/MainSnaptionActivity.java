@@ -201,8 +201,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         ProfileFragment fragment = new ProfileFragment();
         fragment.setUserInfoEditListener(new ProfileFragment.UserInfoEditListener() {
             @Override
-            public void onEditUsername(String error) {
-                if (error == null) {
+            public void onEditUsername(String errorMessage) {
+                if (errorMessage == null) {
                     currentUser = null;
                     updateNavigationViews(false);
                 }
@@ -212,8 +212,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
 
             @Override
-            public void onEditPhoto(String error) {
-                if (error == null) {
+            public void onEditPhoto(String errorMessage) {
+                if (errorMessage == null) {
                     currentUser = null;
                     updateNavigationViews(true);
                 }

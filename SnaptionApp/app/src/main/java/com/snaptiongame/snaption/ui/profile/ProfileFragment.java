@@ -102,8 +102,18 @@ public class ProfileFragment extends Fragment {
     };
     private UserInfoEditListener userInfoEditListener;
     public interface UserInfoEditListener {
-        void onEditUsername(String error);
-        void onEditPhoto(String error);
+        /**
+         * Callback for when the username is edited. If errorMessage is null, the username was
+         * successfully edited. Otherwise, an error occurred while editing the username and
+         * errorMessage contains the details of the error
+         */
+        void onEditUsername(String errorMessage);
+        /**
+         * Callback for when the profile photo is edited. If errorMessage is null, the profile photo
+         * was successfully edited. Otherwise, an error occurred while editing the profile photo and
+         * errorMessage contains the details of the error
+         */
+        void onEditPhoto(String errorMessage);
     }
 
     @Nullable
