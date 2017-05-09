@@ -139,6 +139,12 @@ public class NotificationReceiver extends FirebaseMessagingService {
         //store pickerName and gameId so notification can go to GameActivity
         endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
         endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
+        if (game.getIsPublic()) {
+            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PRIVATE);
+        } else {
+            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PUBLIC);
+        }
+
         PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 

@@ -33,7 +33,10 @@ public class GameEndNotification extends BroadcastReceiver {
         String gameId = delayedIntent.getStringExtra(GameActivity.USE_GAME_ID);
         //get picker's name from intent
         String pickerName = delayedIntent.getStringExtra(Constants.PICKER);
+        //get game's acces
+        String access = delayedIntent.getStringExtra(GameActivity.USE_GAME_ACCESS);
         intent.putExtra(GameActivity.USE_GAME_ID, gameId);
+        intent.putExtra(GameActivity.USE_GAME_ACCESS, access);
         //create fake history so back button goes to Wall
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addParentStack(GameActivity.class);
