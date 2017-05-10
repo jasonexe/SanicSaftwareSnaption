@@ -115,17 +115,6 @@
                         android:layout_toStartOf="@id/captions_icon" />
 
                     <Button
-                        android:id="@+id/leave_button"
-                        android:visibility="gone"
-                        android:layout_width="wrap_content"
-                        android:layout_height="16dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:layout_toEndOf="@id/text_date"
-                        android:layout_centerVertical="true"
-                        android:text="@string/leave_game"
-                        android:textColor="@color/colorPrimaryLight"/>
-
-                    <Button
                         android:id="@+id/invite_friends"
                         android:layout_width="wrap_content"
                         android:layout_height="16dp"

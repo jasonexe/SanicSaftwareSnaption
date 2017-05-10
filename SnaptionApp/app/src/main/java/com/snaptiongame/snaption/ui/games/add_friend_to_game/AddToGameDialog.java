@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +21,7 @@ import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.friends.FriendsListAdapter;
@@ -51,6 +53,9 @@ public class AddToGameDialog extends AlertDialog {
     @BindView(R.id.all_friends_added_text)
     public TextView allAddedText;
 
+    @BindView(R.id.leave_button)
+    public Button leaveButton;
+
     private FragmentActivity activity;
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private AddFriendToGameAdapter addToGameAdapter;
@@ -76,7 +81,17 @@ public class AddToGameDialog extends AlertDialog {
         ButterKnife.bind(this);
         LinearLayoutManager friendsViewManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         friendList.setLayoutManager(friendsViewManager);
+        determineLeaveVisibility();
         populateFriends();
+    }
+
+    private void determineLeaveVisibility() {
+        String thisUser = FirebaseUserResourceManager.getUserId();
+        // If they're the picker, hide button. Otherwise, they're in the game if they got this
+        // dialog open.
+        if (gameData.getPickerId().equals(thisUser)) {
+            leaveButton.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -88,6 +103,26 @@ public class AddToGameDialog extends AlertDialog {
     @OnClick(R.id.deep_link_button)
     public void createDeepLink() {
         FirebaseDeepLinkCreator.createGameInviteIntent(activity, gameData, progressSpinner, photoPreview, sampleCaption);
+    }
+
+    @OnClick(R.id.leave_button)
+    public void leaveGame() {
+        FirebaseUploader.removeCurrentUserFromGame(gameData, new ResourceListener<Exception>() {
+            @Override
+            public void onData(Exception data) {
+                if(data.getLocalizedMessage() != null) {
+                    Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                } else {
+                    Snackbar.make(getCurrentFocus(), getOwnerActivity().getString(R.string.problem_leaving), Snackbar.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        });
+        this.dismiss();
     }
 
     /**
