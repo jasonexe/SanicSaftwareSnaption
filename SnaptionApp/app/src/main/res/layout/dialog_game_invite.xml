@@ -42,7 +42,7 @@
             android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Invite friends without snaption" />
+            android:text="@string/inv_to_snaption" />
     </android.support.percent.PercentRelativeLayout>
 
     <ProgressBar
