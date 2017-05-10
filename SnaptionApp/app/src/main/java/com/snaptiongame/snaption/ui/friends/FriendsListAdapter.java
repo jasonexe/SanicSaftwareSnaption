@@ -58,7 +58,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
                 }
             });
         }
-        holder.photo.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 profileMaker.create(friend.getId());
