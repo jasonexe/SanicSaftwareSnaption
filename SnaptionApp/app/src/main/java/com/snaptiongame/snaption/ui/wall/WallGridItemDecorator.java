@@ -18,7 +18,8 @@ public class WallGridItemDecorator extends RecyclerView.ItemDecoration {
     @Override
     public void getItemOffsets(Rect outRect, View view,
                                RecyclerView parent, RecyclerView.State state) {
-        StaggeredGridLayoutManager.LayoutParams lp = (StaggeredGridLayoutManager.LayoutParams)view .getLayoutParams();
+        StaggeredGridLayoutManager.LayoutParams lp = (StaggeredGridLayoutManager.LayoutParams) view
+                .getLayoutParams();
         int spanIndex = lp.getSpanIndex();
         if(spanIndex == 0){
             outRect.left = space;
@@ -28,5 +29,6 @@ public class WallGridItemDecorator extends RecyclerView.ItemDecoration {
             outRect.left = space / 2;
         }
         outRect.top = space;
+        outRect.bottom = space;
     }
 }
