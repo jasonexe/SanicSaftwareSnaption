@@ -45,7 +45,7 @@ public class WallFragment extends Fragment {
     private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
     private static final int SCROLL_DOWN_CONST = 1;
-    private static final double PERCENT_BEFORE_LOAD = .9; // Load games if 10 % is left to scroll
+    private static final double PERCENT_BEFORE_LOAD = .9; // Load games if already scrolled 90%
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
