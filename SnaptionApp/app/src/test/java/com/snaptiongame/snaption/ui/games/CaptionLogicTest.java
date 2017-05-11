@@ -1,7 +1,8 @@
-package com.snaptiongame.snaptionapp.ui.games;
+package com.snaptiongame.snaption.ui.games;
 
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Card;
+import com.snaptiongame.snaption.ui.games.CaptionLogic;
 
 
 import org.junit.Test;

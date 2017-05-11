@@ -97,6 +97,8 @@ public class Constants {
     public static final String GAME_DATA_CAPTIONS_PATH = "games/%s/data/%s/captions";
     //Path to game's specific caption with configurable access
     public static final String GAME_DATA_CAPTION_PATH = "games/%s/data/%s/captions/%s";
+    //Path to game's player list with configurable access
+    public static final String GAME_DATA_PLAYER_PATH = "games/%s/data/%s/players/%s";
     //PUBLIC
     //Path to public root game metadata directory in Firebase
     public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";

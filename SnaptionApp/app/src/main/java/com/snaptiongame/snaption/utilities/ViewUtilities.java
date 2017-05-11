@@ -126,23 +126,4 @@ public class ViewUtilities {
         }
         return imageHeight;
     }
-
-    /**
-     * Calculates the width of a view based on the aspect ratio, max view width, and max view
-     * height. The width is calculated with respect to the max height. If the calculated width is
-     * greater than the max width, the max width is returned.
-     *
-     * @param aspectRatio view width / view height
-     * @param maxWidthPx maximum width of the view
-     * @param maxHeightPx maximum height of the view
-     * @return calculated width of the view
-     */
-    public static int calculateViewWidth(double aspectRatio, double maxWidthPx,
-                                          double maxHeightPx) {
-        int imageWidth = (int) (maxHeightPx * aspectRatio);
-        if (imageWidth > maxWidthPx) {
-            imageWidth = (int) maxWidthPx;
-        }
-        return imageWidth;
-    }
 }
