@@ -10,7 +10,7 @@
     <color name="greenBackground">#30D93E</color>
     <color name="lightGrey">#20000000</color>
     <color name="lightColorAccent">#0091ea</color>
-    <color name="grey">#BDBDBD</color>
+    <color name="grey">#DDDDDD</color>
     <color name="darkGrey">#424242</color>
     <color name="colorPrimaryLight">#6ec6ff</color>
 </resources>

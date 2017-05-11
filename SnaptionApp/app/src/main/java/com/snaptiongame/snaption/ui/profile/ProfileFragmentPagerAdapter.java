@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.View;
 
+import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
@@ -20,13 +21,14 @@ import java.util.List;
 
 public class ProfileFragmentPagerAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 2;
-    private String tabTitles[] = new String[] { "Games", "Captions" };
-    private Context context;
+    private String tabTitles[];
     private User user;
 
     public ProfileFragmentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
-        this.context = context;
+        String gamesText = context.getResources().getString(R.string.games_text);
+        String captionsText = context.getResources().getString(R.string.captions_text);
+        tabTitles = new String[] {gamesText, captionsText};
     }
 
     public void setUser(User user) {

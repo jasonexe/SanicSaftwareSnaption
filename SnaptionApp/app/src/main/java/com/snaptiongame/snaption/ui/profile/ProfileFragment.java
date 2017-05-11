@@ -88,8 +88,6 @@ public class ProfileFragment extends Fragment {
     protected ViewPager viewPager;
 
     private Unbinder unbinder;
-    private ProfileGamesAdapter gameAdapter;
-    private ProfileCaptionsAdapter captionsAdapter;
     private ProfileFragmentPagerAdapter pagerAdapter;
     private Drawable oldProfilePic;
     private byte[] newPhoto;
@@ -111,7 +109,7 @@ public class ProfileFragment extends Fragment {
         // Set clickability to false - for some reason doesn't work in XML (maybe b/c butterknife?)
         profile.setClickable(false);
 
-        pagerAdapter = new ProfileFragmentPagerAdapter(getFragmentManager(), getContext());
+        pagerAdapter = new ProfileFragmentPagerAdapter(getChildFragmentManager(), getContext());
 
         //if the user is logged in
         if (userId != null) {
@@ -154,14 +152,8 @@ public class ProfileFragment extends Fragment {
         pagerAdapter.setUser(user);
         viewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
+        pagerAdapter.notifyDataSetChanged();
     }
-
-    /*private boolean canDisplayGame(GameMetadata game, boolean isUser) {
-        return game != null && (isUser ||
-                game.getIsPublic() ||
-                FirebaseUserResourceManager.getUserId() != null && game.getPlayers() != null &&
-                        game.getPlayers().containsKey(FirebaseUserResourceManager.getUserId()));
-    }*/
 
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {
         @Override

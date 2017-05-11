@@ -39,7 +39,6 @@ import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 /**
  * Created by austinrobarts on 5/8/17.
  */
-
 public class ProfileTabFragment extends Fragment {
 
     @BindView(R.id.profile_recycler_list)
@@ -50,6 +49,9 @@ public class ProfileTabFragment extends Fragment {
     private ProfileCaptionsAdapter captionsAdapter;
     private ProfileGamesAdapter gamesAdapter;
     private WallViewAdapter wallViewAdapter;
+
+    private static final int CAPTION_TAB_PAGE = 1;
+    private static final int GAME_TAB_PAGE = 0;
 
     private int page = 0;
     private User user = null;
@@ -80,18 +82,14 @@ public class ProfileTabFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        page = getArguments().getInt(PROFILE_FRAGMENT_PAGE);
-        user = (User)getArguments().getSerializable("user");
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_tab_page, container, false);
+        page = getArguments().getInt(PROFILE_FRAGMENT_PAGE);
+        user = (User)getArguments().getSerializable("user");
         unbinder = ButterKnife.bind(this, view);
-        if (page == 1) {
+        if (page == CAPTION_TAB_PAGE) {
+            //on the captions tab
             GridLayoutManager captionViewManager = new GridLayoutManager(view.getContext(), 3, LinearLayoutManager.VERTICAL, false);
             recyclerView.setLayoutManager(captionViewManager);
             List<Caption> captions;
@@ -106,13 +104,7 @@ public class ProfileTabFragment extends Fragment {
             captionsAdapter = new ProfileCaptionsAdapter(captions);
             recyclerView.setAdapter(captionsAdapter);
         } else {
-            //game stuff
-            /*GridLayoutManager gamesViewManager = new GridLayoutManager(view.getContext(), 2,
-                    LinearLayoutManager.VERTICAL, false);
-            recyclerView.setLayoutManager(gamesViewManager);
-            List<Caption> captions = new ArrayList<>();
-            gamesAdapter = new ProfileGamesAdapter(new ArrayList<GameMetadata>());
-            getUserGames(user);*/
+            //on the games tab
             StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(2,
                     StaggeredGridLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(manager);
