@@ -68,10 +68,6 @@ public class ProfileFragment extends Fragment {
     public TextView gamesCreated;
     @BindView(R.id.captions_created)
     public TextView captionsCreated;
-    //@BindView(R.id.profile_games_list)
-    //protected RecyclerView gameListView;
-    //@BindView(R.id.profile_captions_list)
-    //protected RecyclerView captionsListView;
     @BindView(R.id.profile_name_editable)
     protected EditText profileEditName;
     @BindView(R.id.stop_name_change)

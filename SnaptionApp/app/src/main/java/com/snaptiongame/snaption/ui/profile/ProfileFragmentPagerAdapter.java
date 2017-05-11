@@ -20,7 +20,7 @@ import java.util.List;
  */
 
 public class ProfileFragmentPagerAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 2;
+    private final int PAGE_COUNT = 2;
     private String tabTitles[];
     private User user;
 
