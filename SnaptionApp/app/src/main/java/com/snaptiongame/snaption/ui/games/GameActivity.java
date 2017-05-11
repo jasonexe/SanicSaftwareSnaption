@@ -301,7 +301,7 @@ public class GameActivity extends HomeAppCompatActivity {
         startCommentManager(game.getMetaData());
     }
 
-    private void loadPhoto(GameMetadata metadata) {
+    private void loadPhoto(final GameMetadata metadata) {
         // set the progress bar and image view height using the image aspect ratio
         Resources res = getResources();
         final int imageHeight = ViewUtilities.calculateViewHeight(metadata.getImageAspectRatio(),
@@ -321,7 +321,7 @@ public class GameActivity extends HomeAppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             // add a new behavior to the image view
                             minimizeImageBehavior = new MinimizeViewBehavior(gameContentLayout,
-                                    imageHeight, new HideFabOnScrollListener(fab));
+                                    imageHeight, metadata.isOpen() ? new HideFabOnScrollListener(fab) : null);
                             ((CoordinatorLayout.LayoutParams) imageView.getLayoutParams())
                                     .setBehavior(minimizeImageBehavior);
                             // start transition now that image is loaded
