@@ -53,6 +53,8 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
+import com.snaptiongame.snaption.ui.games.players.GamePlayerView;
+import com.snaptiongame.snaption.ui.games.players.PlayerDialogFragment;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
@@ -132,12 +134,6 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.picker_name)
     protected TextView pickerName;
 
-    @BindView(R.id.flag_icon)
-    protected ImageView flag;
-
-    @BindView(R.id.number_captions)
-    protected TextView numberCaptions;
-
     @BindView(R.id.text_date)
     protected TextView endDate;
 
@@ -190,13 +186,14 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.progress_bar)
     public View progressBar;
 
+    @BindView(R.id.game_player_view)
+    public GamePlayerView gamePlayerView;
+
     private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
         public void onNewData(Caption data) {
             if (data != null) {
                 captionAdapter.addCaption(data);
-                numberCaptions.setText(String.format(Locale.getDefault(),
-                        "%d", captionAdapter.getItemCount()));
             }
         }
 
@@ -298,6 +295,7 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         setupButtonDisplay(game);
         setupCaptionList(game);
+        setupPlayerList(game);
         startCommentManager(game.getMetaData());
     }
 
@@ -478,17 +476,21 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
+    private void setupPlayerList(Game game) {
+        if (game.getPlayers() != null) {
+            gamePlayerView.setPlayers(new ArrayList<>(game.getPlayers().keySet()));
+        }
+    }
+
     private void setupCaptionList(Game game) {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
-            numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
         } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
-            numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
         captionListView.addOnScrollListener(scrollFabHider);
@@ -621,6 +623,16 @@ public class GameActivity extends HomeAppCompatActivity {
                 return Exception.class;
             }
         });
+    }
+
+    @OnClick(R.id.game_player_view)
+    public void onClickGamePlayers() {
+        if (game != null && game.getPlayers() != null) {
+            List<String> playerIds = new ArrayList<>(game.getPlayers().keySet());
+            playerIds.add(0, game.getPickerId());
+            PlayerDialogFragment.getInstance(getString(R.string.players), playerIds,
+                    game.getPickerId()).show(getSupportFragmentManager(), null);
+        }
     }
 
     public void displayLoginDialog() {

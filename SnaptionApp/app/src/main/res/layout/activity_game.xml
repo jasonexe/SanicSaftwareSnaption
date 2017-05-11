@@ -73,12 +73,11 @@
                         android:paddingStart="16dp"
                         tools:text="Example picker name" />
 
-                    <ImageView
-                        android:id="@+id/flag_icon"
+                    <com.snaptiongame.snaption.ui.games.players.GamePlayerView
+                        android:id="@+id/game_player_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:src="@drawable/flag_outline" />
+                        android:layout_alignParentEnd="true"/>
 
                 </RelativeLayout>
 
@@ -98,30 +97,12 @@
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="8dp" />
 
-                    <ImageView
-                        android:id="@+id/captions_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="8dp"
-                        android:src="@drawable/ic_chat_bubble_outline_grey_400_24dp" />
-
-                    <TextView
-                        android:id="@+id/number_captions"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toStartOf="@id/captions_icon" />
-
                     <Button
                         android:id="@+id/invite_friends"
                         android:layout_width="wrap_content"
                         android:layout_height="16dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_toStartOf="@id/number_captions"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/game_invite"
                         android:textColor="@color/colorAccent"
@@ -132,9 +113,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="16dp"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_toStartOf="@id/number_captions"
+                        android:layout_alignParentEnd="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/join_game"
                         android:textColor="@color/colorAccent" />

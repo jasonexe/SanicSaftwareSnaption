@@ -28,6 +28,8 @@ public class Constants {
     // BEGIN FIREBASE VARIABLES //
 
     //ALL USER DATA PATHS for database redesign
+    //Path to user profile photos in Firebase Storage
+    public static final String USER_PROFILE_PHOTO_PATH = "ProfilePictures/%s";
     //Path to root user metadata directory in Firebase
     public static final String USERS_METADATA_PATH = "users/public/metadata";
     //Path to specific user metadata directory in Firebase
