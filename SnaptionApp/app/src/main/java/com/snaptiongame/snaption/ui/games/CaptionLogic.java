@@ -1,4 +1,4 @@
-package com.snaptiongame.snaptionapp.ui.games;
+package com.snaptiongame.snaption.ui.games;
 
 
 import com.snaptiongame.snaption.models.Caption;
