@@ -83,6 +83,7 @@
     <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
     <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
     <string name="change_photo_error">Error occurred while changing photo</string>
+    <string name="change_username_error">Error occurred while changing username</string>
     <string name="inv_to_snaption">Invite to snaption</string>
 
     <!--Accessibility strings-->
