@@ -88,7 +88,7 @@ public class PlayerDialogFragment extends DialogFragment {
         }
 
         // build the dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder((getActivity()));
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(customView);
         if (getArguments() != null && !TextUtils.isEmpty(getArguments().getString(TITLE_ARG))) {
             builder.setTitle(getArguments().getString(TITLE_ARG));
