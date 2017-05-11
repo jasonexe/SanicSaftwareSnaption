@@ -1,5 +1,6 @@
 package com.snaptiongame.snaption.models;
 
+import com.google.firebase.database.Exclude;
 import com.snaptiongame.snaption.R;
 
 import java.io.Serializable;
@@ -124,6 +125,7 @@ public class GameMetadata implements Serializable {
         return imageAspectRatio;
     }
 
+    @Exclude
     public boolean isOpen() {
         return (Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND) < endDate;
     }

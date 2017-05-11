@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -240,7 +241,6 @@ public class GameActivity extends HomeAppCompatActivity {
             //Gets the metadata and data for the game and calls setupGameElements
             retrieveGame(access, gameId);
         }
-
     }
 
     private void retrieveGame(String access, String gameId) {
@@ -298,6 +298,7 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         setupButtonDisplay(game);
         setupCaptionList(game);
+        startCommentManager(game.getMetaData());
     }
 
     private void loadPhoto(GameMetadata metadata) {
@@ -344,8 +345,8 @@ public class GameActivity extends HomeAppCompatActivity {
         initLoginManager();
         setupEndDate(metadata);
         setupPickerName(metadata);
-        setupCaptionCardView();
-        startCommentManager(metadata);
+        setupCaptionCardView(metadata);
+//        startCommentManager(metadata);
     }
 
     private void animateBitmapColorSwatch(final Bitmap bitmap) {
@@ -435,6 +436,10 @@ public class GameActivity extends HomeAppCompatActivity {
                 return null;
             }
         });
+        // Make the fab invisible if it's past the end date
+        if (!game.isOpen()) {
+            fab.hide();
+        }
     }
 
     private void determineButtonDisplay(String pickerId, Set<String> players) {
@@ -483,14 +488,19 @@ public class GameActivity extends HomeAppCompatActivity {
         if (game.getCaptions() != null) {
             numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
+                    game.getEndDate());
         } else {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
-                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic());
+                    loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
+                    game.getEndDate());
             numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
-        captionListView.addOnScrollListener(scrollFabHider);
+        // Make the fab invisible if it's past the end date
+        if (game.isOpen()) {
+            captionListView.addOnScrollListener(scrollFabHider);
+        }
     }
 
     // Displays the date that the game will end underneath the picture
@@ -545,7 +555,7 @@ public class GameActivity extends HomeAppCompatActivity {
 
     // Downloads the possible cards for captions,
     // and sets up the recycler view for once the cards are downloaded
-    private void setupCaptionCardView() {
+    private void setupCaptionCardView(GameMetadata gameMetadata) {
         // Sees if user clicks check button
         editCaptionText.setOnEditorActionListener(enterListener);
         // Setup recycler view
@@ -554,7 +564,9 @@ public class GameActivity extends HomeAppCompatActivity {
         captionCardsList.setLayoutManager(gameViewManager);
         cardListAdapter = new CardOptionsAdapter(new ArrayList<Card>(), new CardToTextConverter());
         captionCardsList.setAdapter(cardListAdapter);
-        captionCardsList.addOnScrollListener(scrollFabHider);
+        if (gameMetadata.isOpen()) {
+            captionCardsList.addOnScrollListener(scrollFabHider);
+        }
         populateCards(Constants.DEFAULT_PACK);
     }
 
@@ -587,19 +599,25 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.fab)
     public void displayCardOptions() {
-        //if the user is logged in they can caption
-        if (FirebaseUserResourceManager.getUserId() != null) {
-            toggleVisibility(captionCardsList);
-            //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-            if (cardInputView.getVisibility() == View.VISIBLE) {
-                cardInputView.setVisibility(View.GONE);
-                // In case they press the fab while it's being hidden after scrolling
-                // This prevents it from being hidden forever.
-                hideKeyboard();
+        if (game.isOpen()) {
+            //if the user is logged in they can caption
+            if (FirebaseUserResourceManager.getUserId() != null) {
+                toggleVisibility(captionCardsList);
+                //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+                if (cardInputView.getVisibility() == View.VISIBLE) {
+                    cardInputView.setVisibility(View.GONE);
+                    // In case they press the fab while it's being hidden after scrolling
+                    // This prevents it from being hidden forever.
+                    hideKeyboard();
+                }
+            } else { //if they are logged out
+                //display the loginDialog
+                displayLoginDialog();
             }
-        } else { //if they are logged out
-            //display the loginDialog
-            displayLoginDialog();
+        }
+        else {
+            Toast.makeText(this, getResources().getString(R.string.end_date_passed_caption),
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -711,7 +729,9 @@ public class GameActivity extends HomeAppCompatActivity {
         }
         // In case they click the fab too quick while scrolling in the caption cards, this will make
         // it not disappear forever
-        fab.show();
+        if (game.isOpen()) {
+            fab.show();
+        }
     }
 
     public void submit(String userInput) {

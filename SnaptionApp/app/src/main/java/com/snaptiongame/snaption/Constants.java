@@ -22,6 +22,8 @@ public class Constants {
     public static final String PHOTO_PATH = "currentPhotoPath";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
+    // Intent indicator that the next strings are fields
+    public static final String FIELDS = "fields";
 
     // BEGIN FIREBASE VARIABLES //
 
@@ -87,6 +89,8 @@ public class Constants {
     public static final String GAMES_DATA_PATH = "games/%s/data";
     //Path to specific game's metadata with configurable access
     public static final String GAME_DATA_PATH = "games/%s/data/%s";
+    //Path to the game's players with configurable access
+    public static final String GAME_DATA_PLAYERS_PATH = "games/%s/data/%s/players";
     //Path to specific game's captions with configurable access
     public static final String GAME_DATA_CAPTIONS_PATH = "games/%s/data/%s/captions";
     //Path to game's specific caption with configurable access
