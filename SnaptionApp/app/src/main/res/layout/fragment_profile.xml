@@ -63,36 +63,34 @@
                         android:layout_gravity="center"/>
                 </android.support.v7.widget.CardView>
 
-                <RelativeLayout
+                <LinearLayout
                     android:id="@+id/friends_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="4dp"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
                     android:background="@drawable/profile_text_background"
+                    android:elevation="2dp"
                     android:layout_below="@id/view2"
                     android:layout_alignEnd="@+id/view2"
                     android:layout_alignStart="@+id/view2"
-                    android:gravity="center_horizontal">
+                    android:gravity="center">
 
                     <TextView
                         android:id="@+id/friends_made"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingEnd="5dp"
-                        android:paddingStart="5dp"
+                        android:paddingEnd="4dp"
                         android:textColor="@android:color/white"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         tools:text="100" />
 
                     <ImageView
                         android:id="@+id/friends_icon"
                         android:src="@drawable/ic_supervisor_account_grey_400_18dp"
-                        android:textSize="16sp"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toEndOf="@id/friends_made"/>
-                </RelativeLayout>
+                        android:layout_height="16dp" />
+                </LinearLayout>
 
             </RelativeLayout>
 
@@ -109,7 +107,10 @@
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginEnd="@dimen/activity_horizontal_margin"
                     android:id="@+id/profile_name"
-                    android:textSize="24sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:scrollHorizontally="true"
+                    android:textSize="20sp"
                     android:textAlignment="center" />
 
                 <EditText
@@ -121,7 +122,7 @@
                     android:layout_height="wrap_content"
                     style="@style/Widget.AppCompat.AutoCompleteTextView"
                     android:id="@+id/profile_name_editable"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
                     android:textAlignment="center"
                     android:imeOptions="actionDone"
                     android:padding="10dp" />

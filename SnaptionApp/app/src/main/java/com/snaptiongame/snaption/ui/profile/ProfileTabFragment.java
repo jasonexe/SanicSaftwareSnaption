@@ -34,6 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 
 /**
@@ -52,6 +53,7 @@ public class ProfileTabFragment extends Fragment {
 
     private static final int CAPTION_TAB_PAGE = 1;
     private static final int GAME_TAB_PAGE = 0;
+    private static final int NUM_COLUMNS = 2;
 
     private int page = 0;
     private User user = null;
@@ -90,22 +92,19 @@ public class ProfileTabFragment extends Fragment {
         unbinder = ButterKnife.bind(this, view);
         if (page == CAPTION_TAB_PAGE) {
             //on the captions tab
-            GridLayoutManager captionViewManager = new GridLayoutManager(view.getContext(), 3, LinearLayoutManager.VERTICAL, false);
+            int captionWidth = (int) getResources().getDimension(R.dimen.caption_card_width);
+            int phoneWidth = getResources().getDisplayMetrics().widthPixels;
+            //based on phone width and caption width find how many can fit
+            int numCaptionColumns = phoneWidth / captionWidth;
+            GridLayoutManager captionViewManager = new GridLayoutManager(view.getContext(), numCaptionColumns, LinearLayoutManager.VERTICAL, false);
             recyclerView.setLayoutManager(captionViewManager);
-            List<Caption> captions;
-            if (user.getId().equals(FirebaseUserResourceManager.getUserId())) {
-                //get public and private captions
-                captions = user.getAllCaptions();
-            }
-            else {
-                //get private games only
-                captions = user.getAllPublicCaptions();
-            }
-            captionsAdapter = new ProfileCaptionsAdapter(captions);
+
+            captionsAdapter = new ProfileCaptionsAdapter(getUserCaptions());
             recyclerView.setAdapter(captionsAdapter);
         } else {
             //on the games tab
-            StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(2,
+            //made to have same layout as wall
+            StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
                     StaggeredGridLayoutManager.VERTICAL);
             recyclerView.setLayoutManager(manager);
             recyclerView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
@@ -129,13 +128,34 @@ public class ProfileTabFragment extends Fragment {
         return view;
     }
 
+    private List<Caption> getUserCaptions() {
+        List<Caption> captions;
+        //if user is looking at their own profile
+        if (user.getId().equals(FirebaseUserResourceManager.getUserId())) {
+            //get public and private captions
+            captions = user.getAllCaptions();
+        }
+        else {
+            //get public games only
+            captions = user.getAllPublicCaptions();
+        }
+        return captions;
+    }
+
     private void getUserGames(User user) {
-        Map<String, Integer> gameIds = user.getCreatedPublicGames();
+        Map<String, Integer> publicGameIds = user.getCreatedPublicGames();
+        Map<String, Integer> privateGameIds = user.getCreatedPrivateGames();
         //if User has any games
-        if (gameIds != null) {
-            //for each gameId in user's game list
-            for (String gameId : gameIds.keySet()) {
+        if (publicGameIds != null) {
+            //for each gameId in user's public game list
+            for (String gameId : publicGameIds.keySet()) {
                 FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PUBLIC_METADATA_PATH, gameId), gameListener);
+            }
+        }
+        if (privateGameIds != null) {
+            //for each gameId in user's private game list
+            for (String gameId : privateGameIds.keySet()) {
+                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PRIVATE_METADATA_PATH, gameId), gameListener);
             }
         }
     }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A model class for the User object.
@@ -51,6 +52,21 @@ public class User implements Person, Comparable<User>, Serializable {
 
     public Map<String, Integer> getCreatedPrivateGames() {
         return privateData.getCreatedGames();
+    }
+
+    public List<String> getAllCreatedGameIds() {
+        List<String> gameIds = new ArrayList<>();
+        Map publicGames = getCreatedPublicGames();
+        Map privateGames = getCreatedPrivateGames();
+
+        if (publicGames != null) {
+            gameIds.addAll(publicGames.keySet());
+        }
+        if (privateGames != null) {
+            gameIds.addAll(privateGames.keySet());
+        }
+        return gameIds;
+
     }
 
     public Map<String, Caption> getPublicCaptions() {

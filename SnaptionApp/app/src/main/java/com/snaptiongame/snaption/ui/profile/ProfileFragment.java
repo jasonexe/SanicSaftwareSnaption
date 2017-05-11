@@ -240,7 +240,6 @@ public class ProfileFragment extends Fragment {
             FirebaseUploader.updateDisplayName(newText, thisUser.getId());
             thisUser.setDisplayName(newText);
             userName.setText(newText);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
         }
     }
 
