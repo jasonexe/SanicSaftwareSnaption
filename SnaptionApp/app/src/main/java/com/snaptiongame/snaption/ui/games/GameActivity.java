@@ -406,7 +406,7 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void setupButtonDisplay(Game game) {
+    private void setupButtonDisplay(final Game game) {
         // When this is initially called, setup the button with current data
         final String pickerId = game.getPickerId();
         if (game.getPlayers() == null) {
@@ -420,12 +420,15 @@ public class GameActivity extends HomeAppCompatActivity {
                 String.format(GAME_PUBLIC_DATA_PLAYERS_PATH, game.getId()) :
                 String.format(GAME_PRIVATE_DATA_PLAYERS_PATH, game.getId());
         joinedGameManager.retrieveMapWithUpdates(gamePlayersPath,
-                new ResourceListener<Map<String, Object>>() {
+                new ResourceListener<Map<String, Integer>>() {
             @Override
-            public void onData(Map<String, Object> data) {
+            public void onData(Map<String, Integer> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
                 if (data != null) {
                     determineButtonDisplay(pickerId, data.keySet());
+                    // update the game player view
+                    game.setPlayers(data);
+                    setupPlayerList(game);
                 }
             }
 
@@ -647,8 +650,8 @@ public class GameActivity extends HomeAppCompatActivity {
         if (game != null && game.getPlayers() != null) {
             List<String> playerIds = new ArrayList<>(game.getPlayers().keySet());
             playerIds.add(0, game.getPickerId());
-            PlayerDialogFragment.getInstance(getString(R.string.players), playerIds,
-                    game.getPickerId()).show(getSupportFragmentManager(), null);
+            PlayerDialogFragment.getInstance(getString(R.string.players), game)
+                    .show(getSupportFragmentManager(), null);
         }
     }
 

@@ -40,6 +40,7 @@ public class GamePlayerView extends LinearLayout {
     public void setPlayers(List<String> playerIds) {
         boolean showOverflow = playerIds.size() > MAX_PLAYERS_SHOWN;
         int overflowCount = showOverflow ? playerIds.size() - MAX_PLAYERS_SHOWN : 0;
+        removeAllViews();
         // if the overflow view should be shown, get the players to be shown
         if (showOverflow) {
             playerIds = playerIds.subList(0, MAX_PLAYERS_SHOWN);
