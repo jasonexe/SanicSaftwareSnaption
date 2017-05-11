@@ -18,7 +18,6 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity.ProfileActivityCreator;
-import com.snaptiongame.snaptionapp.ui.games.CaptionLogic;
 
 import java.text.NumberFormat;
 import java.util.Calendar;
