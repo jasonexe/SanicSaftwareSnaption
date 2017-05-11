@@ -1,7 +1,6 @@
 package com.snaptiongame.snaption.ui.friends;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -64,6 +63,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     private FriendsListAdapter userListAdapter;
     private List<UserMetadata> users = new ArrayList<>();
     private String query;
+    private SearchView searchView;
 
     @BindView(R.id.login_provider_friends)
     protected RecyclerView loginProviderFriends;
@@ -148,6 +148,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
 
         ButterKnife.bind(this);
         searchNotice.setVisibility(View.GONE);
+        userViewList.setVisibility(View.GONE);
 
         // Login provider friends recycler view and adapter setup
         setupLoginProviderView();
@@ -285,7 +286,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
 
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
+        searchView =
                 (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
@@ -303,10 +304,17 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        this.query = query;
+        if (searchView != null) {
+            searchView.clearFocus();
+        }
+        return onQueryTextChange(query);
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        query = newText;
         users = new ArrayList<>();
         if (!query.isEmpty()) {
-            System.out.println(query);
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
         }
         else {
@@ -314,11 +322,5 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             userViewList.setVisibility(View.GONE);
         }
         return true;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-
-        return onQueryTextSubmit(newText);
     }
 }
