@@ -161,7 +161,7 @@ public class WallFragment extends Fragment {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if(!isLoading && wallListView != null) {
-                    // offset + extent = range
+                    // offset + range = extent
                     int offset = wallListView.computeVerticalScrollOffset();
                     int range = wallListView.computeVerticalScrollRange();
                     double extentBeforeLoad = wallListView.computeVerticalScrollExtent() * PERCENT_BEFORE_LOAD;
