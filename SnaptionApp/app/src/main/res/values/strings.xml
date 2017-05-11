@@ -53,7 +53,7 @@
     <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
     <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
     <string name="no_internet">There was an error, you may not be connected to the Internet</string>
-    <string name="game_invite">Invite Friends</string>
+    <string name="game_invite">Invite</string>
     <string name="join_game">Join Game</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
@@ -81,8 +81,10 @@
     <string name="plural">s</string>
     <string name="game_ended_notification">A game created by %s has ended</string>
     <string name="gamed_ended_notification_title"></string>
+    <string name="friends_in_game">All your friends are already in this game!</string>
     <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
     <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
+    <string name="inv_to_snaption">Invite to snaption</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

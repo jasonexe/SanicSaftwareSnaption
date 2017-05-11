@@ -80,6 +80,8 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     // PhotoView - Image Zoom Library
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
+    // PercentRelativeView for percentage based layouts
+    compile 'com.android.support:percent:25.3.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
