@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <android.support.percent.PercentRelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="@string/send_invites"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_below="@id/title_text"
+            android:id="@+id/friend_list"
+            android:layout_width="wrap_content"
+            app:layout_heightPercent="60%"
+            android:layout_centerHorizontal="true"
+            android:orientation="vertical"/>
+
+        <TextView
+            android:id="@+id/all_friends_added_text"
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title_text"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            app:layout_heightPercent="60%"
+            android:text="@string/no_friends_add_invite"/>
+
+        <Button
+            android:id="@+id/deep_link_button"
+            android:layout_below="@id/friend_list"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/inv_to_snaption" />
+    </android.support.percent.PercentRelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/intent_load_progress"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center"/>
+</FrameLayout>
