@@ -107,7 +107,7 @@ public class UserMetadata implements Person, Comparable<UserMetadata> {
     @Override
     public int compareTo(UserMetadata other) {
         int result = getSearchName().compareTo(other.getSearchName());
-        if (result == 0) {
+        if (result == 0 && getEmail() != null) {
             result = getEmail().compareTo(other.getEmail());
         }
         return result;

@@ -36,7 +36,7 @@ import butterknife.Unbinder;
 public class FriendsFragment extends Fragment {
 
     @BindView(R.id.friend_notice)
-    public TextView friendNotice;
+    protected TextView friendNotice;
     @BindView(R.id.friend_list)
     protected RecyclerView friendsListView;
 

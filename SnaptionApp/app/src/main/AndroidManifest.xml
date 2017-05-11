@@ -83,18 +83,6 @@
             android:theme="@style/AppTheme.NoActionBar.Transparent"
             android:screenOrientation="portrait" />
 
-        <activity android:name="com.snaptiongame.snaption.ui.friends.SearchActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_search" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable"
-                android:value=".SearchResultsActivity"/>
-        </activity>
-
         <service
             android:name="com.snaptiongame.snaption.servercalls.NotificationReceiver">
             <intent-filter>
