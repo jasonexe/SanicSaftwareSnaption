@@ -183,6 +183,7 @@ public class ProfileFragment extends Fragment {
         //check if we need to show the addFriend button
         //if we came from the Profile Activity and these two users are not already friends
         if (getActivity() instanceof ProfileActivity
+                && user != null && userId != null
                 && (user.getFriends() == null || !user.getFriends().containsKey(userId))
                 && !isUser) {
             ((ProfileActivity) getActivity()).setAddFriendVisible(true);
@@ -276,7 +277,7 @@ public class ProfileFragment extends Fragment {
 
     public void addFriend() {
         String userId = FirebaseUserResourceManager.getUserId();
-        if (thisUser != null && thisUser.getId() != userId) {
+        if (userId != null && thisUser != null && thisUser.getId() != userId) {
             FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
                 @Override
                 public void onData(UserMetadata user) {
