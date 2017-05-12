@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
-import com.snaptiongame.snaption.models.Game;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.ui.games.GameActivity;

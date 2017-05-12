@@ -199,4 +199,8 @@ public class Game implements Serializable {
     public double getImageAspectRatio() {
         return metaData.getImageAspectRatio();
     }
+
+    public void addPlayer(String playerId) {
+        data.addPlayer(playerId);
+    }
 }

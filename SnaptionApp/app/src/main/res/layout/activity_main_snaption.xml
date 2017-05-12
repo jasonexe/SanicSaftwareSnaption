@@ -48,7 +48,8 @@
             app:layout_anchor="@id/bottom_nav"
             app:layout_anchorGravity="end|bottom"
             app:elevation="6dp"
-            app:srcCompat="@drawable/ic_add_white_24dp"/>
+            app:srcCompat="@drawable/ic_add_white_24dp"
+            app:layout_behavior="com.snaptiongame.snaption.ui.MainFabBehavior"/>
     </android.support.design.widget.CoordinatorLayout>
 
     <!-- The navigation drawer -->

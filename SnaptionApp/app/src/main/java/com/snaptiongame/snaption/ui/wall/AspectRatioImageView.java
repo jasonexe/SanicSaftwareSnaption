@@ -33,9 +33,6 @@ public class AspectRatioImageView extends AppCompatImageView {
         if (aspectRatio != 0) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int height = ViewUtilities.calculateViewHeight(aspectRatio, width, maxImageHeight);
-            if (height == maxImageHeight) {
-                width = ViewUtilities.calculateViewWidth(aspectRatio, width, height);
-            }
             setMeasuredDimension(width, height);
         }
     }
