@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,6 +34,7 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
@@ -158,6 +160,10 @@ public class ProfileFragment extends Fragment {
 
     private void setupUserData(User user, View view) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
+        // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
+        if(this.isHidden()) {
+            return;
+        }
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
@@ -239,6 +245,20 @@ public class ProfileFragment extends Fragment {
     @OnClick(R.id.stop_name_change)
     public void cancelChanges() {
         fabClicked(fab, false);
+    }
+
+    @OnClick(R.id.profile_picture_container)
+    public void enlargePhoto() {
+        if(thisUser == null) {
+            // Hasn't loaded user yet, short circuit
+            return;
+        }
+        Intent photoZoomIntent = new Intent(getActivity(), PhotoZoomActivity.class);
+        photoZoomIntent.putExtra(PhotoZoomActivity.PHOTO_PATH, thisUser.getImagePath());
+        photoZoomIntent.putExtra(PhotoZoomActivity.TRANSITION_NAME, thisUser.getId());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),
+                profile, thisUser.getId());
+        startActivity(photoZoomIntent, options.toBundle());
     }
 
     public void fabClicked(FloatingActionButton fab, boolean save) {
