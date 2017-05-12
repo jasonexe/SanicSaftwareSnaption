@@ -79,6 +79,8 @@
     <string name="days">day</string>
     <string name="remain">remaining</string>
     <string name="plural">s</string>
+    <string name="game_ended_notification">A game created by %s has ended</string>
+    <string name="gamed_ended_notification_title"></string>
     <string name="friends_in_game">All your friends are already in this game!</string>
     <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
     <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
