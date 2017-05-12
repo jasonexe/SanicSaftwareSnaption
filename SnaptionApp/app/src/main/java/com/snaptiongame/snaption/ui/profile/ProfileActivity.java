@@ -4,14 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.snaptiongame.snaption.R;
+import com.snaptiongame.snaption.models.Friend;
+import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
+import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 
@@ -62,7 +65,7 @@ public class ProfileActivity extends HomeAppCompatActivity {
         addFriendItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                fragment.addFriend();
+                addFriend();
                 return true;
             }
         });
@@ -72,5 +75,40 @@ public class ProfileActivity extends HomeAppCompatActivity {
     public void setAddFriendVisible(boolean visible) {
         addFriendIsVisible = visible;
         invalidateOptionsMenu();
+    }
+
+    public void addFriend() {
+        final User thisUser = fragment.getUser();
+        String userId = FirebaseUserResourceManager.getUserId();
+        if (userId != null && thisUser != null && !thisUser.getId().equals(userId)) {
+            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
+                @Override
+                public void onData(UserMetadata user) {
+                    Uploader uploader = new FirebaseUploader();
+                    uploader.addFriend(user, new Friend(thisUser.getId(), thisUser.getDisplayName(), thisUser.getEmail(), thisUser.getFacebookId()), new Uploader.UploadListener() {
+                        @Override
+                        public void onComplete() {
+                            //show friend added toast
+                            String addedFriend = String.format(getResources().getString(R.string.added_friend), thisUser.getDisplayName());
+                            Toast.makeText(ProfileActivity.this, addedFriend, Toast.LENGTH_SHORT).show();
+                            //hide add friend button
+                            setAddFriendVisible(false);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            //show friend failed to add toast
+                            String failedFriend = String.format(getResources().getString(R.string.problem_adding_friend), thisUser.getDisplayName());
+                            Toast.makeText(ProfileActivity.this, failedFriend, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public Class getDataType() {
+                    return UserMetadata.class;
+                }
+            });
+        }
     }
 }

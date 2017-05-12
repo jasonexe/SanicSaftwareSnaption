@@ -275,38 +275,8 @@ public class ProfileFragment extends Fragment {
         isEditing = !isEditing;
     }
 
-    public void addFriend() {
-        String userId = FirebaseUserResourceManager.getUserId();
-        if (userId != null && thisUser != null && thisUser.getId() != userId) {
-            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
-                @Override
-                public void onData(UserMetadata user) {
-                    Uploader uploader = new FirebaseUploader();
-                    uploader.addFriend(user, new Friend(thisUser.getId(), thisUser.getDisplayName(), thisUser.getEmail(), thisUser.getFacebookId()), new Uploader.UploadListener() {
-                        @Override
-                        public void onComplete() {
-                            //show friend added toast
-                            String addedFriend = String.format(getResources().getString(R.string.added_friend), thisUser.getDisplayName());
-                            Toast.makeText(getActivity(), addedFriend, Toast.LENGTH_SHORT).show();
-                            //hide add friend button
-                            ((ProfileActivity)getActivity()).setAddFriendVisible(false);
-                        }
-
-                        @Override
-                        public void onError(String errorMessage) {
-                            //show friend failed to add toast
-                            String failedFriend = String.format(getResources().getString(R.string.problem_adding_friend), thisUser.getDisplayName());
-                            Toast.makeText(getActivity(), failedFriend, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                @Override
-                public Class getDataType() {
-                    return UserMetadata.class;
-                }
-            });
-        }
+    public User getUser() {
+        return thisUser;
     }
 
     private void cancelSave() {
