@@ -27,6 +27,8 @@ import com.snaptiongame.snaption.ui.wall.WallGridItemDecorator;
 import com.snaptiongame.snaption.ui.wall.WallViewAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +59,8 @@ public class ProfileTabFragment extends Fragment {
 
     private int page = 0;
     private User user = null;
-    private static String PROFILE_FRAGMENT_PAGE = "profile_page";
+    private static final String PROFILE_FRAGMENT_PAGE = "profile_page";
+    private static final String USER = "user";
     private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
         @Override
         public void onData(GameMetadata data) {
@@ -77,7 +80,7 @@ public class ProfileTabFragment extends Fragment {
     public static ProfileTabFragment newInstance(int page, User user) {
         Bundle args = new Bundle();
         args.putInt(PROFILE_FRAGMENT_PAGE, page);
-        args.putSerializable("user", user);
+        args.putSerializable(USER, user);
         ProfileTabFragment fragment = new ProfileTabFragment();
         fragment.setArguments(args);
         return fragment;
@@ -88,57 +91,67 @@ public class ProfileTabFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_tab_page, container, false);
         page = getArguments().getInt(PROFILE_FRAGMENT_PAGE);
-        user = (User)getArguments().getSerializable("user");
+        user = (User)getArguments().getSerializable(USER);
         unbinder = ButterKnife.bind(this, view);
         if (page == CAPTION_TAB_PAGE) {
             //on the captions tab
-            int captionWidth = (int) getResources().getDimension(R.dimen.caption_card_width);
-            int phoneWidth = getResources().getDisplayMetrics().widthPixels;
-            //based on phone width and caption width find how many can fit
-            int numCaptionColumns = phoneWidth / captionWidth;
-            GridLayoutManager captionViewManager = new GridLayoutManager(view.getContext(), numCaptionColumns, LinearLayoutManager.VERTICAL, false);
-            recyclerView.setLayoutManager(captionViewManager);
-
-            captionsAdapter = new ProfileCaptionsAdapter(getUserCaptions());
-            recyclerView.setAdapter(captionsAdapter);
+            setCapationRecyclerView();
         } else {
             //on the games tab
             //made to have same layout as wall
-            StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
-                    StaggeredGridLayoutManager.VERTICAL);
-            recyclerView.setLayoutManager(manager);
-            recyclerView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
-            wallViewAdapter = new WallViewAdapter(new ArrayList<GameMetadata>(),
-                    ProfileActivity.getProfileActivityCreator(getContext()));
-            wallViewAdapter.setOnClickGamePhotoListener(new WallViewAdapter.OnClickGamePhotoListener() {
-                @Override
-                public void onClickGamePhoto(View view, GameMetadata game) {
-                    // start game activity with shared image transition
-                    Intent createGameIntent = new Intent(getActivity(), GameActivity.class);
-                    createGameIntent.putExtra(Constants.GAME, game);
-                    ActivityOptionsCompat options = ActivityOptionsCompat.
-                            makeSceneTransitionAnimation(getActivity(), view, game.getId());
-                    getActivity().startActivity(createGameIntent, options.toBundle());
-                }
-            });
-            getUserGames(user);
-            recyclerView.setAdapter(wallViewAdapter);
+            setGameRecyclerView();
         }
 
         return view;
     }
 
+    private void setGameRecyclerView() {
+        //on the games tab
+        //made to have same layout as wall
+        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(NUM_COLUMNS,
+                StaggeredGridLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(manager);
+        recyclerView.addItemDecoration(new WallGridItemDecorator(getResources().getDimensionPixelSize(R.dimen.wall_grid_item_spacing)));
+        wallViewAdapter = new WallViewAdapter(new ArrayList<GameMetadata>(),
+                ProfileActivity.getProfileActivityCreator(getContext()));
+        wallViewAdapter.setOnClickGamePhotoListener(new WallViewAdapter.OnClickGamePhotoListener() {
+            @Override
+            public void onClickGamePhoto(View view, GameMetadata game) {
+                // start game activity with shared image transition
+                Intent createGameIntent = new Intent(getActivity(), GameActivity.class);
+                createGameIntent.putExtra(Constants.GAME, game);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(getActivity(), view, game.getId());
+                getActivity().startActivity(createGameIntent, options.toBundle());
+            }
+        });
+        getUserGames(user);
+        recyclerView.setAdapter(wallViewAdapter);
+    }
+
+    private void setCapationRecyclerView() {
+        //on the captions tab
+        int captionWidth = (int) getResources().getDimension(R.dimen.caption_card_width);
+        int phoneWidth = getResources().getDisplayMetrics().widthPixels;
+        //based on phone width and caption width find how many can fit
+        int numCaptionColumns = phoneWidth / captionWidth;
+        GridLayoutManager captionViewManager = new GridLayoutManager(getContext(), numCaptionColumns, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(captionViewManager);
+
+        captionsAdapter = new ProfileCaptionsAdapter(getUserCaptions());
+        recyclerView.setAdapter(captionsAdapter);
+    }
+
     private List<Caption> getUserCaptions() {
-        List<Caption> captions;
+        List<Caption> captions = new ArrayList<>();
         //if user is looking at their own profile
         if (user.getId().equals(FirebaseUserResourceManager.getUserId())) {
             //get public and private captions
-            captions = user.getAllCaptions();
+            captions.addAll(user.getAllPrivateCaptions());
         }
-        else {
-            //get public games only
-            captions = user.getAllPublicCaptions();
-        }
+        //add public games
+        captions.addAll(user.getAllPublicCaptions());
+        Collections.sort(captions);
         return captions;
     }
 

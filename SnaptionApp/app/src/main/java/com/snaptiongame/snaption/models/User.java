@@ -74,7 +74,27 @@ public class User implements Person, Comparable<User>, Serializable {
     }
 
     public Map<String, Caption> getPrivateCaptions() {
+
         return privateData.getCaptions();
+    }
+
+    /**
+     * Get all the private captions and set their isPublic field to false
+     * @return a list of captions all with isPublic false
+     */
+    public List<Caption> getAllPrivateCaptions() {
+        Map<String, Caption> privateCaptions = privateData.getCaptions();
+        List<Caption> captions = new ArrayList<>();
+
+        //if there are any private captions
+        if (privateCaptions != null) {
+            //for each caption, set it to private and add to the list
+            for (Caption caption : privateCaptions.values()) {
+                caption.assignIsPublic(false);
+                captions.add(caption);
+            }
+        }
+        return captions;
     }
 
     public List<Caption> getAllCaptions() {
