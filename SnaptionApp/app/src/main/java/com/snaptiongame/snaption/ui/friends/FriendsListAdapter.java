@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
@@ -59,7 +58,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
                 }
             });
         }
-        holder.photo.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 profileMaker.create(friend.getId());

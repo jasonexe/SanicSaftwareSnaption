@@ -12,6 +12,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -37,7 +38,6 @@ import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
-import com.snaptiongame.snaption.ui.MainFabBehavior;
 import com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaption.ui.friends.FriendsFragment;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
@@ -77,6 +77,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     // Used for keeping track of if this Activity is paused -- needed so logging in from
     // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
+    private CoordinatorLayout.Behavior bottomNavigationBehavior;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -123,7 +124,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
-                    newFragment = new ProfileFragment();
+                    newFragment = createProfileFragment();
                     Bundle args = new Bundle();
                     args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
                     newFragment.setArguments(args);
@@ -177,6 +178,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // hide or show the bottom navigation view
         bottomNavigationView.setVisibility(currentNavDrawerMenuId == R.id.wall_item ?
                 View.VISIBLE : View.GONE);
+        ((CoordinatorLayout.LayoutParams) bottomNavigationView.getLayoutParams())
+                .setBehavior(currentNavDrawerMenuId == R.id.wall_item ?
+                        bottomNavigationBehavior : null);
         fab.setImageResource(currentNavDrawerMenuId == R.id.profile_item ?
                 R.drawable.ic_mode_edit_white_24dp : R.drawable.ic_add_white_24dp);
     }
@@ -191,6 +195,34 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         } else {
             params.setScrollFlags(0);
         }
+    }
+
+    private Fragment createProfileFragment() {
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setUserInfoEditListener(new ProfileFragment.UserInfoEditListener() {
+            @Override
+            public void onEditUsername(String errorMessage) {
+                if (errorMessage == null) {
+                    currentUser = null;
+                    updateNavigationViews(false);
+                }
+                else {
+                    Snackbar.make(fab, R.string.change_username_error, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onEditPhoto(String errorMessage) {
+                if (errorMessage == null) {
+                    currentUser = null;
+                    updateNavigationViews(true);
+                }
+                else {
+                    Snackbar.make(fab, R.string.change_username_error, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+        return fragment;
     }
 
     private void logInOutItemSelected() {
@@ -239,13 +271,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             @Override
             public void onLoginComplete() {
                 if(!isPaused) {
-                    updateNavigationViews();
+                    updateNavigationViews(true);
                 }
             }
             @Override
             public void onLogoutComplete() {
                 switchFragments(R.id.wall_item);
-                updateNavigationViews();
+                updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
             @Override
@@ -280,7 +312,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
-        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setBehavior(new MainFabBehavior(this, null));
 
         DeepLinkGetter.checkIfDeepLink(this);
     }
@@ -291,6 +322,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         drawerLayout.addDrawerListener(mDrawerToggle);
         navigationView.setNavigationItemSelectedListener(mNavListener);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
+        bottomNavigationBehavior = ((CoordinatorLayout.LayoutParams) bottomNavigationView
+                .getLayoutParams()).getBehavior();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
         navDrawerPhotoContainer = ButterKnife.findById(navigationHeaderView, R.id.photo_container);
@@ -299,7 +332,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
     }
 
-    private void updateNavigationViews() {
+    private void updateNavigationViews(final boolean loadPhoto) {
         String id = FirebaseUserResourceManager.getUserId();
         if (id != null) {
             if (currentUser == null) {
@@ -309,7 +342,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                             public void onData(UserMetadata user) {
                                 currentUser = user;
                                 if (user != null) {
-                                    addUserInfoToNavDrawer(user);
+                                    addUserInfoToNavDrawer(user, loadPhoto);
                                 } else {
                                     removeUserInfoFromNavDrawer();
                                 }
@@ -326,11 +359,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void addUserInfoToNavDrawer(UserMetadata user) {
+    private void addUserInfoToNavDrawer(UserMetadata user, boolean loadPhoto) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
-        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+        if (loadPhoto) {
+            FirebaseResourceManager.loadLimitedCacheImageIntoView(user.getImagePath(), navDrawerPhoto);
+        }
         //set user info to visible now they are logged in
         navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);
@@ -406,7 +441,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onResume() {
         super.onResume();
         isPaused = false;
-        updateNavigationViews();
+        updateNavigationViews(true);
     }
 
     @Override

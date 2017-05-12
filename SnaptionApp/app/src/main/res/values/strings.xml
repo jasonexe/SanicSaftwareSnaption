@@ -55,7 +55,7 @@
     <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
     <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
     <string name="no_internet">There was an error, you may not be connected to the Internet</string>
-    <string name="game_invite">Invite Friends</string>
+    <string name="game_invite">Invite</string>
     <string name="join_game">Join Game</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
@@ -81,6 +81,12 @@
     <string name="days">day</string>
     <string name="remain">remaining</string>
     <string name="plural">s</string>
+    <string name="friends_in_game">All your friends are already in this game!</string>
+    <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
+    <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
+    <string name="change_photo_error">Error occurred while changing photo</string>
+    <string name="change_username_error">Error occurred while changing username</string>
+    <string name="inv_to_snaption">Invite to snaption</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
@@ -92,4 +98,5 @@
     <string name="pick_an_image">You must pick an image.</string>
     <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
     <string name="pick_future_date">You must select a day in the future.</string>
+    <string name="illegal_tag_text">Tags cannot contain the characters \".\", \"$\", \"#\", \"/\", \"[\", or \"]\".</string>
 </resources>

@@ -55,6 +55,12 @@ public class FirebaseUploader implements Uploader {
         myRef.setValue(content);
     }
 
+    public static void uploadObject(String firebasePath, Object content,
+                                    DatabaseReference.CompletionListener listener) {
+        DatabaseReference myRef = database.getReference(firebasePath);
+        myRef.setValue(content, listener);
+    }
+
     public static void deleteValue(String firebasePath) {
         DatabaseReference myRef = database.getReference(firebasePath);
         myRef.removeValue();
@@ -248,6 +254,23 @@ public class FirebaseUploader implements Uploader {
         ref.putBytes(photo);
     }
 
+    public static void uploadUserPhoto(String userImagePath, byte[] photo,
+                                       final UploadListener listener) {
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(userImagePath);
+        UploadTask uploadTask = ref.putBytes(photo);
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                listener.onComplete();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                listener.onError(e.getMessage());
+            }
+        });
+    }
+
     public static void updateUserNotificationToken(String userId, final String token) {
         uploadObject(String.format(USER_NOTIFICATION_PATH, userId), token);
     }
@@ -352,8 +375,20 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    public static void updateDisplayName(String newName, String userId) {
-        uploadObject(String.format(USER_DISPLAY_NAME_PATH, userId), newName);
+    public static void updateDisplayName(String newName, String userId, final UploadListener listener) {
+        uploadObject(String.format(USER_DISPLAY_NAME_PATH, userId), newName,
+                new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError,
+                                   DatabaseReference databaseReference) {
+                if (databaseError == null) {
+                    listener.onComplete();
+                }
+                else {
+                    listener.onError(databaseError.getMessage());
+                }
+            }
+        });
         uploadObject(String.format(USER_SEARCH_NAME_PATH, userId), newName.toLowerCase());
     }
 
