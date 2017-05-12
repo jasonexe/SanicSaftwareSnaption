@@ -14,6 +14,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -21,13 +24,16 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
+import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -173,6 +179,15 @@ public class ProfileFragment extends Fragment {
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
 
+        String userId = FirebaseUserResourceManager.getUserId();
+        //check if we need to show the addFriend button
+        //if we came from the Profile Activity and these two users are not already friends
+        if (getActivity() instanceof ProfileActivity
+                && (user.getFriends() == null || !user.getFriends().containsKey(userId))
+                && !isUser) {
+            ((ProfileActivity) getActivity()).setAddFriendVisible(true);
+        }
+
         //get the games based on list of games in user
         thisUser = user;
         getUserGames(user);
@@ -257,6 +272,40 @@ public class ProfileFragment extends Fragment {
             fab.setImageResource(R.drawable.ic_save_white_24dp);
         }
         isEditing = !isEditing;
+    }
+
+    public void addFriend() {
+        String userId = FirebaseUserResourceManager.getUserId();
+        if (thisUser != null && thisUser.getId() != userId) {
+            FirebaseUserResourceManager.getUserMetadataById(userId, new ResourceListener<UserMetadata>() {
+                @Override
+                public void onData(UserMetadata user) {
+                    Uploader uploader = new FirebaseUploader();
+                    uploader.addFriend(user, new Friend(thisUser.getId(), thisUser.getDisplayName(), thisUser.getEmail(), thisUser.getFacebookId()), new Uploader.UploadListener() {
+                        @Override
+                        public void onComplete() {
+                            //show friend added toast
+                            String addedFriend = String.format(getResources().getString(R.string.added_friend), thisUser.getDisplayName());
+                            Toast.makeText(getActivity(), addedFriend, Toast.LENGTH_SHORT).show();
+                            //hide add friend button
+                            ((ProfileActivity)getActivity()).setAddFriendVisible(false);
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            //show friend failed to add toast
+                            String failedFriend = String.format(getResources().getString(R.string.problem_adding_friend), thisUser.getDisplayName());
+                            Toast.makeText(getActivity(), failedFriend, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public Class getDataType() {
+                    return UserMetadata.class;
+                }
+            });
+        }
     }
 
     private void cancelSave() {
