@@ -45,6 +45,7 @@ public class WallFragment extends Fragment {
     private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
     private static final int SCROLL_DOWN_CONST = 1;
+    private static final double PERCENT_BEFORE_LOAD = .9; // Load games if already scrolled 90%
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
@@ -159,8 +160,15 @@ public class WallFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(!isLoading && wallListView != null && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
-                    loadMoreGames();
+                if(!isLoading && wallListView != null) {
+                    // offset + extent = range
+                    int offset = wallListView.computeVerticalScrollOffset();
+                    int extent = wallListView.computeVerticalScrollExtent();
+                    double rangeBeforeLoad = wallListView.computeVerticalScrollRange()*PERCENT_BEFORE_LOAD;
+                    int scrolledSoFar = offset + extent;
+                    if(scrolledSoFar > rangeBeforeLoad) {
+                        loadMoreGames();
+                    }
                 }
             }
         });
