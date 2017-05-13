@@ -37,6 +37,11 @@ public class FirebaseUserResourceManager extends FirebaseResourceManager {
     public FirebaseUserResourceManager() {
         firebase = new FirebaseResourceManager();
     }
+    
+    @Override
+    public void removeListener() {
+        firebase.removeListener();
+    }
 
     /**
      * Gets the direct path to the user metadata table in the database

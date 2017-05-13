@@ -8,12 +8,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -21,18 +25,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
+import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
@@ -158,6 +166,10 @@ public class ProfileFragment extends Fragment {
 
     private void setupUserData(User user, View view) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
+        // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
+        if(this.isHidden()) {
+            return;
+        }
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
@@ -172,6 +184,16 @@ public class ProfileFragment extends Fragment {
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
+
+        String userId = FirebaseUserResourceManager.getUserId();
+        //check if we need to show the addFriend button
+        //if we came from the Profile Activity and these two users are not already friends
+        if (getActivity() instanceof ProfileActivity
+                && user != null && userId != null
+                && (user.getFriends() == null || !user.getFriends().containsKey(userId))
+                && !isUser) {
+            ((ProfileActivity) getActivity()).setAddFriendVisible(true);
+        }
 
         //get the games based on list of games in user
         thisUser = user;
@@ -241,6 +263,20 @@ public class ProfileFragment extends Fragment {
         fabClicked(fab, false);
     }
 
+    @OnClick(R.id.profile_picture_container)
+    public void enlargePhoto() {
+        if(thisUser == null) {
+            // Hasn't loaded user yet, short circuit
+            return;
+        }
+        Intent photoZoomIntent = new Intent(getActivity(), PhotoZoomActivity.class);
+        photoZoomIntent.putExtra(PhotoZoomActivity.PHOTO_PATH, thisUser.getImagePath());
+        photoZoomIntent.putExtra(PhotoZoomActivity.TRANSITION_NAME, thisUser.getId());
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(getActivity(),
+                profile, thisUser.getId());
+        startActivity(photoZoomIntent, options.toBundle());
+    }
+
     public void fabClicked(FloatingActionButton fab, boolean save) {
         // If user was editing their stuff, save it
         this.fab = fab;
@@ -257,6 +293,10 @@ public class ProfileFragment extends Fragment {
             fab.setImageResource(R.drawable.ic_save_white_24dp);
         }
         isEditing = !isEditing;
+    }
+
+    public User getUser() {
+        return thisUser;
     }
 
     private void cancelSave() {
