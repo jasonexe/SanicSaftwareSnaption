@@ -97,12 +97,17 @@ public class ProfileFragment extends Fragment {
     private User thisUser;
     private FloatingActionButton fab;
     private boolean isUser;
+    private int gameUpvotes;
     private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
         @Override
         public void onData(GameMetadata data) {
             // filter out private games if needed
             //TODO get private games for user
             gameAdapter.addGame(data);
+            if(data.getUpvotes() != null) {
+                gameUpvotes += data.getUpvotes().size();
+                // TODO add to the gameUpvotes in the actual view
+            }
         }
 
         @Override
@@ -227,6 +232,7 @@ public class ProfileFragment extends Fragment {
 
     private void getUserGames(User user) {
         Map<String, Integer> gameIds = user.getCreatedPublicGames();
+        gameUpvotes = 0;
         //if User has any games
         if (gameIds != null) {
             //for each gameId in user's game list
