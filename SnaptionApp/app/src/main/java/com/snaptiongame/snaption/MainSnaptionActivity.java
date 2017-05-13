@@ -175,10 +175,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 int selectionsSize = bottomNavSelections.size();
                 // If there's stuff in the back stack and the last thing isn't one with bottom bar
                 // Then add this to the back stack
-                if(!onBack && (selectionsSize == 0 && prevMenuId != 0 || bottomNavSelections.get(selectionsSize-1) == 0)) {
+                if(!onBack && (selectionsSize == 0 && prevMenuId != 0 ||
+                        selectionsSize > 0 && bottomNavSelections.get(selectionsSize-1) == 0)) {
                     bottomNavSelections.add(prevMenuId);
                     navDrawerSelections.add(prevNavDrawer);
-                } else if (!onBack && bottomNavSelections.get(selectionsSize-1) != 0) {
+                } else if (!onBack && selectionsSize > 0 && bottomNavSelections.get(selectionsSize-1) != 0) {
                     bottomNavSelections.set(selectionsSize-1, currentBottomNavMenuId);
                     navDrawerSelections.set(selectionsSize-1, currentNavDrawerMenuId);
                 }
@@ -316,6 +317,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
             @Override
             public void onLogoutComplete() {
+                bottomNavSelections.clear();
+                navDrawerSelections.clear();
                 switchFragments(R.id.wall_item, false);
                 updateNavigationViews(true);
             }
