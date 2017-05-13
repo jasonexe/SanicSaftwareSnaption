@@ -272,7 +272,6 @@ public class ProfileFragment extends Fragment {
         // Firebase stuff here
         if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
             userName.setText(newText);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
 
             FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
                     new Uploader.UploadListener() {

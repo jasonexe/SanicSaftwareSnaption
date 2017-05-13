@@ -170,7 +170,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     }
 
     private void updateFragmentViews() {
-        setToolbarCollapsible(currentNavDrawerMenuId != R.id.profile_item);
+        setToolbarCollapsible(true);
         // show the fab
         // I don't know why hide needs to be called first, but it doesn't work otherwise
         fab.hide();
