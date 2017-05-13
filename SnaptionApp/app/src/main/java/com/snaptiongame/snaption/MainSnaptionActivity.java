@@ -169,7 +169,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                                                 boolean onBack) {
         if (newFragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.replace(R.id.fragment_container, newFragment);
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
                 int selectionsSize = bottomNavSelections.size();
@@ -187,7 +186,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 bottomNavSelections.add(prevMenuId);
                 navDrawerSelections.add(prevNavDrawer);
             }
-            ft.commit();
+            ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
         }
     }

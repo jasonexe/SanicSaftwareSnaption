@@ -52,6 +52,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
@@ -67,7 +68,7 @@ public class ProfileFragment extends Fragment {
     private boolean isEditing;
 
     @BindView(R.id.profile_picture)
-    public ImageView profile;
+    public CircleImageView profile;
     @BindView(R.id.profile_name)
     public TextView userName;
     @BindView(R.id.games_created)
