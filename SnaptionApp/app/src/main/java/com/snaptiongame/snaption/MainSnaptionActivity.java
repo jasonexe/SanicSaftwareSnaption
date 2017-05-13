@@ -104,56 +104,53 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
      * @return true always
      */
     public boolean switchFragments(int selectedItemId) {
-        // if the selected item is different than the currently selected item, replace the fragment
-        if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
-            Fragment newFragment = null;
-            switch (selectedItemId) {
-                case R.id.feedback_item:
-                    //provide survey for bug reporting and feature requests/reviews
-                    Uri uri = Uri.parse(survey_url);
-                    //go to the website for google form
-                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                    break;
-                case R.id.wall_item:
-                    MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
-                    if (bottomNavMenuItem == null) {
-                        bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
-                    }
-                    currentNavDrawerMenuId = selectedItemId;
-                    bottomNavMenuItem.setChecked(true);
-                    bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
-                    break;
-                case R.id.profile_item:
-                    newFragment = createProfileFragment();
-                    Bundle args = new Bundle();
-                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
-                    newFragment.setArguments(args);
-                    currentNavDrawerMenuId = selectedItemId;
-                    currentBottomNavMenuId = 0;
-                    break;
-                case R.id.friends_item:
-                    newFragment = new FriendsFragment();
-                    currentNavDrawerMenuId = selectedItemId;
-                    currentBottomNavMenuId = 0;
-                    break;
-                case R.id.log_option:
-                    logInOutItemSelected();
-                    break;
-                case R.id.my_feed_item:
-                    newFragment = WallFragment.newInstance(GameType.USER_JOINED_GAMES);
-                    currentBottomNavMenuId = selectedItemId;
-                    break;
-                case R.id.discover_item:
-                    newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
-                    currentBottomNavMenuId = selectedItemId;
-                    break;
-                case R.id.popular_item:
-                    newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
-                    currentBottomNavMenuId = selectedItemId;
-                    break;
-            }
-            replaceFragmentWithTransaction(newFragment);
+        Fragment newFragment = null;
+        switch (selectedItemId) {
+            case R.id.feedback_item:
+                //provide survey for bug reporting and feature requests/reviews
+                Uri uri = Uri.parse(survey_url);
+                //go to the website for google form
+                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                break;
+            case R.id.wall_item:
+                MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
+                if (bottomNavMenuItem == null) {
+                    bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
+                }
+                currentNavDrawerMenuId = selectedItemId;
+                bottomNavMenuItem.setChecked(true);
+                bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
+                break;
+            case R.id.profile_item:
+                newFragment = createProfileFragment();
+                Bundle args = new Bundle();
+                args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
+                newFragment.setArguments(args);
+                currentNavDrawerMenuId = selectedItemId;
+                currentBottomNavMenuId = 0;
+                break;
+            case R.id.friends_item:
+                newFragment = new FriendsFragment();
+                currentNavDrawerMenuId = selectedItemId;
+                currentBottomNavMenuId = 0;
+                break;
+            case R.id.log_option:
+                logInOutItemSelected();
+                break;
+            case R.id.my_feed_item:
+                newFragment = WallFragment.newInstance(GameType.USER_JOINED_GAMES);
+                currentBottomNavMenuId = selectedItemId;
+                break;
+            case R.id.discover_item:
+                newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
+                currentBottomNavMenuId = selectedItemId;
+                break;
+            case R.id.popular_item:
+                newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
+                currentBottomNavMenuId = selectedItemId;
+                break;
         }
+        replaceFragmentWithTransaction(newFragment);
         drawerLayout.closeDrawers();
         return true;
     }
@@ -164,8 +161,18 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
             }
-            ft.replace(R.id.fragment_container, newFragment).commit();
+            ft.replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();
             updateFragmentViews();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+        super.onBackPressed();
+        // If this is the first fragment, go back twice to skip the "empty" fragment
+        if (count == 1) {
+            super.onBackPressed();
         }
     }
 
