@@ -15,6 +15,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -22,13 +25,16 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
+import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
+import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
@@ -179,6 +185,16 @@ public class ProfileFragment extends Fragment {
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
 
+        String userId = FirebaseUserResourceManager.getUserId();
+        //check if we need to show the addFriend button
+        //if we came from the Profile Activity and these two users are not already friends
+        if (getActivity() instanceof ProfileActivity
+                && user != null && userId != null
+                && (user.getFriends() == null || !user.getFriends().containsKey(userId))
+                && !isUser) {
+            ((ProfileActivity) getActivity()).setAddFriendVisible(true);
+        }
+
         //get the games based on list of games in user
         thisUser = user;
         getUserGames(user);
@@ -277,6 +293,10 @@ public class ProfileFragment extends Fragment {
             fab.setImageResource(R.drawable.ic_save_white_24dp);
         }
         isEditing = !isEditing;
+    }
+
+    public User getUser() {
+        return thisUser;
     }
 
     private void cancelSave() {
