@@ -232,7 +232,7 @@ public class ProfileFragment extends Fragment {
         // Otherwise, don't do anything.
         if(getActivity() instanceof MainSnaptionActivity) {
             MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
-            activity.switchFragments(R.id.friends_item);
+            activity.switchFragments(R.id.friends_item, false);
         }
     }
 

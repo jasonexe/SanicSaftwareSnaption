@@ -45,6 +45,9 @@ import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -78,6 +81,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
     private CoordinatorLayout.Behavior bottomNavigationBehavior;
+    private List<Integer> bottomNavSelections;
+    private List<Integer> navDrawerSelections;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -85,7 +90,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
     private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationListener =
@@ -94,7 +99,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the bottom navigation bar is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
 
@@ -103,76 +108,102 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
      * @param selectedItemId Id of the item to switch to, used to determine which fragment to load
      * @return true always
      */
-    public boolean switchFragments(int selectedItemId) {
-        Fragment newFragment = null;
-        switch (selectedItemId) {
-            case R.id.feedback_item:
-                //provide survey for bug reporting and feature requests/reviews
-                Uri uri = Uri.parse(survey_url);
-                //go to the website for google form
-                startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                break;
-            case R.id.wall_item:
-                MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
-                if (bottomNavMenuItem == null) {
-                    bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
-                }
-                currentNavDrawerMenuId = selectedItemId;
-                bottomNavMenuItem.setChecked(true);
-                bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
-                break;
-            case R.id.profile_item:
-                newFragment = createProfileFragment();
-                Bundle args = new Bundle();
-                args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
-                newFragment.setArguments(args);
-                currentNavDrawerMenuId = selectedItemId;
-                currentBottomNavMenuId = 0;
-                break;
-            case R.id.friends_item:
-                newFragment = new FriendsFragment();
-                currentNavDrawerMenuId = selectedItemId;
-                currentBottomNavMenuId = 0;
-                break;
-            case R.id.log_option:
-                logInOutItemSelected();
-                break;
-            case R.id.my_feed_item:
-                newFragment = WallFragment.newInstance(GameType.USER_JOINED_GAMES);
-                currentBottomNavMenuId = selectedItemId;
-                break;
-            case R.id.discover_item:
-                newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
-                currentBottomNavMenuId = selectedItemId;
-                break;
-            case R.id.popular_item:
-                newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
-                currentBottomNavMenuId = selectedItemId;
-                break;
+    public boolean switchFragments(int selectedItemId, boolean onBack) {
+        // if the selected item is different than the currently selected item, replace the fragment
+        if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
+            Fragment newFragment = null;
+            int prevMenuId = currentBottomNavMenuId;
+            int prevNavDrawer = currentNavDrawerMenuId;
+            switch (selectedItemId) {
+                case R.id.feedback_item:
+                    //provide survey for bug reporting and feature requests/reviews
+                    Uri uri = Uri.parse(survey_url);
+                    //go to the website for google form
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                    break;
+                case R.id.wall_item:
+                    MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
+                    if (bottomNavMenuItem == null) {
+                        bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
+                    }
+                    currentNavDrawerMenuId = selectedItemId;
+                    bottomNavMenuItem.setChecked(true);
+                    bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
+                    break;
+                case R.id.profile_item:
+                    newFragment = createProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
+                    newFragment.setArguments(args);
+                    currentNavDrawerMenuId = selectedItemId;
+                    currentBottomNavMenuId = 0;
+                    break;
+                case R.id.friends_item:
+                    newFragment = new FriendsFragment();
+                    currentNavDrawerMenuId = selectedItemId;
+                    currentBottomNavMenuId = 0;
+                    break;
+                case R.id.log_option:
+                    logInOutItemSelected();
+                    break;
+                case R.id.my_feed_item:
+                    newFragment = WallFragment.newInstance(GameType.USER_JOINED_GAMES);
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+                case R.id.discover_item:
+                    newFragment = WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+                case R.id.popular_item:
+                    newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+            }
+            replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
         }
-        replaceFragmentWithTransaction(newFragment);
         drawerLayout.closeDrawers();
         return true;
     }
 
-    private void replaceFragmentWithTransaction(Fragment newFragment) {
+    private void replaceFragmentWithTransaction(Fragment newFragment, int prevMenuId, int prevNavDrawer,
+                                                boolean onBack) {
         if (newFragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container, newFragment);
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
+                int selectionsSize = bottomNavSelections.size();
+                // If there's stuff in the back stack and the last thing isn't one with bottom bar
+                // Then add this to the back stack
+                if(!onBack && (selectionsSize == 0 && prevMenuId != 0 || bottomNavSelections.get(selectionsSize-1) == 0)) {
+                    bottomNavSelections.add(prevMenuId);
+                    navDrawerSelections.add(prevNavDrawer);
+                } else if (!onBack && bottomNavSelections.get(selectionsSize-1) != 0) {
+                    bottomNavSelections.set(selectionsSize-1, currentBottomNavMenuId);
+                    navDrawerSelections.set(selectionsSize-1, currentNavDrawerMenuId);
+                }
+            } else if(!onBack && bottomNavSelections.size() > 0){
+                bottomNavSelections.add(prevMenuId);
+                navDrawerSelections.add(prevNavDrawer);
             }
-            ft.replace(R.id.fragment_container, newFragment).addToBackStack(null).commit();
+            ft.commit();
             updateFragmentViews();
         }
     }
 
     @Override
     public void onBackPressed() {
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-        super.onBackPressed();
-        // If this is the first fragment, go back twice to skip the "empty" fragment
-        if (count == 1) {
+        if(bottomNavSelections.size() <= 1) {
             super.onBackPressed();
+            return;
+        }
+        int tryBottom = bottomNavSelections.remove(bottomNavSelections.size() - 1);
+        int tryNav = navDrawerSelections.remove(navDrawerSelections.size() - 1);
+        if(tryBottom > 0) {
+            currentNavDrawerMenuId = tryNav;
+            switchFragments(tryBottom, true);
+        } else {
+            switchFragments(tryNav, true);
         }
     }
 
@@ -260,6 +291,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isPaused = false;
+        bottomNavSelections = new ArrayList<>();
+        navDrawerSelections = new ArrayList<>();
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // set layout and bind views
@@ -283,7 +316,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
             @Override
             public void onLogoutComplete() {
-                switchFragments(R.id.wall_item);
+                switchFragments(R.id.wall_item, false);
                 updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
