@@ -110,7 +110,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
      */
     public boolean switchFragments(int selectedItemId, boolean onBack) {
         // if the selected item is different than the currently selected item, replace the fragment
-        if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
+        if (selectedItemId != currentNavDrawerMenuId) {
             Fragment newFragment = null;
             int prevMenuId = currentBottomNavMenuId;
             int prevNavDrawer = currentNavDrawerMenuId;
@@ -125,7 +125,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
                     if (bottomNavMenuItem == null) {
                         bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
+                        currentBottomNavMenuId = R.id.popular_item;
                     }
+                    currentBottomNavMenuId = R.id.my_feed_item;
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
