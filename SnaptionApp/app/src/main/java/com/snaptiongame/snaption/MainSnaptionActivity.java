@@ -81,8 +81,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
     private CoordinatorLayout.Behavior bottomNavigationBehavior;
-    private List<Integer> bottomNavSelections;
-    private List<Integer> navDrawerSelections;
+    private List<Integer> bottomTabBackStack;
+    private List<Integer> navDrawerBackStack;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -110,7 +110,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
      */
     public boolean switchFragments(int selectedItemId, boolean onBack) {
         // if the selected item is different than the currently selected item, replace the fragment
-        if (selectedItemId != currentNavDrawerMenuId) {
+        if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             Fragment newFragment = null;
             int prevMenuId = currentBottomNavMenuId;
             int prevNavDrawer = currentNavDrawerMenuId;
@@ -125,9 +125,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
                     if (bottomNavMenuItem == null) {
                         bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
-                        currentBottomNavMenuId = R.id.popular_item;
                     }
-                    currentBottomNavMenuId = R.id.my_feed_item;
+                    if(navDrawerBackStack.size() == 0) {
+                        navDrawerBackStack.add(selectedItemId);
+                        bottomTabBackStack.add(bottomNavMenuItem.getItemId());
+                    }
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
@@ -167,26 +169,34 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         return true;
     }
 
+    /** Called when switching fragments (between any nav drawer item or wall type
+     * @param newFragment The new fragment to switch to
+     * @param prevMenuId The ID of the bottom nav menu item we're switching away from
+     * @param prevNavDrawer The ID of the nav drawer selection (wall, profile, etc)
+     * @param onBack If we're calling this method after pressing the back button or not.
+     */
     private void replaceFragmentWithTransaction(Fragment newFragment, int prevMenuId, int prevNavDrawer,
                                                 boolean onBack) {
         if (newFragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // If we are switching tabs on the wall
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
-                int selectionsSize = bottomNavSelections.size();
-                // If there's stuff in the back stack and the last thing isn't one with bottom bar
-                // Then add this to the back stack
-                if(!onBack && (selectionsSize == 0 && prevMenuId != 0 ||
-                        selectionsSize > 0 && bottomNavSelections.get(selectionsSize-1) == 0)) {
-                    bottomNavSelections.add(prevMenuId);
-                    navDrawerSelections.add(prevNavDrawer);
-                } else if (!onBack && selectionsSize > 0 && bottomNavSelections.get(selectionsSize-1) != 0) {
-                    bottomNavSelections.set(selectionsSize-1, currentBottomNavMenuId);
-                    navDrawerSelections.set(selectionsSize-1, currentNavDrawerMenuId);
+                int selectionsSize = bottomTabBackStack.size();
+                // If this isn't a back press and we aren't just switching wall tabs, then
+                // add the selections to the back stack
+                if(!onBack && (selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) == 0)) {
+                    bottomTabBackStack.add(prevMenuId);
+                    navDrawerBackStack.add(prevNavDrawer);
+                } else if (!onBack && selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) != 0) {
+                    // If we're switching between tabs on the wall, update the back stack selections
+                    bottomTabBackStack.set(selectionsSize-1, currentBottomNavMenuId);
+                    navDrawerBackStack.set(selectionsSize-1, currentNavDrawerMenuId);
                 }
-            } else if(!onBack && bottomNavSelections.size() > 0){
-                bottomNavSelections.add(prevMenuId);
-                navDrawerSelections.add(prevNavDrawer);
+            } else if(!onBack){
+                // If we're going to a completely new fragment, definitely add to back stack
+                bottomTabBackStack.add(prevMenuId);
+                navDrawerBackStack.add(prevNavDrawer);
             }
             ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
@@ -195,12 +205,14 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(bottomNavSelections.size() <= 1) {
+        if(bottomTabBackStack.size() <= 1) {
             super.onBackPressed();
             return;
         }
-        int tryBottom = bottomNavSelections.remove(bottomNavSelections.size() - 1);
-        int tryNav = navDrawerSelections.remove(navDrawerSelections.size() - 1);
+        int tryBottom = bottomTabBackStack.remove(bottomTabBackStack.size() - 1);
+        int tryNav = navDrawerBackStack.remove(navDrawerBackStack.size() - 1);
+        // If the bottom nav drawer ID is not 0, we want to switch to that instead of
+        // the nav drawer id.
         if(tryBottom > 0) {
             currentNavDrawerMenuId = tryNav;
             switchFragments(tryBottom, true);
@@ -293,8 +305,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isPaused = false;
-        bottomNavSelections = new ArrayList<>();
-        navDrawerSelections = new ArrayList<>();
+        bottomTabBackStack = new ArrayList<>();
+        navDrawerBackStack = new ArrayList<>();
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // set layout and bind views
@@ -318,9 +330,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
             @Override
             public void onLogoutComplete() {
-                bottomNavSelections.clear();
-                navDrawerSelections.clear();
-                switchFragments(R.id.wall_item, false);
+                bottomTabBackStack.clear();
+                navDrawerBackStack.clear();
+                switchFragments(R.id.wall_item, true);
                 updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
