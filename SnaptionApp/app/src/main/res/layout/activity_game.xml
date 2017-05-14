@@ -97,23 +97,25 @@
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="8dp" />
 
-                    <Button
+                    <TextView
                         android:id="@+id/invite_friends"
+                        style="@style/TextAppearance.AppCompat.Widget.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
-                        android:layout_height="16dp"
-                        android:layout_centerVertical="true"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/game_invite"
                         android:textColor="@color/colorAccent"
                         android:visibility="gone" />
 
-                    <Button
+                    <TextView
                         android:id="@+id/join_game_button"
+                        style="@style/TextAppearance.AppCompat.Widget.Button.Borderless.Colored"
                         android:layout_width="wrap_content"
-                        android:layout_height="16dp"
-                        android:layout_centerVertical="true"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:text="@string/join_game"
                         android:textColor="@color/colorAccent" />

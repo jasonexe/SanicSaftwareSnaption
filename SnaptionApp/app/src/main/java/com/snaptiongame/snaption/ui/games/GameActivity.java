@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,7 +44,6 @@ import com.snaptiongame.snaption.models.GameData;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
-import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
@@ -54,9 +52,9 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
+import com.snaptiongame.snaption.ui.games.add_friend_to_game.AddToGameDialog;
 import com.snaptiongame.snaption.ui.games.players.GamePlayerView;
 import com.snaptiongame.snaption.ui.games.players.PlayerDialogFragment;
-import com.snaptiongame.snaption.ui.games.add_friend_to_game.AddToGameDialog;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
@@ -164,10 +162,10 @@ public class GameActivity extends HomeAppCompatActivity {
     private ScrollFabHider scrollFabHider;
 
     @BindView(R.id.invite_friends)
-    public Button inviteFriendsButton;
+    public TextView inviteFriendsButton;
 
     @BindView(R.id.join_game_button)
-    public Button joinGameButton;
+    public TextView joinGameButton;
 
     @BindView(R.id.coord_layout)
     protected CoordinatorLayout coordinatorLayout;
