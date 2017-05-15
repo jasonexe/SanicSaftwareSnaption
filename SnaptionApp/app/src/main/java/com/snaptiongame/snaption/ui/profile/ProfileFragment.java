@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
@@ -48,8 +49,10 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,6 +80,8 @@ public class ProfileFragment extends Fragment {
     public TextView gamesCreated;
     @BindView(R.id.captions_created)
     public TextView captionsCreated;
+    @BindView(R.id.total_game_upvotes)
+    public TextView totalGameUpvotes;
     @BindView(R.id.profile_name_editable)
     protected EditText profileEditName;
     @BindView(R.id.stop_name_change)
@@ -98,6 +103,7 @@ public class ProfileFragment extends Fragment {
     private Uri newPhotoUri;
     private User thisUser;
     private FloatingActionButton fab;
+    private int gameUpvotes = 0;
     private boolean isUser;
 
     private UserInfoEditListener userInfoEditListener;
@@ -164,6 +170,7 @@ public class ProfileFragment extends Fragment {
         captionsCreated.setText(String.valueOf(user.getTotalCaptionCount()));
         friendsMade.setText(String.valueOf(user.getFriendCount()));
 
+
         int numCapUpvotes = 0;
 
         if(user.getPublicCaptions() != null) {
@@ -172,6 +179,7 @@ public class ProfileFragment extends Fragment {
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
+        setupGameUpvotes(user, totalGameUpvotes);
 
         String userId = FirebaseUserResourceManager.getUserId();
         //check if we need to show the addFriend button
@@ -190,6 +198,50 @@ public class ProfileFragment extends Fragment {
         viewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
         pagerAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * Gets the number of upvotes for all the gameIds, and updates the count as it goes.
+     * @param user The user whose games we're counting the upvotes of
+     * @param countContainer The view to update with the upvote count.
+     */
+    private void setupGameUpvotes(User user, final TextView countContainer) {
+        ResourceListener<GameMetadata> upvoteGetter = new ResourceListener<GameMetadata>() {
+            @Override
+            public void onData(GameMetadata data) {
+                if(data.getUpvotes() != null) {
+                    gameUpvotes += data.getUpvotes().size();
+                    countContainer.setText(String.valueOf(gameUpvotes));
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return GameMetadata.class;
+            }
+        };
+
+        Set<String> pubGameSet = new HashSet<>();
+        Set<String> privGameSet = new HashSet<>();
+        // Make sure there are any public/private games before calling
+        if(user.getCreatedPublicGames() != null) {
+            pubGameSet = user.getCreatedPublicGames().keySet();
+        }
+        if(user.getCreatedPrivateGames() != null) {
+            privGameSet = user.getCreatedPrivateGames().keySet();
+        }
+
+        countContainer.setText(String.valueOf(0));
+
+        for(String gameId : pubGameSet) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(
+                    String.format(Constants.GAME_PUBLIC_METADATA_PATH, gameId), upvoteGetter);
+        }
+
+        for(String gameId : privGameSet) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(
+                    String.format(Constants.GAME_PRIVATE_METADATA_PATH, gameId), upvoteGetter);
+        }
     }
 
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {

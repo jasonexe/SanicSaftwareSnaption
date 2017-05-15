@@ -72,7 +72,7 @@
     <string name="my_feed">My Feed</string>
     <string name="discover">Discover</string>
     <string name="popular">Popular</string>
-    <string name="total_caption_upvote_text">Upvotes:</string>
+    <string name="total_caption_upvote_text">Caption Upvotes:</string>
     <string name="friends_with_colon">Friends:</string>
     <string name="make_own_caption_prompt">Make your own caption!</string>
     <string name="converting">Converting...</string>
@@ -95,6 +95,7 @@
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
     <string name="leave_game_success">You are no longer a player in the game</string>
+    <string name="total_game_upvote_text">Game upvotes:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

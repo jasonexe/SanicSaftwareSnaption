@@ -66,7 +66,7 @@ public class ProfileTabFragment extends Fragment {
         public void onData(GameMetadata data) {
             // filter out private games if needed
             //TODO get private games for user
-            List<GameMetadata> gameList = new ArrayList();
+            List<GameMetadata> gameList = new ArrayList<>();
             gameList.add(data);
             wallViewAdapter.addItems(gameList);
         }
