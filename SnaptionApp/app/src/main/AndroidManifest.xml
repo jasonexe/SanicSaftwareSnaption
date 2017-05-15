@@ -57,7 +57,8 @@
         <activity android:name="com.snaptiongame.snaption.ui.profile.ProfileActivity"
             android:label="@string/profile"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/ProfileActivity"/>
 
         <activity android:name="com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"

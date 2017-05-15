@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.support.v7.widget.Toolbar;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
@@ -18,10 +19,17 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Optional;
+
 /**
  * Created by austinrobarts on 3/9/17.
  */
 public class ProfileActivity extends HomeAppCompatActivity {
+
+    @BindView(R.id.toolbar)
+    protected Toolbar toolbar;
 
     private ProfileFragment fragment;
     private boolean addFriendIsVisible = false;
@@ -45,6 +53,10 @@ public class ProfileActivity extends HomeAppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        //set toolbar up
+        ButterKnife.bind(this);
+        setupToolbar(toolbar);
+
         //go to the user's profile
         fragment = new ProfileFragment();
         Bundle args = new Bundle();
@@ -58,18 +70,22 @@ public class ProfileActivity extends HomeAppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //add menu to toolbar
         getMenuInflater().inflate(R.menu.profile_menu, menu);
-
         MenuItem addFriendItem = menu.findItem(R.id.profile_add_friend);
         addFriendItem.setVisible(addFriendIsVisible);
-        addFriendItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                addFriend();
-                return true;
-            }
-        });
-        return true;
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //if user clicked add friend button
+        if (item.getItemId() == R.id.profile_add_friend) {
+            addFriend();
+            return true;
+        }
+        //else check to see if its back button
+        return super.onOptionsItemSelected(item);
     }
 
     public void setAddFriendVisible(boolean visible) {

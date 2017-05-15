@@ -173,4 +173,32 @@ public class UserTest {
         assertEquals(true, user2.getIsAndroid());
         assertEquals(true, user3.getIsAndroid());
     }
+
+    @Test
+    public void testGetAllCaptions() {
+        assertEquals(4, user3.getAllCaptions().size());
+        assertEquals(0, user1.getAllCaptions().size());
+        assertEquals(0, user2.getAllCaptions().size());
+    }
+
+    @Test
+    public void testGetAllPrivateCaptions() {
+        assertEquals(2, user3.getAllPrivateCaptions().size());
+        assertEquals(0, user1.getAllPrivateCaptions().size());
+        assertEquals(0, user2.getAllPrivateCaptions().size());
+    }
+
+    @Test
+    public void testGetAllPublicCaptions() {
+        assertEquals(2, user3.getAllPublicCaptions().size());
+        assertEquals(0, user1.getAllPublicCaptions().size());
+        assertEquals(0, user2.getAllPublicCaptions().size());
+    }
+
+    @Test
+    public void testGetAllCreatedGames() {
+        assertEquals(4, user3.getAllCreatedGameIds().size());
+        assertEquals(0, user1.getAllCreatedGameIds().size());
+        assertEquals(0, user2.getAllCreatedGameIds().size());
+    }
 }

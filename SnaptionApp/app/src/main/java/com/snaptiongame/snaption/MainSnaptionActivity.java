@@ -170,7 +170,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     }
 
     private void updateFragmentViews() {
-        setToolbarCollapsible(currentNavDrawerMenuId != R.id.profile_item);
         // show the fab
         // I don't know why hide needs to be called first, but it doesn't work otherwise
         fab.hide();
@@ -185,16 +184,12 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 R.drawable.ic_mode_edit_white_24dp : R.drawable.ic_add_white_24dp);
     }
 
-    private void setToolbarCollapsible(boolean collapsible) {
+    private void setToolbarCollapsible() {
         AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        if(collapsible) {
-            params.setScrollFlags(
-                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
-                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
-                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
-        } else {
-            params.setScrollFlags(0);
-        }
+        params.setScrollFlags(
+                AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
     }
 
     private Fragment createProfileFragment() {
@@ -262,6 +257,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // toolbar and navigation drawer setup
         setupToolbar(toolbar);
         setupNavigationViews();
+        setToolbarCollapsible();
 
         currentNavDrawerMenuId = R.id.wall_item;
 

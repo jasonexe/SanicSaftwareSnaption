@@ -1,15 +1,15 @@
 package com.snaptiongame.snaption.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 /**
  * A model class for the User object.
  *
  * @author Austin Robarts
  */
-public class User implements Person, Comparable<User> {
+public class User implements Person, Comparable<User>, Serializable {
 
     private UserMetadata metadata;
     private UserPublicData publicData;
@@ -52,12 +52,47 @@ public class User implements Person, Comparable<User> {
         return privateData.getCreatedGames();
     }
 
+    public List<String> getAllCreatedGameIds() {
+        List<String> gameIds = new ArrayList<>();
+        Map publicGames = getCreatedPublicGames();
+        Map privateGames = getCreatedPrivateGames();
+
+        if (publicGames != null) {
+            gameIds.addAll(publicGames.keySet());
+        }
+        if (privateGames != null) {
+            gameIds.addAll(privateGames.keySet());
+        }
+        return gameIds;
+
+    }
+
     public Map<String, Caption> getPublicCaptions() {
         return publicData.getCaptions();
     }
 
     public Map<String, Caption> getPrivateCaptions() {
+
         return privateData.getCaptions();
+    }
+
+    /**
+     * Get all the private captions and set their isPublic field to false
+     * @return a list of captions all with isPublic false
+     */
+    public List<Caption> getAllPrivateCaptions() {
+        Map<String, Caption> privateCaptions = privateData.getCaptions();
+        List<Caption> captions = new ArrayList<>();
+
+        //if there are any private captions
+        if (privateCaptions != null) {
+            //for each caption, set it to private and add to the list
+            for (Caption caption : privateCaptions.values()) {
+                caption.assignIsPublic(false);
+                captions.add(caption);
+            }
+        }
+        return captions;
     }
 
     public List<Caption> getAllCaptions() {

@@ -8,8 +8,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -74,10 +77,6 @@ public class ProfileFragment extends Fragment {
     public TextView gamesCreated;
     @BindView(R.id.captions_created)
     public TextView captionsCreated;
-    @BindView(R.id.profile_games_list)
-    protected RecyclerView gameListView;
-    @BindView(R.id.profile_captions_list)
-    protected RecyclerView captionsListView;
     @BindView(R.id.profile_name_editable)
     protected EditText profileEditName;
     @BindView(R.id.stop_name_change)
@@ -88,28 +87,19 @@ public class ProfileFragment extends Fragment {
     protected TextView friendsMade;
     @BindView(R.id.total_caption_upvotes)
     protected TextView totalCapUpvotes;
+    @BindView(R.id.profile_tab_layout)
+    protected TabLayout tabLayout;
+    @BindView(R.id.profile_pager)
+    protected ViewPager viewPager;
 
     private Unbinder unbinder;
-    private ProfileGamesAdapter gameAdapter;
-    private ProfileCaptionsAdapter captionsAdapter;
+    private ProfileFragmentPagerAdapter pagerAdapter;
     private Drawable oldProfilePic;
     private Uri newPhotoUri;
     private User thisUser;
     private FloatingActionButton fab;
     private boolean isUser;
-    private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
-        @Override
-        public void onData(GameMetadata data) {
-            // filter out private games if needed
-            //TODO get private games for user
-            gameAdapter.addGame(data);
-        }
 
-        @Override
-        public Class getDataType() {
-            return GameMetadata.class;
-        }
-    };
     private UserInfoEditListener userInfoEditListener;
     public interface UserInfoEditListener {
         /**
@@ -140,11 +130,7 @@ public class ProfileFragment extends Fragment {
         // Set clickability to false - for some reason doesn't work in XML (maybe b/c butterknife?)
         profile.setClickable(false);
 
-        //set up all recycler view connections
-        LinearLayoutManager gameViewManager = new LinearLayoutManager(view.getContext(), LinearLayoutManager.HORIZONTAL, false);
-        gameListView.setLayoutManager(gameViewManager);
-        gameAdapter = new ProfileGamesAdapter(new ArrayList<GameMetadata>());
-        gameListView.setAdapter(gameAdapter);
+        pagerAdapter = new ProfileFragmentPagerAdapter(getChildFragmentManager(), getContext());
 
         //if the user is logged in
         if (userId != null) {
@@ -152,7 +138,7 @@ public class ProfileFragment extends Fragment {
             FirebaseUserResourceManager.getUserById(userId, new ResourceListener<User>() {
                 @Override
                 public void onData(User user) {
-                    setupUserData(user, view);
+                    setupUserData(user);
                 }
 
                 @Override
@@ -164,12 +150,14 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private void setupUserData(User user, View view) {
+    private void setupUserData(User user) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
         // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
         if(this.isHidden()) {
             return;
         }
+
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("");
         userName.setText(user.getDisplayName());
         FirebaseResourceManager.loadImageIntoView(user.getImagePath(), profile);
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
@@ -197,43 +185,11 @@ public class ProfileFragment extends Fragment {
 
         //get the games based on list of games in user
         thisUser = user;
-        getUserGames(user);
-        getUserCaptions(user, view);
-    }
-
-    private void getUserCaptions(User user, View view) {
-        LinearLayoutManager captionViewManager = new LinearLayoutManager(view.getContext(),
-                LinearLayoutManager.HORIZONTAL, false);
-        captionsListView.setLayoutManager(captionViewManager);
-        List<Caption> captions = new ArrayList<>();
-        if (isUser) {
-            //get public and private captions
-            captions = user.getAllCaptions();
-        }
-        else {
-            //get private games only
-            captions = user.getAllPublicCaptions();
-        }
-        captionsAdapter = new ProfileCaptionsAdapter(captions);
-        captionsListView.setAdapter(captionsAdapter);
-    }
-
-    /*private boolean canDisplayGame(GameMetadata game, boolean isUser) {
-        return game != null && (isUser ||
-                game.getIsPublic() ||
-                FirebaseUserResourceManager.getUserId() != null && game.getPlayers() != null &&
-                        game.getPlayers().containsKey(FirebaseUserResourceManager.getUserId()));
-    }*/
-
-    private void getUserGames(User user) {
-        Map<String, Integer> gameIds = user.getCreatedPublicGames();
-        //if User has any games
-        if (gameIds != null) {
-            //for each gameId in user's game list
-            for (String gameId : gameIds.keySet()) {
-                FirebaseResourceManager.retrieveSingleNoUpdates(String.format(GAME_PUBLIC_METADATA_PATH, gameId), gameListener);
-            }
-        }
+        //set up tabbed view for captions and games
+        pagerAdapter.setUser(user);
+        viewPager.setAdapter(pagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        pagerAdapter.notifyDataSetChanged();
     }
 
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {
@@ -337,7 +293,6 @@ public class ProfileFragment extends Fragment {
         // Firebase stuff here
         if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
             userName.setText(newText);
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(newText);
 
             FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
                     new Uploader.UploadListener() {

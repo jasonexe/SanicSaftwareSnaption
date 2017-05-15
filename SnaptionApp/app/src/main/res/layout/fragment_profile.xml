@@ -21,223 +21,234 @@
             android:background="@drawable/long_snaption_background"
             android:backgroundTint="@color/colorPrimary"/>
 
-        <android.support.v7.widget.CardView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:elevation="12dp"
-            android:id="@+id/profile_picture_container"
-            app:cardCornerRadius="40dp"
-            android:layout_centerHorizontal="true"
-            android:innerRadius="0dp"
-            android:shape="ring"
-            android:thicknessRatio="1.9"
-            android:layout_margin="16dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true">
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_height="80dp"
-                android:layout_width="80dp"
-                android:id="@+id/profile_picture"
-                android:clickable="false"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true" />
-
-            <ImageView
-                android:id="@+id/edit_photo_overlay"
-                android:visibility="gone"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_photo_camera_white_48dp"
-                android:layout_gravity="center"/>
-        </android.support.v7.widget.CardView>
-
-        <RelativeLayout
-            android:id="@+id/friends_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_below="@id/profile_picture_container">
-
-            <TextView
-                android:id="@+id/friends_made_text"
-                android:text="@string/friends_with_colon"
-                android:textSize="16sp"
-                android:paddingEnd="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/friends_made"
-                tools:text="0"
-                android:textSize="16sp"
-                android:paddingStart="5dp"
-                android:paddingEnd="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/friends_made_text" />
-        </RelativeLayout>
-
-        <TextView
-            tools:text="username"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:id="@+id/profile_name"
-            android:textSize="24sp"
-            android:textAlignment="center"
-            android:layout_toEndOf="@id/profile_picture_container"/>
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-        <EditText
-            android:text=""
-            android:inputType="text"
-            android:visibility="gone"
-            android:maxLength="30"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.AppCompat.AutoCompleteTextView"
-            android:id="@+id/profile_name_editable"
-            android:textSize="24sp"
-            android:textAlignment="center"
-            android:imeOptions="actionDone"
-            android:padding="10dp"
-            android:layout_toEndOf="@id/profile_picture_container"/>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
 
-        <ImageButton
-            android:visibility="gone"
-            android:id="@+id/stop_name_change"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_close_white_24dp"
-            android:layout_alignEnd="@+id/profile_name_editable" />
+                <android.support.v7.widget.CardView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:elevation="12dp"
+                    android:id="@+id/profile_picture_container"
+                    app:cardCornerRadius="40dp"
+                    android:layout_centerHorizontal="true"
+                    android:innerRadius="0dp"
+                    android:shape="ring"
+                    android:thicknessRatio="1.9"
+                    android:layout_margin="16dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/profile_games_created"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_below="@+id/profile_name"
-            android:layout_toEndOf="@+id/profile_picture_container">
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:layout_height="80dp"
+                        android:layout_width="80dp"
+                        android:id="@+id/profile_picture"
+                        android:clickable="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/games_created_text"
-                android:textSize="16sp"
-                android:text="@string/games_created"
-                android:layout_toStartOf="@+id/games_created" />
+                    <ImageView
+                        android:id="@+id/edit_photo_overlay"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_photo_camera_white_48dp"
+                        android:layout_gravity="center"/>
+                </android.support.v7.widget.CardView>
 
-            <TextView
-                tools:text="0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/games_created"
-                android:textSize="16sp"
-                android:textAlignment="textEnd"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:paddingStart="5dp" />
+                <LinearLayout
+                    android:id="@+id/friends_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:background="@drawable/profile_text_background"
+                    android:elevation="2dp"
+                    android:layout_below="@id/profile_picture_container"
+                    android:layout_alignEnd="@+id/profile_picture_container"
+                    android:layout_alignStart="@+id/profile_picture_container"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/friends_made"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingEnd="4dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"
+                        tools:text="100" />
+
+                    <ImageView
+                        android:id="@+id/friends_icon"
+                        android:src="@drawable/ic_supervisor_account_grey_400_18dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="16dp" />
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="match_parent">
+
+                <TextView
+                    tools:text="username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:id="@+id/profile_name"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:scrollHorizontally="true"
+                    android:textSize="20sp"
+                    android:textAlignment="center" />
+
+                <EditText
+                    android:text=""
+                    android:inputType="text"
+                    android:visibility="gone"
+                    android:maxLength="30"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.AppCompat.AutoCompleteTextView"
+                    android:id="@+id/profile_name_editable"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:imeOptions="actionDone"
+                    android:padding="10dp" />
+
+                <ImageButton
+                    android:visibility="gone"
+                    android:id="@+id/stop_name_change"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_close_white_24dp"
+                    android:layout_alignEnd="@+id/profile_name_editable" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_below="@+id/profile_name"
+                    android:padding="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:divider="@drawable/empty_divider"
+                    android:showDividers="middle">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:id="@+id/profile_games_created">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/games_created_text"
+                            android:textSize="16sp"
+                            android:text="@string/games_created" />
+
+                        <TextView
+                            android:id="@+id/games_created"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_toEndOf="@+id/games_created_text"
+                            android:textAlignment="textEnd"
+                            android:textSize="16sp"
+                            tools:text="50" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/captions_made_container">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/captions_created_text"
+                            android:textSize="16sp"
+                            android:text="@string/captions_created" />
+
+                        <TextView
+                            android:id="@+id/captions_created"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_toEndOf="@+id/captions_created_text"
+                            android:textAlignment="textEnd"
+                            android:textSize="16sp"
+                            tools:text="112" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/caption_upvotes_container">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/total_caption_upvote_text"
+                            android:textSize="16sp"
+                            android:text="@string/total_caption_upvote_text" />
+
+                        <TextView
+                            android:id="@+id/total_caption_upvotes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_toEndOf="@+id/total_caption_upvote_text"
+                            android:textAlignment="textEnd"
+                            android:textSize="16sp"
+                            tools:text="200" />
+
+                    </RelativeLayout>
 
 
-        </RelativeLayout>
+                </LinearLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_below="@+id/profile_games_created"
-            android:layout_toRightOf="@+id/profile_picture_container">
 
-            <TextView
-                android:id="@+id/total_caption_upvotes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:textSize="16sp"
-                android:paddingStart="5dp"
-                tools:text="0"/>
-
-            <TextView
-                android:id="@+id/total_caption_upvote_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:layout_toStartOf="@id/total_caption_upvotes"
-                android:paddingStart="15dp"
-                android:text="@string/total_caption_upvote_text"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/captions_created_text"
-                android:textSize="16sp"
-                android:text="@string/captions_created"
-                android:layout_toStartOf="@+id/captions_created"/>
-
-            <TextView
-                tools:text="0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/captions_created"
-                android:textSize="16sp"
-                android:textAlignment="textEnd"
-                android:layout_toStartOf="@id/total_caption_upvote_text"
-                android:paddingStart="5dp"/>
+            </RelativeLayout>
 
 
 
-        </RelativeLayout>
+        </LinearLayout>
+
+
+
     </RelativeLayout>
 
-    <LinearLayout
+    <android.support.design.widget.TabLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/profile_tab_layout"
+        app:tabMode="fixed"
+        app:tabBackground="@color/colorPrimary"
+        app:tabTextColor="@color/grey"
+        app:tabSelectedTextColor="@android:color/white"
+        app:tabGravity="fill"/>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/profile_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_weight="2" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:text="Games Created"
-            android:gravity="center_vertical"
-            android:background="@color/colorPrimary"
-            android:textColor="#FFFFFF"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/profile_games_list"
-            android:layout_weight="4"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:layout_marginBottom="40dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Captions Created"
-            android:background="@color/colorPrimary"
-            android:textColor="@android:color/white" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/profile_captions_list"
-            android:layout_weight="4"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
-
-    </LinearLayout>
 </LinearLayout >

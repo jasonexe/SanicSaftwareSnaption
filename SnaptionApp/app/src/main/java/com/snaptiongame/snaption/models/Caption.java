@@ -28,11 +28,10 @@ public class Caption implements Serializable, Comparable<Caption> {
     public List<String> userInput; //List of user fill-ins for the blanks. Usually 1, could be more
     public Map<String, Integer> upvotes; // List of users who have upvoted this caption
     private User user;       // The user associated with the game, private to keep firebase out
+    private boolean isPublic = true; //The local access associated with the caption, public or private
 
     //Needed for firebase compatibility
     public Caption() {}
-
-    // TODO add an isPublic method
 
     // Used for dependency injection if you want a custom userId
     public Caption(String id, String gameId, String userId, Card card, List<String> userInput) {
@@ -175,5 +174,13 @@ public class Caption implements Serializable, Comparable<Caption> {
      */
     public User retrieveUser() {
         return user;
+    }
+
+    public void assignIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public boolean retrieveIsPublic() {
+        return isPublic;
     }
 }
