@@ -169,8 +169,6 @@ public class ProfileFragment extends Fragment {
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
         captionsCreated.setText(String.valueOf(user.getTotalCaptionCount()));
         friendsMade.setText(String.valueOf(user.getFriendCount()));
-
-
         int numCapUpvotes = 0;
 
         if(user.getPublicCaptions() != null) {
