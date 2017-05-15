@@ -348,6 +348,32 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
+    public static void removeCurrentUserFromGame(Game game,
+                                                 final UploadListener errDisplay) {
+        String gameId = game.getId();
+        String userId = FirebaseUserResourceManager.getUserId();
+        errDisplay.onComplete();
+        // if userId is null
+        if(userId != null) {
+            String gameUserPath = game.getIsPublic() ?
+                    String.format(GAME_PUBLIC_DATA_PLAYER_PATH, gameId, userId) :
+                    String.format(GAME_PRIVATE_DATA_PLAYER_PATH, gameId, userId);
+            database.getReference(gameUserPath).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    errDisplay.onComplete();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    errDisplay.onError(e.getMessage());
+                }
+            });
+        } else {
+            errDisplay.onError("User is not logged in");
+        }
+    }
+
     public void addFriend(final UserMetadata user, final Friend friend, final UploadListener listener) {
         // add the friend to the user's friends list
         addFriendToHashMap(user.getId(), friend.snaptionId, new DatabaseReference.CompletionListener() {

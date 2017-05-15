@@ -26,7 +26,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,7 +44,6 @@ import com.snaptiongame.snaption.models.GameData;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.ChildResourceListener;
-import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
@@ -55,6 +53,8 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
 import com.snaptiongame.snaption.ui.games.add_friend_to_game.AddToGameDialog;
+import com.snaptiongame.snaption.ui.games.players.GamePlayerView;
+import com.snaptiongame.snaption.ui.games.players.PlayerDialogFragment;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
@@ -133,12 +133,6 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.picker_name)
     protected TextView pickerName;
 
-    @BindView(R.id.flag_icon)
-    protected ImageView flag;
-
-    @BindView(R.id.number_captions)
-    protected TextView numberCaptions;
-
     @BindView(R.id.text_date)
     protected TextView endDate;
 
@@ -168,10 +162,10 @@ public class GameActivity extends HomeAppCompatActivity {
     private ScrollFabHider scrollFabHider;
 
     @BindView(R.id.invite_friends)
-    public Button inviteFriendsButton;
+    public TextView inviteFriendsButton;
 
     @BindView(R.id.join_game_button)
-    public Button joinGameButton;
+    public TextView joinGameButton;
 
     @BindView(R.id.coord_layout)
     protected CoordinatorLayout coordinatorLayout;
@@ -188,13 +182,14 @@ public class GameActivity extends HomeAppCompatActivity {
     @BindView(R.id.progress_bar)
     public View progressBar;
 
+    @BindView(R.id.game_player_view)
+    public GamePlayerView gamePlayerView;
+
     private ChildResourceListener<Caption> captionListener = new ChildResourceListener<Caption>() {
         @Override
         public void onNewData(Caption data) {
             if (data != null) {
                 captionAdapter.addCaption(data);
-                numberCaptions.setText(String.format(Locale.getDefault(),
-                        "%d", captionAdapter.getItemCount()));
             }
         }
 
@@ -295,6 +290,7 @@ public class GameActivity extends HomeAppCompatActivity {
         this.game = game;
         setupButtonDisplay(game);
         setupCaptionList(game);
+        setupPlayerList(game);
         startCommentManager(game.getMetaData());
     }
 
@@ -405,7 +401,7 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void setupButtonDisplay(Game game) {
+    private void setupButtonDisplay(final Game game) {
         // When this is initially called, setup the button with current data
         final String pickerId = game.getPickerId();
         if (game.getPlayers() == null) {
@@ -419,12 +415,15 @@ public class GameActivity extends HomeAppCompatActivity {
                 String.format(GAME_PUBLIC_DATA_PLAYERS_PATH, game.getId()) :
                 String.format(GAME_PRIVATE_DATA_PLAYERS_PATH, game.getId());
         joinedGameManager.retrieveMapWithUpdates(gamePlayersPath,
-                new ResourceListener<Map<String, Object>>() {
+                new ResourceListener<Map<String, Integer>>() {
             @Override
-            public void onData(Map<String, Object> data) {
+            public void onData(Map<String, Integer> data) {
                 // retrieveMapWithUpdates guaranteed to return a map from string to object
                 if (data != null) {
                     determineButtonDisplay(pickerId, data.keySet());
+                    // update the game player view
+                    game.setPlayers(data);
+                    setupPlayerList(game);
                 }
             }
 
@@ -479,11 +478,16 @@ public class GameActivity extends HomeAppCompatActivity {
         }
     }
 
+    private void setupPlayerList(Game game) {
+        if (game.getPlayers() != null) {
+            gamePlayerView.setPlayers(new ArrayList<>(game.getPlayers().keySet()));
+        }
+    }
+
     private void setupCaptionList(Game game) {
         LinearLayoutManager captionViewManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         captionListView.setLayoutManager(captionViewManager);
         if (game.getCaptions() != null) {
-            numberCaptions.setText(Integer.toString(game.getCaptions().size()));
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<>(game.getCaptions().values()),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
                     game.getEndDate());
@@ -491,7 +495,6 @@ public class GameActivity extends HomeAppCompatActivity {
             captionAdapter = new GameCaptionViewAdapter(new ArrayList<Caption>(),
                     loginDialog, ProfileActivity.getProfileActivityCreator(this), game.getIsPublic(),
                     game.getEndDate());
-            numberCaptions.setText(EMPTY_SIZE);
         }
         captionListView.setAdapter(captionAdapter);
         // Make the fab invisible if it's past the end date
@@ -637,6 +640,16 @@ public class GameActivity extends HomeAppCompatActivity {
         });
     }
 
+    @OnClick(R.id.game_player_view)
+    public void onClickGamePlayers() {
+        if (game != null && game.getPlayers() != null) {
+            List<String> playerIds = new ArrayList<>(game.getPlayers().keySet());
+            playerIds.add(0, game.getPickerId());
+            PlayerDialogFragment.getInstance(getString(R.string.players), game)
+                    .show(getSupportFragmentManager(), null);
+        }
+    }
+
     public void displayLoginDialog() {
         loginDialog.show();
     }
@@ -692,7 +705,6 @@ public class GameActivity extends HomeAppCompatActivity {
 
         dlg.show();
     }
-
 
     private String getSampleCaption() {
         Caption toReturn = game.getTopCaption();
