@@ -84,8 +84,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
         @Override
         public void onData(List<UserMetadata> userList) {
-            if (userList != null)
+            if (userList != null) {
                 users.addAll(userList);
+            }
             // query Firebase for Users based on e-mail only after this query is finished
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.EMAIL, emailListener);
         }
@@ -100,8 +101,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     private ResourceListener<List<UserMetadata>> emailListener = new ResourceListener<List<UserMetadata>>() {
         @Override
         public void onData(List<UserMetadata> userList) {
-            if (userList != null)
+            if (userList != null) {
                 users.addAll(userList);
+            }
             // display the list of Users after getting the remaining ones
             displayUsers();
         }
@@ -312,7 +314,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        query = newText;
+        query = newText.trim();
         users = new ArrayList<>();
         if (!query.isEmpty()) {
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
