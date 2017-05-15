@@ -105,7 +105,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
 
     /**
      * If you know the id of the fragment to switch to, call this method with it.
-     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load
+     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load.
+     * @param onBack Whether or not this method is being called because of a back button press.
+     *               If it is, then we don't add the fragment ID to the back stack.
      * @return true always
      */
     public boolean switchFragments(int selectedItemId, boolean onBack) {
