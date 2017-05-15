@@ -4,6 +4,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
+        android:id="@+id/search_notice"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:textSize="16sp"
+        android:paddingTop="16dp"
+        android:gravity="center_horizontal"
+        android:text="@string/no_search"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+    <TextView
         android:id="@+id/login_provider_friends_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

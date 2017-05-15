@@ -1,7 +1,6 @@
 package com.snaptiongame.snaption.ui.friends;
 
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,12 +10,14 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.widget.AppInviteDialog;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.UserMetadata;
@@ -28,6 +29,9 @@ import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,7 +47,7 @@ import butterknife.OnClick;
  *
  * @author Brittany Berlanga
  */
-public class AddInviteFriendsActivity extends HomeAppCompatActivity {
+public class AddInviteFriendsActivity extends HomeAppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
     //created app link from Facebook to link to our application when its on Google Play
@@ -56,6 +60,10 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
     private FriendsViewModel viewModel;
+    private FriendsListAdapter userListAdapter;
+    private List<UserMetadata> users = new ArrayList<>();
+    private String query;
+    private SearchView searchView;
 
     @BindView(R.id.login_provider_friends)
     protected RecyclerView loginProviderFriends;
@@ -66,18 +74,90 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
     @BindView(R.id.invite_friends_button)
     protected Button inviteFriendsButton;
 
+    @BindView(R.id.search_list)
+    protected RecyclerView userViewList;
+
+    @BindView(R.id.search_notice)
+    protected TextView searchNotice;
+
+    // the listener that gets the list of Users based on username
+    private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
+        @Override
+        public void onData(List<UserMetadata> userList) {
+            if (userList != null) {
+                users.addAll(userList);
+            }
+            // query Firebase for Users based on e-mail only after this query is finished
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.EMAIL, emailListener);
+        }
+
+        @Override
+        public Class getDataType() {
+            return UserMetadata.class;
+        }
+    };
+
+    // the listener that gets the list of Users based on e-mail
+    private ResourceListener<List<UserMetadata>> emailListener = new ResourceListener<List<UserMetadata>>() {
+        @Override
+        public void onData(List<UserMetadata> userList) {
+            if (userList != null) {
+                users.addAll(userList);
+            }
+            // display the list of Users after getting the remaining ones
+            displayUsers();
+        }
+
+        @Override
+        public Class getDataType() {
+            return UserMetadata.class;
+        }
+    };
+
+    FriendsListAdapter.AddInviteUserCallback addInviteUserCallback = new FriendsListAdapter.AddInviteUserCallback() {
+        @Override
+        public void addInviteClicked(final UserMetadata user) {
+            final Friend friend = new Friend(user);
+
+            // ensure viewModel has been initialized
+            if (viewModel != null) {
+                viewModel.addFriend(friend, new Uploader.UploadListener() {
+                    @Override
+                    public void onComplete() {
+                        // notify user
+                        Toast.makeText(AddInviteFriendsActivity.this,
+                                viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
+                                        friend.displayName, true, null), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onError(String errorMessage) {
+                        // notify user
+                        Toast.makeText(AddInviteFriendsActivity.this,
+                                viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
+                                        friend.displayName, false, errorMessage), Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        }
+    };
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Initial view setup
         setContentView(R.layout.activity_add_invite_friends);
+
         ButterKnife.bind(this);
+        searchNotice.setVisibility(View.GONE);
+        userViewList.setVisibility(View.GONE);
 
         // Login provider friends recycler view and adapter setup
         setupLoginProviderView();
 
         // Initialize the uploader and view model
         uploader = new FirebaseUploader();
+        userViewList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         initializeViewModel();
     }
 
@@ -179,6 +259,28 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
         loginProviderFriendsLabel.setText(viewModel.getLoginProviderLabel(getApplicationContext()));
     }
 
+    /**
+     * Displays the Users obtained from getting the search in alphabetical order,
+     * showing both their username and email along with a button to add them as a friend.
+     */
+    private void displayUsers() {
+        // display the list of users if there are any, otherwise tell the user nothing matched
+        if (users != null && users.size() > 0) {
+            // convert to a treeset to remove duplicates and be in alphabetical order
+            Set<UserMetadata> set = new TreeSet<>(users);
+            userViewList.setVisibility(View.VISIBLE);
+            searchNotice.setVisibility(View.GONE);
+            // set the adapter to be able to add friend
+            userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
+            userViewList.setAdapter(userListAdapter);
+        }
+        else {
+            searchNotice.setVisibility(View.VISIBLE);
+            userViewList.setVisibility(View.GONE);
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -186,11 +288,41 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity {
 
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
+        searchView =
                 (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
         searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(new ComponentName(this, SearchActivity.class)));
+                searchManager.getSearchableInfo(getComponentName()));
 
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnCloseListener(this);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onClose() {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        if (searchView != null) {
+            searchView.clearFocus();
+        }
+        return onQueryTextChange(query);
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        query = newText.trim();
+        users = new ArrayList<>();
+        if (!query.isEmpty()) {
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
+        }
+        else {
+            searchNotice.setVisibility(View.GONE);
+            userViewList.setVisibility(View.GONE);
+        }
         return true;
     }
 }
