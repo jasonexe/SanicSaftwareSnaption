@@ -146,7 +146,8 @@ public class ProfileFragment extends Fragment {
 
     private void setupUserData(User user) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
-        // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
+        // If the view is not visible or is being removed from the activity (IE user switched to
+        // another fragment) Then we don't have to update anything
         if(!isVisible() || isRemoving()) {
             return;
         }
