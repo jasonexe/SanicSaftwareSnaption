@@ -132,12 +132,6 @@ public class WallFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        // This will clear fragments if they get stuck above other ones. Can't figure out how to
-        // make them never get stuck, see http://stackoverflow.com/questions/18309815/fragments-displayed-over-each-other
-        // But this will at least not force users to reload the app
-        if(container != null) {
-            container.clearDisappearingChildren();
-        }
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
         gameVoteListeners = new ArrayList<>();
