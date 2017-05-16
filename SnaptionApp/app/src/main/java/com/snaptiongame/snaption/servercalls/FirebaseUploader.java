@@ -348,10 +348,10 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    public static void removeCurrentUserFromGame(Game game,
+    public static void removeUserFromGame(UserMetadata user, Game game,
                                                  final UploadListener errDisplay) {
         String gameId = game.getId();
-        String userId = FirebaseUserResourceManager.getUserId();
+        String userId = user.getId();
         errDisplay.onComplete();
         // if userId is null
         if(userId != null) {
