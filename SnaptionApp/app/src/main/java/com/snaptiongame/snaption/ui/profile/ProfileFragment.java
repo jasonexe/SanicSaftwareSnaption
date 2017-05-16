@@ -12,15 +12,9 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -28,30 +22,24 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
-import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
-import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.servercalls.Uploader;
+import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import butterknife.BindView;
@@ -61,7 +49,6 @@ import butterknife.Unbinder;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -159,8 +146,9 @@ public class ProfileFragment extends Fragment {
 
     private void setupUserData(User user) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
-        // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
-        if(this.isHidden()) {
+        // If the view is not visible or is being removed from the activity (IE user switched to
+        // another fragment) Then we don't have to update anything
+        if(!isVisible() || isRemoving()) {
             return;
         }
 
