@@ -46,12 +46,15 @@ public class PlayerListViewModel extends UserListViewModel {
         @Override
         public void onClickAction(UserMetadata user) {
             // remove the user from the game
-            FirebaseUploader.removeCurrentUserFromGame(game, uploadListener);
+            if (FirebaseUserResourceManager.getUserId() != null) {
+                FirebaseUploader.removeCurrentUserFromGame(game, uploadListener);
+            }
         }
 
         @Override
         public String actionText(UserMetadata user) {
-            return FirebaseUserResourceManager.getUserId().equals(user.getId()) &&
+            return FirebaseUserResourceManager.getUserId() != null &&
+                    FirebaseUserResourceManager.getUserId().equals(user.getId()) &&
                     !game.getPickerId().equals(user.getId()) ? actionText : null;
         }
     }
