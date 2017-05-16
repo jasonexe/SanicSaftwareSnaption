@@ -47,6 +47,7 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -97,6 +98,8 @@ public class ProfileFragment extends Fragment {
     protected TabLayout tabLayout;
     @BindView(R.id.profile_pager)
     protected ViewPager viewPager;
+    @BindView(R.id.profile_background)
+    protected ImageView profileBackground;
 
     private Unbinder unbinder;
     private ProfileFragmentPagerAdapter pagerAdapter;
@@ -154,6 +157,12 @@ public class ProfileFragment extends Fragment {
                 }
             });
         }
+
+        // Load the background into the image view with caching to reduce memory leaks
+        Picasso.with(getActivity())
+                .load(R.drawable.long_snaption_background)
+                .into(profileBackground);
+
         return view;
     }
 
