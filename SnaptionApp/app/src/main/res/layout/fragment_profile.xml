@@ -18,8 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.1"
-            android:background="@drawable/long_snaption_background"
-            android:backgroundTint="@color/colorPrimary"/>
+            android:id="@+id/profile_background"
+            android:scaleType="fitXY"
+            android:tint="@color/colorPrimary"/>
 
         <LinearLayout
             android:layout_width="match_parent"
