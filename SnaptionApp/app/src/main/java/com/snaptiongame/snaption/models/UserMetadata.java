@@ -1,12 +1,14 @@
 package com.snaptiongame.snaption.models;
 
+import java.io.Serializable;
+
 /**
  * Class containing all basic user information available to public
  * Fits Firebase data structure
  * Created by austinrobarts on 4/22/17.
  */
 
-public class UserMetadata implements Person, Comparable<UserMetadata> {
+public class UserMetadata implements Person, Comparable<UserMetadata>, Serializable {
 
     private String displayName;
     private String email;

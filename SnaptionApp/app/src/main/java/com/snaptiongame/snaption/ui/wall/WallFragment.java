@@ -45,6 +45,7 @@ public class WallFragment extends Fragment {
     private static final String GAME_TYPE = "game_type";
     private static final int NUM_COLUMNS = 2;
     private static final int SCROLL_DOWN_CONST = 1;
+    private static final double PERCENT_BEFORE_LOAD = .9; // Load games if already scrolled 90%
     private Unbinder unbinder;
     private WallViewAdapter wallAdapter;
     private boolean isLoading = false;
@@ -131,12 +132,6 @@ public class WallFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        // This will clear fragments if they get stuck above other ones. Can't figure out how to
-        // make them never get stuck, see http://stackoverflow.com/questions/18309815/fragments-displayed-over-each-other
-        // But this will at least not force users to reload the app
-        if(container != null) {
-            container.clearDisappearingChildren();
-        }
         View view = inflater.inflate(R.layout.fragment_wall, container, false);
         unbinder = ButterKnife.bind(this, view);
         gameVoteListeners = new ArrayList<>();
@@ -159,8 +154,15 @@ public class WallFragment extends Fragment {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(!isLoading && wallListView != null && !wallListView.canScrollVertically(SCROLL_DOWN_CONST)) {
-                    loadMoreGames();
+                if(!isLoading && wallListView != null) {
+                    // offset + extent = range
+                    int offset = wallListView.computeVerticalScrollOffset();
+                    int extent = wallListView.computeVerticalScrollExtent();
+                    double rangeBeforeLoad = wallListView.computeVerticalScrollRange()*PERCENT_BEFORE_LOAD;
+                    int scrolledSoFar = offset + extent;
+                    if(scrolledSoFar > rangeBeforeLoad) {
+                        loadMoreGames();
+                    }
                 }
             }
         });

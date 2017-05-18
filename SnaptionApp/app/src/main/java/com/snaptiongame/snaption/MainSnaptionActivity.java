@@ -12,6 +12,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -37,13 +38,15 @@ import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
-import com.snaptiongame.snaption.ui.MainFabBehavior;
 import com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaption.ui.friends.FriendsFragment;
 import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,6 +80,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     // Used for keeping track of if this Activity is paused -- needed so logging in from
     // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
+    private CoordinatorLayout.Behavior bottomNavigationBehavior;
+    private List<Integer> bottomTabBackStack;
+    private List<Integer> navDrawerBackStack;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -84,7 +90,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
     private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationListener =
@@ -93,19 +99,23 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the bottom navigation bar is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
 
     /**
      * If you know the id of the fragment to switch to, call this method with it.
-     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load
+     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load.
+     * @param onBack Whether or not this method is being called because of a back button press.
+     *               If it is, then we don't add the fragment ID to the back stack.
      * @return true always
      */
-    public boolean switchFragments(int selectedItemId) {
+    public boolean switchFragments(int selectedItemId, boolean onBack) {
         // if the selected item is different than the currently selected item, replace the fragment
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             Fragment newFragment = null;
+            int prevMenuId = currentBottomNavMenuId;
+            int prevNavDrawer = currentNavDrawerMenuId;
             switch (selectedItemId) {
                 case R.id.feedback_item:
                     //provide survey for bug reporting and feature requests/reviews
@@ -118,12 +128,16 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     if (bottomNavMenuItem == null) {
                         bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
                     }
+                    if(navDrawerBackStack.size() == 0) {
+                        navDrawerBackStack.add(selectedItemId);
+                        bottomTabBackStack.add(bottomNavMenuItem.getItemId());
+                    }
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
                     bottomNavigationListener.onNavigationItemSelected(bottomNavMenuItem);
                     break;
                 case R.id.profile_item:
-                    newFragment = new ProfileFragment();
+                    newFragment = createProfileFragment();
                     Bundle args = new Bundle();
                     args.putString(ProfileFragment.USER_ID_ARG, FirebaseUserResourceManager.getUserId());
                     newFragment.setArguments(args);
@@ -143,33 +157,73 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
-                    newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
+                    newFragment = WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
-                    newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
+                    newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
-            replaceFragmentWithTransaction(newFragment);
+            replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
         }
         drawerLayout.closeDrawers();
         return true;
     }
 
-    private void replaceFragmentWithTransaction(Fragment newFragment) {
+    /** Called when switching fragments (between any nav drawer item or wall type
+     * @param newFragment The new fragment to switch to
+     * @param prevMenuId The ID of the bottom nav menu item we're switching away from
+     * @param prevNavDrawer The ID of the nav drawer selection (wall, profile, etc)
+     * @param onBack If we're calling this method after pressing the back button or not.
+     */
+    private void replaceFragmentWithTransaction(Fragment newFragment, int prevMenuId, int prevNavDrawer,
+                                                boolean onBack) {
         if (newFragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // If we are switching tabs on the wall
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
+                int selectionsSize = bottomTabBackStack.size();
+                // If this isn't a back press and we aren't just switching wall tabs, then
+                // add the selections to the back stack
+                if(!onBack && (selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) == 0)) {
+                    bottomTabBackStack.add(prevMenuId);
+                    navDrawerBackStack.add(prevNavDrawer);
+                } else if (!onBack && selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) != 0) {
+                    // If we're switching between tabs on the wall, update the back stack selections
+                    bottomTabBackStack.set(selectionsSize-1, currentBottomNavMenuId);
+                    navDrawerBackStack.set(selectionsSize-1, currentNavDrawerMenuId);
+                }
+            } else if(!onBack){
+                // If we're going to a completely new fragment, definitely add to back stack
+                bottomTabBackStack.add(prevMenuId);
+                navDrawerBackStack.add(prevNavDrawer);
             }
             ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if(bottomTabBackStack.size() <= 1) {
+            super.onBackPressed();
+            return;
+        }
+        int tryBottom = bottomTabBackStack.remove(bottomTabBackStack.size() - 1);
+        int tryNav = navDrawerBackStack.remove(navDrawerBackStack.size() - 1);
+        // If the bottom nav drawer ID is not 0, we want to switch to that instead of
+        // the nav drawer id.
+        if(tryBottom > 0) {
+            currentNavDrawerMenuId = tryNav;
+            switchFragments(tryBottom, true);
+        } else {
+            switchFragments(tryNav, true);
+        }
+    }
+
     private void updateFragmentViews() {
-        setToolbarCollapsible(currentNavDrawerMenuId != R.id.profile_item);
         // show the fab
         // I don't know why hide needs to be called first, but it doesn't work otherwise
         fab.hide();
@@ -177,20 +231,47 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // hide or show the bottom navigation view
         bottomNavigationView.setVisibility(currentNavDrawerMenuId == R.id.wall_item ?
                 View.VISIBLE : View.GONE);
+        ((CoordinatorLayout.LayoutParams) bottomNavigationView.getLayoutParams())
+                .setBehavior(currentNavDrawerMenuId == R.id.wall_item ?
+                        bottomNavigationBehavior : null);
         fab.setImageResource(currentNavDrawerMenuId == R.id.profile_item ?
                 R.drawable.ic_mode_edit_white_24dp : R.drawable.ic_add_white_24dp);
     }
 
-    private void setToolbarCollapsible(boolean collapsible) {
+    private void setToolbarCollapsible() {
         AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        if(collapsible) {
-            params.setScrollFlags(
-                    AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
-                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
-                            | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
-        } else {
-            params.setScrollFlags(0);
-        }
+        params.setScrollFlags(
+                AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP
+                        | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+    }
+
+    private Fragment createProfileFragment() {
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setUserInfoEditListener(new ProfileFragment.UserInfoEditListener() {
+            @Override
+            public void onEditUsername(String errorMessage) {
+                if (errorMessage == null) {
+                    currentUser = null;
+                    updateNavigationViews(false);
+                }
+                else {
+                    Snackbar.make(fab, R.string.change_username_error, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onEditPhoto(String errorMessage) {
+                if (errorMessage == null) {
+                    currentUser = null;
+                    updateNavigationViews(true);
+                }
+                else {
+                    Snackbar.make(fab, R.string.change_username_error, Snackbar.LENGTH_SHORT).show();
+                }
+            }
+        });
+        return fragment;
     }
 
     private void logInOutItemSelected() {
@@ -221,6 +302,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isPaused = false;
+        bottomTabBackStack = new ArrayList<>();
+        navDrawerBackStack = new ArrayList<>();
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // set layout and bind views
@@ -230,6 +313,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // toolbar and navigation drawer setup
         setupToolbar(toolbar);
         setupNavigationViews();
+        setToolbarCollapsible();
 
         currentNavDrawerMenuId = R.id.wall_item;
 
@@ -239,13 +323,15 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             @Override
             public void onLoginComplete() {
                 if(!isPaused) {
-                    updateNavigationViews();
+                    updateNavigationViews(true);
                 }
             }
             @Override
             public void onLogoutComplete() {
-                switchFragments(R.id.wall_item);
-                updateNavigationViews();
+                bottomTabBackStack.clear();
+                navDrawerBackStack.clear();
+                switchFragments(R.id.wall_item, true);
+                updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
             @Override
@@ -280,7 +366,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
         });
         loginDialog.setLoginManager(loginManager);
-        ((CoordinatorLayout.LayoutParams) fab.getLayoutParams()).setBehavior(new MainFabBehavior(this, null));
 
         DeepLinkGetter.checkIfDeepLink(this);
     }
@@ -291,6 +376,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         drawerLayout.addDrawerListener(mDrawerToggle);
         navigationView.setNavigationItemSelectedListener(mNavListener);
         bottomNavigationView.setOnNavigationItemSelectedListener(bottomNavigationListener);
+        bottomNavigationBehavior = ((CoordinatorLayout.LayoutParams) bottomNavigationView
+                .getLayoutParams()).getBehavior();
         // navigation drawer view setup
         final View navigationHeaderView = navigationView.getHeaderView(0);
         navDrawerPhotoContainer = ButterKnife.findById(navigationHeaderView, R.id.photo_container);
@@ -299,7 +386,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         navDrawerEmail = ButterKnife.findById(navigationHeaderView, R.id.user_email);
     }
 
-    private void updateNavigationViews() {
+    private void updateNavigationViews(final boolean loadPhoto) {
         String id = FirebaseUserResourceManager.getUserId();
         if (id != null) {
             if (currentUser == null) {
@@ -309,7 +396,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                             public void onData(UserMetadata user) {
                                 currentUser = user;
                                 if (user != null) {
-                                    addUserInfoToNavDrawer(user);
+                                    addUserInfoToNavDrawer(user, loadPhoto);
                                 } else {
                                     removeUserInfoFromNavDrawer();
                                 }
@@ -326,11 +413,13 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
     }
 
-    private void addUserInfoToNavDrawer(UserMetadata user) {
+    private void addUserInfoToNavDrawer(UserMetadata user, boolean loadPhoto) {
         //load user data into views
         navDrawerName.setText(user.getDisplayName());
         navDrawerEmail.setText(user.getEmail());
-        FirebaseResourceManager.loadImageIntoView(user.getImagePath(), navDrawerPhoto);
+        if (loadPhoto) {
+            FirebaseResourceManager.loadLimitedCacheImageIntoView(user.getImagePath(), navDrawerPhoto);
+        }
         //set user info to visible now they are logged in
         navDrawerPhotoContainer.setVisibility(View.VISIBLE);
         navDrawerName.setVisibility(View.VISIBLE);
@@ -406,7 +495,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onResume() {
         super.onResume();
         isPaused = false;
-        updateNavigationViews();
+        updateNavigationViews(true);
     }
 
     @Override

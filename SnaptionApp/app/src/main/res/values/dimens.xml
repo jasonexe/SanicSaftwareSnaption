@@ -9,4 +9,5 @@
     <dimen name="user_nav_photo_size">88dp</dimen>
     <dimen name="user_nav_photo_radius">44dp</dimen>
     <dimen name="max_wall_image_height">600dp</dimen>
+    <dimen name="caption_card_width">100dp</dimen>
 </resources>

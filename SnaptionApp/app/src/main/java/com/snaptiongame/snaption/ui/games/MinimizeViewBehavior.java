@@ -23,6 +23,12 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
     private LinearLayout viewBelowView = null;
     private int appBarHeight = -1;
     private int statusBarHeight = -1;
+    private int prevHeight;
+    private OnScrollListener onScrollListener;
+
+    public interface OnScrollListener {
+        void onScroll(int dy);
+    }
 
     public MinimizeViewBehavior() {}
 
@@ -30,9 +36,12 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         this.viewBelowView = viewBelowView;
     }
 
-    public MinimizeViewBehavior(LinearLayout viewBelowView, double maxViewHeightPx) {
+    public MinimizeViewBehavior(LinearLayout viewBelowView, double maxViewHeightPx,
+                                OnScrollListener onScrollListener) {
         this.viewBelowView = viewBelowView;
         updateViewMaxHeight(maxViewHeightPx);
+        prevHeight = (int) this.maxViewHeightPx;
+        this.onScrollListener = onScrollListener;
     }
 
     @Override
@@ -45,7 +54,9 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
                                           View dependency) {
         if (appBarHeight < 0) {
             appBarHeight = dependency.getHeight();
-            updateViewMaxHeight(child.getHeight());
+            if (maxViewHeightPx <= 0) {
+                updateViewMaxHeight(child.getHeight());
+            }
             Resources res = child.getResources();
             statusBarHeight = res.getDimensionPixelSize(res.getIdentifier(STATUS_BAR_HEIGHT_RES,
                     DIMEN_RES, ANDROID_RES));
@@ -58,7 +69,7 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
         if (maxViewHeightPx > 0) {
             float viewY = child.getY();
 
-            // minimize/expand  view
+            // minimize/expand view
             ViewGroup.LayoutParams lp = child.getLayoutParams();
             int height = (int) ((maxViewHeightPx - maxViewHeightPx * MIN_PERCENT_HEIGHT) /
                     appBarHeight * (dependencyY - statusBarHeight) + maxViewHeightPx);
@@ -68,6 +79,12 @@ public class MinimizeViewBehavior extends CoordinatorLayout.Behavior<View> {
             if (viewBelowView != null) {
                 // translate the view under the  view
                 viewBelowView.setY(viewY + height);
+            }
+
+            // notify on scroll listener of scrolling changes
+            if (onScrollListener != null) {
+                onScrollListener.onScroll(prevHeight - height);
+                prevHeight = height;
             }
         }
         return true;

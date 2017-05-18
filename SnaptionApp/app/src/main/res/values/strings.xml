@@ -20,8 +20,10 @@
     <string name="category">Tags (Separate by commas)</string>
     <string name="date_button_set">Set Date</string>
     <string name="set_end_date">Select the game end date.</string>
-    <string name="games_created">Games Made:</string>
-    <string name="captions_created">Captions:</string>
+    <string name="games_created">Games Created:</string>
+    <string name="games_text">Games</string>
+    <string name="captions_text">Captions</string>
+    <string name="captions_created">Captions Created:</string>
     <string name="end_date">\'Ended on: \'MM/dd/yy</string>
     <string name="privacy">Privacy</string>
     <string name="content_rating">Content rating</string>
@@ -53,7 +55,7 @@
     <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
     <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
     <string name="no_internet">There was an error, you may not be connected to the Internet</string>
-    <string name="game_invite">Invite Friends</string>
+    <string name="game_invite">Invite</string>
     <string name="join_game">Join Game</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
@@ -70,7 +72,7 @@
     <string name="my_feed">My Feed</string>
     <string name="discover">Discover</string>
     <string name="popular">Popular</string>
-    <string name="total_caption_upvote_text">Upvotes:</string>
+    <string name="total_caption_upvote_text">Caption Upvotes:</string>
     <string name="friends_with_colon">Friends:</string>
     <string name="make_own_caption_prompt">Make your own caption!</string>
     <string name="converting">Converting...</string>
@@ -79,6 +81,21 @@
     <string name="days">day</string>
     <string name="remain">remaining</string>
     <string name="plural">s</string>
+    <string name="game_ended_notification">A game created by %s has ended</string>
+    <string name="gamed_ended_notification_title"></string>
+    <string name="friends_in_game">All your friends are already in this game!</string>
+    <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
+    <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
+    <string name="change_photo_error">Error occurred while changing photo</string>
+    <string name="change_username_error">Error occurred while changing username</string>
+    <string name="inv_to_snaption">Invite to snaption</string>
+    <string name="overflow_text">+%d</string>
+    <string name="close">Close</string>
+    <string name="players">Players</string>
+    <string name="leave_game">Leave</string>
+    <string name="leave_game_error">Error occurred while attempting to leave game</string>
+    <string name="leave_game_success">You are no longer a player in the game</string>
+    <string name="total_game_upvote_text">Game upvotes:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
@@ -90,4 +107,5 @@
     <string name="pick_an_image">You must pick an image.</string>
     <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
     <string name="pick_future_date">You must select a day in the future.</string>
+    <string name="illegal_tag_text">Tags cannot contain the characters \".\", \"$\", \"#\", \"/\", \"[\", or \"]\".</string>
 </resources>

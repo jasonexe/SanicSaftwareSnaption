@@ -12,6 +12,13 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+    
+    <style name="ProfileActivity" parent="AppTheme.NoActionBar"/>
+
+    <style name="AppTheme.NoActionBar.Transparent" parent="AppTheme.NoActionBar">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 
     <style name="AppTheme.NoActionBar.Transparent" parent="AppTheme.NoActionBar">
         <item name="android:windowTranslucentStatus">true</item>

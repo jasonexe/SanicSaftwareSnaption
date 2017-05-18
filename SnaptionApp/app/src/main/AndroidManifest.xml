@@ -57,7 +57,8 @@
         <activity android:name="com.snaptiongame.snaption.ui.profile.ProfileActivity"
             android:label="@string/profile"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="stateHidden"
+            android:theme="@style/ProfileActivity"/>
 
         <activity android:name="com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"
@@ -83,24 +84,14 @@
             android:theme="@style/AppTheme.NoActionBar.Transparent"
             android:screenOrientation="portrait" />
 
-        <activity android:name="com.snaptiongame.snaption.ui.friends.SearchActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_search" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable"
-                android:value=".SearchResultsActivity"/>
-        </activity>
-
         <service
             android:name="com.snaptiongame.snaption.servercalls.NotificationReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
+        <receiver android:name=".servercalls.GameEndNotification"/>
 
         <service android:name="com.snaptiongame.snaption.servercalls.FirebaseTokenMonitor">
             <intent-filter>

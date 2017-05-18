@@ -1,9 +1,13 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
@@ -125,8 +129,25 @@ public class NotificationReceiver extends FirebaseMessagingService {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
+        //notify user that game was created
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+
+        //create a timed notification to go off when the game has reached its end date
+        Intent endGameIntent = new Intent(this, GameEndNotification.class);
+        //store pickerName and gameId so notification can go to GameActivity
+        endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
+        endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
+        if (game.getIsPublic()) {
+            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PUBLIC);
+        } else {
+            endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PRIVATE);
+        }
+
+        PendingIntent endGamePendingIntent = PendingIntent.getBroadcast(this, 0, endGameIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        alarmManager.set(AlarmManager.RTC_WAKEUP, game.getEndDate() * MILLIS_PER_SECOND, endGamePendingIntent);
     }
 }

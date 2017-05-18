@@ -22,12 +22,16 @@ public class Constants {
     public static final String PHOTO_PATH = "currentPhotoPath";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
+    // Intent indicator that a picker name is given for notification
+    public static final String PICKER = "pickerName";
     // Intent indicator that the next strings are fields
     public static final String FIELDS = "fields";
 
     // BEGIN FIREBASE VARIABLES //
 
     //ALL USER DATA PATHS for database redesign
+    //Path to user profile photos in Firebase Storage
+    public static final String USER_PROFILE_PHOTO_PATH = "ProfilePictures/%s";
     //Path to root user metadata directory in Firebase
     public static final String USERS_METADATA_PATH = "users/public/metadata";
     //Path to specific user metadata directory in Firebase
@@ -95,6 +99,8 @@ public class Constants {
     public static final String GAME_DATA_CAPTIONS_PATH = "games/%s/data/%s/captions";
     //Path to game's specific caption with configurable access
     public static final String GAME_DATA_CAPTION_PATH = "games/%s/data/%s/captions/%s";
+    //Path to game's player list with configurable access
+    public static final String GAME_DATA_PLAYER_PATH = "games/%s/data/%s/players/%s";
     //PUBLIC
     //Path to public root game metadata directory in Firebase
     public static final String GAMES_PUBLIC_METADATA_PATH = "games/public/metadata";

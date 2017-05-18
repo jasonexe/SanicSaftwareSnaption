@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/caption_card_container"
     android:orientation="vertical"
-    android:layout_width="100dp"
+    android:layout_width="@dimen/caption_card_width"
     android:layout_height="150dp"
     android:background="@drawable/image_border"
     android:gravity="center"

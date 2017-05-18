@@ -1,5 +1,6 @@
 package com.snaptiongame.snaption.models;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -9,7 +10,7 @@ import java.util.Map;
  * Created by austinrobarts on 4/22/17.
  */
 
-public class UserPublicData {
+public class UserPublicData implements Serializable{
     private Map<String, Caption> captions; //captions user has added to public games
     private Map<String, Integer> createdGames; //public games user has created
     private Map<String, Integer> friends; //friends the user has added

@@ -20,6 +20,7 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity.ProfileActivityCreator;
 
 import java.text.NumberFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH;
+import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 /**
  * Provides a binding for captions to be displayed using a RecyclerView in GameActivity.
@@ -37,12 +39,14 @@ import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_CAPTION_UPVOT
 public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHolder> {
 
     private static final String UNKNOWN_USER_ID = "unknown";
+    private static final float GRAY_ALPHA_VALUE = .3f;
     private List<Caption> items;
     private LoginDialog loginDialog;
     private ProfileActivityCreator profileMaker;
     private UserMetadata unknownUser = new UserMetadata(UNKNOWN_USER_ID, null, null, null, null, null);
     private boolean isPublic;
     private Map<String, UserMetadata> userMap = new HashMap<>(); // Map from userIds to User
+    private long endDate;
 
     // BEGIN PRIVATE CLASSES //
 
@@ -90,12 +94,14 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      * @param isPublic Whether the game is public or private
      */
     public GameCaptionViewAdapter(List<Caption> items, LoginDialog loginDialog,
-                                  ProfileActivityCreator profileMaker, boolean isPublic) {
+                                  ProfileActivityCreator profileMaker, boolean isPublic,
+                                  long endDate) {
         this.items = items;
         Collections.sort(this.items);
         this.loginDialog = loginDialog;
         this.profileMaker = profileMaker;
         this.isPublic = isPublic;
+        this.endDate = endDate;
     }
 
     /**
@@ -141,7 +147,7 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
             Caption captionInList = items.get(oldIndex);
             items.remove(oldIndex);
             updatedCaption.assignUser(captionInList.retrieveUser());
-            newIndex = insertCaption(updatedCaption);
+            newIndex = CaptionLogic.insertCaption(items, updatedCaption);
             // Check to see if the caption has moved or changed, and if it has
             // then animate its change
             if (oldIndex != newIndex) {
@@ -207,37 +213,48 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
      */
     private void handleClickUpvote(final ImageView upvoteIcon, Caption caption,
                                    boolean hasUpvoted) {
-        // Listens to see if anything went wrong
-        Uploader.UploadListener listener = new Uploader.UploadListener() {
-            // Because the listener is being used twice, don't display the error if it has already appeared
-            boolean hasDisplayedError = false;
-            @Override
-            public void onComplete() {}
+        // Check to see if the end date has passed on the game
+        if (endDate < Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND) {
+            Toast.makeText(upvoteIcon.getContext(),
+                    upvoteIcon.getContext().getResources().getString(R.string.end_date_passed_upvote),
+                    Toast.LENGTH_SHORT).show();
+        }
+        // Otherwise register the vote
+        else {
+            // Listens to see if anything went wrong
+            Uploader.UploadListener listener = new Uploader.UploadListener() {
+                // Because the listener is being used twice, don't display the error if it has already appeared
+                boolean hasDisplayedError = false;
 
-            @Override
-            public void onError(String errorMessage) {
-                if (!hasDisplayedError) {
-                    Toast.makeText(upvoteIcon.getContext(),
-                            upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
-                            Toast.LENGTH_SHORT).show();
-                    hasDisplayedError = true;
+                @Override
+                public void onComplete() {
                 }
-            }
-        };
 
-        if (caption != null) {
-            String upvotePath = isPublic ?
-                    String.format(GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
-                            caption.getId(), FirebaseUserResourceManager.getUserId()) :
-                    String.format(GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
-                            caption.getId(), FirebaseUserResourceManager.getUserId());
-            // Remove the upvote if the user has upvoted
-            if (hasUpvoted) {
-                FirebaseUploader.removeUpvote(upvotePath, listener);
-            }
-            // Add the upvote if the user hasn't upvoted
-            else {
-                FirebaseUploader.addUpvote(upvotePath, listener);
+                @Override
+                public void onError(String errorMessage) {
+                    if (!hasDisplayedError) {
+                        Toast.makeText(upvoteIcon.getContext(),
+                                upvoteIcon.getContext().getResources().getString(R.string.upvote_error),
+                                Toast.LENGTH_SHORT).show();
+                        hasDisplayedError = true;
+                    }
+                }
+            };
+
+            if (caption != null) {
+                String upvotePath = isPublic ?
+                        String.format(GAME_PUBLIC_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
+                                caption.getId(), FirebaseUserResourceManager.getUserId()) :
+                        String.format(GAME_PRIVATE_DATA_CAPTION_UPVOTE_PATH, caption.getGameId(),
+                                caption.getId(), FirebaseUserResourceManager.getUserId());
+                // Remove the upvote if the user has upvoted
+                if (hasUpvoted) {
+                    FirebaseUploader.removeUpvote(upvotePath, listener);
+                }
+                // Add the upvote if the user hasn't upvoted
+                else {
+                    FirebaseUploader.addUpvote(upvotePath, listener);
+                }
             }
         }
     }
@@ -253,6 +270,9 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
         upvoteIcon.setImageDrawable(hasUpvoted ?
                 ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up) :
                 ContextCompat.getDrawable(upvoteIcon.getContext(), R.drawable.thumb_up_outline));
+        if (endDate < Calendar.getInstance().getTimeInMillis() / MILLIS_PER_SECOND) {
+            upvoteIcon.setAlpha(GRAY_ALPHA_VALUE);
+        }
     }
 
     private void setUpCaptionView(CaptionViewHolder holder, Caption caption) {
@@ -316,30 +336,6 @@ public class GameCaptionViewAdapter extends RecyclerView.Adapter<CaptionViewHold
                 });
             }
         }
-    }
-
-    /**
-     * Inserts the caption into the items list in the proper order.
-     *
-     * @param caption The caption to insert
-     */
-    private int insertCaption(Caption caption) {
-        int index = 0;
-        boolean added = false;
-
-        while (index < items.size() && !added) {
-            if (caption.compareTo(items.get(index)) < 0) {
-                items.add(index, caption);
-                added = true;
-            }
-            else {
-                index++;
-            }
-        }
-        if (!added) {
-            items.add(caption);
-        }
-        return index;
     }
 
 }

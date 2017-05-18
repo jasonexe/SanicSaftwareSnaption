@@ -32,7 +32,8 @@ public class ProfileCaptionsAdapter extends RecyclerView.Adapter<ProfileCaptions
     public void onBindViewHolder(ProfileCaptionsViewHolder holder, int position) {
         Caption curCaption = captions.get(position);
         final String gameId = curCaption.getGameId();
-        final String access = Constants.PUBLIC;
+        final String access = curCaption.retrieveIsPublic() ? Constants.PUBLIC : Constants.PRIVATE;
+
         holder.captionText.setText(curCaption.retrieveCaptionText());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

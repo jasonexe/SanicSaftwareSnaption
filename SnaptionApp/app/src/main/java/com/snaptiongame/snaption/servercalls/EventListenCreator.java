@@ -31,7 +31,7 @@ public class EventListenCreator {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Failed to read value
-                Log.w(TAG, "Failed to read value.", databaseError.toException());
+                Log.w(TAG, "Failed to read value of type: " + type, databaseError.toException());
                 listener.onData(null);
             }
         };
