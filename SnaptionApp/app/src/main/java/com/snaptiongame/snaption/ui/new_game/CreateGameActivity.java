@@ -55,6 +55,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaption.Constants.IMAGE_MIN_HEIGHT;
+import static com.snaptiongame.snaption.Constants.IMAGE_MIN_WIDTH;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 
@@ -69,10 +71,6 @@ public class CreateGameActivity extends AppCompatActivity {
     private static final int DEFAULT_DAYS_AHEAD = 5;
     private static final int MILLIS_IN_DAY = 86400000;
     private static final int MAX_END_DAY_COUNT = 14;
-    private static final int IMAGE_MIN_HEIGHT = 20;
-    private static final int IMAGE_MIN_WIDTH = 20;
-    private static final int IMAGE_MAX_HEIGHT = 3000;
-    private static final int IMAGE_MAX_WIDTH = 3000;
 
     // Create a storage reference from our app
     private Uploader uploader;
@@ -527,31 +525,32 @@ public class CreateGameActivity extends AppCompatActivity {
         options.inJustDecodeBounds = true;
         ParcelFileDescriptor fd = null;
         try {
-            fd = getContentResolver().openFileDescriptor(uri, "r"); // u is your Uri
+            fd = getContentResolver().openFileDescriptor(uri, "r");
         }
         catch (FileNotFoundException e) {
             // If the file doesn't exist just return false, shouldn't ever happen though
             return false;
         }
+        // Loads file data into options
         BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
 
         int width = options.outWidth;
         int height = options.outHeight;
-        System.out.println(options.toString());
-        //If the image is too short
+        // If the image is too short
         if (height < IMAGE_MIN_HEIGHT) {
             Toast.makeText(CreateGameActivity.this,
                     String.format(getString(R.string.image_min_height), IMAGE_MIN_HEIGHT),
                     Toast.LENGTH_LONG).show();
             return false;
         }
-        //If the image is too skinny
+        // If the image is too skinny
         else if (width < IMAGE_MIN_WIDTH) {
             Toast.makeText(CreateGameActivity.this,
                     String.format(getString(R.string.image_min_width), IMAGE_MIN_WIDTH),
                     Toast.LENGTH_LONG).show();
             return false;
         }
+        // Otherwise the image is okay
         return true;
     }
 }
