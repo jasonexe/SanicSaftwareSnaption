@@ -108,4 +108,6 @@
     <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
     <string name="pick_future_date">You must select a day in the future.</string>
     <string name="illegal_tag_text">Tags cannot contain the characters \".\", \"$\", \"#\", \"/\", \"[\", or \"]\".</string>
+    <string name="image_min_height">Image must be at least %d pixels tall</string>
+    <string name="image_min_width">Image must be at least %d pixels wide</string>
 </resources>
