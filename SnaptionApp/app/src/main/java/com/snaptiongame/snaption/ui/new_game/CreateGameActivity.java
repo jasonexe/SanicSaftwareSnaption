@@ -56,6 +56,8 @@ import butterknife.OnClick;
 
 import static com.snaptiongame.snaption.Constants.IMAGE_MIN_HEIGHT;
 import static com.snaptiongame.snaption.Constants.IMAGE_MIN_WIDTH;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 
@@ -532,9 +534,12 @@ public class CreateGameActivity extends AppCompatActivity {
         }
         // Loads file data into options
         BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
+        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
+                MAX_IMAGE_UPLOAD_HEIGHT);
 
-        int width = options.outWidth;
-        int height = options.outHeight;
+        int width = options.outWidth / scale;
+        int height = options.outHeight / scale;
+
         // If the image is too short
         if (height < IMAGE_MIN_HEIGHT) {
             Toast.makeText(CreateGameActivity.this,
