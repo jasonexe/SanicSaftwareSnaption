@@ -31,7 +31,6 @@ public class GameMetadata implements Serializable {
     private long endDate; //When the game ends
     private long creationDate; //When the game was created
     private double imageAspectRatio; //The aspect ratio of the image
-    private double priority;
 
     /**
      * Default constructor for Firebase.
