@@ -12,11 +12,14 @@ import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.models.GameMetadata;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.R.attr.data;
 import static com.snaptiongame.snaption.Constants.CREATION_DATE;
 import static com.snaptiongame.snaption.Constants.GAMES_PUBLIC_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
@@ -67,9 +70,11 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             retrieveUserPrivateGames();
         } else if (gameType == GameType.TOP_PUBLIC_GAMES){
             // Otherwise, we're getting either random or top public games, so check which.
-            retrievePublicGamesByPriority();
+            retrievePublicGamesByPriority(new ArrayList<GameMetadata>());
         } else if (gameType == GameType.UNPOPULAR_PUBLIC_GAMES) {
             retrieveBottomPublicGames();
+        } else if (gameType == GameType.TOP_CLOSED_GAMES) {
+            retrieveClosedPublicGames(new ArrayList<GameMetadata>());
         }
     }
 
@@ -135,17 +140,89 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         });
     }
 
-    private void retrievePublicGamesByPriority() {
+    private void retrieveClosedPublicGames(final List<GameMetadata> games) {
+        if(games.size() >= publicLimit) {
+            listener.onData(games);
+            return;
+        }
         Query query = database.getReference(GAMES_PUBLIC_METADATA_PATH).orderByPriority();
         if (retrievedOnce) {
             if (lastRetrievedPriority instanceof Double) {
                 // endAt 0, any priority > 0 will be a private game, we don't want those per se.
                 query = query.limitToFirst(publicLimit + 1)
-                        .startAt((double) lastRetrievedPriority, lastRetrievedKey).endAt(0);
+                        .startAt((double) lastRetrievedPriority + 1, lastRetrievedKey).endAt(0);
             }  else {
                 // If for some reason last priority isn't set to double, we can still use the key
                 // Start at min double value so we know we aren't missing any
                 query = query.limitToFirst(privateLimit + 1)
+                        .startAt(Double.MIN_VALUE, lastRetrievedKey).endAt(0);
+            }
+        } else {
+            query = query.limitToFirst(publicLimit).endAt(0);
+        }
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
+                if (snapshots.iterator().hasNext()) {
+                    for (DataSnapshot snapshot : snapshots) {
+                        lastRetrievedPriority = snapshot.getPriority();
+                        lastRetrievedKey = snapshot.getKey();
+                        games.add((GameMetadata) snapshot.getValue(listener.getDataType()));
+                    }
+                    retrievedOnce = true;
+                } else {
+                    System.out.println("Ending early");
+                    // If no games came back, done searching
+                    listener.onData(filterGames(games, true));
+                    return;
+                }
+                retrieveClosedPublicGames(filterGames(games, true));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private List<GameMetadata> filterGames(List<GameMetadata> toFilter, boolean filterOutOpenGames) {
+        List<GameMetadata> toReturn = new ArrayList<>();
+        for (GameMetadata game : toFilter) {
+            if(filterOutOpenGames) {
+                // Add games whose end dates have already happened and have a top caption
+                if(game.getEndDate() < Calendar.getInstance().getTimeInMillis() / Constants.MILLIS_PER_SECOND
+                        && game.getTopCaption() != null) {
+                    toReturn.add(game);
+                }
+            } else {
+                // Add games whose end dates haven't happened yet
+                if(game.getEndDate() > Calendar.getInstance().getTimeInMillis() / Constants.MILLIS_PER_SECOND) {
+                    toReturn.add(game);
+                }
+            }
+        }
+        // Also remove duplicates. This also randomizes the order a bit as a bonus
+        return new ArrayList<>(new HashSet<>(toReturn));
+    }
+
+    private void retrievePublicGamesByPriority(final List<GameMetadata> games) {
+        if (games.size() >= publicLimit) {
+            listener.onData(games);
+            return;
+        }
+        Query query = database.getReference(GAMES_PUBLIC_METADATA_PATH).orderByPriority();
+        if (retrievedOnce) {
+            if (lastRetrievedPriority instanceof Double) {
+                // endAt 0, any priority > 0 will be a private game, we don't want those per se.
+                query = query.limitToFirst(publicLimit + 1)
+                        .startAt((double) lastRetrievedPriority + 1, lastRetrievedKey).endAt(0);
+            }  else {
+                // If for some reason last priority isn't set to double, we can still use the key
+                // Start at min double value so we know we aren't missing any
+                query = query.limitToFirst(publicLimit + 1)
                         .startAt(Double.MIN_VALUE, lastRetrievedKey).endAt(0);
             }
         }
@@ -155,24 +232,20 @@ public class FirebaseGameResourceManager implements GameResourceManager {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<GameMetadata> data = new ArrayList<>();
                 Iterable<DataSnapshot> snapshots = dataSnapshot.getChildren();
                 if (snapshots.iterator().hasNext()) {
                     for (DataSnapshot snapshot : snapshots) {
                         lastRetrievedPriority = snapshot.getPriority();
                         lastRetrievedKey = snapshot.getKey();
-                        data.add((GameMetadata) snapshot.getValue(listener.getDataType()));
+                        games.add((GameMetadata) snapshot.getValue(listener.getDataType()));
                     }
-                    if (retrievedOnce) {
-                        if (data.size() > 0) {
-                            data.remove(0);
-                        }
-                    }
-                    else {
-                        retrievedOnce = true;
-                    }
+                    retrievedOnce = true;
+                } else {
+                    // If there are no next iterators, finish getting games
+                    listener.onData(filterGames(games, false));
+                    return;
                 }
-                listener.onData(data);
+                retrievePublicGamesByPriority(filterGames(games, false));
             }
 
             @Override

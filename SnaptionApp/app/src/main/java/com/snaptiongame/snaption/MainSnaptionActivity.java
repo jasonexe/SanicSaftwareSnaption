@@ -164,6 +164,10 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
+                case R.id.closed_item:
+                    newFragment = WallFragment.newInstance(GameType.TOP_CLOSED_GAMES);
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
             }
             replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
         }
