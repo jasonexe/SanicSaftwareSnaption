@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
@@ -339,29 +340,33 @@ public class ProfileFragment extends Fragment {
     private void saveEditName() {
         final String newText = profileEditName.getText().toString().trim();
         // Firebase stuff here
-        if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
-            userName.setText(newText);
+        if (thisUser != null) {
+            if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
+                userName.setText(newText);
+                FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
+                        new Uploader.UploadListener() {
+                            @Override
+                            public void onComplete() {
+                                thisUser.setDisplayName(newText);
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditUsername(null);
+                                }
+                            }
 
-            FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
-                    new Uploader.UploadListener() {
-                @Override
-                public void onComplete() {
-                    thisUser.setDisplayName(newText);
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditUsername(null);
-                    }
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    userName.setText(thisUser.getDisplayName());
-                    ((AppCompatActivity) getActivity()).getSupportActionBar()
-                            .setTitle(thisUser.getDisplayName());
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditUsername(errorMessage);
-                    }
-                }
-            });
+                            @Override
+                            public void onError(String errorMessage) {
+                                userName.setText(thisUser.getDisplayName());
+                                ((AppCompatActivity) getActivity()).getSupportActionBar()
+                                        .setTitle(thisUser.getDisplayName());
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditUsername(errorMessage);
+                                }
+                            }
+                        });
+            }
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_internet), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -376,23 +381,29 @@ public class ProfileFragment extends Fragment {
         if(newPhotoUri != null) {
             byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
             clearGlideCache();
-            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
-                    new Uploader.UploadListener() {
-                @Override
-                public void onComplete() {
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditPhoto(null);
-                    }
-                }
+            if (thisUser != null) {
+                FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
+                        new Uploader.UploadListener() {
+                            @Override
+                            public void onComplete() {
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditPhoto(null);
+                                }
+                            }
 
-                @Override
-                public void onError(String errorMessage) {
-                    FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditPhoto(errorMessage);
-                    }
-                }
-            });
+                            @Override
+                            public void onError(String errorMessage) {
+                                FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditPhoto(errorMessage);
+                                }
+                            }
+                        });
+            }
+            else {
+                Toast.makeText(getActivity(), getString(R.string.no_internet),
+                        Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -439,8 +450,10 @@ public class ProfileFragment extends Fragment {
 
         if(requestCode == IMAGE_PICK_CODE) {
             try {
-                newPhotoUri = data.getData();
-                Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                if (thisUser != null) {
+                    newPhotoUri = data.getData();
+                    Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                }
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");
                 e.printStackTrace();
