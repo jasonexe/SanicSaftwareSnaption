@@ -57,6 +57,7 @@
     <string name="no_internet">There was an error, you may not be connected to the Internet</string>
     <string name="game_invite">Invite</string>
     <string name="join_game">Join Game</string>
+    <string name="empty_caption">You cannot submit an empty caption</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
     <string name="search_text">Search for Snaption users</string>
