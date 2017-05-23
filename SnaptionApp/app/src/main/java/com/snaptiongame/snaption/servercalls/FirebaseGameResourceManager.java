@@ -173,7 +173,6 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                     }
                     retrievedOnce = true;
                 } else {
-                    System.out.println("Ending early");
                     // If no games came back, done searching
                     listener.onData(filterGames(games, true));
                     return;
