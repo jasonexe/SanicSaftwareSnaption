@@ -50,7 +50,7 @@ import butterknife.OnClick;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
-    public static final String FRIENDS_KEY = "f";
+    public static final String FRIENDS_KEY = "friends";
     //created app link from Facebook to link to our application when its on Google Play
     private static final String appLinkUrl = "https://fb.me/1863284123957626";
     //currently goes to the Snaption icon on google search
