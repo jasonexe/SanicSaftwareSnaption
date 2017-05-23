@@ -1,6 +1,7 @@
 package com.snaptiongame.snaption.ui.games.players;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
@@ -44,14 +45,15 @@ public class PlayerListViewModel extends UserListViewModel {
         }
 
         @Override
-        public void onClickAction(UserMetadata user) {
+        public void onClickAction(@NonNull UserMetadata user) {
             // remove the user from the game
-            FirebaseUploader.removeCurrentUserFromGame(game, uploadListener);
+            FirebaseUploader.removeUserFromGame(user, game, uploadListener);
         }
 
         @Override
         public String actionText(UserMetadata user) {
-            return FirebaseUserResourceManager.getUserId().equals(user.getId()) &&
+            return FirebaseUserResourceManager.getUserId() != null &&
+                    FirebaseUserResourceManager.getUserId().equals(user.getId()) &&
                     !game.getPickerId().equals(user.getId()) ? actionText : null;
         }
     }

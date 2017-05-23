@@ -46,6 +46,7 @@ import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -81,6 +82,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     // other screens will not trigger an attempted UI update while this activity is gone.
     private boolean isPaused;
     private CoordinatorLayout.Behavior bottomNavigationBehavior;
+    private List<Integer> bottomTabBackStack;
+    private List<Integer> navDrawerBackStack;
 
     private NavigationView.OnNavigationItemSelectedListener mNavListener =
             new NavigationView.OnNavigationItemSelectedListener() {
@@ -88,7 +91,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the navigation drawer is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
     private BottomNavigationView.OnNavigationItemSelectedListener bottomNavigationListener =
@@ -97,19 +100,23 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         // onNavigationItemSelected gets called when an item in the bottom navigation bar is selected
         // any replacing of fragments should be handled here
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            return switchFragments(item.getItemId());
+            return switchFragments(item.getItemId(), false);
         }
     };
 
     /**
      * If you know the id of the fragment to switch to, call this method with it.
-     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load
+     * @param selectedItemId Id of the item to switch to, used to determine which fragment to load.
+     * @param onBack Whether or not this method is being called because of a back button press.
+     *               If it is, then we don't add the fragment ID to the back stack.
      * @return true always
      */
-    public boolean switchFragments(int selectedItemId) {
+    public boolean switchFragments(int selectedItemId, boolean onBack) {
         // if the selected item is different than the currently selected item, replace the fragment
         if (selectedItemId != currentNavDrawerMenuId && selectedItemId != currentBottomNavMenuId) {
             Fragment newFragment = null;
+            int prevMenuId = currentBottomNavMenuId;
+            int prevNavDrawer = currentNavDrawerMenuId;
             switch (selectedItemId) {
                 case R.id.feedback_item:
                     //provide survey for bug reporting and feature requests/reviews
@@ -121,6 +128,10 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     MenuItem bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.my_feed_item);
                     if (bottomNavMenuItem == null) {
                         bottomNavMenuItem = bottomNavigationView.getMenu().findItem(R.id.popular_item);
+                    }
+                    if(navDrawerBackStack.size() == 0) {
+                        navDrawerBackStack.add(selectedItemId);
+                        bottomTabBackStack.add(bottomNavMenuItem.getItemId());
                     }
                     currentNavDrawerMenuId = selectedItemId;
                     bottomNavMenuItem.setChecked(true);
@@ -147,28 +158,69 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.discover_item:
-                    newFragment =  WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
+                    newFragment = WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
                 case R.id.popular_item:
-                    newFragment =  WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
+                    newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
-            replaceFragmentWithTransaction(newFragment);
+            replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
         }
         drawerLayout.closeDrawers();
         return true;
     }
 
-    private void replaceFragmentWithTransaction(Fragment newFragment) {
+    /** Called when switching fragments (between any nav drawer item or wall type
+     * @param newFragment The new fragment to switch to
+     * @param prevMenuId The ID of the bottom nav menu item we're switching away from
+     * @param prevNavDrawer The ID of the nav drawer selection (wall, profile, etc)
+     * @param onBack If we're calling this method after pressing the back button or not.
+     */
+    private void replaceFragmentWithTransaction(Fragment newFragment, int prevMenuId, int prevNavDrawer,
+                                                boolean onBack) {
         if (newFragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            // If we are switching tabs on the wall
             if (currentBottomNavMenuId != 0) {
                 ft.setCustomAnimations(android.R.anim.fade_in , android.R.anim.fade_out);
+                int selectionsSize = bottomTabBackStack.size();
+                // If this isn't a back press and we aren't just switching wall tabs, then
+                // add the selections to the back stack
+                if(!onBack && (selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) == 0)) {
+                    bottomTabBackStack.add(prevMenuId);
+                    navDrawerBackStack.add(prevNavDrawer);
+                } else if (!onBack && selectionsSize > 0 && bottomTabBackStack.get(selectionsSize-1) != 0) {
+                    // If we're switching between tabs on the wall, update the back stack selections
+                    bottomTabBackStack.set(selectionsSize-1, currentBottomNavMenuId);
+                    navDrawerBackStack.set(selectionsSize-1, currentNavDrawerMenuId);
+                }
+            } else if(!onBack){
+                // If we're going to a completely new fragment, definitely add to back stack
+                bottomTabBackStack.add(prevMenuId);
+                navDrawerBackStack.add(prevNavDrawer);
             }
             ft.replace(R.id.fragment_container, newFragment).commit();
             updateFragmentViews();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(bottomTabBackStack.size() <= 1) {
+            super.onBackPressed();
+            return;
+        }
+        int tryBottom = bottomTabBackStack.remove(bottomTabBackStack.size() - 1);
+        int tryNav = navDrawerBackStack.remove(navDrawerBackStack.size() - 1);
+        // If the bottom nav drawer ID is not 0, we want to switch to that instead of
+        // the nav drawer id.
+        if(tryBottom > 0) {
+            currentNavDrawerMenuId = tryNav;
+            switchFragments(tryBottom, true);
+        } else {
+            switchFragments(tryNav, true);
         }
     }
 
@@ -251,6 +303,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isPaused = false;
+        bottomTabBackStack = new ArrayList<>();
+        navDrawerBackStack = new ArrayList<>();
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         // set layout and bind views
@@ -275,7 +329,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
             }
             @Override
             public void onLogoutComplete() {
-                switchFragments(R.id.wall_item);
+                bottomTabBackStack.clear();
+                navDrawerBackStack.clear();
+                switchFragments(R.id.wall_item, true);
                 updateNavigationViews(true);
             }
         }, new LoginManager.AuthCallback() {
