@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -204,7 +205,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
             }
         }
         // Also remove duplicates. This also randomizes the order a bit as a bonus
-        return new ArrayList<>(new HashSet<>(toReturn));
+        return new ArrayList<>(new LinkedHashSet<>(toReturn));
     }
 
     private void retrievePublicGamesByPriority(final List<GameMetadata> games) {
