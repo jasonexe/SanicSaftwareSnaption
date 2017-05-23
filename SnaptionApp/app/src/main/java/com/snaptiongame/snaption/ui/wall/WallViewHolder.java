@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.TintContextWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -134,16 +135,22 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     @OnClick(photo)
     protected void onClickPhoto(View view) {
         // start game activity with shared image transition
-        Intent createGameIntent = new Intent(view.getContext(), GameActivity.class);
+        Context context = getActivityContext(view.getContext());
+        if (context instanceof TintContextWrapper) {
+            context = ((TintContextWrapper) context).getBaseContext();
+        }
+
+        Intent createGameIntent = new Intent(context, GameActivity.class);
         createGameIntent.putExtra(Constants.GAME, game);
         ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation((AppCompatActivity) view.getContext(), view,
+                makeSceneTransitionAnimation((AppCompatActivity) context, view,
                         game.getId());
-        view.getContext().startActivity(createGameIntent, options.toBundle());
+        context.startActivity(createGameIntent, options.toBundle());
     }
 
     @OnLongClick(photo)
-    protected boolean onLongClickPhoto(final View view) {
+    protected boolean onLongClickPhoto(View view) {
+        final Context buttonContext = getActivityContext(view.getContext());
         //if the user is logged in
         if (FirebaseUserResourceManager.getUserId() != null) {
             // If they want to create a game from this one, start the create game intent
@@ -151,7 +158,6 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
             FirebaseResourceManager.getImageURI(game.getImagePath(), new ResourceListener<Uri>() {
                 @Override
                 public void onData(Uri data) {
-                    Context buttonContext = view.getContext();
                     Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
                     createGameIntent.putExtra(Constants.EXTRA_MESSAGE, data);
                     createGameIntent.putExtra(Constants.PHOTO_PATH, game.getImagePath());
@@ -165,23 +171,24 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
             });
         }
         else { //prompt user to log in
-            ((MainSnaptionActivity) view.getContext()).loginDialog.show();
+            ((MainSnaptionActivity) buttonContext).loginDialog.show();
         }
         return true;
     }
 
     @OnClick(R.id.upvote_icon)
     protected void onClickUpvote(View view) {
+        Context context = getActivityContext(view.getContext());
         // Check if user is logged in before letting them upvote. If not logged in, display
         // login dialog.
         if (FirebaseUserResourceManager.getUserId() == null) {
-            ((MainSnaptionActivity) view.getContext()).loginDialog.show();
+            ((MainSnaptionActivity) context).loginDialog.show();
         }
         else {
             Map<String, Integer> upvoters = game.getUpvotes();
             boolean hasUpvoted = upvoters != null && upvoters.containsKey(
                     FirebaseUserResourceManager.getUserId());
-            handleClickUpvote(view.getContext(), game, hasUpvoted);
+            handleClickUpvote(context, game, hasUpvoted);
         }
     }
 
@@ -190,9 +197,16 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
         //call create user profile activity
         if (game.getTopCaption() != null) {
             ProfileActivity.ProfileActivityCreator profileActivityCreator = ProfileActivity
-                    .getProfileActivityCreator(view.getContext());
+                    .getProfileActivityCreator(getActivityContext(view.getContext()));
             profileActivityCreator.create(game.getTopCaption().userId);
         }
+    }
+
+    private Context getActivityContext(Context context) {
+        if (context instanceof TintContextWrapper) {
+            context = ((TintContextWrapper) context).getBaseContext();
+        }
+        return context;
     }
 
     /**
