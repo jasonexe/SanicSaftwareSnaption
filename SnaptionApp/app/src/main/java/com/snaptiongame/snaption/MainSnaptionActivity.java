@@ -45,6 +45,8 @@ import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
 
+import java.util.ArrayList;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -72,6 +74,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     public LoginDialog loginDialog;
     private ActionBarDrawerToggle mDrawerToggle;
     private UserMetadata currentUser;
+    private ArrayList<UserMetadata> friends;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
     // Used for keeping track of if this Activity is paused -- needed so logging in from
@@ -312,6 +315,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         DeepLinkGetter.checkIfDeepLink(this);
     }
 
+    public void setUserFriends(ArrayList<UserMetadata> friends) {
+        this.friends = new ArrayList<>(friends);
+        this.friends.add(currentUser);
+    }
+
     private void setupNavigationViews() {
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
@@ -425,6 +433,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
         else if (currentNavDrawerMenuId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
+            if (friends != null) {
+                Bundle args = new Bundle();
+                args.putSerializable(AddInviteFriendsActivity.FRIENDS_KEY, friends);
+                intent.putExtras(args);
+            }
             startActivity(intent);
         }
         else if (currentNavDrawerMenuId == R.id.profile_item) {
