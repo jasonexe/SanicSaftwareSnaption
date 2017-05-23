@@ -95,7 +95,7 @@
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
     <string name="leave_game_success">You are no longer a player in the game</string>
-    <string name="total_game_upvote_text">Game upvotes:</string>
+    <string name="total_game_upvote_text">Game Upvotes:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
