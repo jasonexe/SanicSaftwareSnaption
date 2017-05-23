@@ -54,8 +54,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.snaptiongame.snaption.Constants.IMAGE_MIN_HEIGHT;
-import static com.snaptiongame.snaption.Constants.IMAGE_MIN_WIDTH;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
 import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
 import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
@@ -541,16 +541,16 @@ public class CreateGameActivity extends AppCompatActivity {
         int height = options.outHeight / scale;
 
         // If the image is too short
-        if (height < IMAGE_MIN_HEIGHT) {
+        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
             Toast.makeText(CreateGameActivity.this,
-                    String.format(getString(R.string.image_min_height), IMAGE_MIN_HEIGHT),
+                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
                     Toast.LENGTH_LONG).show();
             return false;
         }
         // If the image is too skinny
-        else if (width < IMAGE_MIN_WIDTH) {
+        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
             Toast.makeText(CreateGameActivity.this,
-                    String.format(getString(R.string.image_min_width), IMAGE_MIN_WIDTH),
+                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
                     Toast.LENGTH_LONG).show();
             return false;
         }

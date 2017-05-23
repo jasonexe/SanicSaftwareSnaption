@@ -180,6 +180,6 @@ public class Constants {
     public static final int COMPRESSION_VALUE = 80;
     public static final int MAX_IMAGE_UPLOAD_WIDTH = 1920;
     public static final int MAX_IMAGE_UPLOAD_HEIGHT = 1080;
-    public static final int IMAGE_MIN_HEIGHT = 20;
-    public static final int IMAGE_MIN_WIDTH = 20;
+    public static final int MIN_IMAGE_UPLOAD_HEIGHT = 20;
+    public static final int MIN_IMAGE_UPLOAD_WIDTH = 20;
 }
