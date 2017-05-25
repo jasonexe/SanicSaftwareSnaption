@@ -37,6 +37,7 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.ui.HelpDialogFragment;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaption.ui.friends.FriendsFragment;
@@ -159,6 +160,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.discover_item:
                     newFragment = WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
+                    showCreateExistingGameDialog();
                     break;
                 case R.id.popular_item:
                     newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
@@ -542,5 +544,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         else {
             loginManager.handleFacebookLoginResult(requestCode, resultCode, data);
         }
+    }
+
+    private void showCreateExistingGameDialog() {
+        HelpDialogFragment.newInstance("These games are closed. Long press to start a new game " +
+                "with the same image", R.drawable.create_from_existing, "hi")
+                .show(getSupportFragmentManager(), null);
     }
 }
