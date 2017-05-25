@@ -212,8 +212,6 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
             } else {
                 holder.captionText.setText(R.string.closed_caption_filler);
             }
-
-
             holder.captionerLayout.setVisibility(TextView.GONE);
         }
     }
