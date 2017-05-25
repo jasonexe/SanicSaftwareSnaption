@@ -12,6 +12,7 @@ public class UserMetadataTest {
     private UserMetadata emptyData;
     private UserMetadata nullData;
     private UserMetadata filledData;
+    private UserMetadata equalData;
 
     @Before
     public void setup() {
@@ -105,5 +106,16 @@ public class UserMetadataTest {
         assertEquals("name", filledData.getDisplayName());
     }
 
+    @Test
+    public void testEquals() {
+        equalData = new UserMetadata("name", "email", "imagePath", "notificationId", "facebookId", "id");
+        assertEquals(filledData, equalData);
+        equalData = new UserMetadata("only", "the", "id", "gets", "checked", "id");
+        assertEquals(filledData, equalData);
+        assertEquals(false, filledData.equals(null));
+        assertEquals(false, filledData.equals(emptyData));
+        assertEquals(false, filledData.equals(nullData));
+        assertEquals(false, filledData.equals(new Object()));
+    }
 
 }
