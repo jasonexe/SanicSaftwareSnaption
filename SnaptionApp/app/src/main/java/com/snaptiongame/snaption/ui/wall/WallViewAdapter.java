@@ -207,7 +207,13 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
-            holder.captionText.setText(R.string.caption_filler);
+            if(game.isOpen()) {
+                holder.captionText.setText(R.string.caption_filler);
+            } else {
+                holder.captionText.setText(R.string.closed_caption_filler);
+            }
+
+
             holder.captionerLayout.setVisibility(TextView.GONE);
         }
     }
