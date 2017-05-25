@@ -161,6 +161,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
                     Intent createGameIntent = new Intent(buttonContext, CreateGameActivity.class);
                     createGameIntent.putExtra(Constants.EXTRA_MESSAGE, data);
                     createGameIntent.putExtra(Constants.PHOTO_PATH, game.getImagePath());
+                    createGameIntent.putExtra(Constants.ASPECT_RATIO, game.getImageAspectRatio());
                     buttonContext.startActivity(createGameIntent);
                 }
 

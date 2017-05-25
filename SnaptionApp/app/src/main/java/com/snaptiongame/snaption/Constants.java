@@ -20,6 +20,8 @@ public class Constants {
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     // Another Intent label
     public static final String PHOTO_PATH = "currentPhotoPath";
+    // Intent indicator for an image aspect ratio used when creating a game from an existing game
+    public static final String ASPECT_RATIO = "aspectRatio";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
     // Intent indicator that a picker name is given for notification
