@@ -81,7 +81,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
                         @Override
                         public void onData(UserMetadata user) {
                             //ensure the game were found before sending notification
-                            if (metaData != null) {
+                            if (metaData != null && user != null) {
                                 sendNotification(metaData, user, message);
                             }
                         }
@@ -117,7 +117,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //means it is a game creation notification
-        if (user != null) {
+        if (user.getDisplayName() != null) {
             createGameCreationNotification(pendingIntent, game, user.getDisplayName());
         } else {
             //means upvote notification
