@@ -47,13 +47,13 @@ interface DeepLink {
 public class FirebaseDeepLinkCreator {
     private static final String LINK_BEGINNING =  "https://snaptiongame.com"; // Use this at beginning of links
 
-    static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyAa9WDzfmNN5j3i8jn0smpHkZypMmxFCMI";
+    static final String KEY_STRING = "/v1/shortLinks?key=AIzaSyC4rApAhLiKTDruOggQxnzE7OhWl1QAk7Q";
     static final String LINK_KEY = "longDynamicLink";
     static final String GAMES = "games";
     static final String URL_END = ".com/";
 
     // Our app's firebase dynamic link domain
-    private static final String DYNAMIC_LINK_DOMAIN = "https://ba63n.app.goo.gl/";
+    private static final String DYNAMIC_LINK_DOMAIN = "https://h883z.app.goo.gl/";
     // The name of the file that holds the game preview to send in the intent
     private static final String FILE_NAME = "gamePreview.jpg";
     // URL to firebase's dynamic shortlink generator
@@ -61,7 +61,7 @@ public class FirebaseDeepLinkCreator {
     // Our app's default android package
     private static final String ANDROID_PACKAGE = "com.snaptiongame.snaption";
     // The iOS app's default package. Taken from firebase
-    private static final String IOS_PACKAGE = "edu.calpoly.csc.2168.snapsquad.verticalprototype";
+    private static final String IOS_PACKAGE = "com.snaption.snapsquad";
     // The key for the shortlink to send in the intent if needed
     private static final String SHORTLINK_KEY = "shortLink";
     private static final String INTENT_IMAGE_TYPE = "image/jpeg";
@@ -174,8 +174,8 @@ public class FirebaseDeepLinkCreator {
         if(deepLink.contains(GAMES)) {
             Class toSend = GameActivity.class;
             String gameId = deepLink.substring(deepLink.lastIndexOf("/") + 1);
-            String access = deepLink.substring(deepLink.indexOf(URL_END) + URL_END.length(),
-                    deepLink.indexOf(GAMES) - 1);
+            String access = deepLink.substring(deepLink.indexOf(GAMES) + GAMES.length() + 1,
+                    deepLink.lastIndexOf("/"));
             DeepLinkInfo info = new DeepLinkInfo(toSend);
             info.setIntentString(gameId);
             info.setAccessString(access);
@@ -201,8 +201,8 @@ public class FirebaseDeepLinkCreator {
         if(progressView != null) {
             progressView.setVisibility(View.VISIBLE);
         }
-        String access = game.getIsPublic() ? "/public" : "/private";
-        String linkDestination = LINK_BEGINNING + access + "/games/" + game.getId();
+        String access = game.getIsPublic() ? "public/" : "private/";
+        String linkDestination = LINK_BEGINNING + "/games/" + access + game.getId();
         // First, create the deep link to this specific game
         getDeepLink(linkDestination, new ResourceListener<String>() {
             @Override
