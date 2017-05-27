@@ -3,6 +3,7 @@ package com.snaptiongame.snaption.ui.new_game;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,6 +42,7 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
+import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,6 +54,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 
@@ -414,8 +420,11 @@ public class CreateGameActivity extends AppCompatActivity {
         alreadyExisting = false;
 
         try {
-            imageUri = data.getData();
-            setImageFromUrl(imageUri);
+            Uri uri = data.getData();
+            if (isImageSizeLegal(uri)) {
+                imageUri = uri;
+                setImageFromUrl(imageUri);
+            }
         } catch (Exception e) {
             FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
@@ -506,4 +515,46 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Determines whether the image is of an illegal size or not. Displays error messages to the user.
+     * @param uri The Uri of the image selected
+     * @return Whether the image is of an illegal size
+     */
+    private boolean isImageSizeLegal(Uri uri) {
+        //Get dimensions of image to check for size
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getContentResolver().openFileDescriptor(uri, "r");
+        }
+        catch (FileNotFoundException e) {
+            // If the file doesn't exist just return false, shouldn't ever happen though
+            return false;
+        }
+        // Loads file data into options
+        BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
+        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
+                MAX_IMAGE_UPLOAD_HEIGHT);
+
+        int width = options.outWidth / scale;
+        int height = options.outHeight / scale;
+
+        // If the image is too short
+        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
+            Toast.makeText(CreateGameActivity.this,
+                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // If the image is too skinny
+        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
+            Toast.makeText(CreateGameActivity.this,
+                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // Otherwise the image is okay
+        return true;
+    }
 }
