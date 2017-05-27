@@ -83,8 +83,9 @@ public class CreateGameActivity extends AppCompatActivity {
     private Calendar calendar;
     private int year, month, day;
 
-    private boolean alreadyExisting; //True if user is creating this from an exisitng game
-    private String existingPhotoPath;
+    private boolean alreadyExisting; //True if user is creating this from an existing game
+    private double existingImageAspectRatio; //Valid if user is creating this from an existing game
+    private String existingPhotoPath; //Valid if user is creating this from an existing game
     private PersonAdapter friendsListAdapter;
     private AddedPersonAdapter gameFriendsAdapter;
     private PersonAdapter.AddListener addListener = new PersonAdapter.AddListener() {
@@ -144,6 +145,7 @@ public class CreateGameActivity extends AppCompatActivity {
         if(uri != null) {
             alreadyExisting = true;
             existingPhotoPath = intent.getStringExtra(Constants.PHOTO_PATH);
+            existingImageAspectRatio = intent.getDoubleExtra(Constants.ASPECT_RATIO, 0);
             imageUri = uri;
             setImageFromUrl(uri);
         }
@@ -258,10 +260,9 @@ public class CreateGameActivity extends AppCompatActivity {
             // If the photo does exist, addGame but without the data
             // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
             GameData gameData = new GameData(friends, null);
-            String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
             GameMetadata metaData = new GameMetadata(gameId,
-                    FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
-                    endDate, 1);
+                    FirebaseUserResourceManager.getUserId(), existingPhotoPath, tags, isPublic,
+                    endDate, existingImageAspectRatio);
             Game game = new Game(gameData, metaData);
 
             uploader.addGame(game);
