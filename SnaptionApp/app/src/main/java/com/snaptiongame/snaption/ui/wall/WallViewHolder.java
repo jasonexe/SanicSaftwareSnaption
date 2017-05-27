@@ -38,6 +38,20 @@ import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.text.NumberFormat;
 import java.util.Map;
+import com.snaptiongame.snaption.models.GameMetadata;
+import com.snaptiongame.snaption.models.UserMetadata;
+import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
+import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.servercalls.Uploader;
+import com.snaptiongame.snaption.ui.games.GameActivity;
+import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
+import com.snaptiongame.snaption.ui.profile.ProfileActivity;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
+
+import java.text.NumberFormat;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
