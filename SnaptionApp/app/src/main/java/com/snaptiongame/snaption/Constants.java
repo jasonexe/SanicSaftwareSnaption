@@ -182,4 +182,7 @@ public class Constants {
     public static final int MAX_IMAGE_UPLOAD_HEIGHT = 1080;
     public static final int MIN_IMAGE_UPLOAD_HEIGHT = 20;
     public static final int MIN_IMAGE_UPLOAD_WIDTH = 20;
+
+    // Shared preferences keys
+    public static final String SHOW_CREATE_EXISTING_GAME_PREF = "show_create_existing_game_pref";
 }

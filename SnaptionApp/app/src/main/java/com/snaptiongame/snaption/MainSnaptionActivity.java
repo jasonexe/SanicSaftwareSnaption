@@ -37,7 +37,6 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.GameType;
 import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
-import com.snaptiongame.snaption.ui.HelpDialogFragment;
 import com.snaptiongame.snaption.ui.HomeAppCompatActivity;
 import com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity;
 import com.snaptiongame.snaption.ui.friends.FriendsFragment;
@@ -45,6 +44,7 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +54,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaption.Constants.SHOW_CREATE_EXISTING_GAME_PREF;
 
 public class MainSnaptionActivity extends HomeAppCompatActivity {
     private static final String survey_url = "https://docs.google.com/forms/d/e/1FAIpQLSerSw6piYc20yi64SVjM48n7MklEFrg4Nk-oS5oRhlz_uxxRA/viewform";
@@ -160,7 +161,9 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.discover_item:
                     newFragment = WallFragment.newInstance(GameType.UNPOPULAR_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
-                    showCreateExistingGameDialog();
+                    ViewUtilities.showHelpDialog(this,
+                            getString(R.string.create_game_from_existing),
+                            R.drawable.create_from_existing, SHOW_CREATE_EXISTING_GAME_PREF);
                     break;
                 case R.id.popular_item:
                     newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
@@ -544,11 +547,5 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         else {
             loginManager.handleFacebookLoginResult(requestCode, resultCode, data);
         }
-    }
-
-    private void showCreateExistingGameDialog() {
-        HelpDialogFragment.newInstance("These games are closed. Long press to start a new game " +
-                "with the same image", R.drawable.create_from_existing, "hi")
-                .show(getSupportFragmentManager(), null);
     }
 }

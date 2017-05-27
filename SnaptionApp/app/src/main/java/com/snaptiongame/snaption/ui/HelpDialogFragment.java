@@ -1,12 +1,16 @@
 package com.snaptiongame.snaption.ui;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -30,6 +34,8 @@ public class HelpDialogFragment extends DialogFragment {
     protected TextView title;
     @BindView(R.id.help_image)
     protected ImageView helpImage;
+    @BindView(R.id.do_not_show)
+    protected CheckBox doNotShowView;
 
     private Unbinder unbinder;
 
@@ -57,7 +63,18 @@ public class HelpDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(customView);
-        builder.setPositiveButton("ok", null);
+        builder.setPositiveButton(R.string.got_it, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // if don't show again is checked, set the shared preference value to false
+                if (doNotShowView.isChecked()) {
+                    SharedPreferences pref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putBoolean(getArguments().getString(SHARED_PREF_ARG), false);
+                    editor.apply();
+                }
+            }
+        });
         return builder.create();
     }
 

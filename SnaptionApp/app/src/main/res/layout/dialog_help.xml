@@ -20,7 +20,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"/>
     <CheckBox
+        android:id="@+id/do_not_show"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Don't show again"/>
+        android:text="@string/do_not_show_agian"/>
 </LinearLayout>
