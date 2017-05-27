@@ -104,8 +104,8 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                             lastRetrievedKey = snapshot.getKey();
                             gotFirst = true;
                         }
-                        // Checks if the game is private or not. If it is, then the priority will be > 0, meaning don't put it in data
-                        if(snapshot.getPriority() != null && (double) snapshot.getPriority() > 0) {
+                        // Check if the game is closed. If it is, skip it.
+                        if(!curGame.isOpen()) {
                             // If we had to do a continue, don't remove the last thing from data
                             continued = true;
                             continue;
@@ -204,7 +204,7 @@ public class FirebaseGameResourceManager implements GameResourceManager {
                 }
             }
         }
-        // Also remove duplicates. This also randomizes the order a bit as a bonus
+        // Also remove duplicates.
         return new ArrayList<>(new LinkedHashSet<>(toReturn));
     }
 
