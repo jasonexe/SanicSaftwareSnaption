@@ -145,6 +145,10 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
                 return true;
             }
         });
+
+        holder.closedIcon.setVisibility(game.isOpen() ? View.GONE : View.VISIBLE);
+        holder.privateIcon.setVisibility(game.getIsPublic() ? View.GONE : View.VISIBLE);
+        holder.iconDivider.setVisibility(game.isOpen() || game.getIsPublic() ? View.GONE : View.VISIBLE);
     }
 
     /**

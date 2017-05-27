@@ -35,6 +35,12 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public ImageView upvoteIcon;
     @BindView(R.id.upvote_count)
     public TextView upvoteCountText;
+    @BindView(R.id.closed_icon)
+    protected ImageView closedIcon;
+    @BindView(R.id.private_icon)
+    protected ImageView privateIcon;
+    @BindView(R.id.icon_divider)
+    protected View iconDivider;
 
 
     public WallViewHolder(View itemView) {
