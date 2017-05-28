@@ -288,7 +288,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
      * @param game The GameMetadata being referenced
      */
     private void displayCaption(final GameMetadata game) {
-        String access = game.getIsPublic() ? "public" : "private";
+        String access = game.getIsPublic() ? Constants.PUBLIC : Constants.PRIVATE;
 
         if (game.getTopCaption() != null) {
             captionerLayout.setVisibility(TextView.VISIBLE);
