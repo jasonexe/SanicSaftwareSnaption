@@ -11,7 +11,7 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,13 +74,19 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     protected TextView loginProviderFriendsLabel;
 
     @BindView(R.id.invite_friends_button)
-    protected Button inviteFriendsButton;
+    protected LinearLayout inviteFriendsButton;
 
     @BindView(R.id.search_list)
     protected RecyclerView userViewList;
 
     @BindView(R.id.search_notice)
     protected TextView searchNotice;
+
+    @BindView(R.id.search_divider)
+    protected View searchDivider;
+
+    @BindView(R.id.empty_friends_message)
+    protected TextView emptyFriendsMessage;
 
     // the listener that gets the list of Users based on username
     private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
@@ -157,8 +163,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
         setContentView(R.layout.activity_add_invite_friends);
 
         ButterKnife.bind(this);
-        searchNotice.setVisibility(View.GONE);
-        userViewList.setVisibility(View.GONE);
 
         // Login provider friends recycler view and adapter setup
         setupLoginProviderView();
@@ -208,6 +212,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                                         friend.displayName, true, null), Toast.LENGTH_LONG).show();
                         // remove friend from view
                         addFriendAdapter.removeSingleItem(friend);
+                        displayLoginProviderFriends();
                     }
 
                     @Override
@@ -230,10 +235,14 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             @Override
             public void onData(UserMetadata user) {
                 if (user != null) {
-
                     viewModel = new FriendsViewModel(user, uploader);
-                    setLoginProviderFriendsLabel();
-                    populateLoginProviderFriends();
+                    if (viewModel.showLoginProviderLabel()) {
+                        loginProviderFriendsLabel.setVisibility(View.VISIBLE);
+                        populateLoginProviderFriends();
+                    }
+                    else {
+                        loginProviderFriendsLabel.setVisibility(View.GONE);
+                    }
                     //must suppress resource type for this method to work
                     inviteFriendsButton.setVisibility(viewModel.getFacebookButtonVisibility());
                     //TODO: Set visibility of Google+ invite button here after facebook invite
@@ -248,12 +257,14 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     }
 
     private void populateLoginProviderFriends() {
+        displayLoginProviderFriends();
         viewModel.getLoginProviderFriends(new ResourceListener<Friend>() {
             @Override
             public void onData(Friend friend) {
                 if (friend != null) {
                     // update the list of login provider friends
                     addFriendAdapter.addSingleItem(friend);
+                    displayLoginProviderFriends();
                 }
             }
 
@@ -262,10 +273,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                 return Friend.class;
             }
         });
-    }
-
-    private void setLoginProviderFriendsLabel() {
-        loginProviderFriendsLabel.setText(viewModel.getLoginProviderLabel(getApplicationContext()));
     }
 
     /**
@@ -279,6 +286,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             Set<UserMetadata> set = new TreeSet<>(users);
             userViewList.setVisibility(View.VISIBLE);
             searchNotice.setVisibility(View.GONE);
+            searchDivider.setVisibility(View.VISIBLE);
             set.removeAll(friends);
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
@@ -287,6 +295,18 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
         else {
             searchNotice.setVisibility(View.VISIBLE);
             userViewList.setVisibility(View.GONE);
+            searchDivider.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void displayLoginProviderFriends() {
+        if (addFriendAdapter.getItemCount() > 0) {
+            loginProviderFriends.setVisibility(View.VISIBLE);
+            emptyFriendsMessage.setVisibility(View.GONE);
+        }
+        else {
+            loginProviderFriends.setVisibility(View.GONE);
+            emptyFriendsMessage.setVisibility(View.VISIBLE);
         }
     }
 
@@ -332,6 +352,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
         else {
             searchNotice.setVisibility(View.GONE);
             userViewList.setVisibility(View.GONE);
+            searchDivider.setVisibility(View.GONE);
         }
         return true;
     }

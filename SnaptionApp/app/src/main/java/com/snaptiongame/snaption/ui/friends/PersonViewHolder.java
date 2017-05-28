@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,7 +26,7 @@ public class PersonViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.photo)
     public ImageView photo;
     @BindView(R.id.add_invite_button)
-    public Button addInviteButton;
+    public TextView addInviteButton;
 
     public static PersonViewHolder newInstance(ViewGroup parent) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_person_item,
