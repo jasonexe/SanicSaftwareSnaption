@@ -89,6 +89,12 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public ImageView upvoteIcon;
     @BindView(R.id.upvote_count)
     public TextView upvoteCountText;
+    @BindView(R.id.closed_icon)
+    protected ImageView closedIcon;
+    @BindView(R.id.private_icon)
+    protected ImageView privateIcon;
+    @BindView(R.id.icon_divider)
+    protected View iconDivider;
 
     private GameMetadata game;
     private FirebaseResourceManager captionManager;
@@ -133,6 +139,9 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
         } else {
             setUpvoteView(0, false, false);
         }
+
+        // display closed and private icons
+        displayGameIcons(game);
     }
 
     /**
@@ -148,6 +157,9 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
         captionerPhoto.setImageDrawable(null);
         upvoteIcon.setImageDrawable(null);
         upvoteCountText.setText("");
+        closedIcon.setVisibility(View.GONE);
+        iconDivider.setVisibility(View.GONE);
+        privateIcon.setVisibility(View.GONE);
     }
 
     @OnClick(photo)
@@ -464,5 +476,11 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
                 FirebaseUploader.addUpvote(upvotePath, listener);
             }
         }
+    }
+
+    private void displayGameIcons(GameMetadata game) {
+        closedIcon.setVisibility(game.isOpen() ? View.GONE : View.VISIBLE);
+        privateIcon.setVisibility(game.getIsPublic() ? View.GONE : View.VISIBLE);
+        iconDivider.setVisibility(game.isOpen() || game.getIsPublic() ? View.GONE : View.VISIBLE);
     }
 }
