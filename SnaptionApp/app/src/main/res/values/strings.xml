@@ -29,6 +29,7 @@
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>
     <string name="caption_filler">Be the first to caption this photo!</string>
+    <string name="closed_caption_filler">This photo did not receive any captions</string>
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
     <string name="submit_caption">Submit</string>
@@ -57,6 +58,7 @@
     <string name="no_internet">There was an error, you may not be connected to the Internet</string>
     <string name="game_invite">Invite</string>
     <string name="join_game">Join Game</string>
+    <string name="empty_caption">You cannot submit an empty caption</string>
     <string name="upvote_error">There was an error in registering your vote</string>
     <string name="captioner_name">- %s</string>
     <string name="search_text">Search for Snaption users</string>
@@ -82,7 +84,6 @@
     <string name="remain">remaining</string>
     <string name="plural">s</string>
     <string name="game_ended_notification">A game created by %s has ended</string>
-    <string name="gamed_ended_notification_title"></string>
     <string name="friends_in_game">All your friends are already in this game!</string>
     <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
     <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
@@ -95,7 +96,7 @@
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
     <string name="leave_game_success">You are no longer a player in the game</string>
-    <string name="total_game_upvote_text">Game upvotes:</string>
+    <string name="total_game_upvote_text">Game Upvotes:</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
