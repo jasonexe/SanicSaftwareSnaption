@@ -1,5 +1,6 @@
 package com.snaptiongame.snaption.ui.profile;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,7 @@ import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.squareup.picasso.Picasso;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -327,7 +330,13 @@ public class ProfileFragment extends Fragment {
         hideEditName();
         saveEditName();
         hideEditProfilePic();
-        saveProfilePic();
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(newPhotoUri, "r");
+            new ImageCompressTask().execute(fd);
+        } catch (IOException e) {
+            Log.e("PHOTO_NOT_FOUND", "Photo not found.");
+        }
     }
 
     // Disables the ability to edit the name and also hides the keyboard
@@ -385,33 +394,30 @@ public class ProfileFragment extends Fragment {
     }
 
     // Saves the profile picture to firebase and keeps the updated one on the profile
-    private void saveProfilePic() {
-        if(newPhotoUri != null) {
-            byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
-            clearGlideCache();
-            if (thisUser != null) {
-                FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
-                        new Uploader.UploadListener() {
-                            @Override
-                            public void onComplete() {
-                                if (userInfoEditListener != null) {
-                                    userInfoEditListener.onEditPhoto(null);
-                                }
+    private void saveProfilePic(byte[] newPhoto) {
+        clearGlideCache();
+        if (thisUser != null) {
+            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
+                    new Uploader.UploadListener() {
+                        @Override
+                        public void onComplete() {
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(null);
                             }
+                        }
 
-                            @Override
-                            public void onError(String errorMessage) {
-                                FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
-                                if (userInfoEditListener != null) {
-                                    userInfoEditListener.onEditPhoto(errorMessage);
-                                }
+                        @Override
+                        public void onError(String errorMessage) {
+                            FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(errorMessage);
                             }
-                        });
-            }
-            else {
-                Toast.makeText(getActivity(), getString(R.string.no_internet),
-                        Toast.LENGTH_LONG).show();
-            }
+                        }
+                    });
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_internet),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -525,5 +531,37 @@ public class ProfileFragment extends Fragment {
         }
         // Otherwise the image is okay
         return true;
+    }
+
+    private ProgressDialog showConvertProgress() {
+        ProgressDialog convertDialog = new ProgressDialog(getActivity());
+        convertDialog.setIndeterminate(true);
+        convertDialog.setMessage(getString(R.string.converting));
+        convertDialog.setCanceledOnTouchOutside(false);
+        //Display progress dialog
+        convertDialog.show();
+        return convertDialog;
+    }
+
+    private class ImageCompressTask extends AsyncTask<ParcelFileDescriptor, Integer, byte[]> {
+        ProgressDialog convertingDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            convertingDialog = showConvertProgress();
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            convertingDialog.dismiss();
+            saveProfilePic(bytes);
+
+        }
+
+        @Override
+        protected byte[] doInBackground(ParcelFileDescriptor... pfds) {
+            return BitmapConverter.decodeSampledBitmapFromStream(pfds[0], Constants.MAX_IMAGE_UPLOAD_WIDTH, Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+        }
     }
 }
