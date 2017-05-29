@@ -20,7 +20,7 @@ public class DeepLinkTests {
         FirebaseDeepLinkCreator.getDeepLink("https://snaptiongame.com/public/games/-Kd9NH2qekgIvTnTr_-v", new ResourceListener<String>() {
             @Override
             public void onData(String data) {
-                assertTrue("Got the wrong short link", data.contains("ba63n.app.goo.gl"));
+                assertTrue("Got the wrong short link", data.contains("h883z.app.goo.gl/"));
             }
 
             @Override
@@ -59,7 +59,7 @@ public class DeepLinkTests {
         String expectedAccess = Constants.PUBLIC;
         FirebaseDeepLinkCreator.DeepLinkInfo info =
                 FirebaseDeepLinkCreator.interpretDeepLinkString("https://snaptiongame.com/" +
-                        expectedAccess + "/games/" + expectedId);
+                        "games/" + expectedAccess + "/" + expectedId);
         assertEquals(GameActivity.class, info.getClassForIntent());
         assertEquals(expectedId, info.getIntentString());
         assertEquals(expectedAccess, info.getAccessString());

@@ -20,6 +20,8 @@ public class Constants {
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     // Another Intent label
     public static final String PHOTO_PATH = "currentPhotoPath";
+    // Intent indicator for an image aspect ratio used when creating a game from an existing game
+    public static final String ASPECT_RATIO = "aspectRatio";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
     // Intent indicator that a picker name is given for notification
@@ -89,7 +91,9 @@ public class Constants {
     public static final String GAMES_METADATA_PATH = "games/%s/metadata";
     //Path to specific game's metadata with configurable access
     public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
-    //Path to metadata with configurable access
+    //Path to topCaption of a game with configurable access
+    public static final String GAME_TOPCAPTION_PATH = "games/%s/metadata/%s/topCaption";
+    //Path to data with configurable access
     public static final String GAMES_DATA_PATH = "games/%s/data";
     //Path to specific game's metadata with configurable access
     public static final String GAME_DATA_PATH = "games/%s/data/%s";
