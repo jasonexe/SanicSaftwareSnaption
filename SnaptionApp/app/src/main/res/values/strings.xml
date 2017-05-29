@@ -92,6 +92,7 @@
     <string name="inv_to_snaption">Invite to snaption</string>
     <string name="overflow_text">+%d</string>
     <string name="close">Close</string>
+    <string name="hof">Hall of Fame</string>
     <string name="players">Players</string>
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
@@ -109,7 +110,6 @@
     <string name="choose_public_or_private">You must choose whether the game is public or private.</string>
     <string name="pick_future_date">You must select a day in the future.</string>
     <string name="illegal_tag_text">Tags cannot contain the characters \".\", \"$\", \"#\", \"/\", \"[\", or \"]\".</string>
-    <string name="closed">Closed</string>
     <string name="image_min_height">Image must be at least %d pixels tall</string>
     <string name="image_min_width">Image must be at least %d pixels wide</string>
 </resources>
