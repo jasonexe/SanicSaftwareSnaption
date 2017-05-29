@@ -175,4 +175,8 @@ public class GameMetadata implements Serializable {
         }
         return result;
     }
+
+    public String toString() {
+        return this.getId();
+    }
 }
