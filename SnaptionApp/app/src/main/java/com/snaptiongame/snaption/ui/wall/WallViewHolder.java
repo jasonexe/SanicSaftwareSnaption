@@ -23,6 +23,21 @@ import com.bumptech.glide.Glide;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
+import com.snaptiongame.snaption.models.Caption;
+import com.snaptiongame.snaption.models.GameMetadata;
+import com.snaptiongame.snaption.models.UserMetadata;
+import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
+import com.snaptiongame.snaption.servercalls.FirebaseUploader;
+import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
+import com.snaptiongame.snaption.servercalls.ResourceListener;
+import com.snaptiongame.snaption.servercalls.Uploader;
+import com.snaptiongame.snaption.ui.games.GameActivity;
+import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
+import com.snaptiongame.snaption.ui.profile.ProfileActivity;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
+
+import java.text.NumberFormat;
+import java.util.Map;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
@@ -76,6 +91,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     public TextView upvoteCountText;
 
     private GameMetadata game;
+    private FirebaseResourceManager captionManager;
 
     public static WallViewHolder newInstance(ViewGroup parent) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_game_item,
@@ -86,6 +102,7 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     private WallViewHolder(View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
+        captionManager = new FirebaseResourceManager();
     }
 
     /**
@@ -121,8 +138,9 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
     /**
      * Clears the view of information from the game metadata
      */
-    public void clear() {
+    void clear() {
         this.game = null;
+        captionManager.removeListener();
         pickerName.setText("");
         gamePhoto.setImageDrawable(null);
         captionText.setText("");
@@ -269,11 +287,13 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
      *
      * @param game The GameMetadata being referenced
      */
-    private void displayCaption(GameMetadata game) {
+    private void displayCaption(final GameMetadata game) {
+        String access = game.getIsPublic() ? Constants.PUBLIC : Constants.PRIVATE;
+
         if (game.getTopCaption() != null) {
             captionerLayout.setVisibility(TextView.VISIBLE);
             captionText.setText(game.getTopCaption().retrieveCaptionText());
-            displayCaptioner(game);
+            displayCaptioner(game.getTopCaption());
         }
         else {
             // display a request to participate over the caption's view if a caption does not exist
@@ -284,6 +304,28 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
             }
             captionerLayout.setVisibility(TextView.GONE);
         }
+
+        ResourceListener<Caption> topCaptionListener = new ResourceListener<Caption>() {
+            @Override
+            public void onData(Caption data) {
+                // If data is null, don't do anything, default is taken care of above
+                if(data != null) {
+                    captionerLayout.setVisibility(TextView.VISIBLE);
+                    captionText.setText(data.retrieveCaptionText());
+                    game.setTopCaption(data);
+                    displayCaptioner(data);
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return Caption.class;
+            }
+        };
+
+
+        captionManager.retrieveSingleWithUpdates(String.format(Constants.GAME_TOPCAPTION_PATH,
+                access, game.getId()), topCaptionListener);
     }
 
     /**
@@ -333,27 +375,26 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
      * captioner's username and photo will be retrieved, displayed, and updated in the top caption
      * of the game metadata.
      *
-     * @param game The GameMetadata being referenced
+     * @param topCaption The GameMetadata being referenced
      */
-    private void displayCaptioner(final GameMetadata game) {
-        if (game.getTopCaption().userUsername != null) {
-            setUserInfo(captionerName, game.getTopCaption().userUsername, captionerPhoto,
-                    game.getTopCaption().userPhotoPath);
+    private void displayCaptioner(final Caption topCaption) {
+        if (topCaption.userUsername != null) {
+            setUserInfo(captionerName, topCaption.userUsername, captionerPhoto,
+                    topCaption.userPhotoPath);
         }
         else {
             // ensure the user id is a valid one to avoid errors
-            if (FirebaseUserResourceManager.isValidUser(game.getPickerId())) {
+            if (FirebaseUserResourceManager.isValidUser(topCaption.userId)) {
                 // display the name and profile picture if a valid user is obtained from the user id
-                FirebaseUserResourceManager.getUserMetadataById(game.getTopCaption().userId,
+                FirebaseUserResourceManager.getUserMetadataById(topCaption.userId,
                         new ResourceListener<UserMetadata>() {
                             @Override
                             public void onData(final UserMetadata user) {
                                 if (user != null) {
                                     setUserInfo(captionerName, user.getDisplayName(),
                                             captionerPhoto, user.getImagePath());
-                                    game.getTopCaption().userUsername = user.getDisplayName();
-                                    game.getTopCaption().userPhotoPath = user.getImagePath();
-
+                                    topCaption.userUsername = user.getDisplayName();
+                                    topCaption.userPhotoPath = user.getImagePath();
                                 } else {
                                     setDefaultUserInfo(captionerName, captionerPhoto);
                                 }
