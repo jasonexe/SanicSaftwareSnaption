@@ -2,10 +2,12 @@ package com.snaptiongame.snaption.ui.profile;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -38,9 +40,11 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
+import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,6 +55,10 @@ import butterknife.Unbinder;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -451,8 +459,12 @@ public class ProfileFragment extends Fragment {
         if(requestCode == IMAGE_PICK_CODE) {
             try {
                 if (thisUser != null) {
-                    newPhotoUri = data.getData();
-                    Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                    Uri uri = data.getData();
+                    // Check to make sure photo is legal size
+                    if (isImageSizeLegal(uri)) {
+                        newPhotoUri = uri;
+                        Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                    }
                 }
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");
@@ -470,5 +482,48 @@ public class ProfileFragment extends Fragment {
 
     public void setUserInfoEditListener(UserInfoEditListener listener) {
         this.userInfoEditListener = listener;
+    }
+
+    /**
+     * Determines whether the image is of an illegal size or not. Displays error messages to the user.
+     * @param uri The Uri of the image selected
+     * @return Whether the image is of an illegal size
+     */
+    private boolean isImageSizeLegal(Uri uri) {
+        //Get dimensions of image to check for size
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(uri, "r");
+        }
+        catch (FileNotFoundException e) {
+            // If the file doesn't exist just return false, shouldn't ever happen though
+            return false;
+        }
+        // Loads file data into options
+        BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
+        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
+                MAX_IMAGE_UPLOAD_HEIGHT);
+
+        int width = options.outWidth / scale;
+        int height = options.outHeight / scale;
+
+        // If the image is too short
+        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // If the image is too skinny
+        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // Otherwise the image is okay
+        return true;
     }
 }
