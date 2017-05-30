@@ -300,6 +300,14 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             userViewList.setVisibility(View.GONE);
             searchDivider.setVisibility(View.VISIBLE);
         }
+        // see if another request was being made while we were grabbing data from Firebase
+        if (workingQuery != null && !query.equals(workingQuery)) {
+            processQuery();
+        }
+        else {
+            processingQuery = false;
+        }
+
     }
 
     private void displayLoginProviderFriends() {
@@ -311,14 +319,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             loginProviderFriends.setVisibility(View.GONE);
             emptyFriendsMessage.setVisibility(View.VISIBLE);
         }
-        // see if another request was being made while we were grabbing data from Firebase
-        if (workingQuery != null && !query.equals(workingQuery)) {
-            processQuery();
-        }
-        else {
-            processingQuery = false;
-        }
-
     }
 
 
