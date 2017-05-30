@@ -62,7 +62,7 @@
 
         <activity android:name="com.snaptiongame.snaption.ui.friends.AddInviteFriendsActivity"
             android:screenOrientation="portrait"
-            android:label="@string/friends">
+            android:label="@string/add_friends_label">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>

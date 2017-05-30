@@ -31,6 +31,7 @@
     <string name="caption_filler">Be the first to caption this photo!</string>
     <string name="closed_caption_filler">This photo did not receive any captions</string>
     <string name="friends">Friends</string>
+    <string name="add_friends_label">Add Friends</string>
     <string name="captions">Captions</string>
     <string name="submit_caption">Submit</string>
     <string name="refresh">Refresh all cards</string>
@@ -50,8 +51,12 @@
     <string name="login_failure">Failed to log in</string>
     <string name="logout_failure">Failed to log out</string>
     <string name="empty_friends">You don\'t have any friends yet!\n\nClick on the button below to find someone you know.</string>
-    <string name="invite_fb_friends">Facebook Invite</string>
     <string name="send_invites">Invite more friends!</string>
+    <string name="fb_invite">Facebook Invite</string>
+    <string name="fb_invite_details">Invite friends to play Snaption through Facebook</string>
+    <string name="share_link">Share a Link</string>
+    <string name="share_link_details">Invite friends to play Snaption by sharing a link</string>
+    <string name="empty_fb_friends">There are no Facebook friends to add</string>
     <string name="join_snaption_subject">Join me in Snaption!</string>
     <string name="join_game_email_body">%1$s\nHave a better caption? Submit it here: %2$s</string>
     <string name="join_snaption_email_body">You should join me on Snaption! Click here: %1$s</string>
