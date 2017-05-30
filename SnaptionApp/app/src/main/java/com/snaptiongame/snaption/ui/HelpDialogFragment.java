@@ -41,16 +41,11 @@ public class HelpDialogFragment extends DialogFragment {
 
     public static HelpDialogFragment newInstance(String title, int drawable,
                                                  String sharedPrefValue) {
-        HelpDialogFragment helpDialogFragment = newInstance(title, sharedPrefValue);
-        helpDialogFragment.getArguments().putInt(DRAWABLE_ARG, drawable);
-        return helpDialogFragment;
-    }
-
-    public static HelpDialogFragment newInstance(String title, String sharedPrefValue) {
         HelpDialogFragment helpDialogFragment = new HelpDialogFragment();
         Bundle args = new Bundle();
         args.putString(TITLE_ARG, title);
         args.putString(SHARED_PREF_ARG, sharedPrefValue);
+        args.putInt(DRAWABLE_ARG, drawable);
         helpDialogFragment.setArguments(args);
         return helpDialogFragment;
     }
