@@ -44,6 +44,7 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
+import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
+import static com.snaptiongame.snaption.Constants.SHOW_EXISTING_GAME_DIALOG_PREF;
+import static com.snaptiongame.snaption.Constants.SHOW_PLAYER_DIALOG_PREF;
 
 public class MainSnaptionActivity extends HomeAppCompatActivity {
     private static final String survey_url = "https://docs.google.com/forms/d/e/1FAIpQLSerSw6piYc20yi64SVjM48n7MklEFrg4Nk-oS5oRhlz_uxxRA/viewform";
@@ -149,6 +152,8 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     newFragment = new FriendsFragment();
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
+                    ViewUtilities.showHelpDialog(this, getString(R.string.friends_info), 0,
+                            SHOW_PLAYER_DIALOG_PREF);
                     break;
                 case R.id.log_option:
                     logInOutItemSelected();
@@ -168,6 +173,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.closed_item:
                     newFragment = WallFragment.newInstance(GameType.TOP_CLOSED_GAMES);
                     currentBottomNavMenuId = selectedItemId;
+                    if (FirebaseUserResourceManager.getUserId() != null) {
+                        ViewUtilities.showHelpDialog(this,
+                                getString(R.string.create_game_from_existing_info),
+                                R.drawable.create_from_existing, SHOW_EXISTING_GAME_DIALOG_PREF);
+                    }
                     break;
             }
             replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
