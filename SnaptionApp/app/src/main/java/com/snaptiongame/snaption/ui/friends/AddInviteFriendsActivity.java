@@ -285,17 +285,17 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
-            // see if another request was being made while we were grabbing data from Firebase
-            if (workingQuery != null && !query.equals(workingQuery)) {
-                processQuery();
-            }
-            else {
-                processingQuery = false;
-            }
+
         }
         else {
             searchNotice.setVisibility(View.VISIBLE);
             userViewList.setVisibility(View.GONE);
+        }
+        // see if another request was being made while we were grabbing data from Firebase
+        if (workingQuery != null && !query.equals(workingQuery)) {
+            processQuery();
+        }
+        else {
             processingQuery = false;
         }
 
@@ -353,6 +353,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             workingQuery = query;
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
         } else {
+            workingQuery = null;
             displayUsers();
             // to remove the notice that nothing was found, as there is no input
             searchNotice.setVisibility(View.GONE);
