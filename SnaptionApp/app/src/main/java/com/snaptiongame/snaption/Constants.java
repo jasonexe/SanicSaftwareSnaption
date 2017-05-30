@@ -91,7 +91,9 @@ public class Constants {
     public static final String GAMES_METADATA_PATH = "games/%s/metadata";
     //Path to specific game's metadata with configurable access
     public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
-    //Path to metadata with configurable access
+    //Path to topCaption of a game with configurable access
+    public static final String GAME_TOPCAPTION_PATH = "games/%s/metadata/%s/topCaption";
+    //Path to data with configurable access
     public static final String GAMES_DATA_PATH = "games/%s/data";
     //Path to specific game's metadata with configurable access
     public static final String GAME_DATA_PATH = "games/%s/data/%s";

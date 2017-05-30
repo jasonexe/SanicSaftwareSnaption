@@ -1,11 +1,14 @@
 package com.snaptiongame.snaption.ui.profile;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -13,6 +16,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,9 +42,12 @@ import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
+import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,6 +58,10 @@ import butterknife.Unbinder;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -319,7 +330,13 @@ public class ProfileFragment extends Fragment {
         hideEditName();
         saveEditName();
         hideEditProfilePic();
-        saveProfilePic();
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(newPhotoUri, "r");
+            new ImageCompressTask().execute(fd);
+        } catch (IOException e) {
+            Log.e("PHOTO_NOT_FOUND", "Photo not found.");
+        }
     }
 
     // Disables the ability to edit the name and also hides the keyboard
@@ -377,33 +394,30 @@ public class ProfileFragment extends Fragment {
     }
 
     // Saves the profile picture to firebase and keeps the updated one on the profile
-    private void saveProfilePic() {
-        if(newPhotoUri != null) {
-            byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
-            clearGlideCache();
-            if (thisUser != null) {
-                FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
-                        new Uploader.UploadListener() {
-                            @Override
-                            public void onComplete() {
-                                if (userInfoEditListener != null) {
-                                    userInfoEditListener.onEditPhoto(null);
-                                }
+    private void saveProfilePic(byte[] newPhoto) {
+        clearGlideCache();
+        if (thisUser != null) {
+            FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
+                    new Uploader.UploadListener() {
+                        @Override
+                        public void onComplete() {
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(null);
                             }
+                        }
 
-                            @Override
-                            public void onError(String errorMessage) {
-                                FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
-                                if (userInfoEditListener != null) {
-                                    userInfoEditListener.onEditPhoto(errorMessage);
-                                }
+                        @Override
+                        public void onError(String errorMessage) {
+                            FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(errorMessage);
                             }
-                        });
-            }
-            else {
-                Toast.makeText(getActivity(), getString(R.string.no_internet),
-                        Toast.LENGTH_LONG).show();
-            }
+                        }
+                    });
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_internet),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -451,8 +465,12 @@ public class ProfileFragment extends Fragment {
         if(requestCode == IMAGE_PICK_CODE) {
             try {
                 if (thisUser != null) {
-                    newPhotoUri = data.getData();
-                    Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                    Uri uri = data.getData();
+                    // Check to make sure photo is legal size
+                    if (isImageSizeLegal(uri)) {
+                        newPhotoUri = uri;
+                        Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                    }
                 }
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");
@@ -470,5 +488,80 @@ public class ProfileFragment extends Fragment {
 
     public void setUserInfoEditListener(UserInfoEditListener listener) {
         this.userInfoEditListener = listener;
+    }
+
+    /**
+     * Determines whether the image is of an illegal size or not. Displays error messages to the user.
+     * @param uri The Uri of the image selected
+     * @return Whether the image is of an illegal size
+     */
+    private boolean isImageSizeLegal(Uri uri) {
+        //Get dimensions of image to check for size
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(uri, "r");
+        }
+        catch (FileNotFoundException e) {
+            // If the file doesn't exist just return false, shouldn't ever happen though
+            return false;
+        }
+        // Loads file data into options
+        BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
+        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
+                MAX_IMAGE_UPLOAD_HEIGHT);
+
+        int width = options.outWidth / scale;
+        int height = options.outHeight / scale;
+
+        // If the image is too short
+        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // If the image is too skinny
+        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // Otherwise the image is okay
+        return true;
+    }
+
+    private ProgressDialog showConvertProgress() {
+        ProgressDialog convertDialog = new ProgressDialog(getActivity());
+        convertDialog.setIndeterminate(true);
+        convertDialog.setMessage(getString(R.string.converting));
+        convertDialog.setCanceledOnTouchOutside(false);
+        //Display progress dialog
+        convertDialog.show();
+        return convertDialog;
+    }
+
+    private class ImageCompressTask extends AsyncTask<ParcelFileDescriptor, Integer, byte[]> {
+        ProgressDialog convertingDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            convertingDialog = showConvertProgress();
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            convertingDialog.dismiss();
+            saveProfilePic(bytes);
+
+        }
+
+        @Override
+        protected byte[] doInBackground(ParcelFileDescriptor... pfds) {
+            return BitmapConverter.decodeSampledBitmapFromStream(pfds[0], Constants.MAX_IMAGE_UPLOAD_WIDTH, Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+        }
     }
 }

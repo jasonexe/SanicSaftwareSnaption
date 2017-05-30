@@ -56,7 +56,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
     // Pre-generated deep link to the home screen, allows for tracking through firebase console
-    private String homescreenDeepLink = "https://ba63n.app.goo.gl/yv6I";
+    private String homescreenDeepLink = "https://h883z.app.goo.gl/CF5F";
 
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
@@ -65,6 +65,8 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     private List<UserMetadata> users = new ArrayList<>();
     private List<UserMetadata> friends = new ArrayList<>();
     private String query;
+    private boolean processingQuery = false;
+    private String workingQuery;
     private SearchView searchView;
 
     @BindView(R.id.login_provider_friends)
@@ -291,6 +293,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
+
         }
         else {
             searchNotice.setVisibility(View.VISIBLE);
@@ -308,6 +311,14 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             loginProviderFriends.setVisibility(View.GONE);
             emptyFriendsMessage.setVisibility(View.VISIBLE);
         }
+        // see if another request was being made while we were grabbing data from Firebase
+        if (workingQuery != null && !query.equals(workingQuery)) {
+            processQuery();
+        }
+        else {
+            processingQuery = false;
+        }
+
     }
 
 
@@ -345,15 +356,29 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     @Override
     public boolean onQueryTextChange(String newText) {
         query = newText.trim();
+        if (!processingQuery) {
+            processQuery();
+        }
+        return true;
+    }
+
+    /**
+     * Processes the current query to be used in a search.
+     */
+    private void processQuery() {
         users = new ArrayList<>();
         if (!query.isEmpty()) {
+            // ensure that this is the only query being requested for now
+            processingQuery = true;
+            workingQuery = query;
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
-        }
-        else {
+        } else {
+            workingQuery = null;
+            displayUsers();
+            // to remove the notice that nothing was found, as there is no input
             searchNotice.setVisibility(View.GONE);
             userViewList.setVisibility(View.GONE);
             searchDivider.setVisibility(View.GONE);
         }
-        return true;
     }
 }

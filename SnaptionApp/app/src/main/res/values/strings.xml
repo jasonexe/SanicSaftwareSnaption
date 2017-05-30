@@ -29,6 +29,7 @@
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>
     <string name="caption_filler">Be the first to caption this photo!</string>
+    <string name="closed_caption_filler">This photo did not receive any captions</string>
     <string name="friends">Friends</string>
     <string name="add_friends_label">Add Friends</string>
     <string name="captions">Captions</string>
@@ -96,6 +97,7 @@
     <string name="inv_to_snaption">Invite to snaption</string>
     <string name="overflow_text">+%d</string>
     <string name="close">Close</string>
+    <string name="hof">Hall of Fame</string>
     <string name="players">Players</string>
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
