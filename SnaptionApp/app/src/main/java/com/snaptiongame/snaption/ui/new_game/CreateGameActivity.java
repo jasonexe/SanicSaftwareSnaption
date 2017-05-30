@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.crashlytics.android.Crashlytics;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
@@ -53,6 +54,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.fabric.sdk.android.Fabric;
 
 import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
 import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
@@ -140,6 +142,7 @@ public class CreateGameActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         alreadyExisting = false;
 
+        Fabric.with(this, new Crashlytics());
         Intent intent = getIntent();
         Uri uri = intent.getParcelableExtra(Constants.EXTRA_MESSAGE);
         if(uri != null) {
