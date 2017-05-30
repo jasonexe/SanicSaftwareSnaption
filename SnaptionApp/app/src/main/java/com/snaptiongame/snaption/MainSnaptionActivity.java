@@ -77,6 +77,7 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     public LoginDialog loginDialog;
     private ActionBarDrawerToggle mDrawerToggle;
     private UserMetadata currentUser;
+    private ArrayList<UserMetadata> friends;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
     // Used for keeping track of if this Activity is paused -- needed so logging in from
@@ -167,6 +168,10 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     break;
                 case R.id.popular_item:
                     newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
+                    currentBottomNavMenuId = selectedItemId;
+                    break;
+                case R.id.closed_item:
+                    newFragment = WallFragment.newInstance(GameType.TOP_CLOSED_GAMES);
                     currentBottomNavMenuId = selectedItemId;
                     break;
             }
@@ -375,6 +380,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         DeepLinkGetter.checkIfDeepLink(this);
     }
 
+    public void setUserFriends(ArrayList<UserMetadata> friends) {
+        this.friends = new ArrayList<>(friends);
+        this.friends.add(currentUser);
+    }
+
     private void setupNavigationViews() {
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
@@ -488,6 +498,11 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
         else if (currentNavDrawerMenuId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
+            if (friends != null) {
+                Bundle args = new Bundle();
+                args.putSerializable(AddInviteFriendsActivity.FRIENDS_KEY, friends);
+                intent.putExtras(args);
+            }
             startActivity(intent);
         }
         else if (currentNavDrawerMenuId == R.id.profile_item) {

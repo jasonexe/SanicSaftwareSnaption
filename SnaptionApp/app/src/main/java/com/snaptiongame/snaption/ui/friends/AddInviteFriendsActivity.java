@@ -50,18 +50,20 @@ import butterknife.OnClick;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
+    public static final String FRIENDS_KEY = "friends";
     //created app link from Facebook to link to our application when its on Google Play
     private static final String appLinkUrl = "https://fb.me/1863284123957626";
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
     // Pre-generated deep link to the home screen, allows for tracking through firebase console
-    private String homescreenDeepLink = "https://ba63n.app.goo.gl/yv6I";
+    private String homescreenDeepLink = "https://h883z.app.goo.gl/CF5F";
 
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
     private FriendsViewModel viewModel;
     private FriendsListAdapter userListAdapter;
     private List<UserMetadata> users = new ArrayList<>();
+    private List<UserMetadata> friends = new ArrayList<>();
     private String query;
     private SearchView searchView;
 
@@ -128,6 +130,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                         Toast.makeText(AddInviteFriendsActivity.this,
                                 viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
                                         friend.displayName, true, null), Toast.LENGTH_LONG).show();
+                        // remove friend from view
+                        userListAdapter.removeSingleItem(user);
+                        friends.add(user);
                     }
 
                     @Override
@@ -144,6 +149,9 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Get list of friends
+        friends = (ArrayList<UserMetadata>)getIntent().getExtras().getSerializable(FRIENDS_KEY);
 
         // Initial view setup
         setContentView(R.layout.activity_add_invite_friends);
@@ -222,6 +230,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             @Override
             public void onData(UserMetadata user) {
                 if (user != null) {
+
                     viewModel = new FriendsViewModel(user, uploader);
                     setLoginProviderFriendsLabel();
                     populateLoginProviderFriends();
@@ -270,6 +279,7 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             Set<UserMetadata> set = new TreeSet<>(users);
             userViewList.setVisibility(View.VISIBLE);
             searchNotice.setVisibility(View.GONE);
+            set.removeAll(friends);
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);

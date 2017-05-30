@@ -6,6 +6,7 @@ import android.text.style.UnderlineSpan;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,6 +30,11 @@ public class Caption implements Serializable, Comparable<Caption> {
     public Map<String, Integer> upvotes; // List of users who have upvoted this caption
     private User user;       // The user associated with the game, private to keep firebase out
     private boolean isPublic = true; //The local access associated with the caption, public or private
+
+    @Exclude
+    public String userUsername;
+    @Exclude
+    public String userPhotoPath;
 
     //Needed for firebase compatibility
     public Caption() {}

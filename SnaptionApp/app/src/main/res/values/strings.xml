@@ -29,6 +29,7 @@
     <string name="content_rating">Content rating</string>
     <string name="new_game">Create new game</string>
     <string name="caption_filler">Be the first to caption this photo!</string>
+    <string name="closed_caption_filler">This photo did not receive any captions</string>
     <string name="friends">Friends</string>
     <string name="captions">Captions</string>
     <string name="submit_caption">Submit</string>
@@ -83,7 +84,6 @@
     <string name="remain">remaining</string>
     <string name="plural">s</string>
     <string name="game_ended_notification">A game created by %s has ended</string>
-    <string name="gamed_ended_notification_title"></string>
     <string name="friends_in_game">All your friends are already in this game!</string>
     <string name="end_date_passed_upvote">This game has ended, you cannot upvote captions.</string>
     <string name="end_date_passed_caption">This game has ended, you cannot create a caption.</string>
@@ -92,6 +92,7 @@
     <string name="inv_to_snaption">Invite to snaption</string>
     <string name="overflow_text">+%d</string>
     <string name="close">Close</string>
+    <string name="hof">Hall of Fame</string>
     <string name="players">Players</string>
     <string name="leave_game">Leave</string>
     <string name="leave_game_error">Error occurred while attempting to leave game</string>
