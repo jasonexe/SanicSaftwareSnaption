@@ -1,11 +1,15 @@
 package com.snaptiongame.snaption.servercalls;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -212,9 +216,9 @@ public class FirebaseDeepLinkCreator {
                 // Put in stuff we're guaranteed to have in the intent, the message and title
                 toStart.setType(INTENT_IMAGE_TYPE);
                 toStart.putExtra(Intent.EXTRA_SUBJECT, R.string.join_snaption_subject);
-                toStart.putExtra(Intent.EXTRA_TEXT, String.format(activity.getResources()
-                        .getString(R.string.join_game_email_body),
-                        sampleCaption, shortLink));
+                String messageText = String.format(activity.getResources()
+                                .getString(R.string.join_game_email_body),sampleCaption, shortLink);
+                toStart.putExtra(Intent.EXTRA_TEXT, messageText);
                 FileOutputStream out = null;
                 // If there is actually an image, do the converting stuff
                 if(image != null) {
@@ -237,6 +241,13 @@ public class FirebaseDeepLinkCreator {
                         }
                     }
                 }
+
+                // Copy link text to the clipboard for services that are dumb and don't do intents right
+                ClipData inviteText = ClipData.newPlainText("invite", messageText);
+                ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                clipboard.setPrimaryClip(inviteText);
+                Toast.makeText(activity.getApplicationContext(), R.string.copied_link_to_clipboard,
+                        Toast.LENGTH_SHORT).show();
 
                 activity.startActivity(Intent.createChooser(toStart, activity
                         .getResources().getString(R.string.game_invite)));
