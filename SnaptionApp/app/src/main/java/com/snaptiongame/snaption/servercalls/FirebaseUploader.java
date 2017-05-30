@@ -118,39 +118,8 @@ public class FirebaseUploader implements Uploader {
         DatabaseReference dataRef = database.getReference(
                 String.format(GAME_DATA_PLAYERS_PATH, access, gameId));
         dataRef.setValue(gameData.getPlayers());
-        //notify players if there are any
-        //TODO: once we verify firebase functions does notifications well we can remove this and FirebaseNotificationSender
-        /*if (game.getPlayers() != null) {
-            notifyPlayersGameCreated(game.getId(), game.getPlayers().keySet());
-        }*/
     }
 
-    private void notifyPlayersGameCreated(final String gameId, final Set<String> players,
-                                          final String access) {
-
-        final String pickerId = FirebaseUserResourceManager.getUserId();
-        //listener once you get a user to send notification
-        final ResourceListener<UserMetadata> notifyPlayerListener = new ResourceListener<UserMetadata>() {
-            @Override
-            public void onData(UserMetadata receiver) {
-                if (receiver != null) {
-                    FirebaseNotificationSender.sendGameCreationNotification(receiver, pickerId, gameId, access);
-                }
-            }
-            @Override
-            public Class getDataType() {
-                return UserMetadata.class;
-            }
-        };
-
-        //for each player invited to the game, send notification
-        for (String playerId : players) {
-            //dont send notificaiton to picker
-            if (!playerId.equals(pickerId)) {
-                FirebaseUserResourceManager.getUserMetadataById(playerId, notifyPlayerListener);
-            }
-        }
-    }
 
     @Override
     public String getNewGameKey(boolean isPublic) {
@@ -348,10 +317,10 @@ public class FirebaseUploader implements Uploader {
         });
     }
 
-    public static void removeCurrentUserFromGame(Game game,
+    public static void removeUserFromGame(UserMetadata user, Game game,
                                                  final UploadListener errDisplay) {
         String gameId = game.getId();
-        String userId = FirebaseUserResourceManager.getUserId();
+        String userId = user.getId();
         errDisplay.onComplete();
         // if userId is null
         if(userId != null) {

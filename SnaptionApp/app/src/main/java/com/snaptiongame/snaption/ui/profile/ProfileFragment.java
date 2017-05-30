@@ -1,26 +1,24 @@
 package com.snaptiongame.snaption.ui.profile;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -31,33 +29,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
-import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.User;
-import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
-import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
 import com.snaptiongame.snaption.servercalls.Uploader;
+import com.snaptiongame.snaption.ui.games.PhotoZoomActivity;
+import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
+import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static com.facebook.FacebookSdk.getApplicationContext;
-import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_METADATA_PATH;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
+import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
 
 /**
  * Created by austinrobarts on 1/23/17.
@@ -70,13 +74,15 @@ public class ProfileFragment extends Fragment {
     private boolean isEditing;
 
     @BindView(R.id.profile_picture)
-    public ImageView profile;
+    public CircleImageView profile;
     @BindView(R.id.profile_name)
     public TextView userName;
     @BindView(R.id.games_created)
     public TextView gamesCreated;
     @BindView(R.id.captions_created)
     public TextView captionsCreated;
+    @BindView(R.id.total_game_upvotes)
+    public TextView totalGameUpvotes;
     @BindView(R.id.profile_name_editable)
     protected EditText profileEditName;
     @BindView(R.id.stop_name_change)
@@ -91,6 +97,8 @@ public class ProfileFragment extends Fragment {
     protected TabLayout tabLayout;
     @BindView(R.id.profile_pager)
     protected ViewPager viewPager;
+    @BindView(R.id.profile_background)
+    protected ImageView profileBackground;
 
     private Unbinder unbinder;
     private ProfileFragmentPagerAdapter pagerAdapter;
@@ -98,6 +106,7 @@ public class ProfileFragment extends Fragment {
     private Uri newPhotoUri;
     private User thisUser;
     private FloatingActionButton fab;
+    private int gameUpvotes = 0;
     private boolean isUser;
 
     private UserInfoEditListener userInfoEditListener;
@@ -147,13 +156,20 @@ public class ProfileFragment extends Fragment {
                 }
             });
         }
+
+        // Load the background into the image view with caching to reduce memory leaks
+        Picasso.with(getActivity())
+                .load(R.drawable.long_snaption_background)
+                .into(profileBackground);
+
         return view;
     }
 
     private void setupUserData(User user) {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle(user.getDisplayName());
-        // If the view is hidden (IE user switched to another fragment) Then we don't have to update anything
-        if(this.isHidden()) {
+        // If the view is not visible or is being removed from the activity (IE user switched to
+        // another fragment) Then we don't have to update anything
+        if(!isVisible() || isRemoving()) {
             return;
         }
 
@@ -163,7 +179,6 @@ public class ProfileFragment extends Fragment {
         gamesCreated.setText(String.valueOf(user.getTotalCreatedGamesCount()));
         captionsCreated.setText(String.valueOf(user.getTotalCaptionCount()));
         friendsMade.setText(String.valueOf(user.getFriendCount()));
-
         int numCapUpvotes = 0;
 
         if(user.getPublicCaptions() != null) {
@@ -172,6 +187,7 @@ public class ProfileFragment extends Fragment {
             }
         }
         totalCapUpvotes.setText(String.valueOf(numCapUpvotes));
+        setupGameUpvotes(user, totalGameUpvotes);
 
         String userId = FirebaseUserResourceManager.getUserId();
         //check if we need to show the addFriend button
@@ -192,6 +208,50 @@ public class ProfileFragment extends Fragment {
         pagerAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Gets the number of upvotes for all the gameIds, and updates the count as it goes.
+     * @param user The user whose games we're counting the upvotes of
+     * @param countContainer The view to update with the upvote count.
+     */
+    private void setupGameUpvotes(User user, final TextView countContainer) {
+        ResourceListener<GameMetadata> upvoteGetter = new ResourceListener<GameMetadata>() {
+            @Override
+            public void onData(GameMetadata data) {
+                if(data.getUpvotes() != null) {
+                    gameUpvotes += data.getUpvotes().size();
+                    countContainer.setText(String.valueOf(gameUpvotes));
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return GameMetadata.class;
+            }
+        };
+
+        Set<String> pubGameSet = new HashSet<>();
+        Set<String> privGameSet = new HashSet<>();
+        // Make sure there are any public/private games before calling
+        if(user.getCreatedPublicGames() != null) {
+            pubGameSet = user.getCreatedPublicGames().keySet();
+        }
+        if(user.getCreatedPrivateGames() != null) {
+            privGameSet = user.getCreatedPrivateGames().keySet();
+        }
+
+        countContainer.setText(String.valueOf(0));
+
+        for(String gameId : pubGameSet) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(
+                    String.format(Constants.GAME_PUBLIC_METADATA_PATH, gameId), upvoteGetter);
+        }
+
+        for(String gameId : privGameSet) {
+            FirebaseResourceManager.retrieveSingleNoUpdates(
+                    String.format(Constants.GAME_PRIVATE_METADATA_PATH, gameId), upvoteGetter);
+        }
+    }
+
     TextView.OnEditorActionListener enterListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView textView, int actionId,
@@ -210,7 +270,7 @@ public class ProfileFragment extends Fragment {
         // Otherwise, don't do anything.
         if(getActivity() instanceof MainSnaptionActivity) {
             MainSnaptionActivity activity = (MainSnaptionActivity) getActivity();
-            activity.switchFragments(R.id.friends_item);
+            activity.switchFragments(R.id.friends_item, false);
         }
     }
 
@@ -270,7 +330,13 @@ public class ProfileFragment extends Fragment {
         hideEditName();
         saveEditName();
         hideEditProfilePic();
-        saveProfilePic();
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(newPhotoUri, "r");
+            new ImageCompressTask().execute(fd);
+        } catch (IOException e) {
+            Log.e("PHOTO_NOT_FOUND", "Photo not found.");
+        }
     }
 
     // Disables the ability to edit the name and also hides the keyboard
@@ -291,29 +357,33 @@ public class ProfileFragment extends Fragment {
     private void saveEditName() {
         final String newText = profileEditName.getText().toString().trim();
         // Firebase stuff here
-        if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
-            userName.setText(newText);
+        if (thisUser != null) {
+            if (!newText.isEmpty() && !newText.equals(thisUser.getDisplayName())) {
+                userName.setText(newText);
+                FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
+                        new Uploader.UploadListener() {
+                            @Override
+                            public void onComplete() {
+                                thisUser.setDisplayName(newText);
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditUsername(null);
+                                }
+                            }
 
-            FirebaseUploader.updateDisplayName(newText, thisUser.getId(),
-                    new Uploader.UploadListener() {
-                @Override
-                public void onComplete() {
-                    thisUser.setDisplayName(newText);
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditUsername(null);
-                    }
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    userName.setText(thisUser.getDisplayName());
-                    ((AppCompatActivity) getActivity()).getSupportActionBar()
-                            .setTitle(thisUser.getDisplayName());
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditUsername(errorMessage);
-                    }
-                }
-            });
+                            @Override
+                            public void onError(String errorMessage) {
+                                userName.setText(thisUser.getDisplayName());
+                                ((AppCompatActivity) getActivity()).getSupportActionBar()
+                                        .setTitle(thisUser.getDisplayName());
+                                if (userInfoEditListener != null) {
+                                    userInfoEditListener.onEditUsername(errorMessage);
+                                }
+                            }
+                        });
+            }
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_internet), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -324,27 +394,30 @@ public class ProfileFragment extends Fragment {
     }
 
     // Saves the profile picture to firebase and keeps the updated one on the profile
-    private void saveProfilePic() {
-        if(newPhotoUri != null) {
-            byte[] newPhoto = BitmapConverter.getImageFromUri(newPhotoUri, getActivity());
-            clearGlideCache();
+    private void saveProfilePic(byte[] newPhoto) {
+        clearGlideCache();
+        if (thisUser != null) {
             FirebaseUploader.uploadUserPhoto(thisUser.getImagePath(), newPhoto,
                     new Uploader.UploadListener() {
-                @Override
-                public void onComplete() {
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditPhoto(null);
-                    }
-                }
+                        @Override
+                        public void onComplete() {
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(null);
+                            }
+                        }
 
-                @Override
-                public void onError(String errorMessage) {
-                    FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
-                    if (userInfoEditListener != null) {
-                        userInfoEditListener.onEditPhoto(errorMessage);
-                    }
-                }
-            });
+                        @Override
+                        public void onError(String errorMessage) {
+                            FirebaseResourceManager.loadImageIntoView(thisUser.getImagePath(), profile);
+                            if (userInfoEditListener != null) {
+                                userInfoEditListener.onEditPhoto(errorMessage);
+                            }
+                        }
+                    });
+        }
+        else {
+            Toast.makeText(getActivity(), getString(R.string.no_internet),
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -391,8 +464,14 @@ public class ProfileFragment extends Fragment {
 
         if(requestCode == IMAGE_PICK_CODE) {
             try {
-                newPhotoUri = data.getData();
-                Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                if (thisUser != null) {
+                    Uri uri = data.getData();
+                    // Check to make sure photo is legal size
+                    if (isImageSizeLegal(uri)) {
+                        newPhotoUri = uri;
+                        Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
+                    }
+                }
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");
                 e.printStackTrace();
@@ -409,5 +488,80 @@ public class ProfileFragment extends Fragment {
 
     public void setUserInfoEditListener(UserInfoEditListener listener) {
         this.userInfoEditListener = listener;
+    }
+
+    /**
+     * Determines whether the image is of an illegal size or not. Displays error messages to the user.
+     * @param uri The Uri of the image selected
+     * @return Whether the image is of an illegal size
+     */
+    private boolean isImageSizeLegal(Uri uri) {
+        //Get dimensions of image to check for size
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        ParcelFileDescriptor fd = null;
+        try {
+            fd = getActivity().getContentResolver().openFileDescriptor(uri, "r");
+        }
+        catch (FileNotFoundException e) {
+            // If the file doesn't exist just return false, shouldn't ever happen though
+            return false;
+        }
+        // Loads file data into options
+        BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
+        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
+                MAX_IMAGE_UPLOAD_HEIGHT);
+
+        int width = options.outWidth / scale;
+        int height = options.outHeight / scale;
+
+        // If the image is too short
+        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // If the image is too skinny
+        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
+            Toast.makeText(getActivity(),
+                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
+                    Toast.LENGTH_LONG).show();
+            return false;
+        }
+        // Otherwise the image is okay
+        return true;
+    }
+
+    private ProgressDialog showConvertProgress() {
+        ProgressDialog convertDialog = new ProgressDialog(getActivity());
+        convertDialog.setIndeterminate(true);
+        convertDialog.setMessage(getString(R.string.converting));
+        convertDialog.setCanceledOnTouchOutside(false);
+        //Display progress dialog
+        convertDialog.show();
+        return convertDialog;
+    }
+
+    private class ImageCompressTask extends AsyncTask<ParcelFileDescriptor, Integer, byte[]> {
+        ProgressDialog convertingDialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            convertingDialog = showConvertProgress();
+        }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            super.onPostExecute(bytes);
+            convertingDialog.dismiss();
+            saveProfilePic(bytes);
+
+        }
+
+        @Override
+        protected byte[] doInBackground(ParcelFileDescriptor... pfds) {
+            return BitmapConverter.decodeSampledBitmapFromStream(pfds[0], Constants.MAX_IMAGE_UPLOAD_WIDTH, Constants.MAX_IMAGE_UPLOAD_HEIGHT);
+        }
     }
 }

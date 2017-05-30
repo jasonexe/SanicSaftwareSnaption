@@ -86,6 +86,8 @@ dependencies {
     compile 'com.android.support:percent:25.3.1'
     // For creating circular images
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    // For loading drawables efficiently
+    compile 'com.squareup.picasso:picasso:2.5.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

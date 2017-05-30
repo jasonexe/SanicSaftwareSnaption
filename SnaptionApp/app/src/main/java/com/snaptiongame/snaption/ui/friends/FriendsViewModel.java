@@ -9,7 +9,6 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Friend;
-import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
@@ -61,15 +60,10 @@ public class FriendsViewModel {
         }
     }
 
-    public String getLoginProviderLabel(Context appContext) {
+    public boolean showLoginProviderLabel() {
         List<String> providers = FirebaseUserResourceManager.getProviders();
-        // if the user logged in with Facebook
-        if (providers.contains(FacebookAuthProvider.PROVIDER_ID)) {
-            return appContext.getString(R.string.fb_friends);
-        }
-        else {
-            return appContext.getString(R.string.google_friends);
-        }
+        // true if the user logged in with Facebook
+        return providers.contains(FacebookAuthProvider.PROVIDER_ID);
     }
 
     public void addFriend(Friend friend, UploadListener listener) {
@@ -107,7 +101,7 @@ public class FriendsViewModel {
             return View.VISIBLE;
         }
         else {
-            return View.INVISIBLE;
+            return View.GONE;
         }
     }
 }

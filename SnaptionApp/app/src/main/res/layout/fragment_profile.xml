@@ -18,8 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:alpha="0.1"
-            android:background="@drawable/long_snaption_background"
-            android:backgroundTint="@color/colorPrimary"/>
+            android:id="@+id/profile_background"
+            android:scaleType="fitXY"
+            android:tint="@color/colorPrimary"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -143,7 +144,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
+                    android:layout_marginBottom="0dp"
                     android:divider="@drawable/empty_divider"
                     android:showDividers="middle">
 
@@ -221,14 +222,32 @@
 
                     </RelativeLayout>
 
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/game_upvotes_container">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/total_game_upvote_text"
+                            android:textSize="16sp"
+                            android:text="@string/total_game_upvote_text" />
+
+                        <TextView
+                            android:id="@+id/total_game_upvotes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_toEndOf="@+id/total_game_upvote_text"
+                            android:textAlignment="textEnd"
+                            android:textSize="16sp"
+                            tools:text="200" />
+
+                    </RelativeLayout>
                 </LinearLayout>
-
-
             </RelativeLayout>
-
-
-
         </LinearLayout>
 
 
