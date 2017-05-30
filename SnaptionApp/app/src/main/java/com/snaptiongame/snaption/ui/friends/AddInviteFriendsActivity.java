@@ -65,6 +65,8 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     private List<UserMetadata> users = new ArrayList<>();
     private List<UserMetadata> friends = new ArrayList<>();
     private String query;
+    private boolean processingQuery = false;
+    private String workingQuery;
     private SearchView searchView;
 
     @BindView(R.id.login_provider_friends)
@@ -283,11 +285,20 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
+
         }
         else {
             searchNotice.setVisibility(View.VISIBLE);
             userViewList.setVisibility(View.GONE);
         }
+        // see if another request was being made while we were grabbing data from Firebase
+        if (workingQuery != null && !query.equals(workingQuery)) {
+            processQuery();
+        }
+        else {
+            processingQuery = false;
+        }
+
     }
 
 
@@ -325,14 +336,27 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     @Override
     public boolean onQueryTextChange(String newText) {
         query = newText.trim();
-        users = new ArrayList<>();
-        if (!query.isEmpty()) {
-            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
-        }
-        else {
-            searchNotice.setVisibility(View.GONE);
-            userViewList.setVisibility(View.GONE);
+        if (!processingQuery) {
+            processQuery();
         }
         return true;
+    }
+
+    /**
+     * Processes the current query to be used in a search.
+     */
+    private void processQuery() {
+        users = new ArrayList<>();
+        if (!query.isEmpty()) {
+            // ensure that this is the only query being requested for now
+            processingQuery = true;
+            workingQuery = query;
+            FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
+        } else {
+            workingQuery = null;
+            displayUsers();
+            // to remove the notice that nothing was found, as there is no input
+            searchNotice.setVisibility(View.GONE);
+        }
     }
 }
