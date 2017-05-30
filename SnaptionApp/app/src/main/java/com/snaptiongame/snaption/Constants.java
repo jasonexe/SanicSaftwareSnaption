@@ -188,5 +188,6 @@ public class Constants {
     public static final int MIN_IMAGE_UPLOAD_WIDTH = 20;
 
     // Shared preferences keys
-    public static final String SHOW_CREATE_EXISTING_GAME_PREF = "show_create_existing_game_pref";
+    public static final String SHOW_EXISTING_GAME_DIALOG_PREF = "show_existing_game_dialog_pref";
+    public static final String SHOW_PLAYER_DIALOG_PREF = "show_player_dialog_pref";
 }

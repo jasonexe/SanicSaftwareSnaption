@@ -100,7 +100,8 @@
     <string name="total_game_upvote_text">Game Upvotes:</string>
     <string name="got_it">Got it!</string>
     <string name="do_not_show_agian">Don\'t show again</string>
-    <string name="create_game_from_existing">These games are closed. Long press to start a new game with the same image</string>
+    <string name="create_game_from_existing_info">These games are closed. Long press to start a new game with the same image</string>
+    <string name="friends_info">Add and invite your friends so you can add them to games you create!</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>

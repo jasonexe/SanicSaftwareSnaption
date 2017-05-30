@@ -41,10 +41,15 @@ public class HelpDialogFragment extends DialogFragment {
 
     public static HelpDialogFragment newInstance(String title, int drawable,
                                                  String sharedPrefValue) {
+        HelpDialogFragment helpDialogFragment = newInstance(title, sharedPrefValue);
+        helpDialogFragment.getArguments().putInt(DRAWABLE_ARG, drawable);
+        return helpDialogFragment;
+    }
+
+    public static HelpDialogFragment newInstance(String title, String sharedPrefValue) {
         HelpDialogFragment helpDialogFragment = new HelpDialogFragment();
         Bundle args = new Bundle();
         args.putString(TITLE_ARG, title);
-        args.putInt(DRAWABLE_ARG, drawable);
         args.putString(SHARED_PREF_ARG, sharedPrefValue);
         helpDialogFragment.setArguments(args);
         return helpDialogFragment;
@@ -59,7 +64,9 @@ public class HelpDialogFragment extends DialogFragment {
         unbinder = ButterKnife.bind(this, customView);
 
         title.setText(getArguments().getString(TITLE_ARG));
-        helpImage.setImageResource(getArguments().getInt(DRAWABLE_ARG));
+        int drawableId = getArguments().getInt(DRAWABLE_ARG);
+        helpImage.setImageResource(drawableId);
+        helpImage.setVisibility(drawableId == 0 ? View.GONE : View.VISIBLE);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(customView);
