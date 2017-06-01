@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingTop="20dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp">
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.AppCompat.Title"
+        tools:text="Help dialog title"/>
+    <ImageView
+        android:id="@+id/help_image"
+        android:layout_width="wrap_content"
+        android:layout_height="280dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"/>
+    <CheckBox
+        android:id="@+id/do_not_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/do_not_show_agian"/>
+</LinearLayout>

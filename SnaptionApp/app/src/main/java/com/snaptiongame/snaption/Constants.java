@@ -20,6 +20,8 @@ public class Constants {
     public static final String EXTRA_MESSAGE = "fromCurrentUri";
     // Another Intent label
     public static final String PHOTO_PATH = "currentPhotoPath";
+    // Intent indicator for an image aspect ratio used when creating a game from an existing game
+    public static final String ASPECT_RATIO = "aspectRatio";
     // Intent indicator that a game is being accessed
     public static final String GAME = "game";
     // Intent indicator that a picker name is given for notification
@@ -89,7 +91,9 @@ public class Constants {
     public static final String GAMES_METADATA_PATH = "games/%s/metadata";
     //Path to specific game's metadata with configurable access
     public static final String GAME_METADATA_PATH = "games/%s/metadata/%s";
-    //Path to metadata with configurable access
+    //Path to topCaption of a game with configurable access
+    public static final String GAME_TOPCAPTION_PATH = "games/%s/metadata/%s/topCaption";
+    //Path to data with configurable access
     public static final String GAMES_DATA_PATH = "games/%s/data";
     //Path to specific game's metadata with configurable access
     public static final String GAME_DATA_PATH = "games/%s/data/%s";
@@ -180,4 +184,10 @@ public class Constants {
     public static final int COMPRESSION_VALUE = 80;
     public static final int MAX_IMAGE_UPLOAD_WIDTH = 1920;
     public static final int MAX_IMAGE_UPLOAD_HEIGHT = 1080;
+    public static final int MIN_IMAGE_UPLOAD_HEIGHT = 20;
+    public static final int MIN_IMAGE_UPLOAD_WIDTH = 20;
+
+    // Shared preferences keys
+    public static final String SHOW_EXISTING_GAME_DIALOG_PREF = "show_existing_game_dialog_pref";
+    public static final String SHOW_PLAYER_DIALOG_PREF = "show_player_dialog_pref";
 }
