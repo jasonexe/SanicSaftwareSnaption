@@ -627,21 +627,26 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.join_game_button)
     public void joinGame() {
-        if (FirebaseUserResourceManager.getUserId() == null) {
-            loginDialog.show();
-            return;
-        }
-        FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
-            @Override
-            public void onData(Exception data) {
-                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+        if (game != null) {
+            if (FirebaseUserResourceManager.getUserId() == null) {
+                loginDialog.show();
+                return;
             }
+            FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
+                @Override
+                public void onData(Exception data) {
+                    Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                }
 
-            @Override
-            public Class getDataType() {
-                return Exception.class;
-            }
-        });
+                @Override
+                public Class getDataType() {
+                    return Exception.class;
+                }
+            });
+        }
+        else {
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.game_player_view)

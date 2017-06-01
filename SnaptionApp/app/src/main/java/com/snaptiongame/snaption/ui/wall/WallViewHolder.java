@@ -3,6 +3,8 @@ package com.snaptiongame.snaption.ui.wall;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -169,13 +171,18 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
         if (context instanceof TintContextWrapper) {
             context = ((TintContextWrapper) context).getBaseContext();
         }
-
-        Intent createGameIntent = new Intent(context, GameActivity.class);
-        createGameIntent.putExtra(Constants.GAME, game);
-        ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation((AppCompatActivity) context, view,
-                        game.getId());
-        context.startActivity(createGameIntent, options.toBundle());
+        // Check to see if network is available
+        if (isNetworkAvailable(view)) {
+            Intent createGameIntent = new Intent(context, GameActivity.class);
+            createGameIntent.putExtra(Constants.GAME, game);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation((AppCompatActivity) context, view,
+                            game.getId());
+            context.startActivity(createGameIntent, options.toBundle());
+        }
+        else {
+            Toast.makeText(view.getContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnLongClick(photo)
@@ -482,5 +489,14 @@ public class WallViewHolder extends RecyclerView.ViewHolder {
         closedIcon.setVisibility(game.isOpen() ? View.GONE : View.VISIBLE);
         privateIcon.setVisibility(game.getIsPublic() ? View.GONE : View.VISIBLE);
         iconDivider.setVisibility(game.isOpen() || game.getIsPublic() ? View.GONE : View.VISIBLE);
+    }
+
+    // https://stackoverflow.com/questions/4238921
+    private boolean isNetworkAvailable(View view) {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getActivityContext(view.getContext())
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }
