@@ -11,7 +11,7 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,23 +50,19 @@ import butterknife.OnClick;
 public class AddInviteFriendsActivity extends HomeAppCompatActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
     // TODO add friends from Google+
     // TODO add friends from phone contacts
-    public static final String FRIENDS_KEY = "friends";
     //created app link from Facebook to link to our application when its on Google Play
     private static final String appLinkUrl = "https://fb.me/1863284123957626";
     //currently goes to the Snaption icon on google search
     private static final String previewImageUrl = "http://static1.squarespace.com/static/55a5836fe4b0b0843a0e2862/t/571fefa0f8baf30a23c535dd/1473092005381/";
     // Pre-generated deep link to the home screen, allows for tracking through firebase console
-    private String homescreenDeepLink = "https://h883z.app.goo.gl/CF5F";
+    private String homescreenDeepLink = "https://ba63n.app.goo.gl/yv6I";
 
     private Uploader uploader;
     private AddFriendAdapter addFriendAdapter;
     private FriendsViewModel viewModel;
     private FriendsListAdapter userListAdapter;
     private List<UserMetadata> users = new ArrayList<>();
-    private List<UserMetadata> friends = new ArrayList<>();
     private String query;
-    private boolean processingQuery = false;
-    private String workingQuery;
     private SearchView searchView;
 
     @BindView(R.id.login_provider_friends)
@@ -76,19 +72,13 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     protected TextView loginProviderFriendsLabel;
 
     @BindView(R.id.invite_friends_button)
-    protected LinearLayout inviteFriendsButton;
+    protected Button inviteFriendsButton;
 
     @BindView(R.id.search_list)
     protected RecyclerView userViewList;
 
     @BindView(R.id.search_notice)
     protected TextView searchNotice;
-
-    @BindView(R.id.search_divider)
-    protected View searchDivider;
-
-    @BindView(R.id.empty_friends_message)
-    protected TextView emptyFriendsMessage;
 
     // the listener that gets the list of Users based on username
     private ResourceListener<List<UserMetadata>> nameListener = new ResourceListener<List<UserMetadata>>() {
@@ -138,9 +128,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                         Toast.makeText(AddInviteFriendsActivity.this,
                                 viewModel.getAddedFriendText(AddInviteFriendsActivity.this,
                                         friend.displayName, true, null), Toast.LENGTH_LONG).show();
-                        // remove friend from view
-                        userListAdapter.removeSingleItem(user);
-                        friends.add(user);
                     }
 
                     @Override
@@ -158,13 +145,12 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Get list of friends
-        friends = (ArrayList<UserMetadata>)getIntent().getExtras().getSerializable(FRIENDS_KEY);
-
         // Initial view setup
         setContentView(R.layout.activity_add_invite_friends);
 
         ButterKnife.bind(this);
+        searchNotice.setVisibility(View.GONE);
+        userViewList.setVisibility(View.GONE);
 
         // Login provider friends recycler view and adapter setup
         setupLoginProviderView();
@@ -214,7 +200,6 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                                         friend.displayName, true, null), Toast.LENGTH_LONG).show();
                         // remove friend from view
                         addFriendAdapter.removeSingleItem(friend);
-                        displayLoginProviderFriends();
                     }
 
                     @Override
@@ -238,13 +223,8 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             public void onData(UserMetadata user) {
                 if (user != null) {
                     viewModel = new FriendsViewModel(user, uploader);
-                    if (viewModel.showLoginProviderLabel()) {
-                        loginProviderFriendsLabel.setVisibility(View.VISIBLE);
-                        populateLoginProviderFriends();
-                    }
-                    else {
-                        loginProviderFriendsLabel.setVisibility(View.GONE);
-                    }
+                    setLoginProviderFriendsLabel();
+                    populateLoginProviderFriends();
                     //must suppress resource type for this method to work
                     inviteFriendsButton.setVisibility(viewModel.getFacebookButtonVisibility());
                     //TODO: Set visibility of Google+ invite button here after facebook invite
@@ -259,14 +239,12 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     }
 
     private void populateLoginProviderFriends() {
-        displayLoginProviderFriends();
         viewModel.getLoginProviderFriends(new ResourceListener<Friend>() {
             @Override
             public void onData(Friend friend) {
                 if (friend != null) {
                     // update the list of login provider friends
                     addFriendAdapter.addSingleItem(friend);
-                    displayLoginProviderFriends();
                 }
             }
 
@@ -275,6 +253,10 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
                 return Friend.class;
             }
         });
+    }
+
+    private void setLoginProviderFriendsLabel() {
+        loginProviderFriendsLabel.setText(viewModel.getLoginProviderLabel(getApplicationContext()));
     }
 
     /**
@@ -288,36 +270,13 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
             Set<UserMetadata> set = new TreeSet<>(users);
             userViewList.setVisibility(View.VISIBLE);
             searchNotice.setVisibility(View.GONE);
-            searchDivider.setVisibility(View.VISIBLE);
-            set.removeAll(friends);
             // set the adapter to be able to add friend
             userListAdapter = new FriendsListAdapter(new ArrayList<>(set), addInviteUserCallback, ProfileActivity.getProfileActivityCreator(this));
             userViewList.setAdapter(userListAdapter);
-
         }
         else {
             searchNotice.setVisibility(View.VISIBLE);
             userViewList.setVisibility(View.GONE);
-            searchDivider.setVisibility(View.VISIBLE);
-        }
-        // see if another request was being made while we were grabbing data from Firebase
-        if (workingQuery != null && !query.equals(workingQuery)) {
-            processQuery();
-        }
-        else {
-            processingQuery = false;
-        }
-
-    }
-
-    private void displayLoginProviderFriends() {
-        if (addFriendAdapter.getItemCount() > 0) {
-            loginProviderFriends.setVisibility(View.VISIBLE);
-            emptyFriendsMessage.setVisibility(View.GONE);
-        }
-        else {
-            loginProviderFriends.setVisibility(View.GONE);
-            emptyFriendsMessage.setVisibility(View.VISIBLE);
         }
     }
 
@@ -356,29 +315,14 @@ public class AddInviteFriendsActivity extends HomeAppCompatActivity implements S
     @Override
     public boolean onQueryTextChange(String newText) {
         query = newText.trim();
-        if (!processingQuery) {
-            processQuery();
-        }
-        return true;
-    }
-
-    /**
-     * Processes the current query to be used in a search.
-     */
-    private void processQuery() {
         users = new ArrayList<>();
         if (!query.isEmpty()) {
-            // ensure that this is the only query being requested for now
-            processingQuery = true;
-            workingQuery = query;
             FirebaseUserResourceManager.getUserMetadataByName(query.toLowerCase(), Constants.SEARCH_NAME, nameListener);
-        } else {
-            workingQuery = null;
-            displayUsers();
-            // to remove the notice that nothing was found, as there is no input
+        }
+        else {
             searchNotice.setVisibility(View.GONE);
             userViewList.setVisibility(View.GONE);
-            searchDivider.setVisibility(View.GONE);
         }
+        return true;
     }
 }

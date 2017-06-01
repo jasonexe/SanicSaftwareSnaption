@@ -7,6 +7,7 @@ import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
+import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,6 +47,8 @@ public class WallViewAdapterTest {
     @Rule
     public PowerMockRule rule = new PowerMockRule();
     @Mock
+    ProfileActivity.ProfileActivityCreator mockCreator;
+    @Mock
     GameMetadata game1;
     @Mock
     Caption caption1;
@@ -73,7 +76,7 @@ public class WallViewAdapterTest {
     }
 
     public void createAdapter() {
-        adapter = new WallViewAdapter(games);
+        adapter = new WallViewAdapter(games, mockCreator);
     }
 
     @Test

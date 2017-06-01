@@ -44,7 +44,6 @@ import com.snaptiongame.snaption.ui.login.LoginDialog;
 import com.snaptiongame.snaption.ui.new_game.CreateGameActivity;
 import com.snaptiongame.snaption.ui.profile.ProfileFragment;
 import com.snaptiongame.snaption.ui.wall.WallFragment;
-import com.snaptiongame.snaption.utilities.ViewUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +53,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.snaptiongame.snaption.Constants.GOOGLE_LOGIN_RC;
-import static com.snaptiongame.snaption.Constants.SHOW_EXISTING_GAME_DIALOG_PREF;
-import static com.snaptiongame.snaption.Constants.SHOW_PLAYER_DIALOG_PREF;
 
 public class MainSnaptionActivity extends HomeAppCompatActivity {
     private static final String survey_url = "https://docs.google.com/forms/d/e/1FAIpQLSerSw6piYc20yi64SVjM48n7MklEFrg4Nk-oS5oRhlz_uxxRA/viewform";
@@ -78,7 +75,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
     public LoginDialog loginDialog;
     private ActionBarDrawerToggle mDrawerToggle;
     private UserMetadata currentUser;
-    private ArrayList<UserMetadata> friends;
     private int currentNavDrawerMenuId;
     private int currentBottomNavMenuId;
     // Used for keeping track of if this Activity is paused -- needed so logging in from
@@ -152,8 +148,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                     newFragment = new FriendsFragment();
                     currentNavDrawerMenuId = selectedItemId;
                     currentBottomNavMenuId = 0;
-                    ViewUtilities.showHelpDialog(this, getString(R.string.friends_info), 0,
-                            SHOW_PLAYER_DIALOG_PREF);
                     break;
                 case R.id.log_option:
                     logInOutItemSelected();
@@ -169,15 +163,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
                 case R.id.popular_item:
                     newFragment = WallFragment.newInstance(GameType.TOP_PUBLIC_GAMES);
                     currentBottomNavMenuId = selectedItemId;
-                    break;
-                case R.id.closed_item:
-                    newFragment = WallFragment.newInstance(GameType.TOP_CLOSED_GAMES);
-                    currentBottomNavMenuId = selectedItemId;
-                    if (FirebaseUserResourceManager.getUserId() != null) {
-                        ViewUtilities.showHelpDialog(this,
-                                getString(R.string.create_game_from_existing_info),
-                                R.drawable.create_from_existing, SHOW_EXISTING_GAME_DIALOG_PREF);
-                    }
                     break;
             }
             replaceFragmentWithTransaction(newFragment, prevMenuId, prevNavDrawer, onBack);
@@ -385,11 +370,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         DeepLinkGetter.checkIfDeepLink(this);
     }
 
-    public void setUserFriends(ArrayList<UserMetadata> friends) {
-        this.friends = new ArrayList<>(friends);
-        this.friends.add(currentUser);
-    }
-
     private void setupNavigationViews() {
         mDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 R.string.open_nav_drawer, R.string.close_nav_drawer) {};
@@ -503,11 +483,6 @@ public class MainSnaptionActivity extends HomeAppCompatActivity {
         }
         else if (currentNavDrawerMenuId == R.id.friends_item) {
             Intent intent = new Intent(this, AddInviteFriendsActivity.class);
-            if (friends != null) {
-                Bundle args = new Bundle();
-                args.putSerializable(AddInviteFriendsActivity.FRIENDS_KEY, friends);
-                intent.putExtras(args);
-            }
             startActivity(intent);
         }
         else if (currentNavDrawerMenuId == R.id.profile_item) {

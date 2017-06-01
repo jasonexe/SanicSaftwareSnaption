@@ -1,10 +1,12 @@
 package com.snaptiongame.snaption.ui.friends;
 
 import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuthProvider;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
+import com.snaptiongame.snaption.servercalls.FirebaseReporter;
 import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
@@ -21,6 +23,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
@@ -34,12 +37,12 @@ import java.util.Map;
 import static com.snaptiongame.snaption.servercalls.Uploader.ITEM_ALREADY_EXISTS_ERROR;
 import static com.snaptiongame.snaption.servercalls.Uploader.UploadListener;
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 /**
@@ -52,6 +55,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @SuppressStaticInitializationFor({"com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager","com.snaptiongame.snaption.servercalls.FirebaseResourceManager"})
 @PrepareForTest(FirebaseResourceManager.class)
 public class FriendsViewModelTest {
+    private static final String FB_PROVIDER_LABEL = "Facebook friends on Snaption";
+    private static final String GOOGLE_PROVIDER_LABEL = "Google+ friends on Snaption";
     private static final String ADD_FRIEND_SUCCESS = "Brittany is now your friend!";
     private static final String ADD_FRIEND_FAIL = "Problem adding Brittany as your friend.";
     private static final String ADD_FRIEND_ALREADY_EXISTS = "Brittany is already your friend.";
@@ -81,23 +86,25 @@ public class FriendsViewModelTest {
     }
 
     @Test
-    public void testShowFbProviderLabel() {
+    public void testGetFbProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(FacebookAuthProvider.PROVIDER_ID);
         PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
-        assertTrue(viewModel.showLoginProviderLabel());
+        assertEquals(FB_PROVIDER_LABEL,
+                viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
     }
 
     @Test
-    public void testShowGoogleProviderLabel() {
+    public void testGetGoogleProviderLabel() {
         List<String> providers = new ArrayList<>();
         providers.add(GoogleAuthProvider.PROVIDER_ID);
         PowerMockito.mockStatic(FirebaseUserResourceManager.class);
         BDDMockito.given(FirebaseUserResourceManager.getProviders())
                 .willReturn(providers);
-        assertFalse(viewModel.showLoginProviderLabel());
+        assertEquals(GOOGLE_PROVIDER_LABEL,
+                viewModel.getLoginProviderLabel(RuntimeEnvironment.application));
     }
 
     @Test

@@ -8,12 +8,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import static com.google.android.gms.internal.zzs.TAG;
+
 /**
  * Created by austinrobarts on 4/11/17.
  */
 public class EventListenCreator {
-
-    private final static String TAG = "EventListenCreator";
 
     public static ValueEventListener getValueEventListener(final Class type, final ResourceListener listener) {
         return new ValueEventListener() {

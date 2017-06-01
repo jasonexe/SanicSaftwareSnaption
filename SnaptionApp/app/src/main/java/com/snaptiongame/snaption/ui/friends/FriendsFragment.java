@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.snaptiongame.snaption.MainSnaptionActivity;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.User;
 import com.snaptiongame.snaption.models.UserMetadata;
@@ -22,7 +21,6 @@ import com.snaptiongame.snaption.servercalls.ResourceListener;
 import com.snaptiongame.snaption.ui.ScrollFabHider;
 import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +43,6 @@ public class FriendsFragment extends Fragment {
     private FirebaseUserResourceManager userFirebase = new FirebaseUserResourceManager();
     private FriendsListAdapter friendsListAdapter;
     private Unbinder unbinder;
-    private ArrayList<UserMetadata> users;
 
     @Nullable
     @Override
@@ -95,7 +92,7 @@ public class FriendsFragment extends Fragment {
                 public void onData(Map<String, Integer> userIds) {
                     if (userIds != null) {
                         friendNotice.setVisibility(View.GONE);
-                        users = new ArrayList<>();
+                        List<UserMetadata> users = new ArrayList<>();
                         friendsListAdapter = new FriendsListAdapter(users, ProfileActivity.getProfileActivityCreator(getContext()));
                         friendsListView.setAdapter(friendsListAdapter);
                         loadUsers(userIds);
@@ -114,16 +111,12 @@ public class FriendsFragment extends Fragment {
         }
     }
 
-    private void loadUsers(final Map<String, Integer> uids) {
+    private void loadUsers(Map<String, Integer> uids) {
         FirebaseUserResourceManager.getUsersMetadataByIds(uids, new ResourceListener<UserMetadata>() {
             @Override
             public void onData(UserMetadata user) {
                 if (user != null) {
                     friendsListAdapter.addSingleItem(user);
-
-                    if (users.size() == uids.size()) {
-                        ((MainSnaptionActivity)getActivity()).setUserFriends(users);
-                    }
                 }
             }
 

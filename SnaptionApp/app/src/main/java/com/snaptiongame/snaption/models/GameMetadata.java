@@ -32,9 +32,6 @@ public class GameMetadata implements Serializable {
     private long creationDate; //When the game was created
     private double imageAspectRatio; //The aspect ratio of the image
 
-    @Exclude
-    private String pickerUsername;
-
     /**
      * Default constructor for Firebase.
      */
@@ -141,14 +138,6 @@ public class GameMetadata implements Serializable {
         this.topCaption = topCaption;
     }
 
-    public void setPickerUsername(String pickerUsername) {
-        this.pickerUsername = pickerUsername;
-    }
-
-    @Exclude
-    public String getPickerUsername() {
-        return pickerUsername;
-    }
 
     /**
      * Gets the remaining time compared with the inputted date and the endDate of this Game.
@@ -174,9 +163,5 @@ public class GameMetadata implements Serializable {
             }
         }
         return result;
-    }
-
-    public String toString() {
-        return this.getId();
     }
 }

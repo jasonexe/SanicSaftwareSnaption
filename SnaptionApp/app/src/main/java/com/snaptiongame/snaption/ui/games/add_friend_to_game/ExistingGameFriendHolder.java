@@ -26,7 +26,7 @@ public class ExistingGameFriendHolder extends RecyclerView.ViewHolder  {
     @BindView(R.id.photo)
     public ImageView photo;
     @BindView(R.id.add_invite_button)
-    public TextView addInviteButton;
+    public Button addInviteButton;
 
     public static ExistingGameFriendHolder newInstance(ViewGroup parent) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.view_person_item,

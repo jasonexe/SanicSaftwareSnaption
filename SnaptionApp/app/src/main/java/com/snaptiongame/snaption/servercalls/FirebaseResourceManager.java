@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
@@ -26,7 +28,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.snaptiongame.snaption.Constants;
-import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Card;
 
 import java.util.List;
@@ -224,6 +225,9 @@ public class FirebaseResourceManager {
                     .load(ref)
                     .fitCenter()
                     .dontAnimate()
+                    // Caches the full image to make reloading faster
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .priority(Priority.IMMEDIATE)
                     .listener(new RequestListener<StorageReference, GlideDrawable>() {
                         @Override
                         public boolean onException(Exception e, StorageReference model,
@@ -241,7 +245,7 @@ public class FirebaseResourceManager {
                             return false;
                         }
                     })
-                    .placeholder(R.color.lightGrey).into(imageView);
+                    .placeholder(android.R.drawable.progress_horizontal).into(imageView);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             FirebaseReporter.reportException(e, "Glide image load failed");

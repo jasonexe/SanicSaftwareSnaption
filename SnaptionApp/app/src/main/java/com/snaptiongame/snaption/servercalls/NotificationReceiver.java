@@ -1,7 +1,6 @@
 package com.snaptiongame.snaption.servercalls;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -48,7 +47,6 @@ public class NotificationReceiver extends FirebaseMessagingService {
     public static final String GAME_ID_KEY = "gameId";
     public static final String USER_ID_KEY = "userId";
     public static final String GAME_ACCESS_KEY = "gameAccess";
-    public static final String NOTIFICATION_MESSAGE_KEY = "body";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -57,7 +55,6 @@ public class NotificationReceiver extends FirebaseMessagingService {
         String gameId = null;
         String senderUserId = null;
         String access = null;
-        String message = null;
 
         //if a data message was received
         if (data != null && data.size() > 0) {
@@ -65,12 +62,17 @@ public class NotificationReceiver extends FirebaseMessagingService {
             gameId = data.get(GAME_ID_KEY);
             senderUserId = data.get(USER_ID_KEY);
             access = data.get(GAME_ACCESS_KEY);
-            message = data.get(NOTIFICATION_MESSAGE_KEY);
-            createNotification(gameId, senderUserId, access, message);
+
+            createNotification(gameId, senderUserId, access);
+        }
+
+        //if a notification was received
+        if (remoteMessage.getNotification() != null) {
+            //not sure if needed yet
         }
     }
 
-    private void createNotification(final String gameId, final String senderUserId, final String access, final String message) {
+    private void createNotification(final String gameId, final String senderUserId, final String access) {
         //gets given game and given user to populate notification
         ResourceListener<GameMetadata> gameListener = new ResourceListener<GameMetadata>() {
             @Override
@@ -80,9 +82,9 @@ public class NotificationReceiver extends FirebaseMessagingService {
                     new ResourceListener<UserMetadata>() {
                         @Override
                         public void onData(UserMetadata user) {
-                            //ensure the game were found before sending notification
+                            //ensure the user and game were found before sending notification
                             if (metaData != null && user != null) {
-                                sendNotification(metaData, user, message);
+                                sendNotification(metaData, user);
                             }
                         }
 
@@ -105,7 +107,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
         }
     }
 
-    private void sendNotification(GameMetadata game, UserMetadata user, String message) {
+    private void sendNotification(GameMetadata game, UserMetadata user) {
         //create intent to go to game given
         Intent intent = new Intent(this, GameActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -116,44 +118,26 @@ public class NotificationReceiver extends FirebaseMessagingService {
         stackBuilder.addNextIntent(intent);
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //means it is a game creation notification
-        if (user.getDisplayName() != null) {
-            createGameCreationNotification(pendingIntent, game, user.getDisplayName());
-        } else {
-            //means upvote notification
-            createUpvoteNotification(pendingIntent, message);
-        }
-    }
-
-    private void createUpvoteNotification(PendingIntent pendingIntent, String message) {
-        //get display text for notification
-        String title = getResources().getString(R.string.app_name);
-
-        //create notification based on info passed in
-        Notification notification = getNotification(title, message, pendingIntent);
-
-        //notify user based on message passed in
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-    }
-
-    private void createGameCreationNotification(PendingIntent pendingIntent, GameMetadata game, String userDisplayName) {
-        //get display text for notification
-        String title = getResources().getString(R.string.game_invite_notification_title);
-        String text = String.format(getResources().getString(R.string.game_invite_notification_text), userDisplayName);
-
-        Notification notification = getNotification(title, text, pendingIntent);
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_snaption)
+                .setContentTitle(getResources().getString(R.string.game_invite_notification_title))
+                .setContentText(String.format(getResources().getString(R.string.game_invite_notification_text),
+                        user.getDisplayName()))
+                .setAutoCancel(true)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setContentIntent(pendingIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         //notify user that game was created
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notification);
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
 
         //create a timed notification to go off when the game has reached its end date
         Intent endGameIntent = new Intent(this, GameEndNotification.class);
         //store pickerName and gameId so notification can go to GameActivity
-        endGameIntent.putExtra(Constants.PICKER, userDisplayName);
+        endGameIntent.putExtra(Constants.PICKER, user.getDisplayName());
         endGameIntent.putExtra(GameActivity.USE_GAME_ID, game.getId());
         if (game.getIsPublic()) {
             endGameIntent.putExtra(GameActivity.USE_GAME_ACCESS, Constants.PUBLIC);
@@ -165,18 +149,5 @@ public class NotificationReceiver extends FirebaseMessagingService {
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, game.getEndDate() * MILLIS_PER_SECOND, endGamePendingIntent);
-    }
-
-    private Notification getNotification(String title, String text, PendingIntent pendingIntent) {
-        return new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_snaption)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setAutoCancel(true)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setContentIntent(pendingIntent)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .build();
     }
 }

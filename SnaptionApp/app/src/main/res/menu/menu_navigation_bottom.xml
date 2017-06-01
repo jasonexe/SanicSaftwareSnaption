@@ -11,8 +11,4 @@
         android:title="@string/popular"
         android:icon="@drawable/ic_whatshot_color_24dp"
         android:orderInCategory="2"/>
-    <item android:id="@+id/closed_item"
-        android:title="@string/hof"
-        android:icon="@drawable/crown"
-        android:orderInCategory="3"/>
 </menu>

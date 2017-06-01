@@ -3,7 +3,6 @@ package com.snaptiongame.snaption.ui.new_game;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.crashlytics.android.Crashlytics;
 import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
@@ -43,7 +41,6 @@ import com.snaptiongame.snaption.servercalls.Uploader;
 import com.snaptiongame.snaption.utilities.BitmapConverter;
 import com.snaptiongame.snaption.utilities.ViewUtilities;
 
-import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -54,12 +51,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.fabric.sdk.android.Fabric;
 
-import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_HEIGHT;
-import static com.snaptiongame.snaption.Constants.MIN_IMAGE_UPLOAD_WIDTH;
-import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_HEIGHT;
-import static com.snaptiongame.snaption.Constants.MAX_IMAGE_UPLOAD_WIDTH;
 import static com.snaptiongame.snaption.Constants.MILLIS_PER_SECOND;
 
 
@@ -85,9 +77,8 @@ public class CreateGameActivity extends AppCompatActivity {
     private Calendar calendar;
     private int year, month, day;
 
-    private boolean alreadyExisting; //True if user is creating this from an existing game
-    private double existingImageAspectRatio; //Valid if user is creating this from an existing game
-    private String existingPhotoPath; //Valid if user is creating this from an existing game
+    private boolean alreadyExisting; //True if user is creating this from an exisitng game
+    private String existingPhotoPath;
     private PersonAdapter friendsListAdapter;
     private AddedPersonAdapter gameFriendsAdapter;
     private PersonAdapter.AddListener addListener = new PersonAdapter.AddListener() {
@@ -142,13 +133,11 @@ public class CreateGameActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         alreadyExisting = false;
 
-        Fabric.with(this, new Crashlytics());
         Intent intent = getIntent();
         Uri uri = intent.getParcelableExtra(Constants.EXTRA_MESSAGE);
         if(uri != null) {
             alreadyExisting = true;
             existingPhotoPath = intent.getStringExtra(Constants.PHOTO_PATH);
-            existingImageAspectRatio = intent.getDoubleExtra(Constants.ASPECT_RATIO, 0);
             imageUri = uri;
             setImageFromUrl(uri);
         }
@@ -263,9 +252,10 @@ public class CreateGameActivity extends AppCompatActivity {
             // If the photo does exist, addGame but without the data
             // TODO figure out a better way to do this... will have to pull the game to get aspect ratio probs
             GameData gameData = new GameData(friends, null);
+            String imagePath = String.format(Constants.STORAGE_IMAGE_PATH, gameId);
             GameMetadata metaData = new GameMetadata(gameId,
-                    FirebaseUserResourceManager.getUserId(), existingPhotoPath, tags, isPublic,
-                    endDate, existingImageAspectRatio);
+                    FirebaseUserResourceManager.getUserId(), imagePath, tags, isPublic,
+                    endDate, 1);
             Game game = new Game(gameData, metaData);
 
             uploader.addGame(game);
@@ -424,11 +414,8 @@ public class CreateGameActivity extends AppCompatActivity {
         alreadyExisting = false;
 
         try {
-            Uri uri = data.getData();
-            if (isImageSizeLegal(uri)) {
-                imageUri = uri;
-                setImageFromUrl(imageUri);
-            }
+            imageUri = data.getData();
+            setImageFromUrl(imageUri);
         } catch (Exception e) {
             FirebaseReporter.reportException(e, "Couldn't read user's photo data");
             e.printStackTrace();
@@ -519,46 +506,4 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Determines whether the image is of an illegal size or not. Displays error messages to the user.
-     * @param uri The Uri of the image selected
-     * @return Whether the image is of an illegal size
-     */
-    private boolean isImageSizeLegal(Uri uri) {
-        //Get dimensions of image to check for size
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        ParcelFileDescriptor fd = null;
-        try {
-            fd = getContentResolver().openFileDescriptor(uri, "r");
-        }
-        catch (FileNotFoundException e) {
-            // If the file doesn't exist just return false, shouldn't ever happen though
-            return false;
-        }
-        // Loads file data into options
-        BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor(), null, options);
-        int scale = BitmapConverter.calculateInSampleSize(options, MAX_IMAGE_UPLOAD_WIDTH,
-                MAX_IMAGE_UPLOAD_HEIGHT);
-
-        int width = options.outWidth / scale;
-        int height = options.outHeight / scale;
-
-        // If the image is too short
-        if (height < MIN_IMAGE_UPLOAD_HEIGHT) {
-            Toast.makeText(CreateGameActivity.this,
-                    String.format(getString(R.string.image_min_height), MIN_IMAGE_UPLOAD_HEIGHT),
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-        // If the image is too skinny
-        else if (width < MIN_IMAGE_UPLOAD_WIDTH) {
-            Toast.makeText(CreateGameActivity.this,
-                    String.format(getString(R.string.image_min_width), MIN_IMAGE_UPLOAD_WIDTH),
-                    Toast.LENGTH_LONG).show();
-            return false;
-        }
-        // Otherwise the image is okay
-        return true;
-    }
 }
