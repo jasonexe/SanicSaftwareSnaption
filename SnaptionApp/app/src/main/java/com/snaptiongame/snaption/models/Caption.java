@@ -39,8 +39,6 @@ public class Caption implements Serializable, Comparable<Caption> {
     //Needed for firebase compatibility
     public Caption() {}
 
-    // TODO add an isPublic method
-
     // Used for dependency injection if you want a custom userId
     public Caption(String id, String gameId, String userId, Card card, List<String> userInput) {
         this.id = id;
