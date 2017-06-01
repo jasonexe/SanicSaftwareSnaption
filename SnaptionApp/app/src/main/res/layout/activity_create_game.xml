@@ -74,12 +74,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableStart="@drawable/ic_language_18dp"
+                android:drawablePadding="2dp"
                 android:text="@string/game_public"/>
             <RadioButton
                 android:id="@+id/radio_private"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:drawableStart="@drawable/ic_private_game"
+                android:drawablePadding="4dp"
                 android:text="@string/game_private"/>
         </RadioGroup>
 

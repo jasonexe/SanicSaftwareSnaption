@@ -114,4 +114,12 @@ public class UserMetadata implements Person, Comparable<UserMetadata>, Serializa
         }
         return result;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other != null && other instanceof UserMetadata) {
+            return id.equals(((UserMetadata)other).getId());
+        }
+        return false;
+    }
 }

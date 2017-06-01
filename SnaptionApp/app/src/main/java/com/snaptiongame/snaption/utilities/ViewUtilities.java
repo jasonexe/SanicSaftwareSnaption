@@ -2,10 +2,14 @@ package com.snaptiongame.snaption.utilities;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import com.snaptiongame.snaption.ui.HelpDialogFragment;
 
 /**
  * Created by brittanyberlanga on 2/19/17.
@@ -125,5 +129,22 @@ public class ViewUtilities {
             imageHeight = (int) maxHeightPx;
         }
         return imageHeight;
+    }
+
+    /**
+     * Displays a help dialog with the given title and drawable. If the shared preference associated
+     * with the given shared preference key is false, the dialog will not be shown.
+     *
+     * @param activity activity on which the dialog will be displayed
+     * @param title dialog title
+     * @param drawableId dialog drawable
+     * @param sharedPrefKey boolean shared preference
+     */
+    public static void showHelpDialog(AppCompatActivity activity, String title, int drawableId,
+                                      String sharedPrefKey) {
+        if (activity.getPreferences(Context.MODE_PRIVATE).getBoolean(sharedPrefKey, true)) {
+            HelpDialogFragment.newInstance(title, drawableId, sharedPrefKey)
+                    .show(activity.getSupportFragmentManager(), null);
+        }
     }
 }

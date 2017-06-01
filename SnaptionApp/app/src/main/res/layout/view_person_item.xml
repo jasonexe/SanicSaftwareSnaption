@@ -39,12 +39,18 @@
             android:visibility="gone"
             android:textSize="12sp"/>
     </LinearLayout>
-    <Button
+    <TextView
         android:id="@+id/add_invite_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:visibility="gone"
+        android:gravity="center"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:visibility="gone"
+        style="@style/TextAppearance.AppCompat.Widget.Button.Borderless.Colored"
+        android:background="?attr/selectableItemBackgroundBorderless"
+
         android:text="@string/add"/>
 </RelativeLayout>
