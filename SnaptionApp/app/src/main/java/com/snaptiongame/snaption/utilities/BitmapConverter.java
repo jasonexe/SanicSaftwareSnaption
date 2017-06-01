@@ -67,7 +67,7 @@ public class BitmapConverter {
     }
 
     // Calculates what inSampleSize to use when loading an image from the phone, which downscales it
-    private static int calculateInSampleSize(
+    public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;

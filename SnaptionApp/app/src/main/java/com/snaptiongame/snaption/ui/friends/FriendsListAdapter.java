@@ -75,4 +75,12 @@ public class FriendsListAdapter extends RecyclerView.Adapter<PersonViewHolder> {
         friends.add(user);
         notifyDataSetChanged();
     }
+
+    public void removeSingleItem(UserMetadata user) {
+        int ndx = this.friends.indexOf(user);
+        if (ndx >= 0) {
+            this.friends.remove(ndx);
+            notifyItemRemoved(ndx);
+        }
+    }
 }
