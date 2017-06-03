@@ -299,7 +299,6 @@ public class FirebaseUploader implements Uploader {
     }
 
     public static void addCurrentUserToGame(Game game, final ResourceListener<Exception> errorDisplayer) {
-        // TODO check that joined games should actually go in private in the user
         Map<String, Object> childUpdates = new HashMap<>();
         String gameId = game.getId();
         String userId = FirebaseUserResourceManager.getUserId();
