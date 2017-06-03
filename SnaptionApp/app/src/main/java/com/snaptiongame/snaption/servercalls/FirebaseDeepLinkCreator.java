@@ -60,6 +60,8 @@ public class FirebaseDeepLinkCreator {
     private static final String DYNAMIC_LINK_DOMAIN = "https://h883z.app.goo.gl/";
     // The name of the file that holds the game preview to send in the intent
     private static final String FILE_NAME = "gamePreview.jpg";
+    // Constant that is the user-visible label for the clipboard data
+    private static final String INVITE_LABEL = "invite";
     // URL to firebase's dynamic shortlink generator
     private static final String SHORT_LINK_GENERATOR_URL = "https://firebasedynamiclinks.googleapis.com";
     // Our app's default android package
@@ -243,7 +245,7 @@ public class FirebaseDeepLinkCreator {
                 }
 
                 // Copy link text to the clipboard for services that are dumb and don't do intents right
-                ClipData inviteText = ClipData.newPlainText("invite", messageText);
+                ClipData inviteText = ClipData.newPlainText(INVITE_LABEL, messageText);
                 ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                 clipboard.setPrimaryClip(inviteText);
                 Toast.makeText(activity.getApplicationContext(), R.string.copied_link_to_clipboard,
