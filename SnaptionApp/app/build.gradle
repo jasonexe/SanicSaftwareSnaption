@@ -58,7 +58,7 @@ repositories {
 }
 
 ext.androidVersion = '25.3.1'
-ext.firebaseLibVersion = '9.8.0'
+ext.firebaseLibVersion = '10.2.1'
 ext.firebaseStorageVersion = '10.2.1'
 ext.firebasePerformanceVersion = '10.2.6'
 ext.firebaseUILibVersion = '0.6.0'
