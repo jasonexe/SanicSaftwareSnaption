@@ -6,11 +6,14 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.common.SignInButton;
-import com.snaptiongame.snaption.servercalls.LoginManager;
 import com.snaptiongame.snaption.R;
+import com.snaptiongame.snaption.servercalls.LoginManager;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Dialog that is displayed when a user is trying to log in.
@@ -22,7 +25,7 @@ import com.snaptiongame.snaption.R;
 public class LoginDialog extends Dialog implements View.OnClickListener {
     private Activity activity;
     private LoginManager manager;
-    private SignInButton googleLogButton;
+    private Button googleLogButton;
     private LoginButton facebookLogButton;
 
     /**
@@ -49,10 +52,10 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_dialog);
+        ButterKnife.bind(this);
 
         //create google sign in button
-        googleLogButton = (SignInButton)findViewById(R.id.google_login_button);
-        googleLogButton.setSize(SignInButton.SIZE_WIDE);
+        googleLogButton = (Button)findViewById(R.id.google_login_button);
         //create listener for google sign in
         googleLogButton.setOnClickListener(this);
         //create facebook sign in button
@@ -63,6 +66,13 @@ public class LoginDialog extends Dialog implements View.OnClickListener {
         else {
             Log.d("LoginDialog", "onCreate: LoginManager never was assigned");
         }
+    }
+
+
+
+    @OnClick(R.id.mock_facebook_login_button)
+    public void onClickMockFacebookButton() {
+        facebookLogButton.performClick();
     }
 
     @Override
