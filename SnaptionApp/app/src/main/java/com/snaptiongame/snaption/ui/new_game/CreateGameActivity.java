@@ -402,8 +402,13 @@ public class CreateGameActivity extends AppCompatActivity {
         }
     }
 
+    // Takes the user back to the main screen, as long as they are on this activity
     private void backToMain() {
-        onBackPressed();
+        // https://stackoverflow.com/questions/5446565
+        // Checks to see if they are still on this activity
+        if (getWindow().getDecorView().getRootView().isShown()) {
+            onBackPressed();
+        }
     }
 
     @Override
