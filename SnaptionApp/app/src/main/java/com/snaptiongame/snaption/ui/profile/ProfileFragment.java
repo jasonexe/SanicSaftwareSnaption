@@ -330,12 +330,14 @@ public class ProfileFragment extends Fragment {
         hideEditName();
         saveEditName();
         hideEditProfilePic();
-        ParcelFileDescriptor fd = null;
-        try {
-            fd = getActivity().getContentResolver().openFileDescriptor(newPhotoUri, "r");
-            new ImageCompressTask().execute(fd);
-        } catch (IOException e) {
-            Log.e("PHOTO_NOT_FOUND", "Photo not found.");
+        if (newPhotoUri != null) {
+            try {
+                ParcelFileDescriptor fd = getActivity().getContentResolver()
+                        .openFileDescriptor(newPhotoUri, "r");
+                new ImageCompressTask().execute(fd);
+            } catch (IOException e) {
+                Log.e("PHOTO_NOT_FOUND", "Photo not found.");
+            }
         }
     }
 
@@ -471,6 +473,10 @@ public class ProfileFragment extends Fragment {
                         newPhotoUri = uri;
                         Glide.with(ProfileFragment.this).load(newPhotoUri).into(profile);
                     }
+                }
+                else {
+                    Toast.makeText(getActivity(), getString(R.string.no_internet),
+                            Toast.LENGTH_LONG).show();
                 }
             } catch (Exception e) {
                 FirebaseReporter.reportException(e, "Couldn't read user's photo data");

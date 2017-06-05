@@ -599,45 +599,54 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.fab)
     public void displayCardOptions() {
-        if (game.isOpen()) {
-            //if the user is logged in they can caption
-            if (FirebaseUserResourceManager.getUserId() != null) {
-                toggleVisibility(captionCardsList);
-                //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
-                if (cardInputView.getVisibility() == View.VISIBLE) {
-                    cardInputView.setVisibility(View.GONE);
-                    // In case they press the fab while it's being hidden after scrolling
-                    // This prevents it from being hidden forever.
-                    hideKeyboard();
+        if (game != null) {
+            if (game.isOpen()) {
+                //if the user is logged in they can caption
+                if (FirebaseUserResourceManager.getUserId() != null) {
+                    toggleVisibility(captionCardsList);
+                    //If the card input is visible, want that hidden too. Don't necessarily want to toggle it.
+                    if (cardInputView.getVisibility() == View.VISIBLE) {
+                        cardInputView.setVisibility(View.GONE);
+                        // In case they press the fab while it's being hidden after scrolling
+                        // This prevents it from being hidden forever.
+                        hideKeyboard();
+                    }
+                } else { //if they are logged out
+                    //display the loginDialog
+                    displayLoginDialog();
                 }
-            } else { //if they are logged out
-                //display the loginDialog
-                displayLoginDialog();
+            } else {
+                Toast.makeText(this, getResources().getString(R.string.end_date_passed_caption),
+                        Toast.LENGTH_SHORT).show();
             }
         }
         else {
-            Toast.makeText(this, getResources().getString(R.string.end_date_passed_caption),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_LONG).show();
         }
     }
 
     @OnClick(R.id.join_game_button)
     public void joinGame() {
-        if (FirebaseUserResourceManager.getUserId() == null) {
-            loginDialog.show();
-            return;
-        }
-        FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
-            @Override
-            public void onData(Exception data) {
-                Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+        if (game != null) {
+            if (FirebaseUserResourceManager.getUserId() == null) {
+                loginDialog.show();
+                return;
             }
+            FirebaseUploader.addCurrentUserToGame(game, new ResourceListener<Exception>() {
+                @Override
+                public void onData(Exception data) {
+                    Snackbar.make(getCurrentFocus(), data.getLocalizedMessage(), Snackbar.LENGTH_LONG).show();
+                }
 
-            @Override
-            public Class getDataType() {
-                return Exception.class;
-            }
-        });
+                @Override
+                public Class getDataType() {
+                    return Exception.class;
+                }
+            });
+        }
+        else {
+            Toast.makeText(this, R.string.no_internet, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @OnClick(R.id.game_player_view)

@@ -208,8 +208,6 @@ public class LoginManager {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
-            // TODO remove this after we confirm that it works (need keys)
-            System.out.println("Google email: " + acct.getEmail());
             loginToFirebase(acct);
         } else {
             resetGoogleApi();
