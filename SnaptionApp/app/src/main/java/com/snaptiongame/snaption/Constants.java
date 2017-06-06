@@ -79,6 +79,9 @@ public class Constants {
     public static final String CARDS_DIRECTORY = "cards_%s/%s";
     // Name of the images folder in storage
     public static final String STORAGE_IMAGE_PATH = "images/%s";
+    public static final String TEMP_STORAGE_PATH = "temp";
+    // This should be the same root as STORAGE_IMAGE_PATH
+    public static final String MAIN_STORAGE_PATH = "images";
     // The default card pack that everyone has. Used when retrieving cards
     public final static String DEFAULT_PACK = "InitialPack";
     // Path to the game's creation date

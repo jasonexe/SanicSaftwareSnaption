@@ -12,6 +12,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.Friend;
 import com.snaptiongame.snaption.models.Game;
@@ -31,8 +32,10 @@ import static com.snaptiongame.snaption.Constants.GAME_DATA_PLAYERS_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_METADATA_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PRIVATE_DATA_PLAYER_PATH;
 import static com.snaptiongame.snaption.Constants.GAME_PUBLIC_DATA_PLAYER_PATH;
+import static com.snaptiongame.snaption.Constants.MAIN_STORAGE_PATH;
 import static com.snaptiongame.snaption.Constants.PRIVATE;
 import static com.snaptiongame.snaption.Constants.PUBLIC;
+import static com.snaptiongame.snaption.Constants.TEMP_STORAGE_PATH;
 import static com.snaptiongame.snaption.Constants.USER_DISPLAY_NAME_PATH;
 import static com.snaptiongame.snaption.Constants.USER_FRIENDS_PATH;
 import static com.snaptiongame.snaption.Constants.USER_IS_ANDROID_PATH;
@@ -144,7 +147,7 @@ public class FirebaseUploader implements Uploader {
                 .build();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference imageLoc = storage.getReference()
-                .child(game.getImagePath());
+                .child(game.getImagePath().replace(MAIN_STORAGE_PATH, TEMP_STORAGE_PATH));
 
         UploadTask uploadTask = imageLoc.putBytes(data, imageMetadata);
         //Creating the progress dialog
