@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.snaptiongame.snaption.Constants;
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Caption;
 import com.snaptiongame.snaption.models.GameMetadata;
@@ -54,11 +55,22 @@ public class ProfileTabFragment extends Fragment {
     private User user = null;
     private static final String PROFILE_FRAGMENT_PAGE = "profile_page";
     private static final String USER = "user";
+    private List<FirebaseResourceManager> gameVoteListeners;
     private ResourceListener gameListener = new ResourceListener<GameMetadata>() {
         @Override
         public void onData(GameMetadata data) {
             List<GameMetadata> gameList = new ArrayList<>();
             gameList.add(data);
+            ResourceListener<Map<String, Integer>> listener =
+                    getUpdatingListener(gameVoteListeners.size());
+            FirebaseResourceManager manager = new FirebaseResourceManager();
+            String upvotesPath = data.getIsPublic() ?
+                    String.format(Constants.GAME_PUBLIC_METADATA_UPVOTES_PATH,
+                            data.getId()) :
+                    String.format(Constants.GAME_PRIVATE_METADATA_UPVOTES_PATH,
+                            data.getId());
+            manager.retrieveMapWithUpdates(upvotesPath, listener);
+            gameVoteListeners.add(manager);
             wallViewAdapter.addItems(gameList);
         }
 
@@ -67,6 +79,22 @@ public class ProfileTabFragment extends Fragment {
             return GameMetadata.class;
         }
     };
+
+    private ResourceListener<Map<String, Integer>> getUpdatingListener(final int gameNum) {
+        return new ResourceListener<Map<String, Integer>>() {
+            @Override
+            public void onData(Map<String, Integer> data) {
+                if (isVisible() || !isRemoving()) {
+                    wallViewAdapter.gameChanged(gameNum, data);
+                }
+            }
+
+            @Override
+            public Class getDataType() {
+                return null;
+            }
+        };
+    }
 
     public static ProfileTabFragment newInstance(int page, User user) {
         Bundle args = new Bundle();
@@ -84,6 +112,7 @@ public class ProfileTabFragment extends Fragment {
         page = getArguments().getInt(PROFILE_FRAGMENT_PAGE);
         user = (User)getArguments().getSerializable(USER);
         unbinder = ButterKnife.bind(this, view);
+        gameVoteListeners = new ArrayList<>();
         if (page == CAPTION_TAB_PAGE) {
             //on the captions tab
             setCapationRecyclerView();
@@ -155,6 +184,14 @@ public class ProfileTabFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        clearListeners();
         unbinder.unbind();
+    }
+
+    private void clearListeners() {
+        for(FirebaseResourceManager frm : gameVoteListeners) {
+            frm.removeListener();
+        }
+        gameVoteListeners.clear();
     }
 }
