@@ -118,7 +118,7 @@ public class NotificationReceiver extends FirebaseMessagingService {
 
         //means it is a game creation notification
         if (user.getDisplayName() != null) {
-            createGameCreationNotification(pendingIntent, game, user.getDisplayName());
+            createGameCreationNotification(pendingIntent, game, user.getDisplayName(), message);
         } else {
             //means upvote notification
             createUpvoteNotification(pendingIntent, message);
@@ -138,10 +138,10 @@ public class NotificationReceiver extends FirebaseMessagingService {
         notificationManager.notify(1, notification);
     }
 
-    private void createGameCreationNotification(PendingIntent pendingIntent, GameMetadata game, String userDisplayName) {
+    private void createGameCreationNotification(PendingIntent pendingIntent, GameMetadata game,
+                                                String userDisplayName, String text) {
         //get display text for notification
         String title = getResources().getString(R.string.game_invite_notification_title);
-        String text = String.format(getResources().getString(R.string.game_invite_notification_text), userDisplayName);
 
         Notification notification = getNotification(title, text, pendingIntent);
 
