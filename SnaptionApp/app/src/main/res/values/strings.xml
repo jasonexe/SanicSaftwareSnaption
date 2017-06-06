@@ -107,6 +107,7 @@
     <string name="do_not_show_agian">Don\'t show again</string>
     <string name="create_game_from_existing_info">These games are closed. Long press to start a new game with the same image</string>
     <string name="friends_info">Add and invite your friends so you can add them to games you create!</string>
+    <string name="copied_link_to_clipboard">Link copied to your clipboard</string>
     <string name="google_login">Log in with Google</string>
     <string name="facebook_login">Log in with Facebook</string>
 
