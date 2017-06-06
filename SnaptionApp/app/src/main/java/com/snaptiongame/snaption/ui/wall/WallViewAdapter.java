@@ -67,7 +67,7 @@ public class WallViewAdapter extends RecyclerView.Adapter<WallViewHolder> {
         this.notifyItemRangeChanged(startPos, newGames.size());
     }
 
-    void gameChanged(int changedIndex, Map<String, Integer> newUpvotes) {
+    public void gameChanged(int changedIndex, Map<String, Integer> newUpvotes) {
         GameMetadata newGame = items.get(changedIndex);
         Map<String, Integer> oldUpvotes = newGame.getUpvotes();
         newGame.setUpvotes(newUpvotes);
