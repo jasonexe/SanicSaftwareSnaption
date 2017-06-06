@@ -1,11 +1,7 @@
 package com.snaptiongame.snaption.ui.games.add_friend_to_game;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,14 +12,10 @@ import android.widget.TextView;
 
 import com.snaptiongame.snaption.R;
 import com.snaptiongame.snaption.models.Game;
-import com.snaptiongame.snaption.models.GameMetadata;
 import com.snaptiongame.snaption.models.UserMetadata;
 import com.snaptiongame.snaption.servercalls.FirebaseDeepLinkCreator;
-import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUserResourceManager;
 import com.snaptiongame.snaption.servercalls.ResourceListener;
-import com.snaptiongame.snaption.ui.friends.FriendsListAdapter;
-import com.snaptiongame.snaption.ui.profile.ProfileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +96,8 @@ public class AddToGameDialog extends AlertDialog {
                             for(String userId : gameData.getPlayers().keySet()) {
                                 userIds.remove(userId);
                             }
+                            // remove picker from possible friends to add
+                            userIds.remove(gameData.getPickerId());
                         }
                         List<UserMetadata> users = new ArrayList<>();
                         addToGameAdapter = new AddFriendToGameAdapter(users, gameData, allAddedText);

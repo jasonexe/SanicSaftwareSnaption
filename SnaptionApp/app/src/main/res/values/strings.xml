@@ -5,7 +5,7 @@
     <string name="create_game">Create Game</string>
     <string name="facebook_app_id">1810118319274207</string>
     <string name="fb_login_protocol_scheme">fb1810118319274207</string>
-    <string name="login_dialog_header">Log in with Google+ or Facebook</string>
+    <string name="login_dialog_header">Log in with Google or Facebook</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_out">Sign Out</string>
     <string name="snaption_wall">Snaption Wall</string>
@@ -107,6 +107,8 @@
     <string name="do_not_show_agian">Don\'t show again</string>
     <string name="create_game_from_existing_info">These games are closed. Long press to start a new game with the same image</string>
     <string name="friends_info">Add and invite your friends so you can add them to games you create!</string>
+    <string name="google_login">Log in with Google</string>
+    <string name="facebook_login">Log in with Facebook</string>
 
     <!--Accessibility strings-->
     <string name="open_nav_drawer">Open navigation drawer</string>
