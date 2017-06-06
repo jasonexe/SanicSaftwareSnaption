@@ -708,6 +708,10 @@ public class GameActivity extends HomeAppCompatActivity {
 
     @OnClick(R.id.invite_friends)
     public void createGameInvite() {
+        // If the image hasn't loaded yet, just don't do anything when they click the button.
+        if(imageView.getDrawable() == null) {
+            return;
+        }
         Bitmap bmp = BitmapConverter.drawableToBitmap(imageView.getDrawable());
         String sampleCaption = getSampleCaption();
         AddToGameDialog dlg = new AddToGameDialog(this, game, bmp, sampleCaption);
