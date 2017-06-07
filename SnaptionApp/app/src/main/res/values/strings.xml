@@ -70,7 +70,6 @@
     <string name="title_activity_search">Search</string>
     <string name="no_search">We can\'t find anyone with that name, try searching again.</string>
     <string name="picture_change">Your profile picture has changed, but changes may not be immediately reflected</string>
-    <string name="game_invite_notification_text">%s has invited you to a game!</string>
     <string name="game_invite_notification_title">Snaption Game Invitation</string>
     <string name="private_game_error">There was an error getting your private games</string>
     <string name="add_friends">+ add friends</string>
