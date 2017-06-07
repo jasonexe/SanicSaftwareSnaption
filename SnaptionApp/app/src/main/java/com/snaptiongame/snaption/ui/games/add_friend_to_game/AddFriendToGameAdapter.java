@@ -12,6 +12,7 @@ import com.snaptiongame.snaption.servercalls.FirebaseResourceManager;
 import com.snaptiongame.snaption.servercalls.FirebaseUploader;
 import com.snaptiongame.snaption.ui.friends.PersonViewHolder;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.snaptiongame.snaption.Constants.GAME_DATA_PLAYER_PATH;
@@ -72,6 +73,8 @@ public class AddFriendToGameAdapter extends RecyclerView.Adapter<ExistingGameFri
 
     public void addSingleItem(UserMetadata metadata) {
         friends.add(metadata);
-        notifyItemInserted(this.friends.size() - 1);
+        Collections.sort(friends);
+        int insertedPos = friends.indexOf(metadata);
+        notifyItemInserted(insertedPos);
     }
 }
